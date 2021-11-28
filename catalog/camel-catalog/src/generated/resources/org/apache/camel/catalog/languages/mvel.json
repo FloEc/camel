@@ -3,7 +3,7 @@
     "kind": "language",
     "name": "mvel",
     "title": "MVEL",
-    "description": "Evaluate an MVEL template against the Camel Exchange.",
+    "description": "Evaluates a MVEL template.",
     "deprecated": false,
     "firstVersion": "2.0.0",
     "label": "language,java",
@@ -11,7 +11,7 @@
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-mvel",
-    "version": "3.11.0-SNAPSHOT",
+    "version": "3.14.0-SNAPSHOT",
     "modelName": "mvel",
     "modelJavaType": "org.apache.camel.model.language.MvelExpression"
   },

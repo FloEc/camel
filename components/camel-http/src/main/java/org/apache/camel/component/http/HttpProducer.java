@@ -115,8 +115,13 @@ public class HttpProducer extends DefaultProducer {
         String range = getEndpoint().getOkStatusCodeRange();
         if (!range.contains(",")) {
             // default is 200-299 so lets optimize for this
-            minOkRange = Integer.parseInt(StringHelper.before(range, "-"));
-            maxOkRange = Integer.parseInt(StringHelper.after(range, "-"));
+            if (range.contains("-")) {
+                minOkRange = Integer.parseInt(StringHelper.before(range, "-"));
+                maxOkRange = Integer.parseInt(StringHelper.after(range, "-"));
+            } else {
+                minOkRange = Integer.parseInt(range);
+                maxOkRange = minOkRange;
+            }
         }
 
         // optimize and build default url when there are no override headers
@@ -413,7 +418,7 @@ public class HttpProducer extends DefaultProducer {
         }
 
         Header locationHeader = httpResponse.getFirstHeader("location");
-        if (locationHeader != null && (responseCode >= 300 && responseCode < 400)) {
+        if (locationHeader != null && responseCode >= 300 && responseCode < 400) {
             answer = new HttpOperationFailedException(uri, responseCode, statusText, locationHeader.getValue(), headers, copy);
         } else {
             answer = new HttpOperationFailedException(uri, responseCode, statusText, null, headers, copy);
@@ -513,7 +518,13 @@ public class HttpProducer extends DefaultProducer {
                     if (len > 0 && len <= max) {
                         int i = (int) len;
                         byte[] arr = new byte[i];
-                        is.read(arr, 0, i);
+                        int read = 0;
+                        int offset = 0;
+                        int remain = i;
+                        while ((read = is.read(arr, offset, remain)) > 0 && remain > 0) {
+                            offset += read;
+                            remain -= read;
+                        }
                         IOHelper.close(is);
                         return arr;
                     }
@@ -553,7 +564,7 @@ public class HttpProducer extends DefaultProducer {
     /**
      * Creates the HttpHost to use to call the remote server
      */
-    protected HttpHost createHost(HttpRequestBase httpRequest, Exchange exchange) throws Exception {
+    protected HttpHost createHost(HttpRequestBase httpRequest, Exchange exchange) {
         if (httpRequest.getURI() == defaultUri) {
             return defaultHttpHost;
         } else {

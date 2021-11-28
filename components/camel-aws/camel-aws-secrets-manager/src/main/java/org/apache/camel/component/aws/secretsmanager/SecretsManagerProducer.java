@@ -44,6 +44,8 @@ import software.amazon.awssdk.services.secretsmanager.model.ListSecretsResponse;
 import software.amazon.awssdk.services.secretsmanager.model.ReplicaRegionType;
 import software.amazon.awssdk.services.secretsmanager.model.ReplicateSecretToRegionsRequest;
 import software.amazon.awssdk.services.secretsmanager.model.ReplicateSecretToRegionsResponse;
+import software.amazon.awssdk.services.secretsmanager.model.RestoreSecretRequest;
+import software.amazon.awssdk.services.secretsmanager.model.RestoreSecretResponse;
 import software.amazon.awssdk.services.secretsmanager.model.RotateSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.RotateSecretResponse;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
@@ -89,6 +91,9 @@ public class SecretsManagerProducer extends DefaultProducer {
                 break;
             case replicateSecretToRegions:
                 replicateSecretToRegions(getEndpoint().getSecretsManagerClient(), exchange);
+                break;
+            case restoreSecret:
+                restoreSecret(getEndpoint().getSecretsManagerClient(), exchange);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported operation");
@@ -365,6 +370,32 @@ public class SecretsManagerProducer extends DefaultProducer {
             result = secretsManagerClient.replicateSecretToRegions(request);
         } catch (AwsServiceException ase) {
             LOG.trace("Replicate Secret to region command returned the error code {}", ase.awsErrorDetails().errorCode());
+            throw ase;
+        }
+        Message message = getMessageForResponse(exchange);
+        message.setBody(result);
+    }
+
+    private void restoreSecret(SecretsManagerClient secretsManagerClient, Exchange exchange)
+            throws InvalidPayloadException {
+        RestoreSecretRequest request = null;
+        RestoreSecretResponse result;
+        if (getConfiguration().isPojoRequest()) {
+            request = exchange.getIn().getMandatoryBody(RestoreSecretRequest.class);
+        } else {
+            RestoreSecretRequest.Builder builder = RestoreSecretRequest.builder();
+            if (ObjectHelper.isNotEmpty(exchange.getIn().getHeader(SecretsManagerConstants.SECRET_ID))) {
+                String secretId = exchange.getIn().getHeader(SecretsManagerConstants.SECRET_ID, String.class);
+                builder.secretId(secretId);
+            } else {
+                throw new IllegalArgumentException("Secret Id must be specified");
+            }
+            request = builder.build();
+        }
+        try {
+            result = secretsManagerClient.restoreSecret(request);
+        } catch (AwsServiceException ase) {
+            LOG.trace("Restore Secret value command returned the error code {}", ase.awsErrorDetails().errorCode());
             throw ase;
         }
         Message message = getMessageForResponse(exchange);

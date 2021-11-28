@@ -88,6 +88,8 @@ public class DebeziumPostgresEndpointConfigurer extends PropertyConfigurerSuppor
         case "hstoreHandlingMode": target.getConfiguration().setHstoreHandlingMode(property(camelContext, java.lang.String.class, value)); return true;
         case "includeunknowndatatypes":
         case "includeUnknownDatatypes": target.getConfiguration().setIncludeUnknownDatatypes(property(camelContext, boolean.class, value)); return true;
+        case "incrementalsnapshotchunksize":
+        case "incrementalSnapshotChunkSize": target.getConfiguration().setIncrementalSnapshotChunkSize(property(camelContext, int.class, value)); return true;
         case "internalkeyconverter":
         case "internalKeyConverter": target.getConfiguration().setInternalKeyConverter(property(camelContext, java.lang.String.class, value)); return true;
         case "internalvalueconverter":
@@ -194,6 +196,8 @@ public class DebeziumPostgresEndpointConfigurer extends PropertyConfigurerSuppor
         case "toastedValuePlaceholder": target.getConfiguration().setToastedValuePlaceholder(property(camelContext, java.lang.String.class, value)); return true;
         case "tombstonesondelete":
         case "tombstonesOnDelete": target.getConfiguration().setTombstonesOnDelete(property(camelContext, boolean.class, value)); return true;
+        case "truncatehandlingmode":
+        case "truncateHandlingMode": target.getConfiguration().setTruncateHandlingMode(property(camelContext, java.lang.String.class, value)); return true;
         case "xminfetchintervalms":
         case "xminFetchIntervalMs": target.getConfiguration().setXminFetchIntervalMs(property(camelContext, java.time.Duration.class, value).toMillis()); return true;
         default: return false;
@@ -270,6 +274,8 @@ public class DebeziumPostgresEndpointConfigurer extends PropertyConfigurerSuppor
         case "hstoreHandlingMode": return java.lang.String.class;
         case "includeunknowndatatypes":
         case "includeUnknownDatatypes": return boolean.class;
+        case "incrementalsnapshotchunksize":
+        case "incrementalSnapshotChunkSize": return int.class;
         case "internalkeyconverter":
         case "internalKeyConverter": return java.lang.String.class;
         case "internalvalueconverter":
@@ -376,6 +382,8 @@ public class DebeziumPostgresEndpointConfigurer extends PropertyConfigurerSuppor
         case "toastedValuePlaceholder": return java.lang.String.class;
         case "tombstonesondelete":
         case "tombstonesOnDelete": return boolean.class;
+        case "truncatehandlingmode":
+        case "truncateHandlingMode": return java.lang.String.class;
         case "xminfetchintervalms":
         case "xminFetchIntervalMs": return long.class;
         default: return null;
@@ -453,6 +461,8 @@ public class DebeziumPostgresEndpointConfigurer extends PropertyConfigurerSuppor
         case "hstoreHandlingMode": return target.getConfiguration().getHstoreHandlingMode();
         case "includeunknowndatatypes":
         case "includeUnknownDatatypes": return target.getConfiguration().isIncludeUnknownDatatypes();
+        case "incrementalsnapshotchunksize":
+        case "incrementalSnapshotChunkSize": return target.getConfiguration().getIncrementalSnapshotChunkSize();
         case "internalkeyconverter":
         case "internalKeyConverter": return target.getConfiguration().getInternalKeyConverter();
         case "internalvalueconverter":
@@ -559,6 +569,8 @@ public class DebeziumPostgresEndpointConfigurer extends PropertyConfigurerSuppor
         case "toastedValuePlaceholder": return target.getConfiguration().getToastedValuePlaceholder();
         case "tombstonesondelete":
         case "tombstonesOnDelete": return target.getConfiguration().isTombstonesOnDelete();
+        case "truncatehandlingmode":
+        case "truncateHandlingMode": return target.getConfiguration().getTruncateHandlingMode();
         case "xminfetchintervalms":
         case "xminFetchIntervalMs": return target.getConfiguration().getXminFetchIntervalMs();
         default: return null;

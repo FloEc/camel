@@ -18,11 +18,14 @@ package org.apache.camel.component.solr;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.camel.Category;
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.support.DefaultEndpoint;
@@ -37,10 +40,13 @@ public class SolrEndpoint extends DefaultEndpoint {
     @UriParam
     private SolrConfiguration solrConfiguration;
 
+    private final Map<String, SolrConfiguration> solrConfigurationsMap = new HashMap<>();
+
     public SolrEndpoint(String endpointUri, SolrComponent component, SolrConfiguration solrConfiguration) {
         super(endpointUri, component);
         solrConfiguration.setSolrEndpoint(this);
         this.solrConfiguration = solrConfiguration;
+        this.solrConfigurationsMap.put(SolrConstants.OPERATION, solrConfiguration);
     }
 
     public void setZkHost(String zkHost) {
@@ -48,12 +54,21 @@ public class SolrEndpoint extends DefaultEndpoint {
             String decoded = URLDecoder.decode(zkHost, "UTF-8");
             this.solrConfiguration.setZkHost(decoded);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeCamelException(e);
         }
     }
 
     public SolrConfiguration getSolrConfiguration() {
-        return solrConfiguration;
+        return getSolrConfiguration(null);
+    }
+
+    public SolrConfiguration getSolrConfiguration(String solrOperation) {
+        if (solrConfigurationsMap.containsKey(solrOperation)) {
+            return solrConfigurationsMap.get(solrOperation);
+        }
+        SolrConfiguration newSolrConfiguration = SolrClientHandler.initializeFor(solrOperation, solrConfiguration);
+        solrConfigurationsMap.put(solrOperation, newSolrConfiguration);
+        return newSolrConfiguration;
     }
 
     public void setRequestHandler(String requestHandler) {

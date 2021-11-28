@@ -149,7 +149,11 @@ public final class EndpointProducerDeserializersResolver implements YamlDeserial
             case "hdfs":
             case "http":
             case "https":
+            case "hwcloud-dms":
             case "hwcloud-functiongraph":
+            case "hwcloud-iam":
+            case "hwcloud-imagerecognition":
+            case "hwcloud-obs":
             case "hwcloud-smn":
             case "iec60870-client":
             case "iec60870-server":
@@ -182,6 +186,7 @@ public final class EndpointProducerDeserializersResolver implements YamlDeserial
             case "jooq":
             case "jpa":
             case "jslt":
+            case "json-patch":
             case "json-validator":
             case "jsonata":
             case "jt400":

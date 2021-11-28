@@ -16,6 +16,7 @@
  */
 package org.apache.camel.main;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,7 @@ import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.support.ClassicUuidGenerator;
 import org.apache.camel.support.DefaultUuidGenerator;
 import org.apache.camel.support.OffUuidGenerator;
+import org.apache.camel.support.RouteWatcherReloadStrategy;
 import org.apache.camel.support.ShortUuidGenerator;
 import org.apache.camel.support.SimpleUuidGenerator;
 import org.apache.camel.support.jsse.GlobalSSLContextParametersSupplier;
@@ -224,6 +226,13 @@ public final class DefaultConfigurationConfigurer {
         camelContext.setUseMDCLogging(config.isUseMdcLogging());
         camelContext.setMDCLoggingKeysPattern(config.getMdcLoggingKeysPattern());
         camelContext.setLoadTypeConverters(config.isLoadTypeConverters());
+        if (config.isRoutesReloadEnabled()) {
+            RouteWatcherReloadStrategy reloader = new RouteWatcherReloadStrategy(
+                    config.getRoutesReloadDirectory(), config.isRoutesReloadDirectoryRecursive());
+            reloader.setPattern(config.getRoutesReloadPattern());
+            reloader.setRemoveAllRoutes(config.isRoutesReloadRemoveAllRoutes());
+            camelContext.addService(reloader);
+        }
 
         if (camelContext.getManagementStrategy().getManagementAgent() != null) {
             camelContext.getManagementStrategy().getManagementAgent()
@@ -234,6 +243,16 @@ public final class DefaultConfigurationConfigurer {
                     .setManagementNamePattern(config.getJmxManagementNamePattern());
         }
 
+        // global options
+        if (config.getGlobalOptions() != null) {
+            Map<String, String> map = camelContext.getGlobalOptions();
+            if (map == null) {
+                map = new HashMap<>();
+            }
+            map.putAll(config.getGlobalOptions());
+            camelContext.setGlobalOptions(map);
+        }
+
         // global endpoint configurations
         camelContext.getGlobalEndpointConfiguration().setAutowiredEnabled(config.isAutowiredEnabled());
         camelContext.getGlobalEndpointConfiguration().setBridgeErrorHandler(config.isEndpointBridgeErrorHandler());
@@ -241,6 +260,7 @@ public final class DefaultConfigurationConfigurer {
 
         camelContext.setBacklogTracing(config.isBacklogTracing());
         camelContext.setTracing(config.isTracing());
+        camelContext.setTracingStandby(config.isTracingStandby());
         camelContext.setTracingPattern(config.getTracingPattern());
 
         if (config.getThreadNamePattern() != null) {
@@ -447,12 +467,10 @@ public final class DefaultConfigurationConfigurer {
         if (serviceRegistries != null && !serviceRegistries.isEmpty()) {
             for (Map.Entry<String, ServiceRegistry> entry : serviceRegistries.entrySet()) {
                 ServiceRegistry service = entry.getValue();
-
                 if (service.getId() == null) {
                     service.setGeneratedId(camelContext.getUuidGenerator().generateUuid());
                 }
-
-                LOG.info("Using ServiceRegistry with id: {} and implementation: {}", service.getId(), service);
+                LOG.info("Adding Camel Cloud ServiceRegistry with id: {} and implementation: {}", service.getId(), service);
                 camelContext.addService(service);
             }
         }

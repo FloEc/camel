@@ -179,24 +179,16 @@ public class OriginalSimpleTest extends LanguageTestSupport {
     }
 
     @Test
-    public void testBodyOgnlExpression() throws Exception {
+    public void testBodyOgnlExpression() {
         Expression exp = context.resolveLanguage("csimple").createExpression("${body.toString()}");
         assertNotNull(exp);
 
-        try {
-            context.resolveLanguage("csimple").createExpression("${body.xxx}");
-            fail("Should throw exception");
-        } catch (JoorCSimpleCompilationException e) {
-            // expected
-        }
+        Language language = context.resolveLanguage("csimple");
+        assertThrows(JoorCSimpleCompilationException.class, () -> language.createExpression("${body.xxx}"),
+                "Should throw exception");
 
-        // must start with a dot
-        try {
-            context.resolveLanguage("csimple").createExpression("${bodyxxx}");
-            fail("Should throw exception");
-        } catch (SimpleIllegalSyntaxException e) {
-            // expected
-        }
+        assertThrows(SimpleIllegalSyntaxException.class, () -> language.createExpression("${bodyxxx}"),
+                "Should throw exception");
     }
 
     @Test
@@ -680,8 +672,9 @@ public class OriginalSimpleTest extends LanguageTestSupport {
         assertExpression("${id}", exchange.getIn().getMessageId());
 
         assertEquals(2, context.getLanguageNames().size());
-        assertEquals("csimple", context.getLanguageNames().get(0));
-        assertEquals("simple", context.getLanguageNames().get(1));
+        Iterator<String> it = context.getLanguageNames().iterator();
+        assertEquals("csimple", it.next());
+        assertEquals("simple", it.next());
     }
 
     @Test

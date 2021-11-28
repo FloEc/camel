@@ -29,6 +29,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Expression;
 import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.FailedToStartRouteException;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
@@ -54,6 +55,7 @@ import org.apache.camel.model.ModelLifecycleStrategy;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.ProcessorDefinitionHelper;
 import org.apache.camel.model.Resilience4jConfigurationDefinition;
+import org.apache.camel.model.RouteConfigurationDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RouteDefinitionHelper;
 import org.apache.camel.model.RouteTemplateDefinition;
@@ -152,9 +154,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                 xml = StringHelper.replaceFirst(xml, "xmlns=\"http://camel.apache.org/schema/spring\">",
                         "xmlns=\"http://camel.apache.org/schema/spring\">\n");
                 xml = StringHelper.replaceAll(xml, "</route>", "</route>\n");
-                LOG.info("\n\n" + xml + "\n");
+                LOG.info("\n\n{}\n", xml);
             } catch (Exception e) {
-                LOG.warn("Error dumping routes to XML due to " + e.getMessage() + ". This exception is ignored.", e);
+                LOG.warn("Error dumping routes to XML due to {}. This exception is ignored.", e.getMessage(), e);
             }
         }
 
@@ -170,9 +172,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                 xml = StringHelper.replaceFirst(xml, "xmlns=\"http://camel.apache.org/schema/spring\">",
                         "xmlns=\"http://camel.apache.org/schema/spring\">\n");
                 xml = StringHelper.replaceAll(xml, "</rest>", "</rest>\n");
-                LOG.info("\n\n" + xml + "\n");
+                LOG.info("\n\n{}\n", xml);
             } catch (Exception e) {
-                LOG.warn("Error dumping rests to XML due to " + e.getMessage() + ". This exception is ignored.", e);
+                LOG.warn("Error dumping rests to XML due to {}. This exception is ignored.", e.getMessage(), e);
             }
         }
 
@@ -188,9 +190,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                 xml = StringHelper.replaceFirst(xml, "xmlns=\"http://camel.apache.org/schema/spring\">",
                         "xmlns=\"http://camel.apache.org/schema/spring\">\n");
                 xml = StringHelper.replaceAll(xml, "</routeTemplate>", "</routeTemplate>\n");
-                LOG.info("\n\n" + xml + "\n");
+                LOG.info("\n\n{}\n", xml);
             } catch (Exception e) {
-                LOG.warn("Error dumping route-templates to XML due to " + e.getMessage() + ". This exception is ignored.", e);
+                LOG.warn("Error dumping route-templates to XML due to {}. This exception is ignored.", e.getMessage(), e);
             }
         }
     }
@@ -284,6 +286,30 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
         return model.getModelLifecycleStrategies();
+    }
+
+    @Override
+    public void addRouteConfiguration(RouteConfigurationDefinition routesConfiguration) {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        model.addRouteConfiguration(routesConfiguration);
+    }
+
+    @Override
+    public void addRouteConfigurations(List<RouteConfigurationDefinition> routesConfigurations) {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        model.addRouteConfigurations(routesConfigurations);
+    }
+
+    @Override
+    public List<RouteConfigurationDefinition> getRouteConfigurationDefinitions() {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        return model.getRouteConfigurationDefinitions();
     }
 
     @Override
@@ -383,6 +409,14 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     @Override
+    public void removeRouteTemplateDefinitions(String pattern) throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        model.removeRouteTemplateDefinitions(pattern);
+    }
+
+    @Override
     public void addRouteTemplateDefinitionConverter(String templateIdPattern, RouteTemplateDefinition.Converter converter) {
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
@@ -406,6 +440,14 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
         return model.addRouteFromTemplate(routeId, routeTemplateId, routeTemplateContext);
+    }
+
+    @Override
+    public void removeRouteTemplates(String pattern) throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        model.removeRouteTemplateDefinitions(pattern);
     }
 
     @Override
@@ -902,6 +944,19 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         model.getTransformers().add(def);
         Transformer transformer = model.getModelReifierFactory().createTransformer(this, def);
         getTransformerRegistry().put(createTransformerKey(def), transformer);
+    }
+
+    @Override
+    protected synchronized boolean removeRoute(String routeId, LoggingLevel loggingLevel) throws Exception {
+        boolean removed = super.removeRoute(routeId, loggingLevel);
+        if (removed) {
+            // must also remove the route definition
+            RouteDefinition def = getRouteDefinition(routeId);
+            if (def != null) {
+                removeRouteDefinition(def);
+            }
+        }
+        return removed;
     }
 
     private static ValueHolder<String> createTransformerKey(TransformerDefinition def) {

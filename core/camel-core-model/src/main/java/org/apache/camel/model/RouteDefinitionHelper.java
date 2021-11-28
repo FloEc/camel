@@ -637,19 +637,6 @@ public final class RouteDefinitionHelper {
             List<OnCompletionDefinition> onCompletions) {
         List<OnCompletionDefinition> completions = new ArrayList<>();
 
-        // check if there is a clash
-        Collection<OnCompletionDefinition> col
-                = ProcessorDefinitionHelper.filterTypeInOutputs(abstracts, OnCompletionDefinition.class);
-        int count = 0;
-        for (OnCompletionDefinition ocd : col) {
-            if (ocd.isRouteScoped()) {
-                count++;
-            }
-        }
-        if (count > 1) {
-            throw new IllegalArgumentException("Only 1 onCompletion is allowed per route.");
-        }
-
         // find the route scoped onCompletions
         for (ProcessorDefinition out : abstracts) {
             if (out instanceof OnCompletionDefinition) {
@@ -690,7 +677,7 @@ public final class RouteDefinitionHelper {
 
         if (saga != null) {
             // the outputs should be moved to the transacted policy
-            saga.getOutputs().addAll(lower);
+            saga.getOutputs().addAll(0, lower);
             // and add it as the single output
             lower.clear();
             lower.add(saga);
@@ -712,8 +699,8 @@ public final class RouteDefinitionHelper {
         }
 
         if (transacted != null) {
-            // the outputs should be moved to the transacted policy
-            transacted.getOutputs().addAll(lower);
+            // the outputs should be moved to the start of the transacted policy
+            transacted.getOutputs().addAll(0, lower);
             // and add it as the single output
             lower.clear();
             lower.add(transacted);

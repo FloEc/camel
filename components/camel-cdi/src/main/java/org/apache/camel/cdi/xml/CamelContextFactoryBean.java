@@ -41,7 +41,6 @@ import org.apache.camel.core.xml.AbstractCamelContextFactoryBean;
 import org.apache.camel.core.xml.AbstractCamelFactoryBean;
 import org.apache.camel.core.xml.CamelJMXAgentDefinition;
 import org.apache.camel.core.xml.CamelPropertyPlaceholderDefinition;
-import org.apache.camel.core.xml.CamelProxyFactoryDefinition;
 import org.apache.camel.core.xml.CamelRouteControllerDefinition;
 import org.apache.camel.core.xml.CamelServiceExporterDefinition;
 import org.apache.camel.core.xml.CamelStreamCachingStrategyDefinition;
@@ -59,6 +58,7 @@ import org.apache.camel.model.PackageScanDefinition;
 import org.apache.camel.model.Resilience4jConfigurationDefinition;
 import org.apache.camel.model.RestContextRefDefinition;
 import org.apache.camel.model.RouteBuilderDefinition;
+import org.apache.camel.model.RouteConfigurationDefinition;
 import org.apache.camel.model.RouteContextRefDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RouteTemplateContextRefDefinition;
@@ -242,9 +242,6 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Def
     @XmlElement(name = "export", type = CamelServiceExporterDefinition.class)
     private List<CamelServiceExporterDefinition> exports;
 
-    @XmlElement(name = "proxy")
-    private List<CamelProxyFactoryDefinition> proxies;
-
     @XmlElement(name = "routeTemplateContextRef")
     private List<RouteTemplateContextRefDefinition> routeTemplateRefs = new ArrayList<>();
 
@@ -295,6 +292,9 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Def
 
     @XmlElement(name = "rest")
     private List<RestDefinition> rests = new ArrayList<>();
+
+    @XmlElement(name = "routeConfiguration")
+    private List<RouteConfigurationDefinition> routeConfigurations = new ArrayList<>();
 
     @XmlElement(name = "routeTemplate")
     private List<RouteTemplateDefinition> routeTemplates = new ArrayList<>();
@@ -489,6 +489,16 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Def
     @Override
     public void setRoutes(List<RouteDefinition> routes) {
         this.routes = routes;
+    }
+
+    @Override
+    public List<RouteConfigurationDefinition> getRouteConfigurations() {
+        return routeConfigurations;
+    }
+
+    @Override
+    public void setRouteConfigurations(List<RouteConfigurationDefinition> routeConfigurations) {
+        this.routeConfigurations = routeConfigurations;
     }
 
     @Override
@@ -1043,14 +1053,6 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Def
 
     public void setDependsOn(String dependsOn) {
         this.dependsOn = dependsOn;
-    }
-
-    public List<CamelProxyFactoryDefinition> getProxies() {
-        return proxies;
-    }
-
-    public void setProxies(List<CamelProxyFactoryDefinition> proxies) {
-        this.proxies = proxies;
     }
 
     public List<CamelServiceExporterDefinition> getExports() {

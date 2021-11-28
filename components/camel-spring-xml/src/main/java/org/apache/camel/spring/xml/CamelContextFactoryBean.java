@@ -57,6 +57,7 @@ import org.apache.camel.model.PackageScanDefinition;
 import org.apache.camel.model.Resilience4jConfigurationDefinition;
 import org.apache.camel.model.RestContextRefDefinition;
 import org.apache.camel.model.RouteBuilderDefinition;
+import org.apache.camel.model.RouteConfigurationDefinition;
 import org.apache.camel.model.RouteContextRefDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RouteTemplateContextRefDefinition;
@@ -263,6 +264,8 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     private RestConfigurationDefinition restConfiguration;
     @XmlElement(name = "rest")
     private List<RestDefinition> rests = new ArrayList<>();
+    @XmlElement(name = "routeConfiguration")
+    private List<RouteConfigurationDefinition> routeConfigurations = new ArrayList<>();
     @XmlElement(name = "routeTemplate")
     private List<RouteTemplateDefinition> routeTemplates = new ArrayList<>();
     @XmlElement(name = "route")
@@ -462,7 +465,7 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
         // ContextRefreshedEvent but this is the best that we can do
         if (event.getSource() instanceof ApplicationContext) {
             ApplicationContext appCtx = (ApplicationContext) event.getSource();
-            if (appCtx.getId().equals("application:management")) {
+            if (appCtx.getId().endsWith(":management")) {
                 //don't start camel context if
                 //event is from the self management ApplicationContext
                 return;
@@ -502,6 +505,7 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
      */
     protected SpringCamelContext createContext() {
         SpringCamelContext ctx = newCamelContext();
+        ctx.setApplicationContext(getApplicationContext());
         ctx.setName(getId());
 
         return ctx;
@@ -527,7 +531,7 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     }
 
     protected SpringCamelContext newCamelContext() {
-        return new SpringCamelContext(getApplicationContext());
+        return new SpringCamelContext();
     }
 
     @Override
@@ -557,6 +561,20 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
         this.routes = routes;
     }
 
+    @Override
+    public List<RouteConfigurationDefinition> getRouteConfigurations() {
+        return routeConfigurations;
+    }
+
+    /**
+     * Contains the Camel route configurations
+     */
+    @Override
+    public void setRouteConfigurations(List<RouteConfigurationDefinition> routeConfigurations) {
+        this.routeConfigurations = routeConfigurations;
+    }
+
+    @Override
     public List<RouteTemplateDefinition> getRouteTemplates() {
         return routeTemplates;
     }
@@ -564,6 +582,7 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     /**
      * Contains the Camel route templates
      */
+    @Override
     public void setRouteTemplates(List<RouteTemplateDefinition> routeTemplates) {
         this.routeTemplates = routeTemplates;
     }

@@ -186,7 +186,7 @@ public final class NettyHttpHelper {
      * @param  endpoint the endpoint
      * @return          the URL to invoke
      */
-    public static String createURL(Exchange exchange, NettyHttpEndpoint endpoint) throws URISyntaxException {
+    public static String createURL(Exchange exchange, NettyHttpEndpoint endpoint) {
         // rest producer may provide an override url to be used which we should discard if using (hence the remove)
         String uri = (String) exchange.getIn().removeHeader(Exchange.REST_HTTP_URI);
         if (uri == null) {
@@ -203,7 +203,7 @@ public final class NettyHttpHelper {
         // append HTTP_PATH to HTTP_URI if it is provided in the header
         String path = exchange.getIn().getHeader(Exchange.HTTP_PATH, String.class);
         // NOW the HTTP_PATH is just related path, we don't need to trim it
-        if (path != null) {
+        if (path != null && !path.isEmpty()) {
             if (path.startsWith("/")) {
                 path = path.substring(1);
             }

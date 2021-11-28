@@ -44,6 +44,12 @@ public class BlobComponentConfigurer extends PropertyConfigurerSupport implement
         case "blockListType": getOrCreateConfiguration(target).setBlockListType(property(camelContext, com.azure.storage.blob.models.BlockListType.class, value)); return true;
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": target.setBridgeErrorHandler(property(camelContext, boolean.class, value)); return true;
+        case "changefeedcontext":
+        case "changeFeedContext": getOrCreateConfiguration(target).setChangeFeedContext(property(camelContext, com.azure.core.util.Context.class, value)); return true;
+        case "changefeedendtime":
+        case "changeFeedEndTime": getOrCreateConfiguration(target).setChangeFeedEndTime(property(camelContext, java.time.OffsetDateTime.class, value)); return true;
+        case "changefeedstarttime":
+        case "changeFeedStartTime": getOrCreateConfiguration(target).setChangeFeedStartTime(property(camelContext, java.time.OffsetDateTime.class, value)); return true;
         case "closestreamafterread":
         case "closeStreamAfterRead": getOrCreateConfiguration(target).setCloseStreamAfterRead(property(camelContext, boolean.class, value)); return true;
         case "closestreamafterwrite":
@@ -75,6 +81,8 @@ public class BlobComponentConfigurer extends PropertyConfigurerSupport implement
         case "regex": getOrCreateConfiguration(target).setRegex(property(camelContext, java.lang.String.class, value)); return true;
         case "serviceclient":
         case "serviceClient": getOrCreateConfiguration(target).setServiceClient(property(camelContext, com.azure.storage.blob.BlobServiceClient.class, value)); return true;
+        case "sourceblobaccesskey":
+        case "sourceBlobAccessKey": getOrCreateConfiguration(target).setSourceBlobAccessKey(property(camelContext, java.lang.String.class, value)); return true;
         case "timeout": getOrCreateConfiguration(target).setTimeout(property(camelContext, java.time.Duration.class, value)); return true;
         default: return false;
         }
@@ -104,6 +112,12 @@ public class BlobComponentConfigurer extends PropertyConfigurerSupport implement
         case "blockListType": return com.azure.storage.blob.models.BlockListType.class;
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return boolean.class;
+        case "changefeedcontext":
+        case "changeFeedContext": return com.azure.core.util.Context.class;
+        case "changefeedendtime":
+        case "changeFeedEndTime": return java.time.OffsetDateTime.class;
+        case "changefeedstarttime":
+        case "changeFeedStartTime": return java.time.OffsetDateTime.class;
         case "closestreamafterread":
         case "closeStreamAfterRead": return boolean.class;
         case "closestreamafterwrite":
@@ -135,6 +149,8 @@ public class BlobComponentConfigurer extends PropertyConfigurerSupport implement
         case "regex": return java.lang.String.class;
         case "serviceclient":
         case "serviceClient": return com.azure.storage.blob.BlobServiceClient.class;
+        case "sourceblobaccesskey":
+        case "sourceBlobAccessKey": return java.lang.String.class;
         case "timeout": return java.time.Duration.class;
         default: return null;
         }
@@ -160,6 +176,12 @@ public class BlobComponentConfigurer extends PropertyConfigurerSupport implement
         case "blockListType": return getOrCreateConfiguration(target).getBlockListType();
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return target.isBridgeErrorHandler();
+        case "changefeedcontext":
+        case "changeFeedContext": return getOrCreateConfiguration(target).getChangeFeedContext();
+        case "changefeedendtime":
+        case "changeFeedEndTime": return getOrCreateConfiguration(target).getChangeFeedEndTime();
+        case "changefeedstarttime":
+        case "changeFeedStartTime": return getOrCreateConfiguration(target).getChangeFeedStartTime();
         case "closestreamafterread":
         case "closeStreamAfterRead": return getOrCreateConfiguration(target).isCloseStreamAfterRead();
         case "closestreamafterwrite":
@@ -191,6 +213,8 @@ public class BlobComponentConfigurer extends PropertyConfigurerSupport implement
         case "regex": return getOrCreateConfiguration(target).getRegex();
         case "serviceclient":
         case "serviceClient": return getOrCreateConfiguration(target).getServiceClient();
+        case "sourceblobaccesskey":
+        case "sourceBlobAccessKey": return getOrCreateConfiguration(target).getSourceBlobAccessKey();
         case "timeout": return getOrCreateConfiguration(target).getTimeout();
         default: return null;
         }

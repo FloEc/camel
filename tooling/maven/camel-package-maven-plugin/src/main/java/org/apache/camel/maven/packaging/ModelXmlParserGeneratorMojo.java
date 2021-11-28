@@ -101,6 +101,7 @@ public class ModelXmlParserGeneratorMojo extends AbstractGeneratorMojo {
     private Class<?> outputDefinitionClass;
     private Class<?> expressionDefinitionClass;
     private Class<?> routesDefinitionClass;
+    private Class<?> routeConfigurationsDefinitionClass;
     private Class<?> routeTemplatesDefinitionClass;
     private Class<?> restsDefinitionClass;
     private Class<?> processorDefinitionClass;
@@ -134,6 +135,7 @@ public class ModelXmlParserGeneratorMojo extends AbstractGeneratorMojo {
 
         outputDefinitionClass = loadClass(classLoader, MODEL_PACKAGE + ".OutputDefinition");
         routesDefinitionClass = loadClass(classLoader, MODEL_PACKAGE + ".RoutesDefinition");
+        routeConfigurationsDefinitionClass = loadClass(classLoader, MODEL_PACKAGE + ".RouteConfigurationsDefinition");
         routeTemplatesDefinitionClass = loadClass(classLoader, MODEL_PACKAGE + ".RouteTemplatesDefinition");
         dataFormatDefinitionClass = loadClass(classLoader, MODEL_PACKAGE + ".DataFormatDefinition");
         processorDefinitionClass = loadClass(classLoader, MODEL_PACKAGE + ".ProcessorDefinition");
@@ -152,7 +154,10 @@ public class ModelXmlParserGeneratorMojo extends AbstractGeneratorMojo {
                 .map(DotName::createSimple).map(index::getAnnotations)
                 .flatMap(Collection::stream).map(AnnotationInstance::target).map(AnnotationTarget::asClass).map(ClassInfo::name)
                 .map(DotName::toString).sorted().distinct()
-                .map(name -> loadClass(classLoader, name)).flatMap(this::references).flatMap(this::fieldReferences).distinct()
+                // we should skip this model as we do not want this in the JAXB model
+                .filter(n -> !n.equals("org.apache.camel.model.WhenSkipSendToEndpointDefinition"))
+                .map(name -> loadClass(classLoader, name))
+                .flatMap(this::references).flatMap(this::fieldReferences).distinct()
                 .collect(Collectors.toList());
 
         JavaClass parser = generateParser(model, classLoader);
@@ -476,7 +481,7 @@ public class ModelXmlParserGeneratorMojo extends AbstractGeneratorMojo {
                 }
                 return " noValueHandler()";
             });
-            if (clazz == routesDefinitionClass || clazz == routeTemplatesDefinitionClass || clazz == restsDefinitionClass) {
+            if (clazz == routesDefinitionClass || clazz == routeTemplatesDefinitionClass || clazz == restsDefinitionClass || clazz == routeConfigurationsDefinitionClass) {
 
                 // for routes/rests/routeTemplates we want to support single-mode as well, this means
                 // we check that the tag name is either plural or singular and parse accordingly

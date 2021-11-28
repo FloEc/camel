@@ -31,7 +31,7 @@ public interface FunctionGraphEndpointBuilderFactory {
 
 
     /**
-     * Builder for endpoint for the FunctionGraph component.
+     * Builder for endpoint for the Huawei FunctionGraph component.
      */
     public interface FunctionGraphEndpointBuilder
             extends
@@ -70,6 +70,7 @@ public interface FunctionGraphEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
+         * Default: default
          * Group: producer
          * 
          * @param functionPackage the value to set
@@ -164,7 +165,7 @@ public interface FunctionGraphEndpointBuilderFactory {
          * Configuration object for cloud service authentication.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.models.ServiceKeys&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.huaweicloud.common.models.ServiceKeys&lt;/code&gt; type.
          * 
          * Group: producer
          * 
@@ -179,7 +180,7 @@ public interface FunctionGraphEndpointBuilderFactory {
          * Configuration object for cloud service authentication.
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.models.ServiceKeys&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.huaweicloud.common.models.ServiceKeys&lt;/code&gt; type.
          * 
          * Group: producer
          * 
@@ -261,19 +262,18 @@ public interface FunctionGraphEndpointBuilderFactory {
             return this;
         }
         /**
-         * Authentication key for the cloud user.
+         * Access key for the cloud user.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Required: true
          * Group: security
          * 
-         * @param authenticationKey the value to set
+         * @param accessKey the value to set
          * @return the dsl builder
          */
-        default FunctionGraphEndpointBuilder authenticationKey(
-                String authenticationKey) {
-            doSetProperty("authenticationKey", authenticationKey);
+        default FunctionGraphEndpointBuilder accessKey(String accessKey) {
+            doSetProperty("accessKey", accessKey);
             return this;
         }
         /**
@@ -328,7 +328,7 @@ public interface FunctionGraphEndpointBuilderFactory {
 
     public interface FunctionGraphBuilders {
         /**
-         * FunctionGraph (camel-huaweicloud-functiongraph)
+         * Huawei FunctionGraph (camel-huaweicloud-functiongraph)
          * To call serverless functions on Huawei Cloud
          * 
          * Category: cloud,serverless
@@ -347,7 +347,7 @@ public interface FunctionGraphEndpointBuilderFactory {
             return FunctionGraphEndpointBuilderFactory.endpointBuilder("hwcloud-functiongraph", path);
         }
         /**
-         * FunctionGraph (camel-huaweicloud-functiongraph)
+         * Huawei FunctionGraph (camel-huaweicloud-functiongraph)
          * To call serverless functions on Huawei Cloud
          * 
          * Category: cloud,serverless

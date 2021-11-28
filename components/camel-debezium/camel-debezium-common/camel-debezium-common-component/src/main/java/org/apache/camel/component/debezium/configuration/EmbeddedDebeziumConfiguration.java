@@ -23,6 +23,7 @@ import io.debezium.config.Configuration;
 import io.debezium.config.Field;
 import io.debezium.embedded.EmbeddedEngine;
 import io.debezium.engine.spi.OffsetCommitPolicy;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.debezium.DebeziumConstants;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriParam;
@@ -32,7 +33,7 @@ import org.apache.camel.util.ObjectHelper;
 import org.apache.kafka.connect.json.JsonConverter;
 
 @UriParams
-public abstract class EmbeddedDebeziumConfiguration {
+public abstract class EmbeddedDebeziumConfiguration implements Cloneable {
 
     private static final String LABEL_NAME = "consumer";
 
@@ -71,15 +72,15 @@ public abstract class EmbeddedDebeziumConfiguration {
                             + "time intervals.")
     private String offsetCommitPolicy = OffsetCommitPolicy.PeriodicCommitOffsetPolicy.class.getName();
     // offset.flush.interval.ms
-    @UriParam(label = LABEL_NAME, defaultValue = "60s", description = "Interval at which to try committing "
-                                                                      + "offsets. The default is 1 minute.",
+    @UriParam(label = LABEL_NAME, defaultValue = "60000", description = "Interval at which to try committing "
+                                                                        + "offsets. The default is 1 minute.",
               javaType = "java.time.Duration")
     private long offsetFlushIntervalMs = 60000;
     // offset.commit.timeout.ms
-    @UriParam(label = LABEL_NAME, defaultValue = "5s", description = "Maximum number of milliseconds "
-                                                                     + "to wait for records to flush and partition offset data to be committed to offset storage "
-                                                                     + "before cancelling the process and restoring the offset data to be committed in a future "
-                                                                     + "attempt. The default is 5 seconds.",
+    @UriParam(label = LABEL_NAME, defaultValue = "5000", description = "Maximum number of milliseconds "
+                                                                       + "to wait for records to flush and partition offset data to be committed to offset storage "
+                                                                       + "before cancelling the process and restoring the offset data to be committed in a future "
+                                                                       + "attempt. The default is 5 seconds.",
               javaType = "java.time.Duration")
     private long offsetCommitTimeoutMs = 5000;
     // internal.key.converter
@@ -103,6 +104,18 @@ public abstract class EmbeddedDebeziumConfiguration {
     public EmbeddedDebeziumConfiguration() {
         ObjectHelper.notNull(configureConnectorClass(), "connectorClass");
         this.connectorClass = configureConnectorClass();
+    }
+
+    public Object copy() {
+        try {
+            EmbeddedDebeziumConfiguration answer = (EmbeddedDebeziumConfiguration) clone();
+            // make sure the map is copied in its own instance
+            Map<String, Object> additionalPropertiesCopy = new HashMap<>(additionalProperties);
+            answer.setAdditionalProperties(additionalPropertiesCopy);
+            return answer;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeCamelException(e);
+        }
     }
 
     /**

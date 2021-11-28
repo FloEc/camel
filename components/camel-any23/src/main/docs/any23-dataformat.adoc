@@ -1,11 +1,13 @@
-[[any23-dataformat]]
 = Any23 DataFormat
-:docTitle: Any23
-:artifactId: camel-any23
+:doctitle: Any23
+:shortname: any23
+:artifactid: camel-any23
 :description: Extract RDF data from HTML documents.
 :since: 3.0
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/any23.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: any23
 
 
 *Since Camel {since}*
@@ -18,18 +20,7 @@ Any23 is a Data Format that is intended to convert HTML from a site (or file) in
 == Any23 Options
 
 // dataformat options: START
-The Any23 dataformat supports 4 options, which are listed below.
-
-
-
-[width="100%",cols="2s,1m,1m,6",options="header"]
-|===
-| Name | Default | Java Type | Description
-| outputFormat | RDF4JMODEL | Any23OutputFormat | What RDF syntax to unmarshal as, can be: NTRIPLES, TURTLE, NQUADS, RDFXML, JSONLD, RDFJSON, RDF4JMODEL. It is by default: RDF4JMODEL. There are 7 enums and the value can be one of: JSONLD, NQUADS, NTRIPLES, RDF4JMODEL, RDFJSON, RDFXML, TURTLE
-| configuration |  | List | Configurations for Apache Any23 as key-value pairs in order to customize the extraction process. The list of supported parameters can be found here. If not provided, a default configuration is used.
-| extractors |  | List | List of Any23 extractors to be used in the unmarshal operation. A list of the available extractors can be found here here. If not provided, all the available extractors are used.
-| baseURI |  | String | The URI to use as base for building RDF entities if only relative paths are provided.
-|===
+include::partial$dataformat-options.adoc[]
 // dataformat options: END
 
 
@@ -92,4 +83,5 @@ the download page for the latest versions).
 </dependency>
 ----------------------------------------
 
-include::{page-component-version}@camel-spring-boot::page$any23-starter.adoc[]
+
+include::spring-boot:partial$starter.adoc[]

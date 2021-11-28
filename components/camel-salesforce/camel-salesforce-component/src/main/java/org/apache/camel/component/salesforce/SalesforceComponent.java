@@ -32,7 +32,6 @@ import org.apache.camel.TypeConverter;
 import org.apache.camel.component.salesforce.api.SalesforceException;
 import org.apache.camel.component.salesforce.api.dto.AbstractSObjectBase;
 import org.apache.camel.component.salesforce.api.utils.SecurityUtils;
-import org.apache.camel.component.salesforce.api.utils.XStreamUtils;
 import org.apache.camel.component.salesforce.internal.OperationName;
 import org.apache.camel.component.salesforce.internal.PayloadFormat;
 import org.apache.camel.component.salesforce.internal.SalesforceSession;
@@ -146,6 +145,11 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
               label = "common,security", secret = true)
     private KeyStoreParameters keystore;
 
+    @Metadata(description = "Value to use for the Audience claim (aud) when using OAuth JWT flow. If not set, the login URL will be used, which is"
+                            + " appropriate in most cases.",
+              label = "common,security")
+    private String jwtAudience;
+
     @Metadata(description = "Explicit authentication method to be used, one of USERNAME_PASSWORD, REFRESH_TOKEN or JWT."
                             + " Salesforce component can auto-determine the authentication method to use from the properties set, set this "
                             + " property to eliminate any ambiguity.",
@@ -182,6 +186,13 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
                             + " look at properties of SalesforceHttpClient and the Jetty HttpClient for all available options.",
               label = "common,advanced")
     private Map<String, Object> httpClientProperties;
+
+    @Metadata(description = "Size of the thread pool used to handle HTTP responses.",
+              label = "common,advanced", defaultValue = "10")
+    private int workerPoolSize = 10;
+    @Metadata(description = "Maximum size of the thread pool used to handle HTTP responses.",
+              label = "common,advanced", defaultValue = "20")
+    private int workerPoolMaxSize = 20;
 
     @Metadata(description = "Used to set any properties that can be configured on the LongPollingTransport used by the"
                             + " BayeuxClient (CometD) used by the streaming api",
@@ -239,8 +250,8 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
     private boolean httpProxyUseDigestAuth;
 
     @Metadata(description = "In what packages are the generated DTO classes. Typically the classes would be generated"
-                            + " using camel-salesforce-maven-plugin. This must be set if using the XML format. Also,"
-                            + " set it if using the generated DTOs to gain the benefit of using short "
+                            + " using camel-salesforce-maven-plugin. "
+                            + " Set it if using the generated DTOs to gain the benefit of using short "
                             + " SObject names in parameters/header values. Multiple packages can be separated by comma.",
               javaType = "java.lang.String", label = "common")
     private String packages;
@@ -332,16 +343,6 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         return result;
     }
 
-    private void setXStreamPackageWhiteList() {
-        if (packages != null) {
-            String[] packagesArray = getPackagesAsArray();
-            for (int i = 0; i < packagesArray.length; i++) {
-                packagesArray[i] = packagesArray[i] + ".*";
-            }
-            XStreamUtils.packageWhiteList = String.join(",", packagesArray);
-        }
-    }
-
     public SalesforceHttpClient getHttpClient() {
         return httpClient;
     }
@@ -362,6 +363,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
             loginConfig.setClientId(clientId);
             loginConfig.setClientSecret(clientSecret);
             loginConfig.setKeystore(keystore);
+            loginConfig.setJwtAudience(jwtAudience);
             loginConfig.setLazyLogin(lazyLogin);
             loginConfig.setLoginUrl(loginUrl);
             loginConfig.setPassword(password);
@@ -376,14 +378,18 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
 
         // create a Jetty HttpClient if not already set
         if (httpClient == null) {
-            final SSLContextParameters contextParameters = Optional.ofNullable(sslContextParameters)
-                    .orElseGet(() -> Optional.ofNullable(retrieveGlobalSslContextParameters())
-                            .orElseGet(() -> new SSLContextParameters()));
+            if (config != null && config.getHttpClient() != null) {
+                httpClient = config.getHttpClient();
+            } else {
+                final SSLContextParameters contextParameters = Optional.ofNullable(sslContextParameters)
+                        .orElseGet(() -> Optional.ofNullable(retrieveGlobalSslContextParameters())
+                                .orElseGet(() -> new SSLContextParameters()));
 
-            final SslContextFactory sslContextFactory = new SslContextFactory();
-            sslContextFactory.setSslContext(contextParameters.createSSLContext(getCamelContext()));
+                final SslContextFactory sslContextFactory = new SslContextFactory();
+                sslContextFactory.setSslContext(contextParameters.createSSLContext(getCamelContext()));
 
-            httpClient = createHttpClient(sslContextFactory);
+                httpClient = createHttpClient(this, sslContextFactory, getCamelContext(), workerPoolSize, workerPoolMaxSize);
+            }
             if (config != null) {
                 config.setHttpClient(httpClient);
             }
@@ -415,7 +421,6 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
             // parse the packages to create SObject name to class map
             classMap = parsePackages();
             LOG.info("Found {} generated classes in packages: {}", classMap.size(), packages);
-            setXStreamPackageWhiteList();
         } else {
             // use an empty map to avoid NPEs later
             LOG.warn("Missing property packages, getSObject* operations will NOT work without property rawPayload=true");
@@ -520,6 +525,14 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
 
     public KeyStoreParameters getKeystore() {
         return keystore;
+    }
+
+    public String getJwtAudience() {
+        return jwtAudience;
+    }
+
+    public void setJwtAudience(String jwtAudience) {
+        this.jwtAudience = jwtAudience;
     }
 
     public String getRefreshToken() {
@@ -716,6 +729,22 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         this.httpProxyUseDigestAuth = httpProxyUseDigestAuth;
     }
 
+    public int getWorkerPoolSize() {
+        return workerPoolSize;
+    }
+
+    public void setWorkerPoolSize(int workerPoolSize) {
+        this.workerPoolSize = workerPoolSize;
+    }
+
+    public int getWorkerPoolMaxSize() {
+        return workerPoolMaxSize;
+    }
+
+    public void setWorkerPoolMaxSize(int workerPoolMaxSize) {
+        this.workerPoolMaxSize = workerPoolMaxSize;
+    }
+
     public String getPackages() {
         return packages;
     }
@@ -750,7 +779,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         final String version = endpointConfig.getApiVersion();
         final PayloadFormat format = endpointConfig.getFormat();
 
-        return new DefaultRestClient(httpClient, version, format, session, loginConfig);
+        return new DefaultRestClient(httpClient, version, session, loginConfig);
     }
 
     RestClient createRestClient(final Map<String, Object> properties) throws Exception {
@@ -781,24 +810,29 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         final SslContextFactory sslContextFactory = new SslContextFactory();
         sslContextFactory.setSslContext(sslContextParameters.createSSLContext(camelContext));
 
-        final SalesforceHttpClient httpClient = createHttpClient(sslContextFactory);
+        final SalesforceHttpClient httpClient
+                = createHttpClient("SalesforceComponent", sslContextFactory, camelContext, 10, 20);
         setupHttpClient(httpClient, camelContext, properties);
 
         final SalesforceSession session = new SalesforceSession(camelContext, httpClient, httpClient.getTimeout(), loginConfig);
         httpClient.setSession(session);
 
-        return new DefaultRestClient(httpClient, config.getApiVersion(), config.getFormat(), session, loginConfig);
+        return new DefaultRestClient(httpClient, config.getApiVersion(), session, loginConfig);
     }
 
     public RawClient createRawClientFor(SalesforceEndpoint endpoint) throws SalesforceException {
-        SalesforceEndpointConfig endpointConfig = endpoint.getConfiguration();
         return new DefaultRawClient(httpClient, "", session, loginConfig);
     }
 
-    static SalesforceHttpClient createHttpClient(final SslContextFactory sslContextFactory) throws Exception {
+    static SalesforceHttpClient createHttpClient(
+            Object source, final SslContextFactory sslContextFactory, final CamelContext context, int workerPoolSize,
+            int workerPoolMaxSize) {
         SecurityUtils.adaptToIBMCipherNames(sslContextFactory);
 
-        final SalesforceHttpClient httpClient = new SalesforceHttpClient(sslContextFactory);
+        final SalesforceHttpClient httpClient = new SalesforceHttpClient(
+                context, context.getExecutorServiceManager().newThreadPool(source, "SalesforceHttpClient", workerPoolSize,
+                        workerPoolMaxSize),
+                sslContextFactory);
         // default settings, use httpClientProperties to set other
         // properties
         httpClient.setConnectTimeout(CONNECTION_TIMEOUT);

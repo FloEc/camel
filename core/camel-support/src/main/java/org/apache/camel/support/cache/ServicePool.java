@@ -294,6 +294,7 @@ abstract class ServicePool<S extends Service> extends ServiceSupport implements 
      * thread at any given time.
      */
     private class MultiplePool implements Pool<S> {
+        private final Object lock = new Object();
         private final Endpoint endpoint;
         private final BlockingQueue<S> queue;
         private final List<S> evicts;
@@ -313,16 +314,13 @@ abstract class ServicePool<S extends Service> extends ServiceSupport implements 
 
         private void cleanupEvicts() {
             if (!evicts.isEmpty()) {
-                synchronized (this) {
+                synchronized (lock) {
                     if (!evicts.isEmpty()) {
                         for (S evict : evicts) {
                             doStop(evict);
                             queue.remove(evict);
                         }
                         evicts.clear();
-                        if (queue.isEmpty()) {
-                            pool.remove(endpoint);
-                        }
                     }
                 }
             }
@@ -332,10 +330,13 @@ abstract class ServicePool<S extends Service> extends ServiceSupport implements 
         public S acquire() throws Exception {
             cleanupEvicts();
 
-            S s = queue.poll();
-            if (s == null) {
-                s = creator.apply(endpoint);
-                s.start();
+            S s;
+            synchronized (lock) {
+                s = queue.poll();
+                if (s == null) {
+                    s = creator.apply(endpoint);
+                    s.start();
+                }
             }
             return s;
         }
@@ -344,9 +345,11 @@ abstract class ServicePool<S extends Service> extends ServiceSupport implements 
         public void release(S s) {
             cleanupEvicts();
 
-            if (!queue.offer(s)) {
-                // there is no room so lets just stop and discard this
-                doStop(s);
+            synchronized (lock) {
+                if (!queue.offer(s)) {
+                    // there is no room so lets just stop and discard this
+                    doStop(s);
+                }
             }
         }
 
@@ -357,15 +360,19 @@ abstract class ServicePool<S extends Service> extends ServiceSupport implements 
 
         @Override
         public void stop() {
-            queue.forEach(this::doStop);
-            queue.clear();
-            pool.remove(endpoint);
+            synchronized (lock) {
+                queue.forEach(this::doStop);
+                queue.clear();
+                pool.remove(endpoint);
+            }
         }
 
         @Override
         public void evict(S s) {
             // to be evicted
-            evicts.add(s);
+            synchronized (lock) {
+                evicts.add(s);
+            }
         }
 
         @Override
@@ -377,7 +384,9 @@ abstract class ServicePool<S extends Service> extends ServiceSupport implements 
             if (s != null) {
                 ServicePool.stop(s);
                 try {
-                    endpoint.getCamelContext().removeService(s);
+                    if (endpoint != null) {
+                        endpoint.getCamelContext().removeService(s);
+                    }
                 } catch (Exception e) {
                     LOG.debug("Error removing service: {}. This exception is ignored.", s, e);
                 }

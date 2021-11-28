@@ -270,8 +270,9 @@ public class Lambda2Producer extends DefaultProducer {
             }
 
             if (ObjectHelper.isNotEmpty(exchange.getIn().getBody())
-                    || (ObjectHelper.isNotEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_BUCKET))
-                            && ObjectHelper.isNotEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_KEY)))) {
+                    || ObjectHelper.isNotEmpty(exchange.getIn().getHeader(Lambda2Constants.ZIP_FILE))
+                    || ObjectHelper.isNotEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_BUCKET))
+                            && ObjectHelper.isNotEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_KEY))) {
                 builder.code(functionCode.build());
             } else {
                 throw new IllegalArgumentException("At least S3 bucket/S3 key or zip file must be specified");
@@ -359,7 +360,6 @@ public class Lambda2Producer extends DefaultProducer {
         }
         try {
             result = lambdaClient.createFunction(request);
-
         } catch (AwsServiceException ase) {
             LOG.trace("createFunction command returned the error code {}", ase.awsErrorDetails().errorCode());
             throw ase;
@@ -379,8 +379,8 @@ public class Lambda2Producer extends DefaultProducer {
             builder.functionName(getEndpoint().getFunction());
 
             if (ObjectHelper.isEmpty(exchange.getIn().getBody())
-                    && (ObjectHelper.isEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_BUCKET))
-                            && ObjectHelper.isEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_KEY)))) {
+                    && ObjectHelper.isEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_BUCKET))
+                    && ObjectHelper.isEmpty(exchange.getIn().getHeader(Lambda2Constants.S3_KEY))) {
                 throw new IllegalArgumentException("At least S3 bucket/S3 key or zip file must be specified");
             }
 
@@ -684,6 +684,7 @@ public class Lambda2Producer extends DefaultProducer {
                 throw new IllegalArgumentException("Function alias must be specified to get an alias");
             }
             builder.name(aliasName);
+            request = builder.build();
         }
         try {
             result = lambdaClient.getAlias(request);
@@ -704,10 +705,10 @@ public class Lambda2Producer extends DefaultProducer {
             ListAliasesRequest.Builder builder = ListAliasesRequest.builder();
             builder.functionName(getEndpoint().getFunction());
             String version = exchange.getIn().getHeader(Lambda2Constants.FUNCTION_VERSION, String.class);
-            if (ObjectHelper.isEmpty(version)) {
-                throw new IllegalArgumentException("Function Version must be specified to list aliases for a function");
+            if (!ObjectHelper.isEmpty(version)) {
+                builder.functionVersion(version);
             }
-            builder.functionVersion(version);
+            request = builder.build();
         }
         try {
             result = lambdaClient.listAliases(request);

@@ -70,6 +70,14 @@ public class DefaultReactiveExecutor extends ServiceSupport implements ReactiveE
     }
 
     @Override
+    public void scheduleQueue(Runnable runnable) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("ScheduleQueue: {}", runnable);
+        }
+        workers.get().queue.add(runnable);
+    }
+
+    @Override
     public boolean executeFromQueue() {
         return workers.get().executeFromQueue();
     }
@@ -174,7 +182,7 @@ public class DefaultReactiveExecutor extends ServiceSupport implements ReactiveE
                                 executor.pendingTasks.decrement();
                             }
                             if (LOG.isTraceEnabled()) {
-                                LOG.trace("Worker #{} running: {}", number, runnable);
+                                LOG.trace("Worker #{} running: {}", number, polled);
                             }
                             polled.run();
                         } catch (Throwable t) {

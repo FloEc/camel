@@ -1,10 +1,11 @@
-[[testcontainers-other]]
-= Testcontainers Component
-:docTitle: Testcontainers
-:artifactId: camel-testcontainers
+= Testcontainers Component (deprecated)
+:doctitle: Testcontainers
+:shortname: testcontainers
+:artifactid: camel-testcontainers
 :description: Camel support for testcontainers
 :since: 2.22
-:supportLevel: Stable
+:supportlevel: Stable-deprecated
+:deprecated: *deprecated*
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/others/testcontainers.adoc[opts=optional]
 
 *Since Camel {since}*

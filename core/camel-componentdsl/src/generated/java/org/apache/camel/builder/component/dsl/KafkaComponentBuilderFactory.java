@@ -158,7 +158,7 @@ public interface KafkaComponentBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -331,6 +331,23 @@ public interface KafkaComponentBuilderFactory {
             return this;
         }
         /**
+         * The maximum time, in milliseconds, that the code will wait for a
+         * synchronous commit to complete.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Long&lt;/code&gt; type.
+         * 
+         * Default: 5000
+         * Group: consumer
+         * 
+         * @param commitTimeoutMs the value to set
+         * @return the dsl builder
+         */
+        default KafkaComponentBuilder commitTimeoutMs(
+                java.lang.Long commitTimeoutMs) {
+            doSetProperty("commitTimeoutMs", commitTimeoutMs);
+            return this;
+        }
+        /**
          * The configuration controls the maximum amount of time the client will
          * wait for the response of a request. If the response is not received
          * before the timeout elapses the client will resend the request if
@@ -350,7 +367,9 @@ public interface KafkaComponentBuilderFactory {
             return this;
         }
         /**
-         * The number of consumers that connect to kafka server.
+         * The number of consumers that connect to kafka server. Each consumer
+         * is run on a separate thread, that retrieves and process the incoming
+         * data.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -362,21 +381,6 @@ public interface KafkaComponentBuilderFactory {
          */
         default KafkaComponentBuilder consumersCount(int consumersCount) {
             doSetProperty("consumersCount", consumersCount);
-            return this;
-        }
-        /**
-         * Number of concurrent consumers on the consumer.
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: 10
-         * Group: consumer
-         * 
-         * @param consumerStreams the value to set
-         * @return the dsl builder
-         */
-        default KafkaComponentBuilder consumerStreams(int consumerStreams) {
-            doSetProperty("consumerStreams", consumerStreams);
             return this;
         }
         /**
@@ -453,6 +457,28 @@ public interface KafkaComponentBuilderFactory {
          */
         default KafkaComponentBuilder groupId(java.lang.String groupId) {
             doSetProperty("groupId", groupId);
+            return this;
+        }
+        /**
+         * A unique identifier of the consumer instance provided by the end
+         * user. Only non-empty strings are permitted. If set, the consumer is
+         * treated as a static member, which means that only one instance with
+         * this ID is allowed in the consumer group at any time. This can be
+         * used in combination with a larger session timeout to avoid group
+         * rebalances caused by transient unavailability (e.g. process
+         * restarts). If not set, the consumer will join the group as a dynamic
+         * member, which is the traditional behavior.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param groupInstanceId the value to set
+         * @return the dsl builder
+         */
+        default KafkaComponentBuilder groupInstanceId(
+                java.lang.String groupInstanceId) {
+            doSetProperty("groupInstanceId", groupInstanceId);
             return this;
         }
         /**
@@ -645,6 +671,30 @@ public interface KafkaComponentBuilderFactory {
          */
         default KafkaComponentBuilder pollTimeoutMs(java.lang.Long pollTimeoutMs) {
             doSetProperty("pollTimeoutMs", pollTimeoutMs);
+            return this;
+        }
+        /**
+         * This option allows the user to set a custom resume strategy. The
+         * resume strategy is executed when partitions are assigned (i.e.: when
+         * connecting or reconnecting). It allows implementations to customize
+         * how to resume operations and serve as more flexible alternative to
+         * the seekTo and the offsetRepository mechanisms. See the
+         * KafkaConsumerResumeStrategy for implementation details. This option
+         * does not affect the auto commit setting. It is likely that
+         * implementations using this setting will also want to evaluate using
+         * the manual commit option along with this.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default KafkaComponentBuilder resumeStrategy(
+                org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
             return this;
         }
         /**
@@ -1973,13 +2023,14 @@ public interface KafkaComponentBuilderFactory {
             case "breakOnFirstError": getOrCreateConfiguration((KafkaComponent) component).setBreakOnFirstError((boolean) value); return true;
             case "bridgeErrorHandler": ((KafkaComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "checkCrcs": getOrCreateConfiguration((KafkaComponent) component).setCheckCrcs((java.lang.Boolean) value); return true;
+            case "commitTimeoutMs": getOrCreateConfiguration((KafkaComponent) component).setCommitTimeoutMs((java.lang.Long) value); return true;
             case "consumerRequestTimeoutMs": getOrCreateConfiguration((KafkaComponent) component).setConsumerRequestTimeoutMs((java.lang.Integer) value); return true;
             case "consumersCount": getOrCreateConfiguration((KafkaComponent) component).setConsumersCount((int) value); return true;
-            case "consumerStreams": getOrCreateConfiguration((KafkaComponent) component).setConsumerStreams((int) value); return true;
             case "fetchMaxBytes": getOrCreateConfiguration((KafkaComponent) component).setFetchMaxBytes((java.lang.Integer) value); return true;
             case "fetchMinBytes": getOrCreateConfiguration((KafkaComponent) component).setFetchMinBytes((java.lang.Integer) value); return true;
             case "fetchWaitMaxMs": getOrCreateConfiguration((KafkaComponent) component).setFetchWaitMaxMs((java.lang.Integer) value); return true;
             case "groupId": getOrCreateConfiguration((KafkaComponent) component).setGroupId((java.lang.String) value); return true;
+            case "groupInstanceId": getOrCreateConfiguration((KafkaComponent) component).setGroupInstanceId((java.lang.String) value); return true;
             case "headerDeserializer": getOrCreateConfiguration((KafkaComponent) component).setHeaderDeserializer((org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer) value); return true;
             case "heartbeatIntervalMs": getOrCreateConfiguration((KafkaComponent) component).setHeartbeatIntervalMs((java.lang.Integer) value); return true;
             case "keyDeserializer": getOrCreateConfiguration((KafkaComponent) component).setKeyDeserializer((java.lang.String) value); return true;
@@ -1990,6 +2041,7 @@ public interface KafkaComponentBuilderFactory {
             case "partitionAssignor": getOrCreateConfiguration((KafkaComponent) component).setPartitionAssignor((java.lang.String) value); return true;
             case "pollOnError": getOrCreateConfiguration((KafkaComponent) component).setPollOnError((org.apache.camel.component.kafka.PollOnError) value); return true;
             case "pollTimeoutMs": getOrCreateConfiguration((KafkaComponent) component).setPollTimeoutMs((java.lang.Long) value); return true;
+            case "resumeStrategy": getOrCreateConfiguration((KafkaComponent) component).setResumeStrategy((org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy) value); return true;
             case "seekTo": getOrCreateConfiguration((KafkaComponent) component).setSeekTo((java.lang.String) value); return true;
             case "sessionTimeoutMs": getOrCreateConfiguration((KafkaComponent) component).setSessionTimeoutMs((java.lang.Integer) value); return true;
             case "specificAvroReader": getOrCreateConfiguration((KafkaComponent) component).setSpecificAvroReader((boolean) value); return true;

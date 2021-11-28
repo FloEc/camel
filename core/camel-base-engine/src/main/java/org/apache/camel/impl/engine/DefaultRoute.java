@@ -114,6 +114,11 @@ public class DefaultRoute extends ServiceSupport implements Route {
     }
 
     @Override
+    public boolean isCustomId() {
+        return "true".equals(properties.get(Route.CUSTOM_ID_PROPERTY));
+    }
+
+    @Override
     public String getGroup() {
         return (String) properties.get(Route.GROUP_PROPERTY);
     }
@@ -153,6 +158,12 @@ public class DefaultRoute extends ServiceSupport implements Route {
     @Override
     public String getDescription() {
         Object value = properties.get(Route.DESCRIPTION_PROPERTY);
+        return value != null ? (String) value : null;
+    }
+
+    @Override
+    public String getConfigurationId() {
+        Object value = properties.get(Route.CONFIGURATION_ID_PROPERTY);
         return value != null ? (String) value : null;
     }
 

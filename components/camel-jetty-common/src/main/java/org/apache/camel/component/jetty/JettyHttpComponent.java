@@ -138,15 +138,13 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
     public JettyHttpComponent() {
     }
 
-    class ConnectorRef {
-        CamelContext camelContext;
+    static class ConnectorRef {
         Server server;
         Connector connector;
         CamelServlet servlet;
         int refCount;
 
-        ConnectorRef(CamelContext camelContext, Server server, Connector connector, CamelServlet servlet) {
-            this.camelContext = camelContext;
+        ConnectorRef(Server server, Connector connector, CamelServlet servlet) {
             this.server = server;
             this.connector = connector;
             this.servlet = servlet;
@@ -172,8 +170,6 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
         // must extract well known parameters before we create the endpoint
         List<Handler> handlerList = resolveAndRemoveReferenceListParameter(parameters, "handlers", Handler.class);
         HttpBinding binding = resolveAndRemoveReferenceParameter(parameters, "httpBindingRef", HttpBinding.class);
-        JettyHttpBinding jettyBinding
-                = resolveAndRemoveReferenceParameter(parameters, "jettyHttpBindingRef", JettyHttpBinding.class);
         Boolean enableJmx = getAndRemoveParameter(parameters, "enableJmx", Boolean.class);
         Boolean enableMultipartFilter = getAndRemoveParameter(parameters, "enableMultipartFilter",
                 Boolean.class, true);
@@ -189,6 +185,7 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
         String proxyHost = getAndRemoveParameter(parameters, "proxyHost", String.class, getProxyHost());
         Integer proxyPort = getAndRemoveParameter(parameters, "proxyPort", Integer.class, getProxyPort());
         Boolean async = getAndRemoveParameter(parameters, "async", Boolean.class);
+        boolean muteException = getAndRemoveParameter(parameters, "muteException", boolean.class, isMuteException());
 
         // extract filterInit. parameters
         Map filterInitParameters = PropertiesHelper.extractProperties(parameters, "filterInit.");
@@ -210,6 +207,7 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
         if (async != null) {
             endpoint.setAsync(async);
         }
+        endpoint.setMuteException(muteException);
 
         if (headerFilterStrategy != null) {
             endpoint.setHeaderFilterStrategy(headerFilterStrategy);
@@ -234,11 +232,6 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
         }
         if (binding != null) {
             endpoint.setBinding(binding);
-        }
-        // prefer to use endpoint configured over component configured
-        if (jettyBinding == null) {
-            // fallback to component configured
-            jettyBinding = getJettyHttpBinding();
         }
         if (enableJmx != null) {
             endpoint.setEnableJmx(enableJmx);
@@ -335,7 +328,7 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
                 server.addConnector(connector);
 
                 connectorRef = new ConnectorRef(
-                        getCamelContext(), server, connector,
+                        server, connector,
                         createServletForConnector(server, connector, endpoint.getHandlers(), endpoint));
                 // must enable session before we start
                 if (endpoint.isSessionSupport()) {
@@ -1132,8 +1125,7 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
 
         String url = RestComponentHelper.createRestConsumerUrl("jetty", scheme, host, port, path, map);
 
-        JettyHttpEndpoint endpoint = camelContext.getEndpoint(url, JettyHttpEndpoint.class);
-        setProperties(endpoint, parameters);
+        JettyHttpEndpoint endpoint = (JettyHttpEndpoint) camelContext.getEndpoint(url, parameters);
 
         if (!map.containsKey("httpBindingRef")) {
             // use the rest binding, if not using a custom http binding
@@ -1171,7 +1163,10 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
         context.addServlet(holder, "/*");
 
         File file = File.createTempFile("camel", "");
-        file.delete();
+        boolean result = file.delete();
+        if (!result) {
+            LOG.error("failed to delete {}", file);
+        }
 
         //must register the MultipartConfig to make jetty server multipart aware
         holder.getRegistration()
@@ -1297,8 +1292,8 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
     }
 
     @Override
-    protected void doStart() throws Exception {
-        super.doStart();
+    protected void doInit() throws Exception {
+        super.doInit();
 
         try {
             RestConfiguration config = CamelContextHelper.getRestConfiguration(getCamelContext(), "jetty");
@@ -1310,7 +1305,7 @@ public abstract class JettyHttpComponent extends HttpCommonComponent
         } catch (IllegalArgumentException e) {
             // if there's a mismatch between the component and the rest-configuration,
             // then getRestConfiguration throws IllegalArgumentException which can be
-            // safely ignored as it means there's no special conf for this componet.
+            // safely ignored as it means there's no special conf for this component.
         }
     }
 

@@ -41,7 +41,9 @@ public abstract class RestDslGenerator<G> {
 
     String apiContextPath;
 
-    DestinationGenerator destinationGenerator = new DirectToOperationId();
+    DestinationGenerator destinationGenerator;
+
+    String destinationToSyntax;
 
     final OasDocument document;
 
@@ -50,6 +52,8 @@ public abstract class RestDslGenerator<G> {
     String restComponent;
 
     String restContextPath;
+
+    boolean clientRequestValidation;
 
     boolean springBootProject;
 
@@ -88,6 +92,15 @@ public abstract class RestDslGenerator<G> {
         return that;
     }
 
+    public G withClientRequestValidation() {
+        this.clientRequestValidation = true;
+
+        @SuppressWarnings("unchecked")
+        final G that = (G) this;
+
+        return that;
+    }
+
     public G withBasePath(final String basePath) {
         this.basePath = basePath;
 
@@ -97,9 +110,22 @@ public abstract class RestDslGenerator<G> {
         return that;
     }
 
-    public G withDestinationGenerator(final DestinationGenerator directRouteGenerator) {
-        notNull(directRouteGenerator, "directRouteGenerator");
-        this.destinationGenerator = directRouteGenerator;
+    public G withDestinationGenerator(final DestinationGenerator destinationGenerator) {
+        this.destinationGenerator = destinationGenerator;
+
+        @SuppressWarnings("unchecked")
+        final G that = (G) this;
+
+        return that;
+    }
+
+    /**
+     * Syntax to use for to uri.
+     *
+     * The default is <tt>direct:${operationId}</tt>
+     */
+    public G withDestinationToSyntax(final String destinationToSyntax) {
+        this.destinationToSyntax = destinationToSyntax;
 
         @SuppressWarnings("unchecked")
         final G that = (G) this;
@@ -144,6 +170,10 @@ public abstract class RestDslGenerator<G> {
     }
 
     DestinationGenerator destinationGenerator() {
+        if (destinationGenerator == null) {
+            destinationGenerator = destinationToSyntax != null
+                    ? new DefaultDestinationGenerator(destinationToSyntax) : new DefaultDestinationGenerator();
+        }
         return destinationGenerator;
     }
 
@@ -250,5 +280,9 @@ public abstract class RestDslGenerator<G> {
 
     public static RestDslXmlGenerator toXml(final OasDocument document) {
         return new RestDslXmlGenerator(document);
+    }
+
+    public static RestDslYamlGenerator toYaml(final OasDocument document) {
+        return new RestDslYamlGenerator(document);
     }
 }

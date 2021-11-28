@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>catalog</artifactId>
-        <version>3.11.0-SNAPSHOT</version>
+        <version>3.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-catalog</artifactId>
@@ -132,7 +132,7 @@
                             <!-- update names in camel-main -->
                             <goal>update-main-helper</goal>
                         </goals>
-                        <phase>process-resources</phase>
+                        <phase>generate-resources</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -160,14 +160,13 @@
                 </executions>
             </plugin>
 
-            <!-- sync properties -->
+            <!-- sync properties to camel-dependencies -->
             <plugin>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>sync-properties-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <!-- prepare the catalog, readme files, etc. -->
                         <goals>
                             <goal>sync-properties</goal>
                         </goals>

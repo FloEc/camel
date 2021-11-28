@@ -17,7 +17,9 @@
 package org.apache.camel.component.azure.storage.blob;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 
+import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -85,8 +87,16 @@ public class BlobConfiguration implements Cloneable {
     private Long pageBlobSize = BlobConstants.PAGE_BLOB_DEFAULT_SIZE;
     @UriParam(label = "producer", defaultValue = "COMMITTED")
     private BlockListType blockListType = BlockListType.COMMITTED;
+    @UriParam(label = "producer")
+    private OffsetDateTime changeFeedStartTime;
+    @UriParam(label = "producer")
+    private OffsetDateTime changeFeedEndTime;
+    @UriParam(label = "producer")
+    private Context changeFeedContext;
     @UriParam(label = "common")
     private String regex;
+    @UriParam(label = "security", secret = true)
+    private String sourceBlobAccessKey;
 
     /**
      * Azure account name to be used for authentication with azure blob services
@@ -366,6 +376,44 @@ public class BlobConfiguration implements Cloneable {
     }
 
     /**
+     * When using `getChangeFeed` producer operation, this filters the results to return events approximately after the
+     * start time. Note: A few events belonging to the previous hour can also be returned. A few events belonging to
+     * this hour can be missing; to ensure all events from the hour are returned, round the start time down by an hour.
+     */
+    public OffsetDateTime getChangeFeedStartTime() {
+        return changeFeedStartTime;
+    }
+
+    public void setChangeFeedStartTime(OffsetDateTime changeFeedStartTime) {
+        this.changeFeedStartTime = changeFeedStartTime;
+    }
+
+    /**
+     * When using `getChangeFeed` producer operation, this filters the results to return events approximately before the
+     * end time. Note: A few events belonging to the next hour can also be returned. A few events belonging to this hour
+     * can be missing; to ensure all events from the hour are returned, round the end time up by an hour.
+     */
+    public OffsetDateTime getChangeFeedEndTime() {
+        return changeFeedEndTime;
+    }
+
+    public void setChangeFeedEndTime(OffsetDateTime changeFeedEndTime) {
+        this.changeFeedEndTime = changeFeedEndTime;
+    }
+
+    /**
+     * When using `getChangeFeed` producer operation, this gives additional context that is passed through the Http
+     * pipeline during the service call.
+     */
+    public Context getChangeFeedContext() {
+        return changeFeedContext;
+    }
+
+    public void setChangeFeedContext(Context changeFeedContext) {
+        this.changeFeedContext = changeFeedContext;
+    }
+
+    /**
      * Filters the results to return only blobs whose names match the specified regular expression. May be null to
      * return all if both prefix and regex are set, regex takes the priority and prefix is ignored.
      */
@@ -375,6 +423,18 @@ public class BlobConfiguration implements Cloneable {
 
     public void setRegex(String regex) {
         this.regex = regex;
+    }
+
+    public String getSourceBlobAccessKey() {
+        return sourceBlobAccessKey;
+    }
+
+    /**
+     * Source Blob Access Key: for copyblob operation, sadly, we need to have an accessKey for the source blob we want
+     * to copy Passing an accessKey as header, it's unsafe so we could set as key.
+     */
+    public void setSourceBlobAccessKey(String sourceBlobAccessKey) {
+        this.sourceBlobAccessKey = sourceBlobAccessKey;
     }
 
     // *************************************************

@@ -107,8 +107,7 @@ public class SimpleCamelContext extends AbstractCamelContext {
     /**
      * Creates the {@link CamelContext} and allows to control whether the context should automatic initialize or not.
      * <p/>
-     * This is used by some Camel components such as camel-cdi and camel-blueprint, however this constructor is not
-     * intended for regular Camel end users.
+     * Note: Not for end users - this method is used internally by camel-blueprint/camel-cdi
      *
      * @param init whether to automatic initialize.
      */
@@ -514,6 +513,8 @@ public class SimpleCamelContext extends AbstractCamelContext {
         }
         if (tracer == null) {
             tracer = new DefaultTracer();
+            tracer.setEnabled(isTracing());
+            tracer.setStandby(isTracingStandby());
             setExtension(Tracer.class, tracer);
         }
         return tracer;
@@ -626,6 +627,11 @@ public class SimpleCamelContext extends AbstractCamelContext {
     @Override
     public String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
             throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeRouteTemplates(String pattern) throws Exception {
         throw new UnsupportedOperationException();
     }
 

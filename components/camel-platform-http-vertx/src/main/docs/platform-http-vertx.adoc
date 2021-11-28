@@ -1,22 +1,18 @@
-[[platform-http-vertx-other]]
 = Platform Http Vertx Component
-:docTitle: Platform Http Vertx
-:artifactId: camel-platform-http-vertx
+:doctitle: Platform Http Vertx
+:shortname: platform-http-vertx
+:artifactid: camel-platform-http-vertx
 :description: Implementation of the Platform HTTP Engine based on Vert.x Web
 :since: 3.2
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/others/platform-http-vertx.adoc[opts=optional]
 
 *Since Camel {since}*
 
 The camel-platform-http-vertx is a Vert.x based implementation of the `PlatformHttp` SPI.
 
-[NOTE]
-====
-At this time this component is an experiment so use it with care.
-====
-
 == Vert.x Route
+
 This implementation will by default lookup an instance of `VertxPlatformHttpRouter` on the registry however you can
 configure an existing instance using the getter/setter on the `VertxPlatformHttpEngine` class.
 

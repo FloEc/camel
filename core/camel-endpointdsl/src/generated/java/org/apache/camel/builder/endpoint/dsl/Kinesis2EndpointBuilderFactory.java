@@ -39,7 +39,7 @@ public interface Kinesis2EndpointBuilderFactory {
 
 
     /**
-     * Builder for endpoint consumers for the AWS 2 Kinesis component.
+     * Builder for endpoint consumers for the AWS Kinesis component.
      */
     public interface Kinesis2EndpointConsumerBuilder
             extends
@@ -435,6 +435,42 @@ public interface Kinesis2EndpointBuilderFactory {
         default Kinesis2EndpointConsumerBuilder maxResultsPerRequest(
                 String maxResultsPerRequest) {
             doSetProperty("maxResultsPerRequest", maxResultsPerRequest);
+            return this;
+        }
+        /**
+         * Defines a resume strategy for AWS Kinesis. The default strategy reads
+         * the sequenceNumber if provided.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.aws2.kinesis.consumer.KinesisResumeStrategy&lt;/code&gt; type.
+         * 
+         * Default: KinesisUserConfigurationResumeStrategy
+         * Group: consumer
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default Kinesis2EndpointConsumerBuilder resumeStrategy(
+                Object resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
+            return this;
+        }
+        /**
+         * Defines a resume strategy for AWS Kinesis. The default strategy reads
+         * the sequenceNumber if provided.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.aws2.kinesis.consumer.KinesisResumeStrategy&lt;/code&gt; type.
+         * 
+         * Default: KinesisUserConfigurationResumeStrategy
+         * Group: consumer
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default Kinesis2EndpointConsumerBuilder resumeStrategy(
+                String resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
             return this;
         }
         /**
@@ -1053,7 +1089,7 @@ public interface Kinesis2EndpointBuilderFactory {
     }
 
     /**
-     * Advanced builder for endpoint consumers for the AWS 2 Kinesis component.
+     * Advanced builder for endpoint consumers for the AWS Kinesis component.
      */
     public interface AdvancedKinesis2EndpointConsumerBuilder
             extends
@@ -1172,7 +1208,7 @@ public interface Kinesis2EndpointBuilderFactory {
     }
 
     /**
-     * Builder for endpoint producers for the AWS 2 Kinesis component.
+     * Builder for endpoint producers for the AWS Kinesis component.
      */
     public interface Kinesis2EndpointProducerBuilder
             extends
@@ -1540,7 +1576,7 @@ public interface Kinesis2EndpointBuilderFactory {
     }
 
     /**
-     * Advanced builder for endpoint producers for the AWS 2 Kinesis component.
+     * Advanced builder for endpoint producers for the AWS Kinesis component.
      */
     public interface AdvancedKinesis2EndpointProducerBuilder
             extends
@@ -1551,7 +1587,7 @@ public interface Kinesis2EndpointBuilderFactory {
     }
 
     /**
-     * Builder for endpoint for the AWS 2 Kinesis component.
+     * Builder for endpoint for the AWS Kinesis component.
      */
     public interface Kinesis2EndpointBuilder
             extends
@@ -1868,7 +1904,7 @@ public interface Kinesis2EndpointBuilderFactory {
     }
 
     /**
-     * Advanced builder for endpoint for the AWS 2 Kinesis component.
+     * Advanced builder for endpoint for the AWS Kinesis component.
      */
     public interface AdvancedKinesis2EndpointBuilder
             extends
@@ -1912,7 +1948,7 @@ public interface Kinesis2EndpointBuilderFactory {
 
     public interface Kinesis2Builders {
         /**
-         * AWS 2 Kinesis (camel-aws2-kinesis)
+         * AWS Kinesis (camel-aws2-kinesis)
          * Consume and produce records from and to AWS Kinesis Streams using AWS
          * SDK version 2.x.
          * 
@@ -1932,7 +1968,7 @@ public interface Kinesis2EndpointBuilderFactory {
             return Kinesis2EndpointBuilderFactory.endpointBuilder("aws2-kinesis", path);
         }
         /**
-         * AWS 2 Kinesis (camel-aws2-kinesis)
+         * AWS Kinesis (camel-aws2-kinesis)
          * Consume and produce records from and to AWS Kinesis Streams using AWS
          * SDK version 2.x.
          * 

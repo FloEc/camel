@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.properties.DefaultPropertiesParser;
-import org.apache.camel.component.properties.PropertiesParser;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.test.ExcludingPackageScanClassResolver;
 import org.apache.camel.test.junit5.CamelTestSupport;
@@ -66,8 +64,8 @@ public abstract class CamelSpringTestSupport extends CamelTestSupport {
     public static final String TEST_CLASS_SIMPLE_NAME_PROPERTY = "testClassSimpleName";
     public static final String TEST_DIRECTORY_PROPERTY = "testDirectory";
 
-    protected static ThreadLocal<AbstractApplicationContext> threadAppContext = new ThreadLocal<>();
-    protected static Object lock = new Object();
+    protected static final ThreadLocal<AbstractApplicationContext> THREAD_APP_CONTEXT = new ThreadLocal<>();
+    protected static final Object LOCK = new Object();
 
     private static final Logger LOG = LoggerFactory.getLogger(CamelSpringTestSupport.class);
 
@@ -78,7 +76,7 @@ public abstract class CamelSpringTestSupport extends CamelTestSupport {
     @Override
     public void postProcessTest() throws Exception {
         if (isCreateCamelContextPerClass()) {
-            applicationContext = threadAppContext.get();
+            applicationContext = THREAD_APP_CONTEXT.get();
         }
         super.postProcessTest();
     }
@@ -88,13 +86,13 @@ public abstract class CamelSpringTestSupport extends CamelTestSupport {
         if (!"true".equalsIgnoreCase(System.getProperty("skipStartingCamelContext"))) {
             // tell camel-spring it should not trigger starting CamelContext, since we do that later
             // after we are finished setting up the unit test
-            synchronized (lock) {
+            synchronized (LOCK) {
                 SpringCamelContext.setNoStart(true);
                 if (isCreateCamelContextPerClass()) {
-                    applicationContext = threadAppContext.get();
+                    applicationContext = THREAD_APP_CONTEXT.get();
                     if (applicationContext == null) {
                         applicationContext = doCreateApplicationContext();
-                        threadAppContext.set(applicationContext);
+                        THREAD_APP_CONTEXT.set(applicationContext);
                     }
                 } else {
                     applicationContext = doCreateApplicationContext();
@@ -146,9 +144,9 @@ public abstract class CamelSpringTestSupport extends CamelTestSupport {
     public void doPostTearDown() throws Exception {
         super.doPostTearDown();
 
-        if (threadAppContext.get() != null) {
-            IOHelper.close(threadAppContext.get());
-            threadAppContext.remove();
+        if (THREAD_APP_CONTEXT.get() != null) {
+            IOHelper.close(THREAD_APP_CONTEXT.get());
+            THREAD_APP_CONTEXT.remove();
         }
     }
 
@@ -322,7 +320,6 @@ public abstract class CamelSpringTestSupport extends CamelTestSupport {
                         sw.write(buf, 0, l);
                     }
                 }
-                PropertiesParser parser = new DefaultPropertiesParser();
                 String before = sw.toString();
                 String p = properties.keySet().stream().map(Pattern::quote)
                         .collect(Collectors.joining("|", Pattern.quote("{{") + "(", ")" + Pattern.quote("}}")));

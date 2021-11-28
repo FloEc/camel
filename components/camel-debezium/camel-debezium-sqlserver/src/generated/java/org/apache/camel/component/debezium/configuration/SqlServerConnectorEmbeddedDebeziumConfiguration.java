@@ -30,6 +30,8 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     private int databaseHistoryKafkaRecoveryPollIntervalMs = 100;
     @UriParam(label = LABEL_NAME)
     private String signalDataCollection;
+    @UriParam(label = LABEL_NAME, defaultValue = "false")
+    private boolean databaseHistoryStoreOnlyCapturedTablesDdl = false;
     @UriParam(label = LABEL_NAME)
     private String converters;
     @UriParam(label = LABEL_NAME, defaultValue = "__debezium-heartbeat")
@@ -46,6 +48,8 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     private String databaseUser;
     @UriParam(label = LABEL_NAME)
     private String datatypePropagateSourceType;
+    @UriParam(label = LABEL_NAME)
+    private String databaseNames;
     @UriParam(label = LABEL_NAME, defaultValue = "false")
     private boolean sanitizeFieldNames = false;
     @UriParam(label = LABEL_NAME)
@@ -67,6 +71,8 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     @UriParam(label = LABEL_NAME)
     @Metadata(required = true)
     private String databasePassword;
+    @UriParam(label = LABEL_NAME, defaultValue = "false")
+    private boolean databaseHistoryStoreOnlyMonitoredTablesDdl = false;
     @UriParam(label = LABEL_NAME, defaultValue = "2048")
     private int maxBatchSize = 2048;
     @UriParam(label = LABEL_NAME)
@@ -89,14 +95,14 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     private boolean provideTransactionMetadata = false;
     @UriParam(label = LABEL_NAME)
     private String tableWhitelist;
-    @UriParam(label = LABEL_NAME)
-    private String databaseServerTimezone;
     @UriParam(label = LABEL_NAME, defaultValue = "false")
     private boolean tombstonesOnDelete = false;
     @UriParam(label = LABEL_NAME, defaultValue = "precise")
     private String decimalHandlingMode = "precise";
     @UriParam(label = LABEL_NAME, defaultValue = "bytes")
     private String binaryHandlingMode = "bytes";
+    @UriParam(label = LABEL_NAME, defaultValue = "false")
+    private boolean databaseHistorySkipUnparseableDdl = false;
     @UriParam(label = LABEL_NAME, defaultValue = "true")
     private boolean tableIgnoreBuiltin = true;
     @UriParam(label = LABEL_NAME)
@@ -118,6 +124,8 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     private int snapshotMaxThreads = 1;
     @UriParam(label = LABEL_NAME, defaultValue = "1433")
     private int databasePort = 1433;
+    @UriParam(label = LABEL_NAME, defaultValue = "0")
+    private int maxIterationTransactions = 0;
     @UriParam(label = LABEL_NAME)
     private String columnExcludeList;
     @UriParam(label = LABEL_NAME)
@@ -246,6 +254,20 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * Controls what DDL will Debezium store in database history. By default
+     * (false) Debezium will store all incoming DDL statements. If set to true,
+     * then only DDL that manipulates a captured table will be stored.
+     */
+    public void setDatabaseHistoryStoreOnlyCapturedTablesDdl(
+            boolean databaseHistoryStoreOnlyCapturedTablesDdl) {
+        this.databaseHistoryStoreOnlyCapturedTablesDdl = databaseHistoryStoreOnlyCapturedTablesDdl;
+    }
+
+    public boolean isDatabaseHistoryStoreOnlyCapturedTablesDdl() {
+        return databaseHistoryStoreOnlyCapturedTablesDdl;
+    }
+
+    /**
      * Optional list of custom converters that would be used instead of default
      * ones. The converters are defined using '<converter.prefix>.type' config
      * option and configured using options '<converter.prefix>.<option>'
@@ -299,8 +321,8 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
      * Configures the criteria of the attached timestamp within the source
      * record (ts_ms).Options include:'commit', (default) the source timestamp
      * is set to the instant where the record was committed in the
-     * database'processing', the source timestamp is set to the instant where
-     * the record was processed by Debezium.
+     * database'processing', (deprecated) the source timestamp is set to the
+     * instant where the record was processed by Debezium.
      */
     public void setSourceTimestampMode(String sourceTimestampMode) {
         this.sourceTimestampMode = sourceTimestampMode;
@@ -311,7 +333,7 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
-     * The name of the database the connector should be monitoring
+     * The name of the database from which the connector should capture changes
      */
     public void setDatabaseDbname(String databaseDbname) {
         this.databaseDbname = databaseDbname;
@@ -348,6 +370,18 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * The names of the databases from which the connector should capture
+     * changes
+     */
+    public void setDatabaseNames(String databaseNames) {
+        this.databaseNames = databaseNames;
+    }
+
+    public String getDatabaseNames() {
+        return databaseNames;
+    }
+
+    /**
      * Whether field names will be sanitized to Avro naming conventions
      */
     public void setSanitizeFieldNames(boolean sanitizeFieldNames) {
@@ -361,7 +395,7 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     /**
      *  This property contains a comma-separated list of fully-qualified tables
      * (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-     * thespecific connectors . Select statements for the individual tables are
+     * thespecific connectors. Select statements for the individual tables are
      * specified in further configuration properties, one for each table,
      * identified by the id
      * 'snapshot.select.statement.overrides.[DB_NAME].[TABLE_NAME]' or
@@ -479,6 +513,22 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
 
     public String getDatabasePassword() {
         return databasePassword;
+    }
+
+    /**
+     * Controls what DDL will Debezium store in database history. By default
+     * (false) Debezium will store all incoming DDL statements. If set to true,
+     * then only DDL that manipulates a monitored table will be stored
+     * (deprecated, use "database.history.store.only.captured.tables.ddl"
+     * instead)
+     */
+    public void setDatabaseHistoryStoreOnlyMonitoredTablesDdl(
+            boolean databaseHistoryStoreOnlyMonitoredTablesDdl) {
+        this.databaseHistoryStoreOnlyMonitoredTablesDdl = databaseHistoryStoreOnlyMonitoredTablesDdl;
+    }
+
+    public boolean isDatabaseHistoryStoreOnlyMonitoredTablesDdl() {
+        return databaseHistoryStoreOnlyMonitoredTablesDdl;
     }
 
     /**
@@ -620,18 +670,6 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
-     * The timezone of the server used to correctly shift the commit transaction
-     * timestamp on the client sideOptions include: Any valid Java ZoneId
-     */
-    public void setDatabaseServerTimezone(String databaseServerTimezone) {
-        this.databaseServerTimezone = databaseServerTimezone;
-    }
-
-    public String getDatabaseServerTimezone() {
-        return databaseServerTimezone;
-    }
-
-    /**
      * Whether delete operations should be represented by a delete event and a
      * subsquenttombstone event (true) or only by a delete event (false).
      * Emitting the tombstone event (the default behavior) allows Kafka to
@@ -675,6 +713,21 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
 
     public String getBinaryHandlingMode() {
         return binaryHandlingMode;
+    }
+
+    /**
+     * Controls the action Debezium will take when it meets a DDL statement in
+     * binlog, that it cannot parse.By default the connector will stop operating
+     * but by changing the setting it can ignore the statements which it cannot
+     * parse. If skipping is enabled then Debezium can miss metadata changes.
+     */
+    public void setDatabaseHistorySkipUnparseableDdl(
+            boolean databaseHistorySkipUnparseableDdl) {
+        this.databaseHistorySkipUnparseableDdl = databaseHistorySkipUnparseableDdl;
+    }
+
+    public boolean isDatabaseHistorySkipUnparseableDdl() {
+        return databaseHistorySkipUnparseableDdl;
     }
 
     /**
@@ -824,6 +877,18 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * This property can be used to reduce the connector memory usage footprint
+     * when changes are streamed from multiple tables per database.
+     */
+    public void setMaxIterationTransactions(int maxIterationTransactions) {
+        this.maxIterationTransactions = maxIterationTransactions;
+    }
+
+    public int getMaxIterationTransactions() {
+        return maxIterationTransactions;
+    }
+
+    /**
      * Regular expressions matching columns to exclude from change events
      */
     public void setColumnExcludeList(String columnExcludeList) {
@@ -869,6 +934,7 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "poll.interval.ms", pollIntervalMs);
         addPropertyIfNotNull(configBuilder, "database.history.kafka.recovery.poll.interval.ms", databaseHistoryKafkaRecoveryPollIntervalMs);
         addPropertyIfNotNull(configBuilder, "signal.data.collection", signalDataCollection);
+        addPropertyIfNotNull(configBuilder, "database.history.store.only.captured.tables.ddl", databaseHistoryStoreOnlyCapturedTablesDdl);
         addPropertyIfNotNull(configBuilder, "converters", converters);
         addPropertyIfNotNull(configBuilder, "heartbeat.topics.prefix", heartbeatTopicsPrefix);
         addPropertyIfNotNull(configBuilder, "snapshot.fetch.size", snapshotFetchSize);
@@ -877,6 +943,7 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "database.dbname", databaseDbname);
         addPropertyIfNotNull(configBuilder, "database.user", databaseUser);
         addPropertyIfNotNull(configBuilder, "datatype.propagate.source.type", datatypePropagateSourceType);
+        addPropertyIfNotNull(configBuilder, "database.names", databaseNames);
         addPropertyIfNotNull(configBuilder, "sanitize.field.names", sanitizeFieldNames);
         addPropertyIfNotNull(configBuilder, "snapshot.select.statement.overrides", snapshotSelectStatementOverrides);
         addPropertyIfNotNull(configBuilder, "database.history.kafka.bootstrap.servers", databaseHistoryKafkaBootstrapServers);
@@ -887,6 +954,7 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "column.propagate.source.type", columnPropagateSourceType);
         addPropertyIfNotNull(configBuilder, "table.exclude.list", tableExcludeList);
         addPropertyIfNotNull(configBuilder, "database.password", databasePassword);
+        addPropertyIfNotNull(configBuilder, "database.history.store.only.monitored.tables.ddl", databaseHistoryStoreOnlyMonitoredTablesDdl);
         addPropertyIfNotNull(configBuilder, "max.batch.size", maxBatchSize);
         addPropertyIfNotNull(configBuilder, "skipped.operations", skippedOperations);
         addPropertyIfNotNull(configBuilder, "snapshot.mode", snapshotMode);
@@ -898,10 +966,10 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "database.history.kafka.recovery.attempts", databaseHistoryKafkaRecoveryAttempts);
         addPropertyIfNotNull(configBuilder, "provide.transaction.metadata", provideTransactionMetadata);
         addPropertyIfNotNull(configBuilder, "table.whitelist", tableWhitelist);
-        addPropertyIfNotNull(configBuilder, "database.server.timezone", databaseServerTimezone);
         addPropertyIfNotNull(configBuilder, "tombstones.on.delete", tombstonesOnDelete);
         addPropertyIfNotNull(configBuilder, "decimal.handling.mode", decimalHandlingMode);
         addPropertyIfNotNull(configBuilder, "binary.handling.mode", binaryHandlingMode);
+        addPropertyIfNotNull(configBuilder, "database.history.skip.unparseable.ddl", databaseHistorySkipUnparseableDdl);
         addPropertyIfNotNull(configBuilder, "table.ignore.builtin", tableIgnoreBuiltin);
         addPropertyIfNotNull(configBuilder, "snapshot.include.collection.list", snapshotIncludeCollectionList);
         addPropertyIfNotNull(configBuilder, "database.history.file.filename", databaseHistoryFileFilename);
@@ -912,6 +980,7 @@ public class SqlServerConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "snapshot.isolation.mode", snapshotIsolationMode);
         addPropertyIfNotNull(configBuilder, "snapshot.max.threads", snapshotMaxThreads);
         addPropertyIfNotNull(configBuilder, "database.port", databasePort);
+        addPropertyIfNotNull(configBuilder, "max.iteration.transactions", maxIterationTransactions);
         addPropertyIfNotNull(configBuilder, "column.exclude.list", columnExcludeList);
         addPropertyIfNotNull(configBuilder, "database.hostname", databaseHostname);
         addPropertyIfNotNull(configBuilder, "table.include.list", tableIncludeList);

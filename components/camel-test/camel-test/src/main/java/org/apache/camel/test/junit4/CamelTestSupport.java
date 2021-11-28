@@ -56,6 +56,7 @@ import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.Route;
+import org.apache.camel.RouteConfigurationsBuilder;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.Service;
@@ -96,6 +97,7 @@ import org.slf4j.LoggerFactory;
  * {@link org.apache.camel.ProducerTemplate} for use in the test case Do <tt>not</tt> use this class for Spring Boot
  * testing, instead use <code>@RunWith(CamelSpringBootRunner.class)</code>.
  */
+@Deprecated
 public abstract class CamelTestSupport extends TestSupport {
 
     /**
@@ -299,7 +301,7 @@ public abstract class CamelTestSupport extends TestSupport {
     @Before
     public void setUp() throws Exception {
         LOG.info("********************************************************************************");
-        LOG.info("Testing: " + getTestMethodName() + "(" + getClass().getName() + ")");
+        LOG.info("Testing: {} ({})", getTestMethodName(), getClass().getName());
         LOG.info("********************************************************************************");
 
         if (isCreateCamelContextPerClass()) {
@@ -391,9 +393,10 @@ public abstract class CamelTestSupport extends TestSupport {
                 // we need to stop the context first to setup the debugger
                 context.stop();
             }
+            context.setDebugging(true);
             context.setDebugger(new DefaultDebugger());
             context.getDebugger().addBreakpoint(breakpoint);
-            // note: when stopping CamelContext it will automatic remove the breakpoint
+            // note: when stopping CamelContext it will automatically remove the breakpoint
         }
 
         template = context.createProducerTemplate();
@@ -444,8 +447,15 @@ public abstract class CamelTestSupport extends TestSupport {
 
         if (isUseRouteBuilder()) {
             RoutesBuilder[] builders = createRouteBuilders();
+            // add configuration before routes
             for (RoutesBuilder builder : builders) {
-                LOG.debug("Using created route builder: " + builder);
+                if (builder instanceof RouteConfigurationsBuilder) {
+                    log.debug("Using created route configuration: {}", builder);
+                    context.addRoutesConfigurations((RouteConfigurationsBuilder) builder);
+                }
+            }
+            for (RoutesBuilder builder : builders) {
+                log.debug("Using created route builder: {}", builder);
                 context.addRoutes(builder);
             }
             replaceFromEndpoints();
@@ -459,9 +469,9 @@ public abstract class CamelTestSupport extends TestSupport {
             }
         } else {
             replaceFromEndpoints();
-            LOG.debug("Using route builder from the created context: " + context);
+            LOG.debug("Using route builder from the created context: {}", context);
         }
-        LOG.debug("Routing Rules are: " + context.getRoutes());
+        LOG.debug("Routing Rules are: {}", context.getRoutes());
 
         assertValidContext(context);
     }
@@ -486,8 +496,8 @@ public abstract class CamelTestSupport extends TestSupport {
         long time = watch.taken();
 
         LOG.info("********************************************************************************");
-        LOG.info("Testing done: " + getTestMethodName() + "(" + getClass().getName() + ")");
-        LOG.info("Took: " + TimeUtils.printDuration(time) + " (" + time + " millis)");
+        LOG.info("Testing done: {} ({})", getTestMethodName(), getClass().getName());
+        LOG.info("Took: {} ({} millis)", TimeUtils.printDuration(time), time);
 
         // if we should dump route stats, then write that to a file
         if (isRouteCoverageEnabled()) {

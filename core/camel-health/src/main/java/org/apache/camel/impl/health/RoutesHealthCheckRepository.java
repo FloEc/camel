@@ -123,6 +123,7 @@ public class RoutesHealthCheckRepository implements CamelContextAware, HealthChe
     private HealthCheck toRouteHealthCheck(Route route) {
         return checks.computeIfAbsent(route, r -> {
             RouteHealthCheck rhc = new RouteHealthCheck(route);
+            CamelContextAware.trySetCamelContext(rhc, route.getCamelContext());
             HealthCheckConfiguration hcc = matchConfiguration(route.getRouteId());
             if (hcc != null) {
                 rhc.setConfiguration(hcc);

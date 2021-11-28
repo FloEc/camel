@@ -204,15 +204,14 @@ public class ModelParser extends BaseParser {
         }, noValueHandler());
     }
     protected WhenDefinition doParseWhenDefinition() throws IOException, XmlPullParserException {
-        return doParse(new WhenDefinition(), 
-            processorDefinitionAttributeHandler(),  outputExpressionNodeElementHandler(), noValueHandler());
+        return doParse(new WhenDefinition(),
+            processorDefinitionAttributeHandler(), outputExpressionNodeElementHandler(), noValueHandler());
     }
     protected ChoiceDefinition doParseChoiceDefinition() throws IOException, XmlPullParserException {
         return doParse(new ChoiceDefinition(),
             processorDefinitionAttributeHandler(), (def, key) -> {
             switch (key) {
                 case "when": doAdd(doParseWhenDefinition(), def.getWhenClauses(), def::setWhenClauses); break;
-                case "whenSkipSendToEndpoint": doAdd(doParseWhenSkipSendToEndpointDefinition(), def.getWhenClauses(), def::setWhenClauses); break;
                 case "otherwise": def.setOtherwise(doParseOtherwiseDefinition()); break;
                 default: return optionalIdentifiedDefinitionElementHandler().accept(def, key);
             }
@@ -285,6 +284,7 @@ public class ModelParser extends BaseParser {
         return doParse(new ConvertBodyDefinition(), (def, key, val) -> {
             switch (key) {
                 case "charset": def.setCharset(val); break;
+                case "mandatory": def.setMandatory(val); break;
                 case "type": def.setType(val); break;
                 default: return processorDefinitionAttributeHandler().accept(def, key, val);
             }
@@ -815,11 +815,12 @@ public class ModelParser extends BaseParser {
     }
     protected RemoveHeaderDefinition doParseRemoveHeaderDefinition() throws IOException, XmlPullParserException {
         return doParse(new RemoveHeaderDefinition(), (def, key, val) -> {
-            if ("headerName".equals(key)) {
-                def.setHeaderName(val);
-                return true;
+            switch (key) {
+                case "headerName": def.setHeaderName(val); break;
+                case "name": def.setName(val); break;
+                default: return processorDefinitionAttributeHandler().accept(def, key, val);
             }
-            return processorDefinitionAttributeHandler().accept(def, key, val);
+            return true;
         }, optionalIdentifiedDefinitionElementHandler(), noValueHandler());
     }
     protected RemoveHeadersDefinition doParseRemoveHeadersDefinition() throws IOException, XmlPullParserException {
@@ -935,6 +936,53 @@ public class ModelParser extends BaseParser {
             return identifiedTypeAttributeHandler().accept(def, key, val);
         }, noElementHandler(), noValueHandler());
     }
+    protected RouteConfigurationDefinition doParseRouteConfigurationDefinition() throws IOException, XmlPullParserException {
+        return doParse(new RouteConfigurationDefinition(),
+            optionalIdentifiedDefinitionAttributeHandler(), (def, key) -> {
+            switch (key) {
+                case "interceptFrom": doAdd(doParseInterceptFromDefinition(), def.getInterceptFroms(), def::setInterceptFroms); break;
+                case "interceptSendToEndpoint": doAdd(doParseInterceptSendToEndpointDefinition(), def.getInterceptSendTos(), def::setInterceptSendTos); break;
+                case "intercept": doAdd(doParseInterceptDefinition(), def.getIntercepts(), def::setIntercepts); break;
+                case "onCompletion": doAdd(doParseOnCompletionDefinition(), def.getOnCompletions(), def::setOnCompletions); break;
+                case "onException": doAdd(doParseOnExceptionDefinition(), def.getOnExceptions(), def::setOnExceptions); break;
+                default: return optionalIdentifiedDefinitionElementHandler().accept(def, key);
+            }
+            return true;
+        }, noValueHandler());
+    }
+    public Optional<RouteConfigurationsDefinition> parseRouteConfigurationsDefinition()
+            throws IOException, XmlPullParserException {
+        String tag = getNextTag("routeConfigurations", "routeConfiguration");
+        if (tag != null) {
+            switch (tag) {
+                case "routeConfigurations" : return Optional.of(doParseRouteConfigurationsDefinition());
+                case "routeConfiguration" : return parseSingleRouteConfigurationsDefinition();
+            }
+        }
+        return Optional.empty();
+    }
+    private Optional<RouteConfigurationsDefinition> parseSingleRouteConfigurationsDefinition()
+            throws IOException, XmlPullParserException {
+        Optional<RouteConfigurationDefinition> single = Optional.of(doParseRouteConfigurationDefinition());
+        if (single.isPresent()) {
+            List<RouteConfigurationDefinition> list = new ArrayList<>();
+            list.add(single.get());
+            RouteConfigurationsDefinition def = new RouteConfigurationsDefinition();
+            def.setRouteConfigurations(list);
+            return Optional.of(def);
+        }
+        return Optional.empty();
+    }
+    protected RouteConfigurationsDefinition doParseRouteConfigurationsDefinition() throws IOException, XmlPullParserException {
+        return doParse(new RouteConfigurationsDefinition(),
+            noAttributeHandler(), (def, key) -> {
+            if ("routeConfiguration".equals(key)) {
+                doAdd(doParseRouteConfigurationDefinition(), def.getRouteConfigurations(), def::setRouteConfigurations);
+                return true;
+            }
+            return false;
+        }, noValueHandler());
+    }
     protected RouteContextRefDefinition doParseRouteContextRefDefinition() throws IOException, XmlPullParserException {
         return doParse(new RouteContextRefDefinition(), (def, key, val) -> {
             if ("ref".equals(key)) {
@@ -953,6 +1001,7 @@ public class ModelParser extends BaseParser {
                 case "group": def.setGroup(val); break;
                 case "logMask": def.setLogMask(val); break;
                 case "messageHistory": def.setMessageHistory(val); break;
+                case "routeConfigurationId": def.setRouteConfigurationId(val); break;
                 case "routePolicyRef": def.setRoutePolicyRef(val); break;
                 case "shutdownRoute": def.setShutdownRoute(val); break;
                 case "shutdownRunningTask": def.setShutdownRunningTask(val); break;
@@ -1402,10 +1451,6 @@ public class ModelParser extends BaseParser {
         return doParse(new ValidateDefinition(),
             processorDefinitionAttributeHandler(), expressionNodeElementHandler(), noValueHandler());
     }
-    protected WhenSkipSendToEndpointDefinition doParseWhenSkipSendToEndpointDefinition() throws IOException, XmlPullParserException {
-        return doParse(new WhenSkipSendToEndpointDefinition(),
-            processorDefinitionAttributeHandler(), outputExpressionNodeElementHandler(), noValueHandler());
-    }
     protected WireTapDefinition doParseWireTapDefinition() throws IOException, XmlPullParserException {
         return doParse(new WireTapDefinition(), (def, key, val) -> {
             switch (key) {
@@ -1760,7 +1805,7 @@ public class ModelParser extends BaseParser {
     protected ASN1DataFormat doParseASN1DataFormat() throws IOException, XmlPullParserException {
         return doParse(new ASN1DataFormat(), (def, key, val) -> {
             switch (key) {
-                case "clazzName": def.setClazzName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "usingIterator": def.setUsingIterator(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
             }
@@ -1791,20 +1836,20 @@ public class ModelParser extends BaseParser {
                 case "allowUnmarshallType": def.setAllowUnmarshallType(val); break;
                 case "autoDiscoverObjectMapper": def.setAutoDiscoverObjectMapper(val); break;
                 case "autoDiscoverSchemaResolver": def.setAutoDiscoverSchemaResolver(val); break;
-                case "collectionTypeName": def.setCollectionTypeName(val); break;
+                case "collectionType": def.setCollectionTypeName(val); break;
                 case "contentTypeHeader": def.setContentTypeHeader(val); break;
                 case "disableFeatures": def.setDisableFeatures(val); break;
                 case "enableFeatures": def.setEnableFeatures(val); break;
                 case "include": def.setInclude(val); break;
                 case "instanceClassName": def.setInstanceClassName(val); break;
-                case "jsonViewTypeName": def.setJsonViewTypeName(val); break;
+                case "jsonView": def.setJsonViewTypeName(val); break;
                 case "library": def.setLibrary(AvroLibrary.valueOf(val)); break;
                 case "moduleClassNames": def.setModuleClassNames(val); break;
                 case "moduleRefs": def.setModuleRefs(val); break;
                 case "objectMapper": def.setObjectMapper(val); break;
                 case "schemaResolver": def.setSchemaResolver(val); break;
                 case "timezone": def.setTimezone(val); break;
-                case "unmarshalTypeName": def.setUnmarshalTypeName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "useDefaultObjectMapper": def.setUseDefaultObjectMapper(val); break;
                 case "useList": def.setUseList(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
@@ -1869,12 +1914,12 @@ public class ModelParser extends BaseParser {
             switch (key) {
                 case "allowJmsType": def.setAllowJmsType(val); break;
                 case "allowUnmarshallType": def.setAllowUnmarshallType(val); break;
-                case "collectionTypeName": def.setCollectionTypeName(val); break;
+                case "collectionType": def.setCollectionTypeName(val); break;
                 case "disableFeatures": def.setDisableFeatures(val); break;
                 case "enableFeatures": def.setEnableFeatures(val); break;
                 case "objectMapper": def.setObjectMapper(val); break;
                 case "prettyPrint": def.setPrettyPrint(val); break;
-                case "unmarshalTypeName": def.setUnmarshalTypeName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "useDefaultObjectMapper": def.setUseDefaultObjectMapper(val); break;
                 case "useList": def.setUseList(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
@@ -1903,6 +1948,7 @@ public class ModelParser extends BaseParser {
         return doParse(new CsvDataFormat(), (def, key, val) -> {
             switch (key) {
                 case "allowMissingColumnNames": def.setAllowMissingColumnNames(val); break;
+                case "captureHeaderRecord": def.setCaptureHeaderRecord(val); break;
                 case "commentMarker": def.setCommentMarker(val); break;
                 case "commentMarkerDisabled": def.setCommentMarkerDisabled(val); break;
                 case "delimiter": def.setDelimiter(val); break;
@@ -2044,17 +2090,17 @@ public class ModelParser extends BaseParser {
             switch (key) {
                 case "allowJmsType": def.setAllowJmsType(val); break;
                 case "allowUnmarshallType": def.setAllowUnmarshallType(val); break;
-                case "collectionTypeName": def.setCollectionTypeName(val); break;
+                case "collectionType": def.setCollectionTypeName(val); break;
                 case "contentTypeHeader": def.setContentTypeHeader(val); break;
                 case "disableFeatures": def.setDisableFeatures(val); break;
                 case "enableFeatures": def.setEnableFeatures(val); break;
                 case "enableJaxbAnnotationModule": def.setEnableJaxbAnnotationModule(val); break;
                 case "include": def.setInclude(val); break;
-                case "jsonViewTypeName": def.setJsonViewTypeName(val); break;
+                case "jsonView": def.setJsonViewTypeName(val); break;
                 case "moduleClassNames": def.setModuleClassNames(val); break;
                 case "moduleRefs": def.setModuleRefs(val); break;
                 case "prettyPrint": def.setPrettyPrint(val); break;
-                case "unmarshalTypeName": def.setUnmarshalTypeName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "useList": def.setUseList(val); break;
                 case "xmlMapper": def.setXmlMapper(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
@@ -2106,22 +2152,23 @@ public class ModelParser extends BaseParser {
                 case "allowUnmarshallType": def.setAllowUnmarshallType(val); break;
                 case "autoDiscoverObjectMapper": def.setAutoDiscoverObjectMapper(val); break;
                 case "autoDiscoverSchemaResolver": def.setAutoDiscoverSchemaResolver(val); break;
-                case "collectionTypeName": def.setCollectionTypeName(val); break;
+                case "collectionType": def.setCollectionTypeName(val); break;
                 case "contentTypeHeader": def.setContentTypeHeader(val); break;
                 case "disableFeatures": def.setDisableFeatures(val); break;
                 case "dropRootNode": def.setDropRootNode(val); break;
                 case "enableFeatures": def.setEnableFeatures(val); break;
                 case "include": def.setInclude(val); break;
-                case "jsonViewTypeName": def.setJsonViewTypeName(val); break;
+                case "jsonView": def.setJsonViewTypeName(val); break;
                 case "library": def.setLibrary(JsonLibrary.valueOf(val)); break;
                 case "moduleClassNames": def.setModuleClassNames(val); break;
                 case "moduleRefs": def.setModuleRefs(val); break;
+                case "namingStrategy": def.setNamingStrategy(val); break;
                 case "objectMapper": def.setObjectMapper(val); break;
                 case "permissions": def.setPermissions(val); break;
                 case "prettyPrint": def.setPrettyPrint(val); break;
                 case "schemaResolver": def.setSchemaResolver(val); break;
                 case "timezone": def.setTimezone(val); break;
-                case "unmarshalTypeName": def.setUnmarshalTypeName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "useDefaultObjectMapper": def.setUseDefaultObjectMapper(val); break;
                 case "useList": def.setUseList(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
@@ -2180,21 +2227,21 @@ public class ModelParser extends BaseParser {
                 case "allowUnmarshallType": def.setAllowUnmarshallType(val); break;
                 case "autoDiscoverObjectMapper": def.setAutoDiscoverObjectMapper(val); break;
                 case "autoDiscoverSchemaResolver": def.setAutoDiscoverSchemaResolver(val); break;
-                case "collectionTypeName": def.setCollectionTypeName(val); break;
+                case "collectionType": def.setCollectionTypeName(val); break;
                 case "contentTypeFormat": def.setContentTypeFormat(val); break;
                 case "contentTypeHeader": def.setContentTypeHeader(val); break;
                 case "disableFeatures": def.setDisableFeatures(val); break;
                 case "enableFeatures": def.setEnableFeatures(val); break;
                 case "include": def.setInclude(val); break;
                 case "instanceClass": def.setInstanceClass(val); break;
-                case "jsonViewTypeName": def.setJsonViewTypeName(val); break;
+                case "jsonView": def.setJsonViewTypeName(val); break;
                 case "library": def.setLibrary(ProtobufLibrary.valueOf(val)); break;
                 case "moduleClassNames": def.setModuleClassNames(val); break;
                 case "moduleRefs": def.setModuleRefs(val); break;
                 case "objectMapper": def.setObjectMapper(val); break;
                 case "schemaResolver": def.setSchemaResolver(val); break;
                 case "timezone": def.setTimezone(val); break;
-                case "unmarshalTypeName": def.setUnmarshalTypeName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "useDefaultObjectMapper": def.setUseDefaultObjectMapper(val); break;
                 case "useList": def.setUseList(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
@@ -2392,7 +2439,7 @@ public class ModelParser extends BaseParser {
                 case "prettyFlow": def.setPrettyFlow(val); break;
                 case "representer": def.setRepresenter(val); break;
                 case "resolver": def.setResolver(val); break;
-                case "unmarshalTypeName": def.setUnmarshalTypeName(val); break;
+                case "unmarshalType": def.setUnmarshalTypeName(val); break;
                 case "useApplicationContextClassLoader": def.setUseApplicationContextClassLoader(val); break;
                 default: return identifiedTypeAttributeHandler().accept(def, key, val);
             }
@@ -2446,8 +2493,13 @@ public class ModelParser extends BaseParser {
         }, noElementHandler(), expressionDefinitionValueHandler());
     }
     protected ConstantExpression doParseConstantExpression() throws IOException, XmlPullParserException {
-        return doParse(new ConstantExpression(),
-            expressionDefinitionAttributeHandler(), noElementHandler(), expressionDefinitionValueHandler());
+        return doParse(new ConstantExpression(), (def, key, val) -> {
+            if ("resultType".equals(key)) {
+                def.setResultTypeName(val);
+                return true;
+            }
+            return expressionDefinitionAttributeHandler().accept(def, key, val);
+        }, noElementHandler(), expressionDefinitionValueHandler());
     }
     protected DatasonnetExpression doParseDatasonnetExpression() throws IOException, XmlPullParserException {
         return doParse(new DatasonnetExpression(), (def, key, val) -> {
@@ -3150,7 +3202,6 @@ public class ModelParser extends BaseParser {
             case "doTry": return doParseTryDefinition();
             case "unmarshal": return doParseUnmarshalDefinition();
             case "validate": return doParseValidateDefinition();
-            case "whenSkipSendToEndpoint": return doParseWhenSkipSendToEndpointDefinition();
             case "wireTap": return doParseWireTapDefinition();
             case "serviceCall": return doParseServiceCallDefinition();
             default: return null;

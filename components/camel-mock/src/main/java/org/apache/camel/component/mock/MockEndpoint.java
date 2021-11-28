@@ -124,13 +124,13 @@ public class MockEndpoint extends DefaultEndpoint implements BrowsableEndpoint, 
     private String name;
     @UriParam(label = "producer", defaultValue = "-1")
     private int expectedCount;
-    @UriParam(label = "producer", defaultValue = "0", javaType = "java.time.Duration")
+    @UriParam(label = "producer", javaType = "java.time.Duration")
     private long sleepForEmptyTest;
-    @UriParam(label = "producer", defaultValue = "0", javaType = "java.time.Duration")
+    @UriParam(label = "producer", javaType = "java.time.Duration")
     private long resultWaitTime;
-    @UriParam(label = "producer", defaultValue = "0", javaType = "java.time.Duration")
+    @UriParam(label = "producer", javaType = "java.time.Duration")
     private long resultMinimumWaitTime;
-    @UriParam(label = "producer", defaultValue = "0", javaType = "java.time.Duration")
+    @UriParam(label = "producer", javaType = "java.time.Duration")
     private long assertPeriod;
     @UriParam(label = "producer", defaultValue = "-1")
     private int retainFirst;
@@ -138,6 +138,8 @@ public class MockEndpoint extends DefaultEndpoint implements BrowsableEndpoint, 
     private int retainLast;
     @UriParam(label = "producer")
     private int reportGroup;
+    @UriParam(label = "producer")
+    private boolean log;
     @UriParam(label = "producer")
     private boolean failFast = true;
     @UriParam(label = "producer,advanced", defaultValue = "true")
@@ -280,7 +282,7 @@ public class MockEndpoint extends DefaultEndpoint implements BrowsableEndpoint, 
         }
     }
 
-    public static void expectsMessageCount(int count, MockEndpoint... endpoints) throws InterruptedException {
+    public static void expectsMessageCount(int count, MockEndpoint... endpoints) {
         for (MockEndpoint endpoint : endpoints) {
             endpoint.setExpectedMessageCount(count);
         }
@@ -800,15 +802,7 @@ public class MockEndpoint extends DefaultEndpoint implements BrowsableEndpoint, 
             return null;
         }
 
-        if (actualValue instanceof Expression) {
-            Class<?> clazz = Object.class;
-            if (expectedValue != null) {
-                clazz = expectedValue.getClass();
-            }
-            actualValue = ((Expression) actualValue).evaluate(exchange, clazz);
-        } else if (actualValue instanceof Predicate) {
-            actualValue = ((Predicate) actualValue).matches(exchange);
-        } else if (expectedValue != null) {
+        if (expectedValue != null) {
             String from = actualValue.getClass().getName();
             String to = expectedValue.getClass().getName();
             actualValue = getCamelContext().getTypeConverter().convertTo(expectedValue.getClass(), exchange, actualValue);
@@ -1527,6 +1521,20 @@ public class MockEndpoint extends DefaultEndpoint implements BrowsableEndpoint, 
         this.reportGroup = reportGroup;
     }
 
+    public boolean isLog() {
+        return log;
+    }
+
+    /**
+     * To turn on logging when the mock receives an incoming message.
+     * <p/>
+     * This will log only one time at INFO level for the incoming message. For more detailed logging then set the logger
+     * to DEBUG level for the org.apache.camel.component.mock.MockEndpoint class.
+     */
+    public void setLog(boolean log) {
+        this.log = log;
+    }
+
     public boolean isCopyOnExchange() {
         return copyOnExchange;
     }
@@ -1557,8 +1565,18 @@ public class MockEndpoint extends DefaultEndpoint implements BrowsableEndpoint, 
     // Implementation methods
     // -------------------------------------------------------------------------
 
+    @Override
+    public MockComponent getComponent() {
+        return (MockComponent) super.getComponent();
+    }
+
     protected synchronized void onExchange(Exchange exchange) {
         try {
+            if (log) {
+                String line = getComponent().getExchangeFormatter().format(exchange);
+                LOG.info("mock:{} received #{} -> {}", getName(), counter + 1, line);
+            }
+
             if (reporter != null) {
                 reporter.process(exchange);
             }

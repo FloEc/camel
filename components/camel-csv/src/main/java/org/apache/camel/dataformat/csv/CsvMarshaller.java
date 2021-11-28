@@ -58,9 +58,10 @@ public abstract class CsvMarshaller {
             format = format.withHeader((String[]) null);
         }
 
-        String[] fixedColumns = dataFormat.getHeader();
-        if (fixedColumns != null && fixedColumns.length > 0) {
-            return new FixedColumnsMarshaller(format, fixedColumns);
+        String header = dataFormat.getHeader();
+        if (header != null) {
+            String[] columns = header.split(",");
+            return new FixedColumnsMarshaller(format, columns);
         }
         return new DynamicColumnsMarshaller(format);
     }
@@ -79,10 +80,15 @@ public abstract class CsvMarshaller {
             throws NoTypeConversionAvailableException, IOException {
         CSVPrinter printer = createPrinter(exchange, outputStream);
         try {
-            Iterator it = ObjectHelper.createIterator(object);
-            while (it.hasNext()) {
-                Object child = it.next();
-                printer.printRecord(getRecordValues(exchange, child));
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                printer.printRecord(getMapRecordValues(map));
+            } else {
+                Iterator it = ObjectHelper.createIterator(object);
+                while (it.hasNext()) {
+                    Object child = it.next();
+                    printer.printRecord(getRecordValues(exchange, child));
+                }
             }
         } finally {
             IOHelper.close(printer);

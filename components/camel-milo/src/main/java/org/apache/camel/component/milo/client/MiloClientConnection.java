@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.milo.client.internal.SubscriptionManager;
 import org.eclipse.milo.opcua.stack.core.Stack;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
@@ -51,7 +52,7 @@ public class MiloClientConnection implements AutoCloseable {
         return configuration;
     }
 
-    protected void init() throws Exception {
+    protected void init() {
         this.manager = new SubscriptionManager(this.configuration, Stack.sharedScheduledExecutor(), 10_000);
     }
 
@@ -71,7 +72,7 @@ public class MiloClientConnection implements AutoCloseable {
         try {
             init();
         } catch (final Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeCamelException(e);
         }
         this.initialized = true;
     }

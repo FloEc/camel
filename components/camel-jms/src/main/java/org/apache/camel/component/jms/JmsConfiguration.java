@@ -478,8 +478,10 @@ public class JmsConfiguration implements Cloneable {
     @UriParam(label = "producer",
               description = "Sets whether JMS date properties should be formatted according to the ISO 8601 standard.")
     private boolean formatDateHeadersToIso8601;
-    @UriParam(label = "advanced", defaultValue = "true", description = "Whether optimizing for Apache Artemis streaming mode.")
-    private boolean artemisStreamingEnabled = true;
+    @UriParam(label = "advanced",
+              description = "Whether optimizing for Apache Artemis streaming mode. This can reduce memory overhead when using Artemis with JMS StreamMessage types."
+                            + " This option must only be enabled if Apache Artemis is being used.")
+    private boolean artemisStreamingEnabled;
     @UriParam(label = "consumer", description = "Consumer priorities allow you to ensure that high priority consumers"
                                                 + " receive messages while they are active. Normally, active consumers connected to a queue receive messages"
                                                 + " from it in a round-robin fashion. When consumer priorities are in use, messages are delivered round-robin"
@@ -772,7 +774,7 @@ public class JmsConfiguration implements Cloneable {
         return template;
     }
 
-    public AbstractMessageListenerContainer createMessageListenerContainer(JmsEndpoint endpoint) throws Exception {
+    public AbstractMessageListenerContainer createMessageListenerContainer(JmsEndpoint endpoint) {
         AbstractMessageListenerContainer container = chooseMessageListenerContainerImplementation(endpoint);
         configureMessageListenerContainer(container, endpoint);
         return container;
@@ -1547,8 +1549,7 @@ public class JmsConfiguration implements Cloneable {
 
     protected void configureMessageListenerContainer(
             AbstractMessageListenerContainer container,
-            JmsEndpoint endpoint)
-            throws Exception {
+            JmsEndpoint endpoint) {
         container.setConnectionFactory(getOrCreateListenerConnectionFactory());
         if (endpoint instanceof DestinationEndpoint) {
             container.setDestinationResolver(createDestinationResolver((DestinationEndpoint) endpoint));
@@ -2286,7 +2287,8 @@ public class JmsConfiguration implements Cloneable {
     }
 
     /**
-     * Whether optimizing for Apache Artemis streaming mode.
+     * Whether optimizing for Apache Artemis streaming mode. This can reduce memory overhead when using Artemis with JMS
+     * StreamMessage types. This option must only be enabled if Apache Artemis is being used.
      */
     public void setArtemisStreamingEnabled(boolean artemisStreamingEnabled) {
         this.artemisStreamingEnabled = artemisStreamingEnabled;

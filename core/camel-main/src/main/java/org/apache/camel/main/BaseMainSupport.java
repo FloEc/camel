@@ -46,6 +46,7 @@ import org.apache.camel.health.HealthCheckConfiguration;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.health.HealthCheckRepository;
 import org.apache.camel.saga.CamelSagaService;
+import org.apache.camel.spi.AutowiredLifecycleStrategy;
 import org.apache.camel.spi.CamelBeanPostProcessor;
 import org.apache.camel.spi.DataFormat;
 import org.apache.camel.spi.Language;
@@ -94,6 +95,7 @@ public abstract class BaseMainSupport extends BaseService {
     protected String defaultPropertyPlaceholderLocation = DEFAULT_PROPERTY_PLACEHOLDER_LOCATION;
     protected Properties initialProperties;
     protected Properties overrideProperties;
+    protected boolean standalone = true;
     private final MainHelper helper;
 
     protected BaseMainSupport() {
@@ -114,8 +116,7 @@ public abstract class BaseMainSupport extends BaseService {
         CamelSagaService answer = camelContext.adapt(ExtendedCamelContext.class).getBootstrapFactoryFinder()
                 .newInstance("lra-saga-service", CamelSagaService.class)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Cannot find LRASagaService on classpath. "
-                                                                + "Add camel-lra to classpath."));
+                        "Cannot find LRASagaService on classpath. Add camel-lra to classpath."));
 
         // add as service so its discover by saga eip
         camelContext.addService(answer, true, false);
@@ -407,11 +408,6 @@ public abstract class BaseMainSupport extends BaseService {
             autowireWildcardProperties(camelContext);
         }
 
-        // tracing may be enabled by some other property (i.e. camel.context.tracer.exchange-formatter.show-headers)
-        if (camelContext.isTracing() && !mainConfigurationProperties.isTracing()) {
-            camelContext.setTracing(Boolean.FALSE);
-        }
-
         // log summary of configurations
         if (mainConfigurationProperties.isAutoConfigurationLogSummary() && !autoConfiguredProperties.isEmpty()) {
             LOG.info("Auto-configuration summary");
@@ -515,6 +511,10 @@ public abstract class BaseMainSupport extends BaseService {
     }
 
     protected void postProcessCamelContext(CamelContext camelContext) throws Exception {
+        // use the main autowired lifecycle strategy instead of the default
+        camelContext.getLifecycleStrategies().removeIf(s -> s instanceof AutowiredLifecycleStrategy);
+        camelContext.addLifecycleStrategy(new MainAutowiredLifecycleStrategy(camelContext));
+
         // setup properties
         configurePropertiesService(camelContext);
         // setup startup recorder before building context
@@ -527,17 +527,20 @@ public abstract class BaseMainSupport extends BaseService {
             listener.beforeInitialize(this);
         }
 
-        // allow to do configuration before its started
+        // allow doing custom configuration before camel is started
         for (MainListener listener : listeners) {
             listener.beforeConfigure(this);
         }
 
         // we want to capture startup events for import tasks during main bootstrap
         StartupStepRecorder recorder = camelContext.adapt(ExtendedCamelContext.class).getStartupStepRecorder();
+        StartupStep step;
 
-        StartupStep step = recorder.beginStep(BaseMainSupport.class, "autoconfigure", "Auto Configure");
-        autoconfigure(camelContext);
-        recorder.endStep(step);
+        if (standalone) {
+            step = recorder.beginStep(BaseMainSupport.class, "autoconfigure", "Auto Configure");
+            autoconfigure(camelContext);
+            recorder.endStep(step);
+        }
 
         if (mainConfigurationProperties.isEagerClassloading()) {
             step = recorder.beginStep(BaseMainSupport.class, "classloading", "Eager Classloading");
@@ -547,11 +550,13 @@ public abstract class BaseMainSupport extends BaseService {
 
         configureLifecycle(camelContext);
 
-        step = recorder.beginStep(BaseMainSupport.class, "configureRoutes", "Collect Routes");
-        configureRoutes(camelContext);
-        recorder.endStep(step);
+        if (standalone) {
+            step = recorder.beginStep(BaseMainSupport.class, "configureRoutes", "Collect Routes");
+            configureRoutes(camelContext);
+            recorder.endStep(step);
+        }
 
-        // allow to do configuration before its started
+        // allow doing custom configuration before camel is started
         for (MainListener listener : listeners) {
             listener.afterConfigure(this);
             listener.configure(camelContext);
@@ -716,6 +721,7 @@ public abstract class BaseMainSupport extends BaseService {
         Map<String, Object> lraProperties = new LinkedHashMap<>();
         Map<String, Object> routeTemplateProperties = new LinkedHashMap<>();
         Map<String, Object> beansProperties = new LinkedHashMap<>();
+        Map<String, String> globalOptions = new LinkedHashMap<>();
         for (String key : prop.stringPropertyNames()) {
             if (key.startsWith("camel.context.")) {
                 // grab the value
@@ -777,9 +783,19 @@ public abstract class BaseMainSupport extends BaseService {
                 String option = key.substring(12);
                 validateOptionAndValue(key, option, value);
                 beansProperties.put(optionKey(option), value);
+            } else if (key.startsWith("camel.global-options.")) {
+                // grab the value
+                String value = prop.getProperty(key);
+                String option = key.substring(12);
+                validateOptionAndValue(key, option, value);
+                globalOptions.put(optionKey(option), value);
             }
         }
 
+        // global options first
+        if (!globalOptions.isEmpty()) {
+            mainConfigurationProperties.setGlobalOptions(globalOptions);
+        }
         // create beans first as they may be used later
         if (!beansProperties.isEmpty()) {
             LOG.debug("Creating and binding beans to registry from loaded properties: {}", beansProperties.size());
@@ -953,7 +969,7 @@ public abstract class BaseMainSupport extends BaseService {
                 hcr.register(hc);
             }
         }
-        // routes is enabled by default
+        // routes are enabled by default
         if (hcr.isEnabled() && (!health.getConfig().containsKey("routes") || health.getRoutesEnabled() != null)) {
             HealthCheckRepository hc = hcr.getRepository("routes").orElse((HealthCheckRepository) hcr.resolveById("routes"));
             if (hc != null) {
@@ -963,13 +979,27 @@ public abstract class BaseMainSupport extends BaseService {
                 hcr.register(hc);
             }
         }
-        // registry is enabled by default
-        if (hcr.isEnabled() && (!health.getConfig().containsKey("registry") || health.getRegistryEnabled() != null)) {
-            hcr.getRepository("registry").ifPresent(h -> {
-                if (health.getRegistryEnabled() != null) {
-                    h.setEnabled(health.getRegistryEnabled());
+        // consumers are enabled by default
+        if (hcr.isEnabled() && (!health.getConfig().containsKey("consumers") || health.getRegistryEnabled() != null)) {
+            HealthCheckRepository hc
+                    = hcr.getRepository("consumers").orElse((HealthCheckRepository) hcr.resolveById("consumers"));
+            if (hc != null) {
+                if (health.getConsumersEnabled() != null) {
+                    hc.setEnabled(health.getConsumersEnabled());
                 }
-            });
+                hcr.register(hc);
+            }
+        }
+        // registry are enabled by default
+        if (hcr.isEnabled() && (!health.getConfig().containsKey("registry") || health.getRegistryEnabled() != null)) {
+            HealthCheckRepository hc
+                    = hcr.getRepository("registry").orElse((HealthCheckRepository) hcr.resolveById("registry"));
+            if (hc != null) {
+                if (health.getRegistryEnabled() != null) {
+                    hc.setEnabled(health.getRegistryEnabled());
+                }
+                hcr.register(hc);
+            }
         }
 
         // configure health checks configurations
@@ -981,7 +1011,7 @@ public abstract class BaseMainSupport extends BaseService {
             if (hc == null) {
                 hc = hcr.resolveById(parent);
                 if (hc == null) {
-                    LOG.warn("Cannot resolve HealthCheck with id: " + parent + " from classpath.");
+                    LOG.warn("Cannot resolve HealthCheck with id: {} from classpath.", parent);
                     continue;
                 }
                 hcr.register(hc);
@@ -989,6 +1019,7 @@ public abstract class BaseMainSupport extends BaseService {
                     ((HealthCheck) hc).getConfiguration().setParent(hcc.getParent());
                     ((HealthCheck) hc).getConfiguration().setEnabled(hcc.isEnabled());
                     ((HealthCheck) hc).getConfiguration().setFailureThreshold(hcc.getFailureThreshold());
+                    ((HealthCheck) hc).getConfiguration().setSuccessThreshold(hcc.getSuccessThreshold());
                     ((HealthCheck) hc).getConfiguration().setInterval(hcc.getInterval());
                 } else if (hc instanceof HealthCheckRepository) {
                     ((HealthCheckRepository) hc).addConfiguration(id, hcc);

@@ -4,12 +4,12 @@
     "name": "test",
     "title": "Test",
     "description": "Camel unit testing",
-    "deprecated": false,
+    "deprecated": true,
     "firstVersion": "2.9.0",
     "label": "testing,java",
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-test",
-    "version": "3.11.0-SNAPSHOT"
+    "version": "3.14.0-SNAPSHOT"
   }
 }

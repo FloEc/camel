@@ -4,12 +4,12 @@
     "name": "testcontainers",
     "title": "Testcontainers",
     "description": "Camel support for testcontainers",
-    "deprecated": false,
+    "deprecated": true,
     "firstVersion": "2.22.0",
     "label": "testing,java,docker",
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-testcontainers",
-    "version": "3.11.0-SNAPSHOT"
+    "version": "3.14.0-SNAPSHOT"
   }
 }

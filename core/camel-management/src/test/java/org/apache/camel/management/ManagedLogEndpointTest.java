@@ -21,6 +21,8 @@ import javax.management.ObjectName;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.apache.camel.management.DefaultManagementObjectNameStrategy.TYPE_PROCESSOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisabledOnOs(OS.AIX)
 public class ManagedLogEndpointTest extends ManagementTestSupport {
 
     @Test
@@ -49,7 +52,7 @@ public class ManagedLogEndpointTest extends ManagementTestSupport {
         Long total = (Long) mbeanServer.getAttribute(name, "ExchangesTotal");
         assertEquals(10, total.intValue());
 
-        Integer received = (Integer) mbeanServer.getAttribute(name, "ReceivedCounter");
+        Long received = (Long) mbeanServer.getAttribute(name, "ReceivedCounter");
         assertEquals(10, received.intValue());
 
         String last = (String) mbeanServer.getAttribute(name, "LastLogMessage");
@@ -75,7 +78,7 @@ public class ManagedLogEndpointTest extends ManagementTestSupport {
         last = (String) mbeanServer.getAttribute(name, "LastLogMessage");
         assertNull(last);
 
-        received = (Integer) mbeanServer.getAttribute(name, "ReceivedCounter");
+        received = (Long) mbeanServer.getAttribute(name, "ReceivedCounter");
         assertEquals(0, received.intValue());
 
         rate = (Double) mbeanServer.getAttribute(name, "Rate");

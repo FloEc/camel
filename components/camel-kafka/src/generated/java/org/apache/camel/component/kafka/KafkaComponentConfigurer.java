@@ -53,6 +53,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "checkCrcs": getOrCreateConfiguration(target).setCheckCrcs(property(camelContext, java.lang.Boolean.class, value)); return true;
         case "clientid":
         case "clientId": getOrCreateConfiguration(target).setClientId(property(camelContext, java.lang.String.class, value)); return true;
+        case "committimeoutms":
+        case "commitTimeoutMs": getOrCreateConfiguration(target).setCommitTimeoutMs(property(camelContext, java.lang.Long.class, value)); return true;
         case "compressioncodec":
         case "compressionCodec": getOrCreateConfiguration(target).setCompressionCodec(property(camelContext, java.lang.String.class, value)); return true;
         case "configuration": target.setConfiguration(property(camelContext, org.apache.camel.component.kafka.KafkaConfiguration.class, value)); return true;
@@ -60,8 +62,6 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "connectionMaxIdleMs": getOrCreateConfiguration(target).setConnectionMaxIdleMs(property(camelContext, java.lang.Integer.class, value)); return true;
         case "consumerrequesttimeoutms":
         case "consumerRequestTimeoutMs": getOrCreateConfiguration(target).setConsumerRequestTimeoutMs(property(camelContext, java.lang.Integer.class, value)); return true;
-        case "consumerstreams":
-        case "consumerStreams": getOrCreateConfiguration(target).setConsumerStreams(property(camelContext, int.class, value)); return true;
         case "consumerscount":
         case "consumersCount": getOrCreateConfiguration(target).setConsumersCount(property(camelContext, int.class, value)); return true;
         case "deliverytimeoutms":
@@ -76,6 +76,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "fetchWaitMaxMs": getOrCreateConfiguration(target).setFetchWaitMaxMs(property(camelContext, java.lang.Integer.class, value)); return true;
         case "groupid":
         case "groupId": getOrCreateConfiguration(target).setGroupId(property(camelContext, java.lang.String.class, value)); return true;
+        case "groupinstanceid":
+        case "groupInstanceId": getOrCreateConfiguration(target).setGroupInstanceId(property(camelContext, java.lang.String.class, value)); return true;
         case "headerdeserializer":
         case "headerDeserializer": getOrCreateConfiguration(target).setHeaderDeserializer(property(camelContext, org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer.class, value)); return true;
         case "headerfilterstrategy":
@@ -158,6 +160,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "requestRequiredAcks": getOrCreateConfiguration(target).setRequestRequiredAcks(property(camelContext, java.lang.String.class, value)); return true;
         case "requesttimeoutms":
         case "requestTimeoutMs": getOrCreateConfiguration(target).setRequestTimeoutMs(property(camelContext, java.lang.Integer.class, value)); return true;
+        case "resumestrategy":
+        case "resumeStrategy": getOrCreateConfiguration(target).setResumeStrategy(property(camelContext, org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy.class, value)); return true;
         case "retries": getOrCreateConfiguration(target).setRetries(property(camelContext, java.lang.Integer.class, value)); return true;
         case "retrybackoffms":
         case "retryBackoffMs": getOrCreateConfiguration(target).setRetryBackoffMs(property(camelContext, java.lang.Integer.class, value)); return true;
@@ -263,6 +267,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "checkCrcs": return java.lang.Boolean.class;
         case "clientid":
         case "clientId": return java.lang.String.class;
+        case "committimeoutms":
+        case "commitTimeoutMs": return java.lang.Long.class;
         case "compressioncodec":
         case "compressionCodec": return java.lang.String.class;
         case "configuration": return org.apache.camel.component.kafka.KafkaConfiguration.class;
@@ -270,8 +276,6 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "connectionMaxIdleMs": return java.lang.Integer.class;
         case "consumerrequesttimeoutms":
         case "consumerRequestTimeoutMs": return java.lang.Integer.class;
-        case "consumerstreams":
-        case "consumerStreams": return int.class;
         case "consumerscount":
         case "consumersCount": return int.class;
         case "deliverytimeoutms":
@@ -286,6 +290,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "fetchWaitMaxMs": return java.lang.Integer.class;
         case "groupid":
         case "groupId": return java.lang.String.class;
+        case "groupinstanceid":
+        case "groupInstanceId": return java.lang.String.class;
         case "headerdeserializer":
         case "headerDeserializer": return org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer.class;
         case "headerfilterstrategy":
@@ -368,6 +374,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "requestRequiredAcks": return java.lang.String.class;
         case "requesttimeoutms":
         case "requestTimeoutMs": return java.lang.Integer.class;
+        case "resumestrategy":
+        case "resumeStrategy": return org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy.class;
         case "retries": return java.lang.Integer.class;
         case "retrybackoffms":
         case "retryBackoffMs": return java.lang.Integer.class;
@@ -469,6 +477,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "checkCrcs": return getOrCreateConfiguration(target).getCheckCrcs();
         case "clientid":
         case "clientId": return getOrCreateConfiguration(target).getClientId();
+        case "committimeoutms":
+        case "commitTimeoutMs": return getOrCreateConfiguration(target).getCommitTimeoutMs();
         case "compressioncodec":
         case "compressionCodec": return getOrCreateConfiguration(target).getCompressionCodec();
         case "configuration": return target.getConfiguration();
@@ -476,8 +486,6 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "connectionMaxIdleMs": return getOrCreateConfiguration(target).getConnectionMaxIdleMs();
         case "consumerrequesttimeoutms":
         case "consumerRequestTimeoutMs": return getOrCreateConfiguration(target).getConsumerRequestTimeoutMs();
-        case "consumerstreams":
-        case "consumerStreams": return getOrCreateConfiguration(target).getConsumerStreams();
         case "consumerscount":
         case "consumersCount": return getOrCreateConfiguration(target).getConsumersCount();
         case "deliverytimeoutms":
@@ -492,6 +500,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "fetchWaitMaxMs": return getOrCreateConfiguration(target).getFetchWaitMaxMs();
         case "groupid":
         case "groupId": return getOrCreateConfiguration(target).getGroupId();
+        case "groupinstanceid":
+        case "groupInstanceId": return getOrCreateConfiguration(target).getGroupInstanceId();
         case "headerdeserializer":
         case "headerDeserializer": return getOrCreateConfiguration(target).getHeaderDeserializer();
         case "headerfilterstrategy":
@@ -574,6 +584,8 @@ public class KafkaComponentConfigurer extends PropertyConfigurerSupport implemen
         case "requestRequiredAcks": return getOrCreateConfiguration(target).getRequestRequiredAcks();
         case "requesttimeoutms":
         case "requestTimeoutMs": return getOrCreateConfiguration(target).getRequestTimeoutMs();
+        case "resumestrategy":
+        case "resumeStrategy": return getOrCreateConfiguration(target).getResumeStrategy();
         case "retries": return getOrCreateConfiguration(target).getRetries();
         case "retrybackoffms":
         case "retryBackoffMs": return getOrCreateConfiguration(target).getRetryBackoffMs();

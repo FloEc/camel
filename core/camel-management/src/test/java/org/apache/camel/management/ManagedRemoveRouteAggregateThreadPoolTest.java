@@ -24,11 +24,14 @@ import javax.management.ObjectName;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.processor.aggregate.UseLatestAggregationStrategy;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.apache.camel.management.DefaultManagementObjectNameStrategy.TYPE_ROUTE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+@DisabledOnOs(OS.AIX)
 public class ManagedRemoveRouteAggregateThreadPoolTest extends ManagementTestSupport {
 
     @Test
@@ -51,11 +54,10 @@ public class ManagedRemoveRouteAggregateThreadPoolTest extends ManagementTestSup
         boolean registered = mbeanServer.isRegistered(on);
         assertFalse(registered, "Route mbean should have been unregistered");
 
-        // and no wire tap thread pool as we use an existing external pool
         Set<ObjectName> after = mbeanServer.queryNames(new ObjectName("*:type=threadpools,*"), null);
 
-        // there should be 1 less thread pool
-        assertEquals(before.size() - 1, after.size(), "There should be one less thread pool");
+        // there should be 2 less thread pools (timeout and worker)
+        assertEquals(before.size() - 2, after.size(), "There should be two less thread pool");
     }
 
     @Override

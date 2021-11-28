@@ -42,6 +42,7 @@ public final class Kamelet {
     public static final String SINK_ID = "sink";
     public static final String PARAM_ROUTE_ID = "routeId";
     public static final String PARAM_TEMPLATE_ID = "templateId";
+    public static final String PARAM_LOCATION = "location";
     public static final String DEFAULT_LOCATION = "classpath:/kamelets";
 
     // use a running counter as uuid
@@ -96,20 +97,27 @@ public final class Kamelet {
         return answer;
     }
 
+    public static String extractLocation(CamelContext context, Map<String, Object> parameters) {
+        Object param = parameters.get(PARAM_LOCATION);
+        if (param != null) {
+            return CamelContextHelper.mandatoryConvertTo(context, String.class, param);
+        }
+        return null;
+    }
+
     public static void extractKameletProperties(CamelContext context, Map<String, Object> properties, String... elements) {
         PropertiesComponent pc = context.getPropertiesComponent();
-        String prefix = Kamelet.PROPERTIES_PREFIX;
+        StringBuffer prefixBuffer = new StringBuffer(Kamelet.PROPERTIES_PREFIX);
 
         for (String element : elements) {
             if (element == null) {
                 continue;
             }
+            prefixBuffer.append(element + ".");
 
-            prefix = prefix + element + ".";
-
-            Properties prefixed = pc.loadProperties(Kamelet.startsWith(prefix));
+            Properties prefixed = pc.loadProperties(Kamelet.startsWith(prefixBuffer.toString()));
             for (String name : prefixed.stringPropertyNames()) {
-                properties.put(name.substring(prefix.length()), prefixed.getProperty(name));
+                properties.put(name.substring(prefixBuffer.toString().length()), prefixed.getProperty(name));
             }
         }
     }

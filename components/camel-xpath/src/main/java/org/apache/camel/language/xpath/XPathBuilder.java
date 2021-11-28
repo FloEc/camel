@@ -163,7 +163,7 @@ public class XPathBuilder extends ServiceSupport
 
     @Override
     public void init(CamelContext context) {
-        if (preCompile) {
+        if (preCompile && pool.isEmpty()) {
             LOG.trace("PreCompiling new XPathExpression and adding to pool during initialization");
             try {
                 XPathExpression xpathExpression = createXPathExpression();
@@ -989,10 +989,8 @@ public class XPathBuilder extends ServiceSupport
             }
 
             // add to map
-            if (!map.containsKey(prefix)) {
-                map.put(prefix, new HashSet<String>());
-            }
-            map.get(prefix).add(namespaces.item(i).getNodeValue());
+            map.computeIfAbsent(prefix, k -> new HashSet<>())
+                    .add(namespaces.item(i).getNodeValue());
         }
 
         LOG.info("Namespaces discovered in message: {}.", map);

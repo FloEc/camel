@@ -17,7 +17,6 @@
 package org.apache.camel.oaipmh.component;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.camel.Category;
@@ -118,7 +117,7 @@ public class OAIPMHEndpoint extends ScheduledPollEndpoint {
         return consumer;
     }
 
-    private void validateParameters() throws URISyntaxException {
+    private void validateParameters() {
         // From parameter in ISO 8601 format
         if (from != null) {
             ISODateTimeFormat.dateTimeNoMillis().parseDateTime(from);
@@ -150,10 +149,6 @@ public class OAIPMHEndpoint extends ScheduledPollEndpoint {
 
     public void setSsl(boolean ssl) {
         this.ssl = ssl;
-    }
-
-    public boolean isSingleton() {
-        return true;
     }
 
     public String getFrom() {

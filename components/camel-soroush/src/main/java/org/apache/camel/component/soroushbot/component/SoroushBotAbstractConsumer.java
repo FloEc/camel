@@ -34,8 +34,6 @@ import org.apache.camel.support.DefaultConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.camel.component.soroushbot.utils.StringUtils.ordinal;
-
 /**
  * this component handle logic for getting message from Soroush server and for each message it calls abstract function
  * {@link SoroushBotAbstractConsumer#sendExchange(Exchange)} each subclass should handle how it will start the
@@ -84,23 +82,14 @@ public abstract class SoroushBotAbstractConsumer extends DefaultConsumer impleme
         connection = new ReconnectableEventSourceListener(client, request, endpoint.getMaxConnectionRetry()) {
             @Override
             protected boolean onBeforeConnect() {
-                int connectionRetry = getConnectionRetry();
+                long interval = endpoint.getBackOffStrategyHelper().calculateInterval(getConnectionRetry());
+
                 try {
-                    endpoint.waitBeforeRetry(connectionRetry);
+                    Thread.sleep(interval);
                 } catch (InterruptedException e) {
-                    return false;
+                    Thread.currentThread().interrupt();
                 }
-                if (!shutdown) {
-                    if (connectionRetry == 0) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("connecting to getMessage from soroush");
-                        }
-                    } else {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("connection is closed. retrying for the " + ordinal(connectionRetry) + " time(s)... ");
-                        }
-                    }
-                }
+
                 return !shutdown;
             }
 
@@ -136,9 +125,7 @@ public abstract class SoroushBotAbstractConsumer extends DefaultConsumer impleme
                 try {
                     SoroushMessage soroushMessage = objectMapper.readValue(data, SoroushMessage.class);
                     exchange.getIn().setBody(soroushMessage);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("event data is: " + data);
-                    }
+                    LOG.debug("event data is: {}", data);
                     // if autoDownload is true, download the resource if provided in the message
                     if (endpoint.isAutoDownload()) {
                         endpoint.handleDownloadFiles(soroushMessage);
@@ -175,7 +162,7 @@ public abstract class SoroushBotAbstractConsumer extends DefaultConsumer impleme
 
 class ReconnectableEventSourceListener extends EventSourceListener {
     private boolean manuallyClosed;
-    private OkHttpClient client;
+    //private OkHttpClient client;
     private final int maxConnectionRetry;
     private int connectionRetry;
     private Request request;
@@ -183,7 +170,7 @@ class ReconnectableEventSourceListener extends EventSourceListener {
     private EventSource eventSource;
 
     public ReconnectableEventSourceListener(OkHttpClient client, Request request, int maxConnectionRetry) {
-        this.client = client;
+        //this.client = client;
         this.maxConnectionRetry = maxConnectionRetry;
         this.request = request;
         factory = EventSources.createFactory(client);

@@ -25,6 +25,7 @@ import java.util.Properties;
 import com.google.api.services.calendar.model.Calendar;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelExecutionException;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.support.PropertyBindingSupport;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.AfterEach;
@@ -52,7 +53,8 @@ public class AbstractGoogleCalendarTestSupport extends CamelTestSupport {
         try {
             properties.load(AbstractGoogleCalendarTestSupport.class.getResourceAsStream(TEST_OPTIONS_PROPERTIES));
         } catch (Exception e) {
-            throw new RuntimeException(String.format("%s could not be loaded: %s", TEST_OPTIONS_PROPERTIES, e.getMessage()), e);
+            throw new RuntimeCamelException(
+                    String.format("%s could not be loaded: %s", TEST_OPTIONS_PROPERTIES, e.getMessage()), e);
         }
 
         return properties;
@@ -63,9 +65,9 @@ public class AbstractGoogleCalendarTestSupport extends CamelTestSupport {
     private static boolean hasCredentials() {
         loadProperties();
 
-        return (!properties.getProperty("clientId", "").isEmpty())
-                && (!properties.getProperty("clientSecret", "").isEmpty())
-                && (!properties.getProperty("accessToken", "").isEmpty());
+        return !properties.getProperty("clientId", "").isEmpty()
+                && !properties.getProperty("clientSecret", "").isEmpty()
+                && !properties.getProperty("accessToken", "").isEmpty();
     }
 
     @BeforeEach

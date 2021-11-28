@@ -36,7 +36,7 @@ import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.TimeUtils;
 
 /**
- * Enables sagas on the route
+ * Enables Sagas on the route
  */
 @Metadata(label = "eip,routing")
 @XmlRootElement(name = "saga")
@@ -251,10 +251,6 @@ public class SagaDefinition extends OutputDefinition<SagaDefinition> {
         }
         this.completion = new SagaActionUriDefinition(completion);
         return this;
-    }
-
-    public SagaDefinition propagation(String propagation) {
-        return propagation(propagation);
     }
 
     public SagaDefinition propagation(SagaPropagation propagation) {

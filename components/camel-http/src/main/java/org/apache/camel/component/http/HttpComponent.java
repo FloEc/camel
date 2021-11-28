@@ -42,6 +42,7 @@ import org.apache.camel.spi.HeaderFilterStrategy;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.RestConfiguration;
 import org.apache.camel.spi.RestProducerFactory;
+import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.CamelContextHelper;
 import org.apache.camel.support.PropertyBindingSupport;
@@ -182,6 +183,8 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
                             + " If there are no data needed from HTTP headers then this can avoid parsing overhead"
                             + " with many object allocations for the JVM garbage collector.")
     protected boolean skipResponseHeaders;
+    @UriParam(label = "producer,advanced", description = "To set a custom HTTP User-Agent request header")
+    protected String userAgent;
 
     public HttpComponent() {
         this(HttpEndpoint.class);
@@ -238,8 +241,7 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
     }
 
     private HttpClientConfigurer configureHttpProxy(
-            Map<String, Object> parameters, HttpClientConfigurer configurer, boolean secure)
-            throws Exception {
+            Map<String, Object> parameters, HttpClientConfigurer configurer, boolean secure) {
         String proxyAuthScheme = getParameter(parameters, "proxyAuthScheme", String.class, getProxyAuthScheme());
         if (proxyAuthScheme == null) {
             // fallback and use either http or https depending on secure
@@ -312,6 +314,7 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
         }
 
         String httpMethodRestrict = getAndRemoveParameter(parameters, "httpMethodRestrict", String.class);
+        boolean muteException = getAndRemoveParameter(parameters, "muteException", boolean.class, isMuteException());
 
         HeaderFilterStrategy headerFilterStrategy
                 = resolveAndRemoveReferenceParameter(parameters, "headerFilterStrategy", HeaderFilterStrategy.class);
@@ -361,6 +364,8 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
         endpoint.setCopyHeaders(copyHeaders);
         endpoint.setSkipRequestHeaders(skipRequestHeaders);
         endpoint.setSkipResponseHeaders(skipResponseHeaders);
+        endpoint.setUserAgent(userAgent);
+        endpoint.setMuteException(muteException);
 
         // configure the endpoint with the common configuration from the component
         if (getHttpConfiguration() != null) {
@@ -437,8 +442,7 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
 
     protected HttpClientBuilder createHttpClientBuilder(
             final String uri, final Map<String, Object> parameters,
-            final Map<String, Object> httpClientOptions)
-            throws Exception {
+            final Map<String, Object> httpClientOptions) {
         // http client can be configured from URI options
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         // allow the builder pattern
@@ -575,8 +579,8 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
         // the component, one such case is when we switch from "http" to "https" component name
         RestProducerFactoryHelper.setupComponentFor(url, camelContext, (Map<String, Object>) parameters.remove("component"));
 
-        HttpEndpoint endpoint = camelContext.getEndpoint(url, HttpEndpoint.class);
-        setProperties(endpoint, parameters);
+        HttpEndpoint endpoint = (HttpEndpoint) camelContext.getEndpoint(url, parameters);
+
         String path = uriTemplate != null ? uriTemplate : basePath;
         endpoint.setHeaderFilterStrategy(new HttpRestHeaderFilterStrategy(path, queryParameters));
 
@@ -910,6 +914,14 @@ public class HttpComponent extends HttpCommonComponent implements RestProducerFa
 
     public void setSkipResponseHeaders(boolean skipResponseHeaders) {
         this.skipResponseHeaders = skipResponseHeaders;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
     @Override

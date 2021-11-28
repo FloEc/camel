@@ -3,7 +3,7 @@
     "kind": "language",
     "name": "simple",
     "title": "Simple",
-    "description": "Evaluate Camel's built-in Simple language expression against the Camel Exchange.",
+    "description": "Evaluates a Camel simple expression.",
     "deprecated": false,
     "firstVersion": "1.1.0",
     "label": "language,core,java",
@@ -11,7 +11,7 @@
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-core-languages",
-    "version": "3.11.0-SNAPSHOT",
+    "version": "3.14.0-SNAPSHOT",
     "modelName": "simple",
     "modelJavaType": "org.apache.camel.model.language.SimpleExpression"
   },

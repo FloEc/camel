@@ -205,7 +205,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -221,7 +221,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
@@ -520,6 +520,41 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
+         * The maximum time, in milliseconds, that the code will wait for a
+         * synchronous commit to complete.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Long&lt;/code&gt; type.
+         * 
+         * Default: 5000
+         * Group: consumer
+         * 
+         * @param commitTimeoutMs the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder commitTimeoutMs(
+                Long commitTimeoutMs) {
+            doSetProperty("commitTimeoutMs", commitTimeoutMs);
+            return this;
+        }
+        /**
+         * The maximum time, in milliseconds, that the code will wait for a
+         * synchronous commit to complete.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Long&lt;/code&gt; type.
+         * 
+         * Default: 5000
+         * Group: consumer
+         * 
+         * @param commitTimeoutMs the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder commitTimeoutMs(
+                String commitTimeoutMs) {
+            doSetProperty("commitTimeoutMs", commitTimeoutMs);
+            return this;
+        }
+        /**
          * The configuration controls the maximum amount of time the client will
          * wait for the response of a request. If the response is not received
          * before the timeout elapses the client will resend the request if
@@ -559,7 +594,9 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The number of consumers that connect to kafka server.
+         * The number of consumers that connect to kafka server. Each consumer
+         * is run on a separate thread, that retrieves and process the incoming
+         * data.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -574,7 +611,9 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The number of consumers that connect to kafka server.
+         * The number of consumers that connect to kafka server. Each consumer
+         * is run on a separate thread, that retrieves and process the incoming
+         * data.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -587,37 +626,6 @@ public interface KafkaEndpointBuilderFactory {
         default KafkaEndpointConsumerBuilder consumersCount(
                 String consumersCount) {
             doSetProperty("consumersCount", consumersCount);
-            return this;
-        }
-        /**
-         * Number of concurrent consumers on the consumer.
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: 10
-         * Group: consumer
-         * 
-         * @param consumerStreams the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointConsumerBuilder consumerStreams(int consumerStreams) {
-            doSetProperty("consumerStreams", consumerStreams);
-            return this;
-        }
-        /**
-         * Number of concurrent consumers on the consumer.
-         * 
-         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: 10
-         * Group: consumer
-         * 
-         * @param consumerStreams the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointConsumerBuilder consumerStreams(
-                String consumerStreams) {
-            doSetProperty("consumerStreams", consumerStreams);
             return this;
         }
         /**
@@ -752,6 +760,28 @@ public interface KafkaEndpointBuilderFactory {
          */
         default KafkaEndpointConsumerBuilder groupId(String groupId) {
             doSetProperty("groupId", groupId);
+            return this;
+        }
+        /**
+         * A unique identifier of the consumer instance provided by the end
+         * user. Only non-empty strings are permitted. If set, the consumer is
+         * treated as a static member, which means that only one instance with
+         * this ID is allowed in the consumer group at any time. This can be
+         * used in combination with a larger session timeout to avoid group
+         * rebalances caused by transient unavailability (e.g. process
+         * restarts). If not set, the consumer will join the group as a dynamic
+         * member, which is the traditional behavior.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param groupInstanceId the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder groupInstanceId(
+                String groupInstanceId) {
+            doSetProperty("groupInstanceId", groupInstanceId);
             return this;
         }
         /**
@@ -1104,6 +1134,54 @@ public interface KafkaEndpointBuilderFactory {
          */
         default KafkaEndpointConsumerBuilder pollTimeoutMs(String pollTimeoutMs) {
             doSetProperty("pollTimeoutMs", pollTimeoutMs);
+            return this;
+        }
+        /**
+         * This option allows the user to set a custom resume strategy. The
+         * resume strategy is executed when partitions are assigned (i.e.: when
+         * connecting or reconnecting). It allows implementations to customize
+         * how to resume operations and serve as more flexible alternative to
+         * the seekTo and the offsetRepository mechanisms. See the
+         * KafkaConsumerResumeStrategy for implementation details. This option
+         * does not affect the auto commit setting. It is likely that
+         * implementations using this setting will also want to evaluate using
+         * the manual commit option along with this.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder resumeStrategy(
+                Object resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
+            return this;
+        }
+        /**
+         * This option allows the user to set a custom resume strategy. The
+         * resume strategy is executed when partitions are assigned (i.e.: when
+         * connecting or reconnecting). It allows implementations to customize
+         * how to resume operations and serve as more flexible alternative to
+         * the seekTo and the offsetRepository mechanisms. See the
+         * KafkaConsumerResumeStrategy for implementation details. This option
+         * does not affect the auto commit setting. It is likely that
+         * implementations using this setting will also want to evaluate using
+         * the manual commit option along with this.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder resumeStrategy(
+                String resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
             return this;
         }
         /**
@@ -1976,7 +2054,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -1992,7 +2070,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
@@ -3922,7 +4000,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -3938,7 +4016,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Timeout in milli seconds to wait gracefully for the consumer or
+         * Timeout in milliseconds to wait gracefully for the consumer or
          * producer to shutdown and terminate its worker threads.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.

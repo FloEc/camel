@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>components</artifactId>
-        <version>3.11.0-SNAPSHOT</version>
+        <version>3.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-openapi-java</artifactId>
@@ -41,6 +41,8 @@
             com.fasterxml.jackson.*;version="[2.11,3)",
             io.apicurio.datamodels*
         </camel.osgi.import.before.defaults>
+
+        <camel.surefire.parallel>true</camel.surefire.parallel>
     </properties>
 
     <dependencies>
@@ -67,10 +69,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>

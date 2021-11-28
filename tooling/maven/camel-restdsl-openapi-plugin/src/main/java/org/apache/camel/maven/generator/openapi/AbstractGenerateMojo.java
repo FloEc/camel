@@ -82,6 +82,9 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
     String destinationGenerator;
 
     @Parameter
+    String destinationToSyntax;
+
+    @Parameter
     String filterOperation;
 
     @Parameter
@@ -104,6 +107,9 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "true")
     boolean restConfiguration;
+
+    @Parameter(defaultValue = "false")
+    boolean clientRequestValidation;
 
     @Parameter(defaultValue = "false")
     boolean skip;

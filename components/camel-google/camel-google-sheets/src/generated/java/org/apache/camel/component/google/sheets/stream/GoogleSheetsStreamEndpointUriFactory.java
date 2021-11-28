@@ -15,21 +15,16 @@ import org.apache.camel.spi.EndpointUriFactory;
  */
 public class GoogleSheetsStreamEndpointUriFactory extends org.apache.camel.support.component.EndpointUriFactorySupport implements EndpointUriFactory {
 
-    private static final String BASE = ":apiName";
+    private static final String BASE = ":spreadsheetId";
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
     static {
-        Set<String> props = new HashSet<>(42);
+        Set<String> props = new HashSet<>(32);
         props.add("backoffMultiplier");
-        props.add("apiName");
         props.add("majorDimension");
-        props.add("batchClearValuesRequest");
-        props.add("values");
-        props.add("batchUpdateValuesRequest");
         props.add("range");
         props.add("initialDelay");
-        props.add("content");
         props.add("scheduler");
         props.add("bridgeErrorHandler");
         props.add("useFixedDelay");
@@ -37,24 +32,19 @@ public class GoogleSheetsStreamEndpointUriFactory extends org.apache.camel.suppo
         props.add("runLoggingLevel");
         props.add("maxResults");
         props.add("backoffErrorThreshold");
-        props.add("clearValuesRequest");
         props.add("greedy");
         props.add("clientSecret");
         props.add("scheduledExecutorService");
-        props.add("batchGetValuesByDataFilterRequest");
         props.add("applicationName");
         props.add("repeatCount");
         props.add("timeUnit");
         props.add("clientId");
-        props.add("batchUpdateSpreadsheetRequest");
         props.add("sendEmptyMessageWhenIdle");
         props.add("schedulerProperties");
         props.add("splitResults");
         props.add("exchangePattern");
         props.add("spreadsheetId");
         props.add("accessToken");
-        props.add("getSpreadsheetByDataFilterRequest");
-        props.add("batchUpdateValuesByDataFilterRequest");
         props.add("backoffIdleThreshold");
         props.add("delay");
         props.add("pollStrategy");
@@ -83,7 +73,7 @@ public class GoogleSheetsStreamEndpointUriFactory extends org.apache.camel.suppo
 
         Map<String, Object> copy = new HashMap<>(properties);
 
-        uri = buildPathParameter(syntax, uri, "apiName", null, true, copy);
+        uri = buildPathParameter(syntax, uri, "spreadsheetId", null, true, copy);
         uri = buildQueryParameters(uri, copy, encode);
         return uri;
     }

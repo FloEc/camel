@@ -17,7 +17,6 @@
 package org.apache.camel.component.kafka;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,16 +28,19 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.component.kafka.producer.support.DelegatingCallback;
+import org.apache.camel.component.kafka.producer.support.KafkaProducerCallBack;
+import org.apache.camel.component.kafka.producer.support.KeyValueHolderIterator;
 import org.apache.camel.component.kafka.serde.KafkaHeaderSerializer;
 import org.apache.camel.spi.HeaderFilterStrategy;
 import org.apache.camel.support.DefaultAsyncProducer;
 import org.apache.camel.util.KeyValueHolder;
+import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.URISupport;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -46,9 +48,10 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.apache.kafka.common.utils.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.camel.component.kafka.producer.support.ProducerUtil.tryConvertToSerializedType;
 
 public class KafkaProducer extends DefaultAsyncProducer {
 
@@ -104,19 +107,7 @@ public class KafkaProducer extends DefaultAsyncProducer {
     protected void doStart() throws Exception {
         Properties props = getProps();
         if (kafkaProducer == null) {
-            ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                // Kafka uses reflection for loading authentication settings,
-                // use its classloader
-                Thread.currentThread()
-                        .setContextClassLoader(org.apache.kafka.clients.producer.KafkaProducer.class.getClassLoader());
-                LOG.trace("Creating KafkaProducer");
-                kafkaProducer = endpoint.getKafkaClientFactory().getProducer(props);
-                closeKafkaProducer = true;
-            } finally {
-                Thread.currentThread().setContextClassLoader(threadClassLoader);
-            }
-            LOG.debug("Created KafkaProducer: {}", kafkaProducer);
+            createProducer(props);
         }
 
         // if we are in asynchronous mode we need a worker pool
@@ -125,6 +116,22 @@ public class KafkaProducer extends DefaultAsyncProducer {
             // we create a thread pool so we should also shut it down
             shutdownWorkerPool = true;
         }
+    }
+
+    private void createProducer(Properties props) {
+        ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            // Kafka uses reflection for loading authentication settings,
+            // use its classloader
+            Thread.currentThread()
+                    .setContextClassLoader(org.apache.kafka.clients.producer.KafkaProducer.class.getClassLoader());
+            LOG.trace("Creating KafkaProducer");
+            kafkaProducer = endpoint.getKafkaClientFactory().getProducer(props);
+            closeKafkaProducer = true;
+        } finally {
+            Thread.currentThread().setContextClassLoader(threadClassLoader);
+        }
+        LOG.debug("Created KafkaProducer: {}", kafkaProducer);
     }
 
     @Override
@@ -162,9 +169,9 @@ public class KafkaProducer extends DefaultAsyncProducer {
         }
 
         Object overrideTimeStamp = exchange.getIn().removeHeader(KafkaConstants.OVERRIDE_TIMESTAMP);
-        if ((overrideTimeStamp != null) && (overrideTimeStamp instanceof Long)) {
+        if (overrideTimeStamp instanceof Long) {
             LOG.debug("Using override TimeStamp: {}", overrideTimeStamp);
-            timeStamp = ((Long) overrideTimeStamp).longValue();
+            timeStamp = (Long) overrideTimeStamp;
         }
 
         // extracting headers which need to be propagated
@@ -182,88 +189,18 @@ public class KafkaProducer extends DefaultAsyncProducer {
         if (iterator != null) {
             final Iterator<Object> msgList = iterator;
             final String msgTopic = topic;
-            return new Iterator<KeyValueHolder<Object, ProducerRecord>>() {
-                @Override
-                public boolean hasNext() {
-                    return msgList.hasNext();
-                }
 
-                @Override
-                public KeyValueHolder<Object, ProducerRecord> next() {
-                    // must convert each entry of the iterator into the value
-                    // according to the serializer
-                    Object next = msgList.next();
-                    String innerTopic = msgTopic;
-                    Object innerKey = null;
-                    Integer innerPartitionKey = null;
-                    Long innerTimestamp = null;
-
-                    Object value = next;
-                    Exchange ex = null;
-                    Object body = next;
-
-                    if (next instanceof Exchange || next instanceof Message) {
-                        Exchange innerExchange = null;
-                        Message innerMmessage = null;
-                        if (next instanceof Exchange) {
-                            innerExchange = (Exchange) next;
-                            innerMmessage = innerExchange.getIn();
-                        } else {
-                            innerMmessage = (Message) next;
-                        }
-
-                        if (innerMmessage.getHeader(KafkaConstants.OVERRIDE_TOPIC) != null) {
-                            innerTopic = (String) innerMmessage.removeHeader(KafkaConstants.OVERRIDE_TOPIC);
-                        }
-
-                        if (innerMmessage.getHeader(KafkaConstants.PARTITION_KEY) != null) {
-                            innerPartitionKey = endpoint.getConfiguration().getPartitionKey() != null
-                                    ? endpoint.getConfiguration().getPartitionKey()
-                                    : innerMmessage.getHeader(KafkaConstants.PARTITION_KEY, Integer.class);
-                        }
-
-                        if (innerMmessage.getHeader(KafkaConstants.KEY) != null) {
-                            innerKey = endpoint.getConfiguration().getKey() != null
-                                    ? endpoint.getConfiguration().getKey() : innerMmessage.getHeader(KafkaConstants.KEY);
-                            if (innerKey != null) {
-                                innerKey = tryConvertToSerializedType(innerExchange, innerKey,
-                                        endpoint.getConfiguration().getKeySerializer());
-                            }
-                        }
-
-                        if (innerMmessage.getHeader(KafkaConstants.OVERRIDE_TIMESTAMP) != null) {
-                            if (innerMmessage.getHeader(KafkaConstants.OVERRIDE_TIMESTAMP) instanceof Long) {
-                                innerTimestamp
-                                        = ((Long) innerMmessage.removeHeader(KafkaConstants.OVERRIDE_TIMESTAMP)).longValue();
-                            }
-                        }
-                        ex = innerExchange == null ? exchange : innerExchange;
-                        value = tryConvertToSerializedType(ex, innerMmessage.getBody(),
-                                endpoint.getConfiguration().getValueSerializer());
-
-                    }
-
-                    return new KeyValueHolder(
-                            body,
-                            new ProducerRecord(
-                                    innerTopic, innerPartitionKey, innerTimestamp, innerKey, value, propagatedHeaders));
-                }
-
-                @Override
-                public void remove() {
-                    msgList.remove();
-                }
-            };
+            return new KeyValueHolderIterator(msgList, exchange, endpoint.getConfiguration(), msgTopic, propagatedHeaders);
         }
 
         // endpoint take precedence over header configuration
-        final Integer partitionKey = endpoint.getConfiguration().getPartitionKey() != null
-                ? endpoint.getConfiguration().getPartitionKey()
-                : exchange.getIn().getHeader(KafkaConstants.PARTITION_KEY, Integer.class);
+        final Integer partitionKey = ObjectHelper.supplyIfEmpty(endpoint.getConfiguration().getPartitionKey(),
+                () -> exchange.getIn().getHeader(KafkaConstants.PARTITION_KEY, Integer.class));
 
         // endpoint take precedence over header configuration
-        Object key = endpoint.getConfiguration().getKey() != null
-                ? endpoint.getConfiguration().getKey() : exchange.getIn().getHeader(KafkaConstants.KEY);
+        Object key = ObjectHelper.supplyIfEmpty(endpoint.getConfiguration().getKey(),
+                () -> exchange.getIn().getHeader(KafkaConstants.KEY));
+
         if (key != null) {
             key = tryConvertToSerializedType(exchange, key, endpoint.getConfiguration().getKeySerializer());
         }
@@ -307,11 +244,7 @@ public class KafkaProducer extends DefaultAsyncProducer {
         List<RecordMetadata> recordMetadatas = new ArrayList<>();
 
         if (endpoint.getConfiguration().isRecordMetadata()) {
-            if (exchange.hasOut()) {
-                exchange.getOut().setHeader(KafkaConstants.KAFKA_RECORDMETA, recordMetadatas);
-            } else {
-                exchange.getIn().setHeader(KafkaConstants.KAFKA_RECORDMETA, recordMetadatas);
-            }
+            exchange.getMessage().setHeader(KafkaConstants.KAFKA_RECORDMETA, recordMetadatas);
         }
 
         while (c.hasNext()) {
@@ -331,11 +264,7 @@ public class KafkaProducer extends DefaultAsyncProducer {
                 innerExchange = (Exchange) f.getKey();
                 if (innerExchange != null) {
                     if (endpoint.getConfiguration().isRecordMetadata()) {
-                        if (innerExchange.hasOut()) {
-                            innerExchange.getOut().setHeader(KafkaConstants.KAFKA_RECORDMETA, metadata);
-                        } else {
-                            innerExchange.getIn().setHeader(KafkaConstants.KAFKA_RECORDMETA, metadata);
-                        }
+                        innerExchange.getMessage().setHeader(KafkaConstants.KAFKA_RECORDMETA, metadata);
                     }
                 }
             }
@@ -356,7 +285,7 @@ public class KafkaProducer extends DefaultAsyncProducer {
     public boolean process(Exchange exchange, AsyncCallback callback) {
         try {
             Iterator<KeyValueHolder<Object, ProducerRecord>> c = createRecorder(exchange);
-            KafkaProducerCallBack cb = new KafkaProducerCallBack(exchange, callback);
+            KafkaProducerCallBack cb = new KafkaProducerCallBack(exchange, callback, workerPool, endpoint.getConfiguration());
             while (c.hasNext()) {
                 cb.increment();
                 KeyValueHolder<Object, ProducerRecord> exrec = c.next();
@@ -366,7 +295,7 @@ public class KafkaProducer extends DefaultAsyncProducer {
                 }
                 List<Callback> delegates = new ArrayList<>(Arrays.asList(cb));
                 if (exrec.getKey() != null) {
-                    delegates.add(new KafkaProducerCallBack(exrec.getKey()));
+                    delegates.add(new KafkaProducerCallBack(exrec.getKey(), workerPool, endpoint.getConfiguration()));
                 }
                 kafkaProducer.send(rec, new DelegatingCallback(delegates.toArray(new Callback[0])));
             }
@@ -377,130 +306,4 @@ public class KafkaProducer extends DefaultAsyncProducer {
         callback.done(true);
         return true;
     }
-
-    /**
-     * Attempts to convert the object to the same type as the value serializer specified
-     */
-    protected Object tryConvertToSerializedType(Exchange exchange, Object object, String valueSerializer) {
-        Object answer = null;
-
-        if (exchange == null) {
-            return object;
-        }
-
-        if (KafkaConstants.KAFKA_DEFAULT_SERIALIZER.equals(valueSerializer)) {
-            answer = exchange.getContext().getTypeConverter().tryConvertTo(String.class, exchange, object);
-        } else if ("org.apache.kafka.common.serialization.ByteArraySerializer".equals(valueSerializer)) {
-            answer = exchange.getContext().getTypeConverter().tryConvertTo(byte[].class, exchange, object);
-        } else if ("org.apache.kafka.common.serialization.ByteBufferSerializer".equals(valueSerializer)) {
-            answer = exchange.getContext().getTypeConverter().tryConvertTo(ByteBuffer.class, exchange, object);
-        } else if ("org.apache.kafka.common.serialization.BytesSerializer".equals(valueSerializer)) {
-            // we need to convert to byte array first
-            byte[] array = exchange.getContext().getTypeConverter().tryConvertTo(byte[].class, exchange, object);
-            if (array != null) {
-                answer = new Bytes(array);
-            }
-        }
-
-        return answer != null ? answer : object;
-    }
-
-    private final class DelegatingCallback implements Callback {
-
-        private final List<Callback> callbacks;
-
-        public DelegatingCallback(Callback... callbacks) {
-            this.callbacks = Arrays.asList(callbacks);
-        }
-
-        @Override
-        public void onCompletion(RecordMetadata metadata, Exception exception) {
-            callbacks.forEach(c -> c.onCompletion(metadata, exception));
-        }
-    }
-
-    private final class KafkaProducerCallBack implements Callback {
-
-        private final Object body;
-        private final AsyncCallback callback;
-        private final AtomicInteger count = new AtomicInteger(1);
-        private final List<RecordMetadata> recordMetadatas = new ArrayList<>();
-
-        KafkaProducerCallBack(Object body, AsyncCallback callback) {
-            this.body = body;
-            this.callback = callback;
-            if (endpoint.getConfiguration().isRecordMetadata()) {
-                if (body instanceof Exchange) {
-                    Exchange ex = (Exchange) body;
-                    if (ex.hasOut()) {
-                        ex.getOut().setHeader(KafkaConstants.KAFKA_RECORDMETA, recordMetadatas);
-                    } else {
-                        ex.getIn().setHeader(KafkaConstants.KAFKA_RECORDMETA, recordMetadatas);
-                    }
-                }
-                if (body instanceof Message) {
-                    Message msg = (Message) body;
-                    msg.setHeader(KafkaConstants.KAFKA_RECORDMETA, recordMetadatas);
-                }
-            }
-        }
-
-        public KafkaProducerCallBack(Exchange exchange) {
-            this(exchange, null);
-        }
-
-        public KafkaProducerCallBack(Message message) {
-            this(message, null);
-        }
-
-        public KafkaProducerCallBack(Object body) {
-            this(body, null);
-        }
-
-        void increment() {
-            count.incrementAndGet();
-        }
-
-        boolean allSent() {
-            if (count.decrementAndGet() == 0) {
-                LOG.trace("All messages sent, continue routing.");
-                // was able to get all the work done while queuing the requests
-                if (callback != null) {
-                    callback.done(true);
-                }
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-            if (e != null) {
-                if (body instanceof Exchange) {
-                    ((Exchange) body).setException(e);
-                }
-                if (body instanceof Message && ((Message) body).getExchange() != null) {
-                    ((Message) body).getExchange().setException(e);
-                }
-            }
-
-            recordMetadatas.add(recordMetadata);
-
-            if (count.decrementAndGet() == 0) {
-                // use worker pool to continue routing the exchange
-                // as this thread is from Kafka Callback and should not be used
-                // by Camel routing
-                workerPool.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.trace("All messages sent, continue routing.");
-                        if (callback != null) {
-                            callback.done(false);
-                        }
-                    }
-                });
-            }
-        }
-    }
-
 }

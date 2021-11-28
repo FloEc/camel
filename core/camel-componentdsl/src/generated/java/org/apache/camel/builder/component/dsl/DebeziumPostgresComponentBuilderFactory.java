@@ -172,7 +172,7 @@ public interface DebeziumPostgresComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 5s
+         * Default: 5000
          * Group: consumer
          * 
          * @param offsetCommitTimeoutMs the value to set
@@ -188,7 +188,7 @@ public interface DebeziumPostgresComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 60s
+         * Default: 60000
          * Group: consumer
          * 
          * @param offsetFlushIntervalMs the value to set
@@ -418,7 +418,8 @@ public interface DebeziumPostgresComponentBuilderFactory {
             return this;
         }
         /**
-         * The name of the database the connector should be monitoring.
+         * The name of the database from which the connector should capture
+         * changes.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -816,6 +817,22 @@ public interface DebeziumPostgresComponentBuilderFactory {
         default DebeziumPostgresComponentBuilder includeUnknownDatatypes(
                 boolean includeUnknownDatatypes) {
             doSetProperty("includeUnknownDatatypes", includeUnknownDatatypes);
+            return this;
+        }
+        /**
+         * The maximum size of chunk for incremental snapshotting.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 1024
+         * Group: postgres
+         * 
+         * @param incrementalSnapshotChunkSize the value to set
+         * @return the dsl builder
+         */
+        default DebeziumPostgresComponentBuilder incrementalSnapshotChunkSize(
+                int incrementalSnapshotChunkSize) {
+            doSetProperty("incrementalSnapshotChunkSize", incrementalSnapshotChunkSize);
             return this;
         }
         /**
@@ -1380,9 +1397,8 @@ public interface DebeziumPostgresComponentBuilderFactory {
          * would normally start emitting changes;'never' to specify the
          * connector should never run a snapshot and that upon first startup the
          * connector should read from the last position (LSN) recorded by the
-         * server; and'exported' to specify the connector should run a snapshot
-         * based on the position when the replication slot was created; 'custom'
-         * to specify a custom class with 'snapshot.custom_class' which will be
+         * server; and'exported' deprecated, use 'initial' instead; 'custom' to
+         * specify a custom class with 'snapshot.custom_class' which will be
          * loaded and used to determine the snapshot, see docs for more details.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1401,7 +1417,7 @@ public interface DebeziumPostgresComponentBuilderFactory {
         /**
          * This property contains a comma-separated list of fully-qualified
          * tables (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-         * thespecific connectors . Select statements for the individual tables
+         * thespecific connectors. Select statements for the individual tables
          * are specified in further configuration properties, one for each
          * table, identified by the id
          * 'snapshot.select.statement.overrides.DB_NAME.TABLE_NAME' or
@@ -1601,6 +1617,25 @@ public interface DebeziumPostgresComponentBuilderFactory {
             return this;
         }
         /**
+         * Specify how TRUNCATE operations are handled for change events
+         * (supported only on pg11 pgoutput plugin), including: 'skip' to skip /
+         * ignore TRUNCATE events (default), 'include' to handle and include
+         * TRUNCATE events.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: skip
+         * Group: postgres
+         * 
+         * @param truncateHandlingMode the value to set
+         * @return the dsl builder
+         */
+        default DebeziumPostgresComponentBuilder truncateHandlingMode(
+                java.lang.String truncateHandlingMode) {
+            doSetProperty("truncateHandlingMode", truncateHandlingMode);
+            return this;
+        }
+        /**
          * Specify how often (in ms) the xmin will be fetched from the
          * replication slot. This xmin value is exposed by the slot which gives
          * a lower bound of where a new replication slot could start from. The
@@ -1691,6 +1726,7 @@ public interface DebeziumPostgresComponentBuilderFactory {
             case "heartbeatTopicsPrefix": getOrCreateConfiguration((DebeziumPostgresComponent) component).setHeartbeatTopicsPrefix((java.lang.String) value); return true;
             case "hstoreHandlingMode": getOrCreateConfiguration((DebeziumPostgresComponent) component).setHstoreHandlingMode((java.lang.String) value); return true;
             case "includeUnknownDatatypes": getOrCreateConfiguration((DebeziumPostgresComponent) component).setIncludeUnknownDatatypes((boolean) value); return true;
+            case "incrementalSnapshotChunkSize": getOrCreateConfiguration((DebeziumPostgresComponent) component).setIncrementalSnapshotChunkSize((int) value); return true;
             case "intervalHandlingMode": getOrCreateConfiguration((DebeziumPostgresComponent) component).setIntervalHandlingMode((java.lang.String) value); return true;
             case "maxBatchSize": getOrCreateConfiguration((DebeziumPostgresComponent) component).setMaxBatchSize((int) value); return true;
             case "maxQueueSize": getOrCreateConfiguration((DebeziumPostgresComponent) component).setMaxQueueSize((int) value); return true;
@@ -1734,6 +1770,7 @@ public interface DebeziumPostgresComponentBuilderFactory {
             case "timePrecisionMode": getOrCreateConfiguration((DebeziumPostgresComponent) component).setTimePrecisionMode((java.lang.String) value); return true;
             case "toastedValuePlaceholder": getOrCreateConfiguration((DebeziumPostgresComponent) component).setToastedValuePlaceholder((java.lang.String) value); return true;
             case "tombstonesOnDelete": getOrCreateConfiguration((DebeziumPostgresComponent) component).setTombstonesOnDelete((boolean) value); return true;
+            case "truncateHandlingMode": getOrCreateConfiguration((DebeziumPostgresComponent) component).setTruncateHandlingMode((java.lang.String) value); return true;
             case "xminFetchIntervalMs": getOrCreateConfiguration((DebeziumPostgresComponent) component).setXminFetchIntervalMs((long) value); return true;
             default: return false;
             }

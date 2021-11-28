@@ -74,6 +74,8 @@ public class NettyHttpComponent extends NettyComponent
     private NettyHttpSecurityConfiguration securityConfiguration;
     @Metadata(label = "security", defaultValue = "false")
     private boolean useGlobalSslContextParameters;
+    @Metadata(label = "consumer")
+    private boolean muteException;
 
     public NettyHttpComponent() {
         // use the http configuration and filter strategy
@@ -95,6 +97,7 @@ public class NettyHttpComponent extends NettyComponent
 
         HeaderFilterStrategy headerFilterStrategy
                 = resolveAndRemoveReferenceParameter(parameters, "headerFilterStrategy", HeaderFilterStrategy.class);
+        boolean muteException = getAndRemoveParameter(parameters, "muteException", boolean.class, isMuteException());
 
         // merge any custom bootstrap configuration on the config
         NettyServerBootstrapConfiguration bootstrapConfiguration = resolveAndRemoveReferenceParameter(parameters,
@@ -179,6 +182,7 @@ public class NettyHttpComponent extends NettyComponent
         String addressUri = URISupport.createRemainingURI(u, parameters).toString();
 
         NettyHttpEndpoint answer = new NettyHttpEndpoint(addressUri, this, config);
+        answer.getConfiguration().setMuteException(muteException);
         setProperties(answer, parameters);
 
         // must use a copy of the binding on the endpoint to avoid sharing same
@@ -313,6 +317,18 @@ public class NettyHttpComponent extends NettyComponent
         this.useGlobalSslContextParameters = useGlobalSslContextParameters;
     }
 
+    public boolean isMuteException() {
+        return muteException;
+    }
+
+    /**
+     * If enabled and an Exchange failed processing on the consumer side the response's body won't contain the
+     * exception's stack trace.
+     */
+    public void setMuteException(boolean muteException) {
+        this.muteException = muteException;
+    }
+
     public synchronized HttpServerConsumerChannelFactory getMultiplexChannelHandler(int port) {
         HttpServerConsumerChannelFactory answer = multiplexChannelHandlers.get(port);
         if (answer == null) {
@@ -417,8 +433,7 @@ public class NettyHttpComponent extends NettyComponent
 
         String url = RestComponentHelper.createRestConsumerUrl("netty-http", scheme, host, port, path, map);
 
-        NettyHttpEndpoint endpoint = camelContext.getEndpoint(url, NettyHttpEndpoint.class);
-        setProperties(endpoint, parameters);
+        NettyHttpEndpoint endpoint = (NettyHttpEndpoint) camelContext.getEndpoint(url, parameters);
 
         // configure consumer properties
         Consumer consumer = endpoint.createConsumer(processor);
@@ -478,8 +493,7 @@ public class NettyHttpComponent extends NettyComponent
         // the component
         RestProducerFactoryHelper.setupComponentFor(url, camelContext, (Map<String, Object>) parameters.remove("component"));
 
-        NettyHttpEndpoint endpoint = camelContext.getEndpoint(url, NettyHttpEndpoint.class);
-        setProperties(endpoint, parameters);
+        NettyHttpEndpoint endpoint = (NettyHttpEndpoint) camelContext.getEndpoint(url, parameters);
         String path = uriTemplate != null ? uriTemplate : basePath;
         endpoint.setHeaderFilterStrategy(new NettyHttpRestHeaderFilterStrategy(path, queryParameters));
 
@@ -503,7 +517,7 @@ public class NettyHttpComponent extends NettyComponent
         } catch (IllegalArgumentException e) {
             // if there's a mismatch between the component and the rest-configuration,
             // then getRestConfiguration throws IllegalArgumentException which can be
-            // safely ignored as it means there's no special conf for this componet.
+            // safely ignored as it means there's no special conf for this component.
         }
     }
 

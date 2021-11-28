@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-test-parent</artifactId>
-        <version>3.11.0-SNAPSHOT</version>
+        <version>3.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-testcontainers</artifactId>
     <packaging>jar</packaging>
 
-    <name>Camel :: Testcontainers</name>
+    <name>Camel :: Testcontainers (deprecated)</name>
     <description>Camel support for testcontainers</description>
 
     <properties>

@@ -1,11 +1,13 @@
-[[jfr-other]]
 = Jfr Component
-:docTitle: Jfr
-:artifactId: camel-jfr
+:doctitle: Jfr
+:shortname: jfr
+:artifactid: camel-jfr
 :description: Diagnose Camel applications with Java Flight Recorder
 :since: 3.8
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/others/jfr.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: jfr
 
 *Since Camel {since}*
 
@@ -31,4 +33,4 @@ JFR recordings can be started either at:
 
 See the `camel-example-flight-recorder` from the Camel Examples.
 
-include::{page-component-version}@camel-spring-boot::page$jfr-starter.adoc[]
+include::spring-boot:partial$starter.adoc[]

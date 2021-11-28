@@ -3,7 +3,7 @@
     "kind": "language",
     "name": "hl7terser",
     "title": "HL7 Terser",
-    "description": "Get the value of an HL7 message field specified by terse location specification syntax.",
+    "description": "Get the value of a HL7 message field specified by terse location specification syntax.",
     "deprecated": false,
     "firstVersion": "2.11.0",
     "label": "language,hl7",
@@ -11,7 +11,7 @@
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-hl7",
-    "version": "3.11.0-SNAPSHOT",
+    "version": "3.14.0-SNAPSHOT",
     "modelName": "hl7terser",
     "modelJavaType": "org.apache.camel.model.language.Hl7TerserExpression"
   },

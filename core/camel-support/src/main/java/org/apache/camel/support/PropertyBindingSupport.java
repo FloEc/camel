@@ -313,6 +313,11 @@ public final class PropertyBindingSupport {
                 newTarget = prop;
                 newClass = newTarget.getClass();
                 newName = parts[i + 1];
+
+                // if we have not yet found a configurer for the new target
+                if (configurer == null) {
+                    configurer = PropertyConfigurerHelper.resolvePropertyConfigurer(camelContext, newTarget);
+                }
             }
         }
 
@@ -1147,32 +1152,6 @@ public final class PropertyBindingSupport {
         return null;
     }
 
-    private static Class getGetterType(CamelContext context, Object target, String name, boolean ignoreCase) {
-        try {
-            if (ignoreCase) {
-                Method getter = context.adapt(ExtendedCamelContext.class).getBeanIntrospection()
-                        .getPropertyGetter(target.getClass(), name, true);
-                if (getter != null) {
-                    return getter.getReturnType();
-                }
-            } else {
-                Method getter = context.adapt(ExtendedCamelContext.class).getBeanIntrospection()
-                        .getPropertyGetter(target.getClass(), name, false);
-                if (getter != null) {
-                    return getter.getReturnType();
-                }
-            }
-        } catch (NoSuchMethodException e) {
-            // ignore
-        }
-        return null;
-    }
-
-    private static boolean isComplexUserType(Class type) {
-        // lets consider all non java, as complex types
-        return type != null && !type.isPrimitive() && !type.getName().startsWith("java.");
-    }
-
     /**
      * Is the given parameter a reference parameter (starting with a # char)
      *
@@ -1202,7 +1181,17 @@ public final class PropertyBindingSupport {
         return true;
     }
 
-    private static Object newInstanceConstructorParameters(CamelContext camelContext, Class<?> type, String parameters)
+    /**
+     * Creates a new bean instance using the constructor that takes the given set of parameters.
+     *
+     * @param  camelContext the camel context
+     * @param  type         the class type of the bean to create
+     * @param  parameters   the parameters for the constructor
+     * @return              the created bean, or null if there was no constructor that matched the given set of
+     *                      parameters
+     * @throws Exception    is thrown if error creating the bean
+     */
+    public static Object newInstanceConstructorParameters(CamelContext camelContext, Class<?> type, String parameters)
             throws Exception {
         String[] params = StringQuoteHelper.splitSafeQuote(parameters, ',');
         Constructor found = findMatchingConstructor(type.getConstructors(), params);
@@ -1211,7 +1200,20 @@ public final class PropertyBindingSupport {
             for (int i = 0; i < found.getParameterCount(); i++) {
                 Class<?> paramType = found.getParameterTypes()[i];
                 Object param = params[i];
-                Object val = camelContext.getTypeConverter().convertTo(paramType, param);
+                Object val = null;
+                // special as we may refer to other #bean or #type in the parameter
+                if (param instanceof String) {
+                    String str = param.toString();
+                    if (str.startsWith("#")) {
+                        Object bean = resolveBean(camelContext, param);
+                        if (bean != null) {
+                            val = bean;
+                        }
+                    }
+                }
+                if (val == null) {
+                    val = camelContext.getTypeConverter().convertTo(paramType, param);
+                }
                 // unquote text
                 if (val instanceof String) {
                     val = StringHelper.removeLeadingAndEndingQuotes((String) val);
@@ -1276,7 +1278,17 @@ public final class PropertyBindingSupport {
         return candidates.size() == 1 ? candidates.get(0) : fallbackCandidate;
     }
 
-    private static Object newInstanceFactoryParameters(
+    /**
+     * Creates a new bean instance using a public static factory method from the given class
+     *
+     * @param  camelContext the camel context
+     * @param  type         the class with the public static factory method
+     * @param  parameters   optional parameters for the factory method
+     * @return              the created bean, or null if there was no factory method (optionally matched the given set
+     *                      of parameters)
+     * @throws Exception    is thrown if error creating the bean
+     */
+    public static Object newInstanceFactoryParameters(
             CamelContext camelContext, Class<?> type, String factoryMethod, String parameters)
             throws Exception {
         String[] params = StringQuoteHelper.splitSafeQuote(parameters, ',');
@@ -1455,9 +1467,7 @@ public final class PropertyBindingSupport {
         Object answer = value;
 
         // resolve placeholders
-        if (strval != null) {
-            strval = camelContext.resolvePropertyPlaceholders(strval);
-        }
+        strval = camelContext.resolvePropertyPlaceholders(strval);
 
         if (strval.startsWith("#class:")) {
             // its a new class to be created

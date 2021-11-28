@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>components</artifactId>
-        <version>3.11.0-SNAPSHOT</version>
+        <version>3.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-spring-xml</artifactId>
@@ -137,41 +137,19 @@
             <artifactId>derby</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- todo: remove log4j 1.x logging if possible -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-1.2-api</artifactId>
-            <scope>test</scope>
-        </dependency>
+
+        <!-- logging for testing -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- xmlunit, assertj and woostox are used for a few tests -->
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
             <version>${xmlunit-version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- for testing Spring AOP at class level -->
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>${aspectj-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>${cglib-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -385,7 +363,7 @@
                                     <classifier>sources</classifier>
                                     <overWrite>true</overWrite>
                                     <includes>**/*</includes>
-                                    <excludes>**/*DefinitionConfigurer.java</excludes>
+                                    <excludes>**/*Configurer.java</excludes>
                                     <outputDirectory>target/sources/camel-core-model</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>

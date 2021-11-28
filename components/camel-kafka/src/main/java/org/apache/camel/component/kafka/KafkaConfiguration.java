@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy;
 import org.apache.camel.component.kafka.serde.DefaultKafkaHeaderDeserializer;
 import org.apache.camel.component.kafka.serde.DefaultKafkaHeaderSerializer;
 import org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer;
@@ -50,6 +51,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.config.internals.BrokerSecurityConfigs;
 
 @UriParams
 public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware {
@@ -70,8 +72,9 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
     private boolean topicIsPattern;
     @UriParam(label = "consumer")
     private String groupId;
-    @UriParam(label = "consumer", defaultValue = "10")
-    private int consumerStreams = 10;
+    @UriParam(label = "consumer")
+    private String groupInstanceId;
+
     @UriParam(label = "consumer", defaultValue = "1")
     private int consumersCount = 1;
     @UriParam(label = "consumer", description = "To use a custom KafkaHeaderDeserializer to deserialize kafka headers values")
@@ -142,6 +145,11 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
     private StateRepository<String, String> offsetRepository;
     @UriParam(label = "consumer", defaultValue = "ERROR_HANDLER")
     private PollOnError pollOnError = PollOnError.ERROR_HANDLER;
+    @UriParam(label = "consumer", defaultValue = "5000", javaType = "java.time.Duration")
+    private Long commitTimeoutMs = 5000L;
+
+    @UriParam(label = "consumer")
+    private KafkaConsumerResumeStrategy resumeStrategy;
 
     // Producer configuration properties
     @UriParam(label = "producer", defaultValue = KafkaConstants.KAFKA_DEFAULT_PARTITIONER)
@@ -294,7 +302,7 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
     @UriParam(label = "common,security", defaultValue = CommonClientConfigs.DEFAULT_SECURITY_PROTOCOL)
     private String securityProtocol = CommonClientConfigs.DEFAULT_SECURITY_PROTOCOL;
     // SASL
-    // sasl.kerberos.kinit.cmd
+    // sasl.mechanism
     @UriParam(label = "common,security", defaultValue = SaslConfigs.DEFAULT_SASL_MECHANISM)
     private String saslMechanism = SaslConfigs.DEFAULT_SASL_MECHANISM;
     // sasl.kerberos.kinit.cmd
@@ -341,6 +349,7 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
     public KafkaConfiguration copy() {
         try {
             KafkaConfiguration copy = (KafkaConfiguration) clone();
+            copy.additionalProperties = new HashMap<>(this.additionalProperties);
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeCamelException(e);
@@ -401,7 +410,8 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
         addPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_MIN_TIME_BEFORE_RELOGIN, getKerberosBeforeReloginMinTime());
         addPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_TICKET_RENEW_JITTER, getKerberosRenewJitter());
         addPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_TICKET_RENEW_WINDOW_FACTOR, getKerberosRenewWindowFactor());
-        addListPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_PRINCIPAL_TO_LOCAL_RULES, getKerberosPrincipalToLocalRules());
+        addListPropertyIfNotNull(props, BrokerSecurityConfigs.SASL_KERBEROS_PRINCIPAL_TO_LOCAL_RULES_CONFIG,
+                getKerberosPrincipalToLocalRules());
         addPropertyIfNotNull(props, SaslConfigs.SASL_MECHANISM, getSaslMechanism());
         addPropertyIfNotNull(props, SaslConfigs.SASL_JAAS_CONFIG, getSaslJaasConfig());
 
@@ -468,7 +478,8 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
         addPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_MIN_TIME_BEFORE_RELOGIN, getKerberosBeforeReloginMinTime());
         addPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_TICKET_RENEW_JITTER, getKerberosRenewJitter());
         addPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_TICKET_RENEW_WINDOW_FACTOR, getKerberosRenewWindowFactor());
-        addListPropertyIfNotNull(props, SaslConfigs.SASL_KERBEROS_PRINCIPAL_TO_LOCAL_RULES, getKerberosPrincipalToLocalRules());
+        addListPropertyIfNotNull(props, BrokerSecurityConfigs.SASL_KERBEROS_PRINCIPAL_TO_LOCAL_RULES_CONFIG,
+                getKerberosPrincipalToLocalRules());
         addPropertyIfNotNull(props, SaslConfigs.SASL_MECHANISM, getSaslMechanism());
         addPropertyIfNotNull(props, SaslConfigs.SASL_JAAS_CONFIG, getSaslJaasConfig());
 
@@ -581,6 +592,21 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
         this.groupId = groupId;
     }
 
+    public String getGroupInstanceId() {
+        return groupInstanceId;
+    }
+
+    /**
+     * A unique identifier of the consumer instance provided by the end user. Only non-empty strings are permitted. If
+     * set, the consumer is treated as a static member, which means that only one instance with this ID is allowed in
+     * the consumer group at any time. This can be used in combination with a larger session timeout to avoid group
+     * rebalances caused by transient unavailability (e.g. process restarts). If not set, the consumer will join the
+     * group as a dynamic member, which is the traditional behavior.
+     */
+    public void setGroupInstanceId(String groupInstanceId) {
+        this.groupInstanceId = groupInstanceId;
+    }
+
     public String getPartitioner() {
         return partitioner;
     }
@@ -605,23 +631,13 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
         this.topic = topic;
     }
 
-    public int getConsumerStreams() {
-        return consumerStreams;
-    }
-
-    /**
-     * Number of concurrent consumers on the consumer
-     */
-    public void setConsumerStreams(int consumerStreams) {
-        this.consumerStreams = consumerStreams;
-    }
-
     public int getConsumersCount() {
         return consumersCount;
     }
 
     /**
-     * The number of consumers that connect to kafka server
+     * The number of consumers that connect to kafka server. Each consumer is run on a separate thread, that retrieves
+     * and process the incoming data.
      */
     public void setConsumersCount(int consumersCount) {
         this.consumersCount = consumersCount;
@@ -674,7 +690,7 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
     }
 
     /**
-     * Timeout in milli seconds to wait gracefully for the consumer or producer to shutdown and terminate its worker
+     * Timeout in milliseconds to wait gracefully for the consumer or producer to shutdown and terminate its worker
      * threads.
      */
     public void setShutdownTimeout(int shutdownTimeout) {
@@ -783,6 +799,26 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
      */
     public void setBreakOnFirstError(boolean breakOnFirstError) {
         this.breakOnFirstError = breakOnFirstError;
+    }
+
+    public KafkaConsumerResumeStrategy getResumeStrategy() {
+        return resumeStrategy;
+    }
+
+    /**
+     * This option allows the user to set a custom resume strategy. The resume strategy is executed when partitions are
+     * assigned (i.e.: when connecting or reconnecting). It allows implementations to customize how to resume operations
+     * and serve as more flexible alternative to the seekTo and the offsetRepository mechanisms.
+     *
+     * See the {@link KafkaConsumerResumeStrategy} for implementation details.
+     *
+     * This option does not affect the auto commit setting. It is likely that implementations using this setting will
+     * also want to evaluate using the manual commit option along with this.
+     *
+     * @param resumeStrategy An instance of the resume strategy
+     */
+    public void setResumeStrategy(KafkaConsumerResumeStrategy resumeStrategy) {
+        this.resumeStrategy = resumeStrategy;
     }
 
     public String getBrokers() {
@@ -1120,8 +1156,8 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
      * Expose the kafka sasl.jaas.config parameter Example: org.apache.kafka.common.security.plain.PlainLoginModule
      * required username="USERNAME" password="PASSWORD";
      */
-    public void setSaslJaasConfig(String saslMechanism) {
-        this.saslJaasConfig = saslMechanism;
+    public void setSaslJaasConfig(String saslJaasConfig) {
+        this.saslJaasConfig = saslJaasConfig;
     }
 
     public String getSecurityProtocol() {
@@ -1762,5 +1798,18 @@ public class KafkaConfiguration implements Cloneable, HeaderFilterStrategyAware 
      */
     public void setPollOnError(PollOnError pollOnError) {
         this.pollOnError = pollOnError;
+    }
+
+    public Long getCommitTimeoutMs() {
+        return commitTimeoutMs;
+    }
+
+    /**
+     * The maximum time, in milliseconds, that the code will wait for a synchronous commit to complete
+     * 
+     * @param commitTimeoutMs
+     */
+    public void setCommitTimeoutMs(Long commitTimeoutMs) {
+        this.commitTimeoutMs = commitTimeoutMs;
     }
 }

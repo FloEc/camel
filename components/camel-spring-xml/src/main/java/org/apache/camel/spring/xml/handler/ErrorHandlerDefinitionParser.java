@@ -148,7 +148,7 @@ public class ErrorHandlerDefinitionParser extends BeanDefinitionParser {
                                                + ", in error handler with id: " + id);
         }
         String rollbackLoggingLevel = element.getAttribute("rollbackLoggingLevel");
-        if (ObjectHelper.isNotEmpty(rollbackLoggingLevel) && (!type.equals(ErrorHandlerType.TransactionErrorHandler))) {
+        if (ObjectHelper.isNotEmpty(rollbackLoggingLevel) && !type.equals(ErrorHandlerType.TransactionErrorHandler)) {
             throw new IllegalArgumentException(
                     "Attribute rollbackLoggingLevel can only be used if type is "
                                                + ErrorHandlerType.TransactionErrorHandler.name()
@@ -218,7 +218,7 @@ public class ErrorHandlerDefinitionParser extends BeanDefinitionParser {
         }
     }
 
-    protected class RedeliveryPolicyDefinitionParser extends BeanDefinitionParser {
+    protected static class RedeliveryPolicyDefinitionParser extends BeanDefinitionParser {
 
         public RedeliveryPolicyDefinitionParser(Class<?> type) {
             super(type, false);

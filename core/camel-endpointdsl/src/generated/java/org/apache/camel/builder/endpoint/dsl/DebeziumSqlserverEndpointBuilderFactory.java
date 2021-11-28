@@ -199,7 +199,7 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 5s
+         * Default: 5000
          * Group: consumer
          * 
          * @param offsetCommitTimeoutMs the value to set
@@ -218,7 +218,7 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 5s
+         * Default: 5000
          * Group: consumer
          * 
          * @param offsetCommitTimeoutMs the value to set
@@ -234,7 +234,7 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 60s
+         * Default: 60000
          * Group: consumer
          * 
          * @param offsetFlushIntervalMs the value to set
@@ -250,7 +250,7 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 60s
+         * Default: 60000
          * Group: consumer
          * 
          * @param offsetFlushIntervalMs the value to set
@@ -490,7 +490,8 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
             return this;
         }
         /**
-         * The name of the database the connector should be monitoring.
+         * The name of the database from which the connector should capture
+         * changes.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -645,6 +646,125 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
             return this;
         }
         /**
+         * Controls the action Debezium will take when it meets a DDL statement
+         * in binlog, that it cannot parse.By default the connector will stop
+         * operating but by changing the setting it can ignore the statements
+         * which it cannot parse. If skipping is enabled then Debezium can miss
+         * metadata changes.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: sqlserver
+         * 
+         * @param databaseHistorySkipUnparseableDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseHistorySkipUnparseableDdl(
+                boolean databaseHistorySkipUnparseableDdl) {
+            doSetProperty("databaseHistorySkipUnparseableDdl", databaseHistorySkipUnparseableDdl);
+            return this;
+        }
+        /**
+         * Controls the action Debezium will take when it meets a DDL statement
+         * in binlog, that it cannot parse.By default the connector will stop
+         * operating but by changing the setting it can ignore the statements
+         * which it cannot parse. If skipping is enabled then Debezium can miss
+         * metadata changes.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: sqlserver
+         * 
+         * @param databaseHistorySkipUnparseableDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseHistorySkipUnparseableDdl(
+                String databaseHistorySkipUnparseableDdl) {
+            doSetProperty("databaseHistorySkipUnparseableDdl", databaseHistorySkipUnparseableDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database history. By default
+         * (false) Debezium will store all incoming DDL statements. If set to
+         * true, then only DDL that manipulates a captured table will be stored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: sqlserver
+         * 
+         * @param databaseHistoryStoreOnlyCapturedTablesDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseHistoryStoreOnlyCapturedTablesDdl(
+                boolean databaseHistoryStoreOnlyCapturedTablesDdl) {
+            doSetProperty("databaseHistoryStoreOnlyCapturedTablesDdl", databaseHistoryStoreOnlyCapturedTablesDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database history. By default
+         * (false) Debezium will store all incoming DDL statements. If set to
+         * true, then only DDL that manipulates a captured table will be stored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: sqlserver
+         * 
+         * @param databaseHistoryStoreOnlyCapturedTablesDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseHistoryStoreOnlyCapturedTablesDdl(
+                String databaseHistoryStoreOnlyCapturedTablesDdl) {
+            doSetProperty("databaseHistoryStoreOnlyCapturedTablesDdl", databaseHistoryStoreOnlyCapturedTablesDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database history. By default
+         * (false) Debezium will store all incoming DDL statements. If set to
+         * true, then only DDL that manipulates a monitored table will be stored
+         * (deprecated, use database.history.store.only.captured.tables.ddl
+         * instead).
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: sqlserver
+         * 
+         * @param databaseHistoryStoreOnlyMonitoredTablesDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseHistoryStoreOnlyMonitoredTablesDdl(
+                boolean databaseHistoryStoreOnlyMonitoredTablesDdl) {
+            doSetProperty("databaseHistoryStoreOnlyMonitoredTablesDdl", databaseHistoryStoreOnlyMonitoredTablesDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database history. By default
+         * (false) Debezium will store all incoming DDL statements. If set to
+         * true, then only DDL that manipulates a monitored table will be stored
+         * (deprecated, use database.history.store.only.captured.tables.ddl
+         * instead).
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: sqlserver
+         * 
+         * @param databaseHistoryStoreOnlyMonitoredTablesDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseHistoryStoreOnlyMonitoredTablesDdl(
+                String databaseHistoryStoreOnlyMonitoredTablesDdl) {
+            doSetProperty("databaseHistoryStoreOnlyMonitoredTablesDdl", databaseHistoryStoreOnlyMonitoredTablesDdl);
+            return this;
+        }
+        /**
          * Resolvable hostname or IP address of the database server.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -672,6 +792,22 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
         default DebeziumSqlserverEndpointBuilder databaseInstance(
                 String databaseInstance) {
             doSetProperty("databaseInstance", databaseInstance);
+            return this;
+        }
+        /**
+         * The names of the databases from which the connector should capture
+         * changes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: sqlserver
+         * 
+         * @param databaseNames the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder databaseNames(
+                String databaseNames) {
+            doSetProperty("databaseNames", databaseNames);
             return this;
         }
         /**
@@ -739,23 +875,6 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
         default DebeziumSqlserverEndpointBuilder databaseServerName(
                 String databaseServerName) {
             doSetProperty("databaseServerName", databaseServerName);
-            return this;
-        }
-        /**
-         * The timezone of the server used to correctly shift the commit
-         * transaction timestamp on the client sideOptions include: Any valid
-         * Java ZoneId.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: sqlserver
-         * 
-         * @param databaseServerTimezone the value to set
-         * @return the dsl builder
-         */
-        default DebeziumSqlserverEndpointBuilder databaseServerTimezone(
-                String databaseServerTimezone) {
-            doSetProperty("databaseServerTimezone", databaseServerTimezone);
             return this;
         }
         /**
@@ -960,6 +1079,42 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
         default DebeziumSqlserverEndpointBuilder maxBatchSize(
                 String maxBatchSize) {
             doSetProperty("maxBatchSize", maxBatchSize);
+            return this;
+        }
+        /**
+         * This property can be used to reduce the connector memory usage
+         * footprint when changes are streamed from multiple tables per
+         * database.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 0
+         * Group: sqlserver
+         * 
+         * @param maxIterationTransactions the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder maxIterationTransactions(
+                int maxIterationTransactions) {
+            doSetProperty("maxIterationTransactions", maxIterationTransactions);
+            return this;
+        }
+        /**
+         * This property can be used to reduce the connector memory usage
+         * footprint when changes are streamed from multiple tables per
+         * database.
+         * 
+         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 0
+         * Group: sqlserver
+         * 
+         * @param maxIterationTransactions the value to set
+         * @return the dsl builder
+         */
+        default DebeziumSqlserverEndpointBuilder maxIterationTransactions(
+                String maxIterationTransactions) {
+            doSetProperty("maxIterationTransactions", maxIterationTransactions);
             return this;
         }
         /**
@@ -1464,7 +1619,7 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
         /**
          * This property contains a comma-separated list of fully-qualified
          * tables (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-         * thespecific connectors . Select statements for the individual tables
+         * thespecific connectors. Select statements for the individual tables
          * are specified in further configuration properties, one for each
          * table, identified by the id
          * 'snapshot.select.statement.overrides.DB_NAME.TABLE_NAME' or
@@ -1508,8 +1663,8 @@ public interface DebeziumSqlserverEndpointBuilderFactory {
          * Configures the criteria of the attached timestamp within the source
          * record (ts_ms).Options include:'commit', (default) the source
          * timestamp is set to the instant where the record was committed in the
-         * database'processing', the source timestamp is set to the instant
-         * where the record was processed by Debezium.
+         * database'processing', (deprecated) the source timestamp is set to the
+         * instant where the record was processed by Debezium.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 

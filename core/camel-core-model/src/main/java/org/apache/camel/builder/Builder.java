@@ -146,6 +146,30 @@ public final class Builder {
     /**
      * Returns a constant expression
      */
+    public static ValueBuilder constant(String value, Class<?> resultType) {
+        ConstantExpression exp = new ConstantExpression(value);
+        exp.setResultType(resultType);
+        return new ValueBuilder(exp);
+    }
+
+    /**
+     * Returns a constant expression
+     */
+    public static ValueBuilder constant(Object value, boolean trim) {
+        Expression exp;
+        if (value instanceof String) {
+            ConstantExpression ce = new ConstantExpression((String) value);
+            ce.setTrim(trim ? "true" : "false");
+            exp = ce;
+        } else {
+            exp = ExpressionBuilder.constantExpression(value);
+        }
+        return new ValueBuilder(exp);
+    }
+
+    /**
+     * Returns a constant expression
+     */
     public static ValueBuilder language(String language, String expression) {
         Expression exp = new LanguageExpression(language, expression);
         return new ValueBuilder(exp);

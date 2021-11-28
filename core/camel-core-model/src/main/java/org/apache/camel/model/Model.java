@@ -50,6 +50,27 @@ public interface Model {
     List<ModelLifecycleStrategy> getModelLifecycleStrategies();
 
     /**
+     * Adds a collection of route configuration definitions to the context
+     *
+     * @param routesConfigurations the route configuration(s) definition to add
+     */
+    void addRouteConfigurations(List<RouteConfigurationDefinition> routesConfigurations);
+
+    /**
+     * Adds a single route configuration definition to the context
+     *
+     * @param routesConfiguration the route configuration to add
+     */
+    void addRouteConfiguration(RouteConfigurationDefinition routesConfiguration);
+
+    /**
+     * Returns a list of the current route configuration definitions
+     *
+     * @return list of the current route configuration definitions
+     */
+    List<RouteConfigurationDefinition> getRouteConfigurationDefinitions();
+
+    /**
      * Returns a list of the current route definitions
      *
      * @return list of the current route definitions
@@ -156,6 +177,14 @@ public interface Model {
      * @throws Exception               if the route template definition could not be removed for whatever reason
      */
     void removeRouteTemplateDefinition(RouteTemplateDefinition routeTemplateDefinition) throws Exception;
+
+    /**
+     * Removes the route templates matching the pattern - stopping any previously running routes if any of them are
+     * actively running
+     *
+     * @param pattern pattern, such as * for all, or foo* to remove all foo templates
+     */
+    void removeRouteTemplateDefinitions(String pattern) throws Exception;
 
     /**
      * Add a converter to translate a {@link RouteTemplateDefinition} to a {@link RouteDefinition}.

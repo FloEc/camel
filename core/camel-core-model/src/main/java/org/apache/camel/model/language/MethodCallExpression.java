@@ -26,9 +26,9 @@ import org.apache.camel.spi.Metadata;
 import org.apache.camel.util.ObjectHelper;
 
 /**
- * Call a method of the specified Java bean passing the Exchange, Body or specific headers to it.
+ * Calls a Java bean method.
  */
-@Metadata(firstVersion = "1.3.0", label = "language,core,java", title = "Bean method")
+@Metadata(firstVersion = "1.3.0", label = "language,core,java", title = "Bean Method")
 @XmlRootElement(name = "method")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class MethodCallExpression extends ExpressionDefinition {
@@ -96,7 +96,7 @@ public class MethodCallExpression extends ExpressionDefinition {
     }
 
     /**
-     * Reference to bean to lookup in the registry
+     * Reference to an existing bean (bean id) to lookup in the registry
      */
     public void setRef(String ref) {
         this.ref = ref;
@@ -127,7 +127,10 @@ public class MethodCallExpression extends ExpressionDefinition {
     }
 
     /**
-     * Class name of the bean to use
+     * Class name (fully qualified) of the bean to use
+     *
+     * Will lookup in registry and if there is a single instance of the same type, then the existing bean is used,
+     * otherwise a new bean is created (requires a default no-arg constructor).
      */
     public void setBeanTypeName(String beanTypeName) {
         this.beanTypeName = beanTypeName;
@@ -147,7 +150,7 @@ public class MethodCallExpression extends ExpressionDefinition {
      * times while processing the request. The bean does not have to be thread-safe as the instance is only called from
      * the same request. When using prototype scope, then the bean will be looked up or created per call. However in
      * case of lookup then this is delegated to the bean registry such as Spring or CDI (if in use), which depends on
-     * their configuration can act as either singleton or prototype scope. so when using prototype scope then this
+     * their configuration can act as either singleton or prototype scope. So when using prototype scope then this
      * depends on the bean registry implementation.
      */
     public void setScope(String scope) {

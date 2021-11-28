@@ -884,7 +884,7 @@ public interface FtpsEndpointBuilderFactory {
         }
         /**
          * Is used to exclude files, if filename matches the regex pattern
-         * (matching is case in-senstive). Notice if you use symbols such as
+         * (matching is case in-sensitive). Notice if you use symbols such as
          * plus sign and others you would need to configure this using the RAW()
          * syntax if configuring this as an endpoint uri. See more details at
          * configuring endpoint uris.
@@ -904,7 +904,10 @@ public interface FtpsEndpointBuilderFactory {
          * Is used to exclude files matching file extension name (case
          * insensitive). For example to exclude bak files, then use
          * excludeExt=bak. Multiple extensions can be separated by comma, for
-         * example to exclude bak and dat files, use excludeExt=bak,dat.
+         * example to exclude bak and dat files, use excludeExt=bak,dat. Note
+         * that the file extension includes all parts, for example having a file
+         * named mydata.tar.gz will have extension as tar.gz. For more
+         * flexibility then use the include/exclude options.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1095,7 +1098,7 @@ public interface FtpsEndpointBuilderFactory {
         }
         /**
          * A pluggable repository org.apache.camel.spi.IdempotentRepository
-         * which by default use MemoryMessageIdRepository if none is specified
+         * which by default use MemoryIdempotentRepository if none is specified
          * and idempotent is true.
          * 
          * The option is a:
@@ -1114,7 +1117,7 @@ public interface FtpsEndpointBuilderFactory {
         }
         /**
          * A pluggable repository org.apache.camel.spi.IdempotentRepository
-         * which by default use MemoryMessageIdRepository if none is specified
+         * which by default use MemoryIdempotentRepository if none is specified
          * and idempotent is true.
          * 
          * The option will be converted to a
@@ -1153,7 +1156,10 @@ public interface FtpsEndpointBuilderFactory {
          * Is used to include files matching file extension name (case
          * insensitive). For example to include txt files, then use
          * includeExt=txt. Multiple extensions can be separated by comma, for
-         * example to include txt and xml files, use includeExt=txt,xml.
+         * example to include txt and xml files, use includeExt=txt,xml. Note
+         * that the file extension includes all parts, for example having a file
+         * named mydata.tar.gz will have extension as tar.gz. For more
+         * flexibility then use the include/exclude options.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3439,6 +3445,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
+         * Default: 1000
          * Group: advanced
          * 
          * @param reconnectDelay the value to set
@@ -3455,6 +3462,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
+         * Default: 1000
          * Group: advanced
          * 
          * @param reconnectDelay the value to set
@@ -3482,15 +3490,14 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the so timeout FTP and FTPS Only for Camel 2.4. SFTP for Camel
-         * 2.14.3/2.15.3/2.16 onwards. Is the SocketOptions.SO_TIMEOUT value in
-         * millis. Recommended option is to set this to 300000 so as not have a
-         * hanged connection. On SFTP this option is set as timeout on the JSCH
-         * Session instance.
+         * Sets the so timeout FTP and FTPS Is the SocketOptions.SO_TIMEOUT
+         * value in millis. Recommended option is to set this to 300000 so as
+         * not have a hanged connection. On SFTP this option is set as timeout
+         * on the JSCH Session instance.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 5m
+         * Default: 300000
          * Group: advanced
          * 
          * @param soTimeout the value to set
@@ -3501,15 +3508,14 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the so timeout FTP and FTPS Only for Camel 2.4. SFTP for Camel
-         * 2.14.3/2.15.3/2.16 onwards. Is the SocketOptions.SO_TIMEOUT value in
-         * millis. Recommended option is to set this to 300000 so as not have a
-         * hanged connection. On SFTP this option is set as timeout on the JSCH
-         * Session instance.
+         * Sets the so timeout FTP and FTPS Is the SocketOptions.SO_TIMEOUT
+         * value in millis. Recommended option is to set this to 300000 so as
+         * not have a hanged connection. On SFTP this option is set as timeout
+         * on the JSCH Session instance.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 5m
+         * Default: 300000
          * Group: advanced
          * 
          * @param soTimeout the value to set
@@ -3594,7 +3600,7 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Should an exception be thrown if connection failed (exhausted) By
+         * Should an exception be thrown if connection failed (exhausted)By
          * default exception is not thrown and a WARN is logged. You can use
          * this to enable exception being thrown and handle the thrown exception
          * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
@@ -3614,7 +3620,7 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Should an exception be thrown if connection failed (exhausted) By
+         * Should an exception be thrown if connection failed (exhausted)By
          * default exception is not thrown and a WARN is logged. You can use
          * this to enable exception being thrown and handle the thrown exception
          * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
@@ -3639,7 +3645,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 30s
+         * Default: 30000
          * Group: advanced
          * 
          * @param timeout the value to set
@@ -3654,7 +3660,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 30s
+         * Default: 30000
          * Group: advanced
          * 
          * @param timeout the value to set
@@ -5254,6 +5260,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
+         * Default: 1000
          * Group: advanced
          * 
          * @param reconnectDelay the value to set
@@ -5270,6 +5277,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
+         * Default: 1000
          * Group: advanced
          * 
          * @param reconnectDelay the value to set
@@ -5297,15 +5305,14 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the so timeout FTP and FTPS Only for Camel 2.4. SFTP for Camel
-         * 2.14.3/2.15.3/2.16 onwards. Is the SocketOptions.SO_TIMEOUT value in
-         * millis. Recommended option is to set this to 300000 so as not have a
-         * hanged connection. On SFTP this option is set as timeout on the JSCH
-         * Session instance.
+         * Sets the so timeout FTP and FTPS Is the SocketOptions.SO_TIMEOUT
+         * value in millis. Recommended option is to set this to 300000 so as
+         * not have a hanged connection. On SFTP this option is set as timeout
+         * on the JSCH Session instance.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 5m
+         * Default: 300000
          * Group: advanced
          * 
          * @param soTimeout the value to set
@@ -5316,15 +5323,14 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the so timeout FTP and FTPS Only for Camel 2.4. SFTP for Camel
-         * 2.14.3/2.15.3/2.16 onwards. Is the SocketOptions.SO_TIMEOUT value in
-         * millis. Recommended option is to set this to 300000 so as not have a
-         * hanged connection. On SFTP this option is set as timeout on the JSCH
-         * Session instance.
+         * Sets the so timeout FTP and FTPS Is the SocketOptions.SO_TIMEOUT
+         * value in millis. Recommended option is to set this to 300000 so as
+         * not have a hanged connection. On SFTP this option is set as timeout
+         * on the JSCH Session instance.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 5m
+         * Default: 300000
          * Group: advanced
          * 
          * @param soTimeout the value to set
@@ -5409,7 +5415,7 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Should an exception be thrown if connection failed (exhausted) By
+         * Should an exception be thrown if connection failed (exhausted)By
          * default exception is not thrown and a WARN is logged. You can use
          * this to enable exception being thrown and handle the thrown exception
          * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
@@ -5429,7 +5435,7 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Should an exception be thrown if connection failed (exhausted) By
+         * Should an exception be thrown if connection failed (exhausted)By
          * default exception is not thrown and a WARN is logged. You can use
          * this to enable exception being thrown and handle the thrown exception
          * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
@@ -5454,7 +5460,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 30s
+         * Default: 30000
          * Group: advanced
          * 
          * @param timeout the value to set
@@ -5469,7 +5475,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 30s
+         * Default: 30000
          * Group: advanced
          * 
          * @param timeout the value to set
@@ -6493,6 +6499,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
+         * Default: 1000
          * Group: advanced
          * 
          * @param reconnectDelay the value to set
@@ -6508,6 +6515,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
+         * Default: 1000
          * Group: advanced
          * 
          * @param reconnectDelay the value to set
@@ -6533,15 +6541,14 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the so timeout FTP and FTPS Only for Camel 2.4. SFTP for Camel
-         * 2.14.3/2.15.3/2.16 onwards. Is the SocketOptions.SO_TIMEOUT value in
-         * millis. Recommended option is to set this to 300000 so as not have a
-         * hanged connection. On SFTP this option is set as timeout on the JSCH
-         * Session instance.
+         * Sets the so timeout FTP and FTPS Is the SocketOptions.SO_TIMEOUT
+         * value in millis. Recommended option is to set this to 300000 so as
+         * not have a hanged connection. On SFTP this option is set as timeout
+         * on the JSCH Session instance.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 5m
+         * Default: 300000
          * Group: advanced
          * 
          * @param soTimeout the value to set
@@ -6552,15 +6559,14 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the so timeout FTP and FTPS Only for Camel 2.4. SFTP for Camel
-         * 2.14.3/2.15.3/2.16 onwards. Is the SocketOptions.SO_TIMEOUT value in
-         * millis. Recommended option is to set this to 300000 so as not have a
-         * hanged connection. On SFTP this option is set as timeout on the JSCH
-         * Session instance.
+         * Sets the so timeout FTP and FTPS Is the SocketOptions.SO_TIMEOUT
+         * value in millis. Recommended option is to set this to 300000 so as
+         * not have a hanged connection. On SFTP this option is set as timeout
+         * on the JSCH Session instance.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 5m
+         * Default: 300000
          * Group: advanced
          * 
          * @param soTimeout the value to set
@@ -6643,7 +6649,7 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Should an exception be thrown if connection failed (exhausted) By
+         * Should an exception be thrown if connection failed (exhausted)By
          * default exception is not thrown and a WARN is logged. You can use
          * this to enable exception being thrown and handle the thrown exception
          * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
@@ -6663,7 +6669,7 @@ public interface FtpsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Should an exception be thrown if connection failed (exhausted) By
+         * Should an exception be thrown if connection failed (exhausted)By
          * default exception is not thrown and a WARN is logged. You can use
          * this to enable exception being thrown and handle the thrown exception
          * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
@@ -6688,7 +6694,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 30s
+         * Default: 30000
          * Group: advanced
          * 
          * @param timeout the value to set
@@ -6703,7 +6709,7 @@ public interface FtpsEndpointBuilderFactory {
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 30s
+         * Default: 30000
          * Group: advanced
          * 
          * @param timeout the value to set

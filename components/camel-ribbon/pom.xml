@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>components</artifactId>
-        <version>3.11.0-SNAPSHOT</version>
+        <version>3.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-ribbon</artifactId>
     <packaging>jar</packaging>
 
-    <name>Camel :: Ribbon</name>
+    <name>Camel :: Ribbon (deprecated)</name>
     <description>Using Netflix Ribbon for client side load balancing</description>
 
     <properties>
@@ -109,4 +109,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>

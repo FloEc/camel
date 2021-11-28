@@ -19,15 +19,14 @@ package org.apache.camel.component.salesforce;
 import java.io.InputStream;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.apache.camel.CamelExecutionException;
+import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.salesforce.api.NoSuchSObjectException;
@@ -51,11 +50,9 @@ import org.apache.camel.component.salesforce.dto.generated.QueryRecordsAccount;
 import org.apache.camel.component.salesforce.dto.generated.QueryRecordsContact;
 import org.apache.camel.component.salesforce.dto.generated.QueryRecordsLine_Item__c;
 import org.apache.camel.component.salesforce.dto.generated.Task;
+import org.apache.camel.component.salesforce.dto.generated.User;
+import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.support.jsse.SSLContextParameters;
-import org.apache.camel.test.junit5.params.Parameter;
-import org.apache.camel.test.junit5.params.Parameterized;
-import org.apache.camel.test.junit5.params.Parameters;
-import org.apache.camel.test.junit5.params.Test;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -64,6 +61,8 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,15 +71,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@Standalone
-@Parameterized
+@Tag("standalone")
 public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
 
     /**
      * Request DTO for Salesforce APEX REST calls. See
      * https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_rest_methods.htm.
      */
-    @XStreamAlias("request")
     public static class MerchandiseRequest extends AbstractDTOBase {
         private Merchandise__c merchandise;
 
@@ -101,7 +98,6 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
      * Response DTO for Salesforce APEX REST calls. See
      * https://www.salesforce.com/us/developer/docs/apexcode/Content/apex_rest_methods.htm.
      */
-    @XStreamAlias("response")
     public static class MerchandiseResponse extends Merchandise__c {
         // XML response contains a type string with the SObject type name
         private String type;
@@ -120,9 +116,6 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
     private static final String TEST_DOCUMENT_ID = "Test Document";
 
     private static final AtomicInteger TEST_LINE_ITEM_ID = new AtomicInteger(1);
-
-    @Parameter
-    protected String format;
 
     private String merchandiseId;
     private String accountId;
@@ -149,6 +142,13 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
                 = template().requestBody("salesforce:createSObject", merchandise, CreateSObjectResult.class);
 
         merchandiseId = merchandiseResult.getId();
+    }
+
+    private void createLineItem() {
+        Line_Item__c lineItem = new Line_Item__c();
+        final String lineItemId = String.valueOf(TEST_LINE_ITEM_ID.incrementAndGet());
+        lineItem.setName(lineItemId);
+        CreateSObjectResult result = template().requestBody("direct:createLineItem", lineItem, CreateSObjectResult.class);
     }
 
     private void createAccountAndContact() {
@@ -206,6 +206,14 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
     }
 
     @Test
+    public void returnsHttpResponseStatusAndText() {
+        Exchange exchange = new DefaultExchange(context);
+        template().send("direct:query", exchange);
+        assertEquals("200", exchange.getOut().getHeader(Exchange.HTTP_RESPONSE_CODE));
+        assertNotNull(exchange.getOut().getHeader(Exchange.HTTP_RESPONSE_TEXT));
+    }
+
+    @Test
     public void testCreateUpdateDelete() throws Exception {
         final Merchandise__c merchandise = new Merchandise__c();
         merchandise.setName("Wee Wee Wee Plane");
@@ -225,11 +233,11 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
         // also need to set the Id
         merchandise.setId(result.getId());
 
-        assertNull(template().requestBodyAndHeader("direct:updateSObject", merchandise, SalesforceEndpointConfig.SOBJECT_ID,
+        assertNotNull(template().requestBodyAndHeader("direct:updateSObject", merchandise, SalesforceEndpointConfig.SOBJECT_ID,
                 result.getId()));
 
         // delete the newly created SObject
-        assertNull(template().requestBody("direct:deleteSObject", result.getId()));
+        assertNotNull(template().requestBody("direct:deleteSObject", result.getId()));
     }
 
     @Test
@@ -276,7 +284,7 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
 
         final Object updateAccountResult = template().requestBodyAndHeader("salesforce:updateSObject", account,
                 SalesforceEndpointConfig.SOBJECT_ID, account.getId());
-        assertNull(updateAccountResult);
+        assertNotNull(updateAccountResult);
 
         Account updatedAccount = (Account) template().requestBodyAndHeader("salesforce:getSObject?sObjectFields=Id,Name,Site",
                 account.getId(), "sObjectName", "Account");
@@ -311,7 +319,7 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
 
         final Object updateContactResult = template().requestBodyAndHeader("salesforce:updateSObject", contact,
                 SalesforceEndpointConfig.SOBJECT_ID, contact.getId());
-        assertNull(updateContactResult);
+        assertNotNull(updateContactResult);
 
         // delete the Contact
         template().requestBodyAndHeader("direct:deleteSObject", contactResult.getId(), "sObjectName", "Contact");
@@ -334,11 +342,11 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
         taken.setId(result.getId());
         taken.setActivityDate(ZonedDateTime.of(1991, 1, 2, 3, 4, 5, 6, ZoneId.systemDefault()));
 
-        assertNull(template().requestBodyAndHeader("direct:updateSObject", taken, SalesforceEndpointConfig.SOBJECT_ID,
+        assertNotNull(template().requestBodyAndHeader("direct:updateSObject", taken, SalesforceEndpointConfig.SOBJECT_ID,
                 result.getId()));
 
         // delete the newly created SObject
-        assertNull(template().requestBody("direct:deleteSObjectTaken", result.getId()));
+        assertNotNull(template().requestBody("direct:deleteSObjectTaken", result.getId()));
     }
 
     @Test
@@ -362,10 +370,10 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
         final String newLineItemId = String.valueOf(NEW_LINE_ITEM_ID.incrementAndGet());
         lineItem.setName(newLineItemId);
 
-        result = template().requestBodyAndHeader("direct:upsertSObject", lineItem,
-                SalesforceEndpointConfig.SOBJECT_EXT_ID_VALUE, newLineItemId, CreateSObjectResult.class);
-        assertNotNull(result);
-        assertTrue(result.getSuccess());
+        UpsertSObjectResult upsertResult = template().requestBodyAndHeader("direct:upsertSObject", lineItem,
+                SalesforceEndpointConfig.SOBJECT_EXT_ID_VALUE, newLineItemId, UpsertSObjectResult.class);
+        assertNotNull(upsertResult);
+        assertTrue(upsertResult.getSuccess());
 
         // clear read only parent type fields
         lineItem.setMerchandise__c(null);
@@ -373,12 +381,12 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
         lineItem.setUnits_Sold__c(25.0);
 
         // update line item with Name NEW_LINE_ITEM_ID
-        result = template().requestBodyAndHeader("direct:upsertSObject", lineItem,
-                SalesforceEndpointConfig.SOBJECT_EXT_ID_VALUE, newLineItemId, CreateSObjectResult.class);
-        assertNull(result);
+        upsertResult = template().requestBodyAndHeader("direct:upsertSObject", lineItem,
+                SalesforceEndpointConfig.SOBJECT_EXT_ID_VALUE, newLineItemId, UpsertSObjectResult.class);
+        assertNotNull(upsertResult);
 
         // delete the SObject with Name NEW_LINE_ITEM_ID
-        assertNull(template().requestBody("direct:deleteSObjectWithId", newLineItemId));
+        assertNotNull(template().requestBody("direct:deleteSObjectWithId", newLineItemId));
     }
 
     @Test
@@ -465,9 +473,22 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
 
     @Test
     public void testQuery() throws Exception {
+        createLineItem();
         final QueryRecordsLine_Item__c queryRecords
                 = template().requestBody("direct:query", null, QueryRecordsLine_Item__c.class);
         assertNotNull(queryRecords);
+        // verify polymorphic query resulted in the correct type
+        assertEquals(User.class, queryRecords.getRecords().get(0).getOwner().getClass());
+        final Line_Item__c lineItem = queryRecords.getRecords().get(0);
+        User user = (User) queryRecords.getRecords().get(0).getOwner();
+        assertNotNull(user.getUsername());
+        assertNotNull(lineItem.getRecordType());
+    }
+
+    @Test
+    public void querySyncAsyncDoesntTimeout() throws Exception {
+        final Object result = template.requestBody("direct:querySyncAsync", "");
+        assertNotNull(result);
     }
 
     @Test
@@ -666,6 +687,15 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
         assertFalse(globalObjects.getSobjects().isEmpty());
     }
 
+    @Test
+    public void testBodyIsPreservedAfterError() throws Exception {
+        Contact contact = new Contact();
+
+        final Object result = template.requestBody("direct:createSObjectContinueOnException", contact);
+        assertNotNull(result);
+        assertEquals(contact, result);
+    }
+
     @Override
     protected RouteBuilder doCreateRouteBuilder() throws Exception {
 
@@ -675,39 +705,38 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
             public void configure() {
 
                 // testGetVersion
-                from("direct:getVersions").to("salesforce:getVersions?format=" + format);
+                from("direct:getVersions").to("salesforce:getVersions");
 
                 // testGetResources
-                from("direct:getResources").to("salesforce:getResources?format=" + format);
+                from("direct:getResources").to("salesforce:getResources");
 
                 // testGetGlobalObjects
-                from("direct:getGlobalObjects").to("salesforce:getGlobalObjects?format=" + format);
+                from("direct:getGlobalObjects").to("salesforce:getGlobalObjects");
 
                 // testGetBasicInfo
-                from("direct:getBasicInfo").to("salesforce:getBasicInfo?sObjectName=Merchandise__c&format=" + format);
+                from("direct:getBasicInfo").to("salesforce:getBasicInfo?sObjectName=Merchandise__c");
 
                 // testGetDescription
-                from("direct:getDescription").to("salesforce:getDescription?sObjectName=Merchandise__c&format=" + format);
+                from("direct:getDescription").to("salesforce:getDescription?sObjectName=Merchandise__c");
 
                 // testGetSObject
                 from("direct:getSObject")
-                        .to("salesforce:getSObject?sObjectName=Merchandise__c&sObjectFields=Description__c,Price__c&format="
-                            + format);
+                        .to("salesforce:getSObject?sObjectName=Merchandise__c&sObjectFields=Description__c,Price__c");
 
                 // testCreateSObject
-                from("direct:createSObject").to("salesforce:createSObject?sObjectName=Merchandise__c&format=" + format);
+                from("direct:createSObject").to("salesforce:createSObject?sObjectName=Merchandise__c");
 
                 // testUpdateSObject
-                from("direct:updateSObject").to("salesforce:updateSObject?sObjectName=Merchandise__c&format=" + format);
+                from("direct:updateSObject").to("salesforce:updateSObject?sObjectName=Merchandise__c");
 
                 // testDeleteSObject
-                from("direct:deleteSObject").to("salesforce:deleteSObject?sObjectName=Merchandise__c&format=" + format);
+                from("direct:deleteSObject").to("salesforce:deleteSObject?sObjectName=Merchandise__c");
 
-                from("direct:deleteSObjectTaken").to("salesforce:deleteSObject?sObjectName=Task&format=" + format);
+                from("direct:deleteSObjectTaken").to("salesforce:deleteSObject?sObjectName=Task");
 
                 // testGetSObjectWithId
                 from("direct:getSObjectWithId")
-                        .to("salesforce:getSObjectWithId?sObjectName=Line_Item__c&sObjectIdName=Name&format=" + format);
+                        .to("salesforce:getSObjectWithId?sObjectName=Line_Item__c&sObjectIdName=Name");
 
                 // testUpsertSObject
                 from("direct:deleteLineItems")
@@ -719,59 +748,66 @@ public class RestApiIntegrationTest extends AbstractSalesforceTestBase {
                 from("direct:createLineItem").to("salesforce:createSObject?sObjectName=Line_Item__c");
 
                 from("direct:upsertSObject")
-                        .to("salesforce:upsertSObject?sObjectName=Line_Item__c&sObjectIdName=Name&format=" + format);
+                        .to("salesforce:upsertSObject?sObjectName=Line_Item__c&sObjectIdName=Name");
 
                 // testDeleteSObjectWithId
                 from("direct:deleteSObjectWithId")
-                        .to("salesforce:deleteSObjectWithId?sObjectName=Line_Item__c&sObjectIdName=Name&format=" + format);
+                        .to("salesforce:deleteSObjectWithId?sObjectName=Line_Item__c&sObjectIdName=Name");
 
                 // testGetBlobField
                 from("direct:getBlobField")
-                        .to("salesforce:getBlobField?sObjectName=Document&sObjectBlobFieldName=Body&format=" + format);
+                        .to("salesforce:getBlobField?sObjectName=Document&sObjectBlobFieldName=Body");
 
                 // testQuery
                 from("direct:query")
-                        .to("salesforce:query?sObjectQuery=SELECT name from Line_Item__c&sObjectClass="
-                            + QueryRecordsLine_Item__c.class.getName() + "&format=" + format);
+                        .to("salesforce:query?sObjectQuery=SELECT Id, name, Typeof Owner WHEN User Then Username End, recordTypeId, RecordType.Name from Line_Item__c&sObjectClass="
+                            + QueryRecordsLine_Item__c.class.getName() + "");
 
                 // testParentRelationshipQuery
                 from("direct:parentRelationshipQuery")
                         .process(exchange -> exchange.getIn()
                                 .setBody("SELECT LastName, Account.Name FROM Contact WHERE Id = '" + contactId + "'"))
-                        .to("salesforce:query?sObjectClass=" + QueryRecordsContact.class.getName() + "&format=" + format);
+                        .to("salesforce:query?sObjectClass=" + QueryRecordsContact.class.getName() + "");
 
                 // testChildRelationshipQuery
                 from("direct:childRelationshipQuery")
                         .process(exchange -> exchange.getIn()
                                 .setBody("SELECT Id, Name, (SELECT Id, LastName FROM Contacts)" + " FROM Account WHERE Id = '"
                                          + accountId + "'"))
-                        .to("salesforce:query?sObjectClass=" + QueryRecordsAccount.class.getName() + "&format=" + format);
+                        .to("salesforce:query?sObjectClass=" + QueryRecordsAccount.class.getName() + "");
 
                 // testQueryAll
                 from("direct:queryAll")
                         .to("salesforce:queryAll?sObjectQuery=SELECT name from Line_Item__c&sObjectClass="
-                            + QueryRecordsLine_Item__c.class.getName() + "&format=" + format);
+                            + QueryRecordsLine_Item__c.class.getName() + "");
+
+                from("direct:querySyncAsync")
+                        .to("direct:querySync")
+                        .to("direct:queryAsync");
+
+                from("direct:querySync?synchronous=false").routeId("r.querySync")
+                        .to("salesforce:query?rawPayload=true&sObjectQuery=Select Id From Contact Where Name = 'Sync'");
+
+                from("direct:queryAsync?synchronous=true").routeId("r.queryAsync")
+                        .to("salesforce:query?rawPayload=true&sObjectQuery=Select Id From Contact  Where Name = 'Sync'");
 
                 // testSearch
-                from("direct:search").to("salesforce:search?sObjectSearch=FIND {Wee}&format=" + format);
+                from("direct:search").to("salesforce:search?sObjectSearch=FIND {Wee}");
 
                 // testApexCall
                 from("direct:apexCallGet")
-                        .to("salesforce:apexCall?apexMethod=GET&apexUrl=Merchandise/{id}&sObjectName=Merchandise__c&format="
-                            + format);
+                        .to("salesforce:apexCall?apexMethod=GET&apexUrl=Merchandise/{id}&sObjectName=Merchandise__c");
 
                 from("direct:apexCallGetWithId")
-                        .to("salesforce:apexCall/Merchandise/?apexMethod=GET&id=dummyId&format=" + format + "&sObjectClass="
+                        .to("salesforce:apexCall/Merchandise/?apexMethod=GET&id=dummyId" + "&sObjectClass="
                             + Merchandise__c.class.getName());
 
-                from("direct:apexCallPatch").to("salesforce:apexCall/Merchandise/?format=" + format
+                from("direct:apexCallPatch").to("salesforce:apexCall/Merchandise/"
                                                 + "&apexMethod=PATCH&sObjectClass=" + MerchandiseResponse.class.getName());
+
+                from("direct:createSObjectContinueOnException").onException(Exception.class).continued(true).end()
+                        .to("salesforce:createSObject");
             }
         };
-    }
-
-    @Parameters
-    public static Iterable<String> parameters() {
-        return Arrays.asList("XML", "JSON");
     }
 }

@@ -86,7 +86,7 @@ public interface SalesforceComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: 50.0
+         * Default: 53.0
          * Group: common
          * 
          * @param apiVersion the value to set
@@ -161,8 +161,25 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
+         * ReplayId to fall back to after an Invalid Replay Id response.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Long&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: common
+         * 
+         * @param fallBackReplayId the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder fallBackReplayId(
+                java.lang.Long fallBackReplayId) {
+            doSetProperty("fallBackReplayId", fallBackReplayId);
+            return this;
+        }
+        /**
          * Payload format to use for Salesforce API calls, either JSON or XML,
-         * defaults to JSON.
+         * defaults to JSON. As of Camel 3.12, this option only applies to the
+         * Raw operation.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.PayloadFormat&lt;/code&gt; type.
@@ -335,6 +352,21 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
+         * Locator provided by salesforce Bulk 2.0 API for use in getting
+         * results for a Query job.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param locator the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder locator(java.lang.String locator) {
+            doSetProperty("locator", locator);
+            return this;
+        }
+        /**
          * Maximum backoff interval for Streaming connection restart attempts
          * for failures beyond CometD auto-reconnect.
          * 
@@ -348,6 +380,28 @@ public interface SalesforceComponentBuilderFactory {
          */
         default SalesforceComponentBuilder maxBackoff(long maxBackoff) {
             doSetProperty("maxBackoff", maxBackoff);
+            return this;
+        }
+        /**
+         * The maximum number of records to retrieve per set of results for a
+         * Bulk 2.0 Query. The request is still subject to the size limits. If
+         * you are working with a very large number of query results, you may
+         * experience a timeout before receiving all the data from Salesforce.
+         * To prevent a timeout, specify the maximum number of records your
+         * client is expecting to receive in the maxRecords parameter. This
+         * splits the results into smaller sets with this value as the maximum
+         * size.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param maxRecords the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder maxRecords(
+                java.lang.Integer maxRecords) {
+            doSetProperty("maxRecords", maxRecords);
             return this;
         }
         /**
@@ -484,10 +538,10 @@ public interface SalesforceComponentBuilderFactory {
         }
         /**
          * In what packages are the generated DTO classes. Typically the classes
-         * would be generated using camel-salesforce-maven-plugin. This must be
-         * set if using the XML format. Also, set it if using the generated DTOs
-         * to gain the benefit of using short SObject names in parameters/header
-         * values. Multiple packages can be separated by comma.
+         * would be generated using camel-salesforce-maven-plugin. Set it if
+         * using the generated DTOs to gain the benefit of using short SObject
+         * names in parameters/header values. Multiple packages can be separated
+         * by comma.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -848,6 +902,37 @@ public interface SalesforceComponentBuilderFactory {
         default SalesforceComponentBuilder longPollingTransportProperties(
                 java.util.Map<java.lang.String, java.lang.Object> longPollingTransportProperties) {
             doSetProperty("longPollingTransportProperties", longPollingTransportProperties);
+            return this;
+        }
+        /**
+         * Maximum size of the thread pool used to handle HTTP responses.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 20
+         * Group: common (advanced)
+         * 
+         * @param workerPoolMaxSize the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder workerPoolMaxSize(
+                int workerPoolMaxSize) {
+            doSetProperty("workerPoolMaxSize", workerPoolMaxSize);
+            return this;
+        }
+        /**
+         * Size of the thread pool used to handle HTTP responses.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 10
+         * Group: common (advanced)
+         * 
+         * @param workerPoolSize the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder workerPoolSize(int workerPoolSize) {
+            doSetProperty("workerPoolSize", workerPoolSize);
             return this;
         }
         /**
@@ -1268,6 +1353,23 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
+         * Value to use for the Audience claim (aud) when using OAuth JWT flow.
+         * If not set, the login URL will be used, which is appropriate in most
+         * cases.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param jwtAudience the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder jwtAudience(
+                java.lang.String jwtAudience) {
+            doSetProperty("jwtAudience", jwtAudience);
+            return this;
+        }
+        /**
          * KeyStore parameters to use in OAuth JWT flow. The KeyStore should
          * contain only one entry with private key and certificate. Salesforce
          * does not verify the certificate chain, so this can easily be a
@@ -1457,6 +1559,7 @@ public interface SalesforceComponentBuilderFactory {
             case "batchId": getOrCreateConfiguration((SalesforceComponent) component).setBatchId((java.lang.String) value); return true;
             case "contentType": getOrCreateConfiguration((SalesforceComponent) component).setContentType((org.apache.camel.component.salesforce.api.dto.bulk.ContentType) value); return true;
             case "defaultReplayId": getOrCreateConfiguration((SalesforceComponent) component).setDefaultReplayId((java.lang.Long) value); return true;
+            case "fallBackReplayId": getOrCreateConfiguration((SalesforceComponent) component).setFallBackReplayId((java.lang.Long) value); return true;
             case "format": getOrCreateConfiguration((SalesforceComponent) component).setFormat((org.apache.camel.component.salesforce.internal.PayloadFormat) value); return true;
             case "httpClient": getOrCreateConfiguration((SalesforceComponent) component).setHttpClient((org.apache.camel.component.salesforce.SalesforceHttpClient) value); return true;
             case "httpClientConnectionTimeout": ((SalesforceComponent) component).setHttpClientConnectionTimeout((long) value); return true;
@@ -1468,7 +1571,9 @@ public interface SalesforceComponentBuilderFactory {
             case "instanceId": getOrCreateConfiguration((SalesforceComponent) component).setInstanceId((java.lang.String) value); return true;
             case "jobId": getOrCreateConfiguration((SalesforceComponent) component).setJobId((java.lang.String) value); return true;
             case "limit": getOrCreateConfiguration((SalesforceComponent) component).setLimit((java.lang.Integer) value); return true;
+            case "locator": getOrCreateConfiguration((SalesforceComponent) component).setLocator((java.lang.String) value); return true;
             case "maxBackoff": getOrCreateConfiguration((SalesforceComponent) component).setMaxBackoff((long) value); return true;
+            case "maxRecords": getOrCreateConfiguration((SalesforceComponent) component).setMaxRecords((java.lang.Integer) value); return true;
             case "notFoundBehaviour": getOrCreateConfiguration((SalesforceComponent) component).setNotFoundBehaviour((org.apache.camel.component.salesforce.NotFoundBehaviour) value); return true;
             case "notifyForFields": getOrCreateConfiguration((SalesforceComponent) component).setNotifyForFields((org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum) value); return true;
             case "notifyForOperationCreate": getOrCreateConfiguration((SalesforceComponent) component).setNotifyForOperationCreate((java.lang.Boolean) value); return true;
@@ -1500,6 +1605,8 @@ public interface SalesforceComponentBuilderFactory {
             case "config": ((SalesforceComponent) component).setConfig((org.apache.camel.component.salesforce.SalesforceEndpointConfig) value); return true;
             case "httpClientProperties": ((SalesforceComponent) component).setHttpClientProperties((java.util.Map) value); return true;
             case "longPollingTransportProperties": ((SalesforceComponent) component).setLongPollingTransportProperties((java.util.Map) value); return true;
+            case "workerPoolMaxSize": ((SalesforceComponent) component).setWorkerPoolMaxSize((int) value); return true;
+            case "workerPoolSize": ((SalesforceComponent) component).setWorkerPoolSize((int) value); return true;
             case "bridgeErrorHandler": ((SalesforceComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "allOrNone": getOrCreateConfiguration((SalesforceComponent) component).setAllOrNone((boolean) value); return true;
             case "apexUrl": getOrCreateConfiguration((SalesforceComponent) component).setApexUrl((java.lang.String) value); return true;
@@ -1525,6 +1632,7 @@ public interface SalesforceComponentBuilderFactory {
             case "httpProxyUseDigestAuth": ((SalesforceComponent) component).setHttpProxyUseDigestAuth((boolean) value); return true;
             case "httpProxyUsername": ((SalesforceComponent) component).setHttpProxyUsername((java.lang.String) value); return true;
             case "instanceUrl": ((SalesforceComponent) component).setInstanceUrl((java.lang.String) value); return true;
+            case "jwtAudience": ((SalesforceComponent) component).setJwtAudience((java.lang.String) value); return true;
             case "keystore": ((SalesforceComponent) component).setKeystore((org.apache.camel.support.jsse.KeyStoreParameters) value); return true;
             case "lazyLogin": ((SalesforceComponent) component).setLazyLogin((boolean) value); return true;
             case "loginConfig": ((SalesforceComponent) component).setLoginConfig((org.apache.camel.component.salesforce.SalesforceLoginConfig) value); return true;

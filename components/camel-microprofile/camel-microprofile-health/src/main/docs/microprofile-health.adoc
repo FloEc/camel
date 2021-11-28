@@ -1,10 +1,10 @@
-[[microprofile-health-other]]
 = Microprofile Health Component
-:docTitle: Microprofile Health
-:artifactId: camel-microprofile-health
-:description: Bridging Eclipse MicroProfile Health with Camel health checks
+:doctitle: Microprofile Health
+:shortname: microprofile-health
+:artifactid: camel-microprofile-health
+:description: Expose Camel health checks via MicroProfile Health
 :since: 3.0
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/others/microprofile-health.adoc[opts=optional]
 
 *Since Camel {since}*

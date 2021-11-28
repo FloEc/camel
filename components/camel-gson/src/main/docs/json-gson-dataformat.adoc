@@ -1,11 +1,13 @@
-[[json-gson-dataformat]]
 = JSON Gson DataFormat
-:docTitle: JSON Gson
-:artifactId: camel-gson
+:doctitle: JSON Gson
+:shortname: json-gson
+:artifactid: camel-gson
 :description: Marshal POJOs to JSON and back using Gson
 :since: 2.10
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/json-gson.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: gson
 
 *Since Camel {since}*
 
@@ -23,17 +25,7 @@ from("activemq:My.Queue").
 
 
 // dataformat options: START
-The JSON Gson dataformat supports 3 options, which are listed below.
-
-
-
-[width="100%",cols="2s,1m,1m,6",options="header"]
-|===
-| Name | Default | Java Type | Description
-| prettyPrint | false | Boolean | To enable pretty printing output nicely formatted. Is by default false.
-| unmarshalTypeName |  | String | Class name of the java type to use when unmarshalling
-| contentTypeHeader | true | Boolean | Whether the data format should set the Content-Type header with the type from the data format. For example application/xml for data formats marshalling to XML, or application/json for data formats marshalling to JSON
-|===
+include::partial$dataformat-options.adoc[]
 // dataformat options: END
 
 
@@ -57,4 +49,5 @@ the download page for the latest versions).
 </dependency>
 ----------------------------------------------------------
 
-include::{page-component-version}@camel-spring-boot::page$gson-starter.adoc[]
+
+include::spring-boot:partial$starter.adoc[]

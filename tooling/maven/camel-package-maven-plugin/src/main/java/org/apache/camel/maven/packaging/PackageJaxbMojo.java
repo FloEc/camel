@@ -22,6 +22,7 @@ import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -98,14 +99,19 @@ public class PackageJaxbMojo extends AbstractGeneratorMojo {
     private void processClasses(IndexView index) {
         Map<String, Set<String>> byPackage = new HashMap<>();
 
-        Stream.of(XmlRootElement.class, XmlEnum.class, XmlType.class).map(Class::getName).map(DotName::createSimple)
+        Stream.of(XmlRootElement.class, XmlEnum.class, XmlType.class)
+                .map(Class::getName).map(DotName::createSimple)
                 .map(index::getAnnotations).flatMap(Collection::stream)
                 .map(AnnotationInstance::target).map(AnnotationTarget::asClass).map(ClassInfo::name).map(DotName::toString)
                 .forEach(name -> {
                     int idx = name.lastIndexOf('.');
                     String p = name.substring(0, idx);
                     String c = name.substring(idx + 1);
-                    byPackage.computeIfAbsent(p, s -> new TreeSet<>()).add(c);
+                    // we should skip this model as we do not want this in the JAXB model
+                    boolean skip = "WhenSkipSendToEndpointDefinition".equals(c);
+                    if (!skip) {
+                        byPackage.computeIfAbsent(p, s -> new TreeSet<>()).add(c);
+                    }
                 });
 
         Path jaxbIndexDir = jaxbIndexOutDir.toPath();
@@ -153,11 +159,10 @@ public class PackageJaxbMojo extends AbstractGeneratorMojo {
     private Path asFolder(String p) {
         if (p.endsWith(".jar")) {
             File fp = new File(p);
-            try {
-                Map<String, String> env = new HashMap<>();
-                return FileSystems.newFileSystem(URI.create("jar:" + fp.toURI().toString()), env).getPath("/");
+            try (FileSystem fs = FileSystems.newFileSystem(URI.create("jar:" + fp.toURI()), new HashMap<>())) {
+                return fs.getPath("/");
             } catch (FileSystemAlreadyExistsException e) {
-                return FileSystems.getFileSystem(URI.create("jar:" + fp.toURI().toString())).getPath("/");
+                return FileSystems.getFileSystem(URI.create("jar:" + fp.toURI())).getPath("/");
             } catch (IOException e) {
                 throw new IOError(e);
             }

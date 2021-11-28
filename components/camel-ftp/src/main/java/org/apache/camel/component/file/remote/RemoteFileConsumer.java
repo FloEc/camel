@@ -16,7 +16,6 @@
  */
 package org.apache.camel.component.file.remote;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -192,10 +191,11 @@ public abstract class RemoteFileConsumer<T> extends GenericFileConsumer<T> {
                 }
                 getOperations().disconnect();
             }
-        } catch (GenericFileOperationFailedException e) {
-            // ignore just log a warning
-            LOG.warn("Error occurred while disconnecting from {} due: {} This exception will be ignored.",
-                    remoteServer(), e.getMessage());
+        } catch (Exception e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error occurred while disconnecting from {} due: {} This exception will be ignored.",
+                        remoteServer(), e.getMessage(), e);
+            }
         }
     }
 
@@ -209,14 +209,15 @@ public abstract class RemoteFileConsumer<T> extends GenericFileConsumer<T> {
                 LOG.debug("Force disconnecting from: {}", remoteServer());
             }
             getOperations().forceDisconnect();
-        } catch (GenericFileOperationFailedException e) {
-            // ignore just log a warning
-            LOG.warn("Error occurred while disconnecting from {} due: {} This exception will be ignored.",
-                    remoteServer(), e.getMessage());
+        } catch (Exception e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error occurred while disconnecting from {} due: {} This exception will be ignored.",
+                        remoteServer(), e.getMessage(), e);
+            }
         }
     }
 
-    protected void connectIfNecessary() throws IOException {
+    protected void connectIfNecessary() {
         // We need to send a noop first to check if the connection is still open
         boolean isConnected = false;
         try {
@@ -240,7 +241,7 @@ public abstract class RemoteFileConsumer<T> extends GenericFileConsumer<T> {
     }
 
     /**
-     * Returns human readable server information for logging purpose
+     * Returns human-readable server information for logging purpose
      */
     protected String remoteServer() {
         return ((RemoteFileEndpoint<?>) endpoint).remoteServerInformation();

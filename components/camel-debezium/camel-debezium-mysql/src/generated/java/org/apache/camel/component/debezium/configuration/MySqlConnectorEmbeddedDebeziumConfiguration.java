@@ -36,6 +36,8 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     private String signalDataCollection;
     @UriParam(label = LABEL_NAME)
     private String databaseInitialStatements;
+    @UriParam(label = LABEL_NAME, defaultValue = "false")
+    private boolean databaseHistoryStoreOnlyCapturedTablesDdl = false;
     @UriParam(label = LABEL_NAME)
     private String converters;
     @UriParam(label = LABEL_NAME, defaultValue = "__debezium-heartbeat")
@@ -76,6 +78,8 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     private String columnPropagateSourceType;
     @UriParam(label = LABEL_NAME, defaultValue = "fail")
     private String inconsistentSchemaHandlingMode = "fail";
+    @UriParam(label = LABEL_NAME, defaultValue = "1000")
+    private int minRowCountToStreamResults = 1000;
     @UriParam(label = LABEL_NAME)
     private String tableExcludeList;
     @UriParam(label = LABEL_NAME)
@@ -83,6 +87,8 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     private String databasePassword;
     @UriParam(label = LABEL_NAME)
     private String databaseExcludeList;
+    @UriParam(label = LABEL_NAME, defaultValue = "false")
+    private boolean databaseHistoryStoreOnlyMonitoredTablesDdl = false;
     @UriParam(label = LABEL_NAME, defaultValue = "true")
     private boolean gtidSourceFilterDmlEvents = true;
     @UriParam(label = LABEL_NAME, defaultValue = "2048")
@@ -99,6 +105,8 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     private int connectTimeoutMs = 30000;
     @UriParam(label = LABEL_NAME, defaultValue = "8192")
     private int maxQueueSize = 8192;
+    @UriParam(label = LABEL_NAME, defaultValue = "1024")
+    private int incrementalSnapshotChunkSize = 1024;
     @UriParam(label = LABEL_NAME)
     private String databaseHistoryKafkaTopic;
     @UriParam(label = LABEL_NAME, defaultValue = "10s", javaType = "java.time.Duration")
@@ -115,8 +123,12 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     private boolean tombstonesOnDelete = false;
     @UriParam(label = LABEL_NAME, defaultValue = "precise")
     private String decimalHandlingMode = "precise";
+    @UriParam(label = LABEL_NAME, defaultValue = "bytes")
+    private String binaryHandlingMode = "bytes";
     @UriParam(label = LABEL_NAME, defaultValue = "off")
     private String snapshotNewTables = "off";
+    @UriParam(label = LABEL_NAME, defaultValue = "false")
+    private boolean databaseHistorySkipUnparseableDdl = false;
     @UriParam(label = LABEL_NAME, defaultValue = "true")
     private boolean tableIgnoreBuiltin = true;
     @UriParam(label = LABEL_NAME)
@@ -338,6 +350,20 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * Controls what DDL will Debezium store in database history. By default
+     * (false) Debezium will store all incoming DDL statements. If set to true,
+     * then only DDL that manipulates a captured table will be stored.
+     */
+    public void setDatabaseHistoryStoreOnlyCapturedTablesDdl(
+            boolean databaseHistoryStoreOnlyCapturedTablesDdl) {
+        this.databaseHistoryStoreOnlyCapturedTablesDdl = databaseHistoryStoreOnlyCapturedTablesDdl;
+    }
+
+    public boolean isDatabaseHistoryStoreOnlyCapturedTablesDdl() {
+        return databaseHistoryStoreOnlyCapturedTablesDdl;
+    }
+
+    /**
      * Optional list of custom converters that would be used instead of default
      * ones. The converters are defined using '<converter.prefix>.type' config
      * option and configured using options '<converter.prefix>.<option>'
@@ -453,7 +479,7 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     /**
      *  This property contains a comma-separated list of fully-qualified tables
      * (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-     * thespecific connectors . Select statements for the individual tables are
+     * thespecific connectors. Select statements for the individual tables are
      * specified in further configuration properties, one for each table,
      * identified by the id
      * 'snapshot.select.statement.overrides.[DB_NAME].[TABLE_NAME]' or
@@ -609,6 +635,19 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * The number of rows a table must contain to stream results rather than
+     * pull all into memory during snapshots. Defaults to 1,000. Use 0 to stream
+     * all results and completely avoid checking the size of each table.
+     */
+    public void setMinRowCountToStreamResults(int minRowCountToStreamResults) {
+        this.minRowCountToStreamResults = minRowCountToStreamResults;
+    }
+
+    public int getMinRowCountToStreamResults() {
+        return minRowCountToStreamResults;
+    }
+
+    /**
      * A comma-separated list of regular expressions that match the
      * fully-qualified names of tables to be excluded from monitoring
      */
@@ -641,6 +680,22 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
 
     public String getDatabaseExcludeList() {
         return databaseExcludeList;
+    }
+
+    /**
+     * Controls what DDL will Debezium store in database history. By default
+     * (false) Debezium will store all incoming DDL statements. If set to true,
+     * then only DDL that manipulates a monitored table will be stored
+     * (deprecated, use "database.history.store.only.captured.tables.ddl"
+     * instead)
+     */
+    public void setDatabaseHistoryStoreOnlyMonitoredTablesDdl(
+            boolean databaseHistoryStoreOnlyMonitoredTablesDdl) {
+        this.databaseHistoryStoreOnlyMonitoredTablesDdl = databaseHistoryStoreOnlyMonitoredTablesDdl;
+    }
+
+    public boolean isDatabaseHistoryStoreOnlyMonitoredTablesDdl() {
+        return databaseHistoryStoreOnlyMonitoredTablesDdl;
     }
 
     /**
@@ -754,6 +809,17 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * The maximum size of chunk for incremental snapshotting
+     */
+    public void setIncrementalSnapshotChunkSize(int incrementalSnapshotChunkSize) {
+        this.incrementalSnapshotChunkSize = incrementalSnapshotChunkSize;
+    }
+
+    public int getIncrementalSnapshotChunkSize() {
+        return incrementalSnapshotChunkSize;
+    }
+
+    /**
      * The name of the topic for the database schema history
      */
     public void setDatabaseHistoryKafkaTopic(String databaseHistoryKafkaTopic) {
@@ -859,6 +925,20 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
+     * Specify how binary (blob, binary, etc.) columns should be represented in
+     * change events, including:'bytes' represents binary data as byte array
+     * (default)'base64' represents binary data as base64-encoded string'hex'
+     * represents binary data as hex-encoded (base16) string
+     */
+    public void setBinaryHandlingMode(String binaryHandlingMode) {
+        this.binaryHandlingMode = binaryHandlingMode;
+    }
+
+    public String getBinaryHandlingMode() {
+        return binaryHandlingMode;
+    }
+
+    /**
      * BETA FEATURE: On connector restart, the connector will check if there
      * have been any new tables added to the configuration, and snapshot them.
      * There is presently only two options:'off': Default behavior. Do not
@@ -877,6 +957,21 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
 
     public String getSnapshotNewTables() {
         return snapshotNewTables;
+    }
+
+    /**
+     * Controls the action Debezium will take when it meets a DDL statement in
+     * binlog, that it cannot parse.By default the connector will stop operating
+     * but by changing the setting it can ignore the statements which it cannot
+     * parse. If skipping is enabled then Debezium can miss metadata changes.
+     */
+    public void setDatabaseHistorySkipUnparseableDdl(
+            boolean databaseHistorySkipUnparseableDdl) {
+        this.databaseHistorySkipUnparseableDdl = databaseHistorySkipUnparseableDdl;
+    }
+
+    public boolean isDatabaseHistorySkipUnparseableDdl() {
+        return databaseHistorySkipUnparseableDdl;
     }
 
     /**
@@ -1200,6 +1295,7 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "database.history.kafka.recovery.poll.interval.ms", databaseHistoryKafkaRecoveryPollIntervalMs);
         addPropertyIfNotNull(configBuilder, "signal.data.collection", signalDataCollection);
         addPropertyIfNotNull(configBuilder, "database.initial.statements", databaseInitialStatements);
+        addPropertyIfNotNull(configBuilder, "database.history.store.only.captured.tables.ddl", databaseHistoryStoreOnlyCapturedTablesDdl);
         addPropertyIfNotNull(configBuilder, "converters", converters);
         addPropertyIfNotNull(configBuilder, "heartbeat.topics.prefix", heartbeatTopicsPrefix);
         addPropertyIfNotNull(configBuilder, "binlog.buffer.size", binlogBufferSize);
@@ -1220,9 +1316,11 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "enable.time.adjuster", enableTimeAdjuster);
         addPropertyIfNotNull(configBuilder, "column.propagate.source.type", columnPropagateSourceType);
         addPropertyIfNotNull(configBuilder, "inconsistent.schema.handling.mode", inconsistentSchemaHandlingMode);
+        addPropertyIfNotNull(configBuilder, "min.row.count.to.stream.results", minRowCountToStreamResults);
         addPropertyIfNotNull(configBuilder, "table.exclude.list", tableExcludeList);
         addPropertyIfNotNull(configBuilder, "database.password", databasePassword);
         addPropertyIfNotNull(configBuilder, "database.exclude.list", databaseExcludeList);
+        addPropertyIfNotNull(configBuilder, "database.history.store.only.monitored.tables.ddl", databaseHistoryStoreOnlyMonitoredTablesDdl);
         addPropertyIfNotNull(configBuilder, "gtid.source.filter.dml.events", gtidSourceFilterDmlEvents);
         addPropertyIfNotNull(configBuilder, "max.batch.size", maxBatchSize);
         addPropertyIfNotNull(configBuilder, "skipped.operations", skippedOperations);
@@ -1231,6 +1329,7 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "database.history", databaseHistory);
         addPropertyIfNotNull(configBuilder, "connect.timeout.ms", connectTimeoutMs);
         addPropertyIfNotNull(configBuilder, "max.queue.size", maxQueueSize);
+        addPropertyIfNotNull(configBuilder, "incremental.snapshot.chunk.size", incrementalSnapshotChunkSize);
         addPropertyIfNotNull(configBuilder, "database.history.kafka.topic", databaseHistoryKafkaTopic);
         addPropertyIfNotNull(configBuilder, "retriable.restart.connector.wait.ms", retriableRestartConnectorWaitMs);
         addPropertyIfNotNull(configBuilder, "snapshot.delay.ms", snapshotDelayMs);
@@ -1239,7 +1338,9 @@ public class MySqlConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "table.whitelist", tableWhitelist);
         addPropertyIfNotNull(configBuilder, "tombstones.on.delete", tombstonesOnDelete);
         addPropertyIfNotNull(configBuilder, "decimal.handling.mode", decimalHandlingMode);
+        addPropertyIfNotNull(configBuilder, "binary.handling.mode", binaryHandlingMode);
         addPropertyIfNotNull(configBuilder, "snapshot.new.tables", snapshotNewTables);
+        addPropertyIfNotNull(configBuilder, "database.history.skip.unparseable.ddl", databaseHistorySkipUnparseableDdl);
         addPropertyIfNotNull(configBuilder, "table.ignore.builtin", tableIgnoreBuiltin);
         addPropertyIfNotNull(configBuilder, "snapshot.include.collection.list", snapshotIncludeCollectionList);
         addPropertyIfNotNull(configBuilder, "database.history.file.filename", databaseHistoryFileFilename);

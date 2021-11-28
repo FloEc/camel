@@ -46,6 +46,7 @@ import org.apache.camel.model.ModelLifecycleStrategy;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.ProcessorDefinitionHelper;
 import org.apache.camel.model.Resilience4jConfigurationDefinition;
+import org.apache.camel.model.RouteConfigurationDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RouteDefinitionHelper;
 import org.apache.camel.model.RouteFilters;
@@ -60,12 +61,18 @@ import org.apache.camel.spi.ExchangeFactory;
 import org.apache.camel.spi.Language;
 import org.apache.camel.spi.ModelReifierFactory;
 import org.apache.camel.spi.PropertyConfigurer;
+import org.apache.camel.spi.RouteTemplateLoaderListener;
+import org.apache.camel.spi.RouteTemplateParameterSource;
 import org.apache.camel.spi.ScriptingLanguage;
+import org.apache.camel.support.CamelContextHelper;
+import org.apache.camel.support.PatternHelper;
 import org.apache.camel.support.PropertyBindingSupport;
+import org.apache.camel.support.RouteTemplateHelper;
 import org.apache.camel.support.ScriptHelper;
 import org.apache.camel.support.service.ServiceHelper;
 import org.apache.camel.util.AntPathMatcher;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.util.StringHelper;
 import org.apache.camel.util.function.Suppliers;
 
 public class DefaultModel implements Model {
@@ -74,6 +81,7 @@ public class DefaultModel implements Model {
 
     private ModelReifierFactory modelReifierFactory = new DefaultModelReifierFactory();
     private final List<ModelLifecycleStrategy> modelLifecycleStrategies = new ArrayList<>();
+    private final List<RouteConfigurationDefinition> routesConfigurations = new ArrayList<>();
     private final List<RouteDefinition> routeDefinitions = new ArrayList<>();
     private final List<RouteTemplateDefinition> routeTemplateDefinitions = new ArrayList<>();
     private final List<RestDefinition> restDefinitions = new ArrayList<>();
@@ -106,6 +114,44 @@ public class DefaultModel implements Model {
     @Override
     public List<ModelLifecycleStrategy> getModelLifecycleStrategies() {
         return modelLifecycleStrategies;
+    }
+
+    @Override
+    public void addRouteConfiguration(RouteConfigurationDefinition routesConfiguration) {
+        if (routesConfiguration == null) {
+            return;
+        }
+        // only add if not already exists (route-loader may let Java DSL add route configuration twice
+        // because it extends RouteBuilder as base class)
+        if (!this.routesConfigurations.contains(routesConfiguration)) {
+            // check that there is no id clash
+            if (routesConfiguration.getId() != null) {
+                boolean clash = this.routesConfigurations.stream()
+                        .anyMatch(r -> ObjectHelper.equal(r.getId(), routesConfiguration.getId()));
+                if (clash) {
+                    throw new IllegalArgumentException(
+                            "Route configuration already exists with id: " + routesConfiguration.getId());
+                }
+            }
+            this.routesConfigurations.add(routesConfiguration);
+        }
+    }
+
+    @Override
+    public void addRouteConfigurations(List<RouteConfigurationDefinition> routesConfigurations) {
+        if (routesConfigurations == null || routesConfigurations.isEmpty()) {
+            return;
+        }
+        // only add if not already exists (route-loader may let Java DSL add route configuration twice
+        // because it extends RouteBuilder as base class)
+        for (RouteConfigurationDefinition rc : routesConfigurations) {
+            addRouteConfiguration(rc);
+        }
+    }
+
+    @Override
+    public List<RouteConfigurationDefinition> getRouteConfigurationDefinitions() {
+        return routesConfigurations;
     }
 
     @Override
@@ -166,6 +212,15 @@ public class DefaultModel implements Model {
             s.onRemoveRouteDefinition(toBeRemoved);
         }
         this.routeDefinitions.remove(toBeRemoved);
+    }
+
+    @Override
+    public synchronized void removeRouteTemplateDefinitions(String pattern) throws Exception {
+        for (RouteTemplateDefinition def : new ArrayList<>(routeTemplateDefinitions)) {
+            if (PatternHelper.matchPattern(def.getId(), pattern)) {
+                removeRouteTemplateDefinition(def);
+            }
+        }
     }
 
     @Override
@@ -256,6 +311,23 @@ public class DefaultModel implements Model {
             if (routeTemplateId.equals(def.getId())) {
                 target = def;
                 break;
+            }
+        }
+        if (target == null) {
+            // if the route template has a location parameter, then try to load route templates from the location
+            // and look up again
+            Object location = routeTemplateContext.getParameters().get(RouteTemplateParameterSource.LOCATION);
+            if (location != null) {
+                RouteTemplateLoaderListener listener
+                        = CamelContextHelper.findByType(getCamelContext(), RouteTemplateLoaderListener.class);
+                RouteTemplateHelper.loadRouteTemplateFromLocation(getCamelContext(), listener, routeTemplateId,
+                        location.toString());
+            }
+            for (RouteTemplateDefinition def : routeTemplateDefinitions) {
+                if (routeTemplateId.equals(def.getId())) {
+                    target = def;
+                    break;
+                }
             }
         }
         if (target == null) {
@@ -404,19 +476,69 @@ public class DefaultModel implements Model {
                     }));
                 }
             } else if (b.getBeanClass() != null || b.getType() != null && b.getType().startsWith("#class:")) {
-                Class<?> clazz = b.getBeanClass() != null
-                        ? b.getBeanClass() : camelContext.getClassResolver().resolveMandatoryClass(b.getType().substring(7));
-                // we only have the bean class so we use that to create a new bean via the injector
-                // and memorize so the bean is only created once and the local bean is the same
-                // if a route template refers to the local bean multiple times
-                routeTemplateContext.bind(b.getName(), clazz,
-                        Suppliers.memorize(() -> {
-                            Object local = camelContext.getInjector().newInstance(clazz);
+                // if there is a factory method then the class/bean should be created in a different way
+                String className = null;
+                String factoryMethod = null;
+                String parameters = null;
+                if (b.getType() != null) {
+                    className = b.getType().substring(7);
+                    if (className.endsWith(")") && className.indexOf('(') != -1) {
+                        parameters = StringHelper.after(className, "(");
+                        parameters = parameters.substring(0, parameters.length() - 1); // clip last )
+                        className = StringHelper.before(className, "(");
+                    }
+                    if (className != null && className.indexOf('#') != -1) {
+                        factoryMethod = StringHelper.after(className, "#");
+                        className = StringHelper.before(className, "#");
+                    }
+                }
+                if (className != null && (factoryMethod != null || parameters != null)) {
+                    final Class<?> clazz = camelContext.getClassResolver().resolveMandatoryClass(className);
+                    final String fqn = className;
+                    final String fm = factoryMethod;
+                    final String fp = parameters;
+                    routeTemplateContext.bind(b.getName(), Object.class, Suppliers.memorize(() -> {
+                        try {
+                            Object local;
+                            if (fm != null) {
+                                if (fp != null) {
+                                    // special to support factory method parameters
+                                    local = PropertyBindingSupport.newInstanceFactoryParameters(camelContext, clazz, fm, fp);
+                                } else {
+                                    local = camelContext.getInjector().newInstance(clazz, fm);
+                                }
+                                if (local == null) {
+                                    throw new IllegalStateException(
+                                            "Cannot create bean instance using factory method: " + fqn + "#" + fm);
+                                }
+                            } else {
+                                // special to support constructor parameters
+                                local = PropertyBindingSupport.newInstanceConstructorParameters(camelContext, clazz, fp);
+                            }
                             if (!props.isEmpty()) {
                                 setPropertiesOnTarget(camelContext, local, props);
                             }
                             return local;
-                        }));
+                        } catch (Exception e) {
+                            throw new IllegalStateException(
+                                    "Cannot create bean: " + b.getType());
+                        }
+                    }));
+                } else {
+                    Class<?> clazz = b.getBeanClass() != null
+                            ? b.getBeanClass() : camelContext.getClassResolver().resolveMandatoryClass(className);
+                    // we only have the bean class so we use that to create a new bean via the injector
+                    // and memorize so the bean is only created once and the local bean is the same
+                    // if a route template refers to the local bean multiple times
+                    routeTemplateContext.bind(b.getName(), clazz,
+                            Suppliers.memorize(() -> {
+                                Object local = camelContext.getInjector().newInstance(clazz);
+                                if (!props.isEmpty()) {
+                                    setPropertiesOnTarget(camelContext, local, props);
+                                }
+                                return local;
+                            }));
+                }
             } else if (b.getType() != null && b.getType().startsWith("#type:")) {
                 Class<?> clazz = camelContext.getClassResolver().resolveMandatoryClass(b.getType().substring(6));
                 Set<?> found = getCamelContext().getRegistry().findByType(clazz);
@@ -429,6 +551,11 @@ public class DefaultModel implements Model {
                     // do not set properties when using #type as it uses an existing shared bean
                     routeTemplateContext.bind(b.getName(), clazz, found.iterator().next());
                 }
+            } else {
+                // invalid syntax for the local bean, so lets report an exception
+                throw new IllegalArgumentException(
+                        "Route template local bean: " + b.getName() + " has invalid type syntax: " + b.getType()
+                                                   + ". To refer to a class then prefix the value with #class such as: #class:fullyQualifiedClassName");
             }
         }
     }

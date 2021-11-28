@@ -558,7 +558,7 @@ public interface FileEndpointBuilderFactory {
         }
         /**
          * Is used to exclude files, if filename matches the regex pattern
-         * (matching is case in-senstive). Notice if you use symbols such as
+         * (matching is case in-sensitive). Notice if you use symbols such as
          * plus sign and others you would need to configure this using the RAW()
          * syntax if configuring this as an endpoint uri. See more details at
          * configuring endpoint uris.
@@ -578,7 +578,10 @@ public interface FileEndpointBuilderFactory {
          * Is used to exclude files matching file extension name (case
          * insensitive). For example to exclude bak files, then use
          * excludeExt=bak. Multiple extensions can be separated by comma, for
-         * example to exclude bak and dat files, use excludeExt=bak,dat.
+         * example to exclude bak and dat files, use excludeExt=bak,dat. Note
+         * that the file extension includes all parts, for example having a file
+         * named mydata.tar.gz will have extension as tar.gz. For more
+         * flexibility then use the include/exclude options.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -769,7 +772,7 @@ public interface FileEndpointBuilderFactory {
         }
         /**
          * A pluggable repository org.apache.camel.spi.IdempotentRepository
-         * which by default use MemoryMessageIdRepository if none is specified
+         * which by default use MemoryIdempotentRepository if none is specified
          * and idempotent is true.
          * 
          * The option is a:
@@ -788,7 +791,7 @@ public interface FileEndpointBuilderFactory {
         }
         /**
          * A pluggable repository org.apache.camel.spi.IdempotentRepository
-         * which by default use MemoryMessageIdRepository if none is specified
+         * which by default use MemoryIdempotentRepository if none is specified
          * and idempotent is true.
          * 
          * The option will be converted to a
@@ -827,7 +830,10 @@ public interface FileEndpointBuilderFactory {
          * Is used to include files matching file extension name (case
          * insensitive). For example to include txt files, then use
          * includeExt=txt. Multiple extensions can be separated by comma, for
-         * example to include txt and xml files, use includeExt=txt,xml.
+         * example to include txt and xml files, use includeExt=txt,xml. Note
+         * that the file extension includes all parts, for example having a file
+         * named mydata.tar.gz will have extension as tar.gz. For more
+         * flexibility then use the include/exclude options.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2549,6 +2555,44 @@ public interface FileEndpointBuilderFactory {
         default AdvancedFileEndpointConsumerBuilder processStrategy(
                 String processStrategy) {
             doSetProperty("processStrategy", processStrategy);
+            return this;
+        }
+        /**
+         * Set a resume strategy for files. This makes it possible to define a
+         * strategy for resuming reading files after the last point before
+         * stopping the application. See the FileConsumerResumeStrategy for
+         * implementation details.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.file.consumer.FileConsumerResumeStrategy&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default AdvancedFileEndpointConsumerBuilder resumeStrategy(
+                Object resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
+            return this;
+        }
+        /**
+         * Set a resume strategy for files. This makes it possible to define a
+         * strategy for resuming reading files after the last point before
+         * stopping the application. See the FileConsumerResumeStrategy for
+         * implementation details.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.file.consumer.FileConsumerResumeStrategy&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param resumeStrategy the value to set
+         * @return the dsl builder
+         */
+        default AdvancedFileEndpointConsumerBuilder resumeStrategy(
+                String resumeStrategy) {
+            doSetProperty("resumeStrategy", resumeStrategy);
             return this;
         }
         /**

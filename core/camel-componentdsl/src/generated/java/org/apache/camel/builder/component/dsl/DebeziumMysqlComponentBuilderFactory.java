@@ -172,7 +172,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 5s
+         * Default: 5000
          * Group: consumer
          * 
          * @param offsetCommitTimeoutMs the value to set
@@ -188,7 +188,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
-         * Default: 60s
+         * Default: 60000
          * Group: consumer
          * 
          * @param offsetFlushIntervalMs the value to set
@@ -321,6 +321,25 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder bigintUnsignedHandlingMode(
                 java.lang.String bigintUnsignedHandlingMode) {
             doSetProperty("bigintUnsignedHandlingMode", bigintUnsignedHandlingMode);
+            return this;
+        }
+        /**
+         * Specify how binary (blob, binary, etc.) columns should be represented
+         * in change events, including:'bytes' represents binary data as byte
+         * array (default)'base64' represents binary data as base64-encoded
+         * string'hex' represents binary data as hex-encoded (base16) string.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: bytes
+         * Group: mysql
+         * 
+         * @param binaryHandlingMode the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder binaryHandlingMode(
+                java.lang.String binaryHandlingMode) {
+            doSetProperty("binaryHandlingMode", binaryHandlingMode);
             return this;
         }
         /**
@@ -609,6 +628,64 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder databaseHistoryKafkaTopic(
                 java.lang.String databaseHistoryKafkaTopic) {
             doSetProperty("databaseHistoryKafkaTopic", databaseHistoryKafkaTopic);
+            return this;
+        }
+        /**
+         * Controls the action Debezium will take when it meets a DDL statement
+         * in binlog, that it cannot parse.By default the connector will stop
+         * operating but by changing the setting it can ignore the statements
+         * which it cannot parse. If skipping is enabled then Debezium can miss
+         * metadata changes.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param databaseHistorySkipUnparseableDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder databaseHistorySkipUnparseableDdl(
+                boolean databaseHistorySkipUnparseableDdl) {
+            doSetProperty("databaseHistorySkipUnparseableDdl", databaseHistorySkipUnparseableDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database history. By default
+         * (false) Debezium will store all incoming DDL statements. If set to
+         * true, then only DDL that manipulates a captured table will be stored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param databaseHistoryStoreOnlyCapturedTablesDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder databaseHistoryStoreOnlyCapturedTablesDdl(
+                boolean databaseHistoryStoreOnlyCapturedTablesDdl) {
+            doSetProperty("databaseHistoryStoreOnlyCapturedTablesDdl", databaseHistoryStoreOnlyCapturedTablesDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database history. By default
+         * (false) Debezium will store all incoming DDL statements. If set to
+         * true, then only DDL that manipulates a monitored table will be stored
+         * (deprecated, use database.history.store.only.captured.tables.ddl
+         * instead).
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param databaseHistoryStoreOnlyMonitoredTablesDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder databaseHistoryStoreOnlyMonitoredTablesDdl(
+                boolean databaseHistoryStoreOnlyMonitoredTablesDdl) {
+            doSetProperty("databaseHistoryStoreOnlyMonitoredTablesDdl", databaseHistoryStoreOnlyMonitoredTablesDdl);
             return this;
         }
         /**
@@ -1128,6 +1205,22 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
+         * The maximum size of chunk for incremental snapshotting.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 1024
+         * Group: mysql
+         * 
+         * @param incrementalSnapshotChunkSize the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder incrementalSnapshotChunkSize(
+                int incrementalSnapshotChunkSize) {
+            doSetProperty("incrementalSnapshotChunkSize", incrementalSnapshotChunkSize);
+            return this;
+        }
+        /**
          * Maximum size of each batch of source records. Defaults to 2048.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -1198,6 +1291,25 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder messageKeyColumns(
                 java.lang.String messageKeyColumns) {
             doSetProperty("messageKeyColumns", messageKeyColumns);
+            return this;
+        }
+        /**
+         * The number of rows a table must contain to stream results rather than
+         * pull all into memory during snapshots. Defaults to 1,000. Use 0 to
+         * stream all results and completely avoid checking the size of each
+         * table.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 1000
+         * Group: mysql
+         * 
+         * @param minRowCountToStreamResults the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder minRowCountToStreamResults(
+                int minRowCountToStreamResults) {
+            doSetProperty("minRowCountToStreamResults", minRowCountToStreamResults);
             return this;
         }
         /**
@@ -1486,7 +1598,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
         /**
          * This property contains a comma-separated list of fully-qualified
          * tables (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-         * thespecific connectors . Select statements for the individual tables
+         * thespecific connectors. Select statements for the individual tables
          * are specified in further configuration properties, one for each
          * table, identified by the id
          * 'snapshot.select.statement.overrides.DB_NAME.TABLE_NAME' or
@@ -1687,6 +1799,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "offsetStorageTopic": getOrCreateConfiguration((DebeziumMySqlComponent) component).setOffsetStorageTopic((java.lang.String) value); return true;
             case "autowiredEnabled": ((DebeziumMySqlComponent) component).setAutowiredEnabled((boolean) value); return true;
             case "bigintUnsignedHandlingMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setBigintUnsignedHandlingMode((java.lang.String) value); return true;
+            case "binaryHandlingMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setBinaryHandlingMode((java.lang.String) value); return true;
             case "binlogBufferSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setBinlogBufferSize((int) value); return true;
             case "columnBlacklist": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnBlacklist((java.lang.String) value); return true;
             case "columnExcludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnExcludeList((java.lang.String) value); return true;
@@ -1704,6 +1817,9 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "databaseHistoryKafkaRecoveryAttempts": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaRecoveryAttempts((int) value); return true;
             case "databaseHistoryKafkaRecoveryPollIntervalMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaRecoveryPollIntervalMs((int) value); return true;
             case "databaseHistoryKafkaTopic": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaTopic((java.lang.String) value); return true;
+            case "databaseHistorySkipUnparseableDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistorySkipUnparseableDdl((boolean) value); return true;
+            case "databaseHistoryStoreOnlyCapturedTablesDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryStoreOnlyCapturedTablesDdl((boolean) value); return true;
+            case "databaseHistoryStoreOnlyMonitoredTablesDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryStoreOnlyMonitoredTablesDdl((boolean) value); return true;
             case "databaseHostname": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHostname((java.lang.String) value); return true;
             case "databaseIncludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseIncludeList((java.lang.String) value); return true;
             case "databaseInitialStatements": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseInitialStatements((java.lang.String) value); return true;
@@ -1732,10 +1848,12 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "includeQuery": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncludeQuery((boolean) value); return true;
             case "includeSchemaChanges": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncludeSchemaChanges((boolean) value); return true;
             case "inconsistentSchemaHandlingMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setInconsistentSchemaHandlingMode((java.lang.String) value); return true;
+            case "incrementalSnapshotChunkSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncrementalSnapshotChunkSize((int) value); return true;
             case "maxBatchSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMaxBatchSize((int) value); return true;
             case "maxQueueSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMaxQueueSize((int) value); return true;
             case "maxQueueSizeInBytes": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMaxQueueSizeInBytes((long) value); return true;
             case "messageKeyColumns": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMessageKeyColumns((java.lang.String) value); return true;
+            case "minRowCountToStreamResults": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMinRowCountToStreamResults((int) value); return true;
             case "pollIntervalMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setPollIntervalMs((long) value); return true;
             case "provideTransactionMetadata": getOrCreateConfiguration((DebeziumMySqlComponent) component).setProvideTransactionMetadata((boolean) value); return true;
             case "queryFetchSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setQueryFetchSize((int) value); return true;

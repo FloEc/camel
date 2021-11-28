@@ -1,11 +1,13 @@
-[[leveldb-legacy-other]]
 = LevelDB-legacy Component
-:docTitle: LevelDB-legacy
-:artifactId: camel-leveldb-legacy
+:doctitle: LevelDB-legacy
+:shortname: leveldb-legacy
+:artifactid: camel-leveldb-legacy
 :description: Using LevelDB as persistent EIP store
 :since: 2.10
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/others/leveldb-legacy.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: leveldb-legacy
 
 *Since Camel {since}*
 
@@ -158,3 +160,5 @@ the download page for the latest versions).
   <version>x.y.z</version>
 </dependency>
 ----------------------------------------
+
+include::spring-boot:partial$starter.adoc[]

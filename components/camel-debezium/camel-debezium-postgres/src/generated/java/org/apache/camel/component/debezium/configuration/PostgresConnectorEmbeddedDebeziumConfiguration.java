@@ -105,6 +105,8 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
     private String snapshotCustomClass;
     @UriParam(label = LABEL_NAME, defaultValue = "debezium")
     private String slotName = "debezium";
+    @UriParam(label = LABEL_NAME, defaultValue = "1024")
+    private int incrementalSnapshotChunkSize = 1024;
     @UriParam(label = LABEL_NAME, defaultValue = "json")
     private String hstoreHandlingMode = "json";
     @UriParam(label = LABEL_NAME, defaultValue = "10s", javaType = "java.time.Duration")
@@ -123,6 +125,8 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
     private String decimalHandlingMode = "precise";
     @UriParam(label = LABEL_NAME, defaultValue = "bytes")
     private String binaryHandlingMode = "bytes";
+    @UriParam(label = LABEL_NAME, defaultValue = "skip")
+    private String truncateHandlingMode = "skip";
     @UriParam(label = LABEL_NAME, defaultValue = "true")
     private boolean tableIgnoreBuiltin = true;
     @UriParam(label = LABEL_NAME, defaultValue = "true")
@@ -469,7 +473,7 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
     }
 
     /**
-     * The name of the database the connector should be monitoring
+     * The name of the database from which the connector should capture changes
      */
     public void setDatabaseDbname(String databaseDbname) {
         this.databaseDbname = databaseDbname;
@@ -520,7 +524,7 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
     /**
      *  This property contains a comma-separated list of fully-qualified tables
      * (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-     * thespecific connectors . Select statements for the individual tables are
+     * thespecific connectors. Select statements for the individual tables are
      * specified in further configuration properties, one for each table,
      * identified by the id
      * 'snapshot.select.statement.overrides.[DB_NAME].[TABLE_NAME]' or
@@ -722,9 +726,8 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
      * stop after completing the snapshot and before it would normally start
      * emitting changes;'never' to specify the connector should never run a
      * snapshot and that upon first startup the connector should read from the
-     * last position (LSN) recorded by the server; and'exported' to specify the
-     * connector should run a snapshot based on the position when the
-     * replication slot was created; 'custom' to specify a custom class with
+     * last position (LSN) recorded by the server; and'exported' deprecated, use
+     * 'initial' instead; 'custom' to specify a custom class with
      * 'snapshot.custom_class' which will be loaded and used to determine the
      * snapshot, see docs for more details.
      */
@@ -774,6 +777,17 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
 
     public String getSlotName() {
         return slotName;
+    }
+
+    /**
+     * The maximum size of chunk for incremental snapshotting
+     */
+    public void setIncrementalSnapshotChunkSize(int incrementalSnapshotChunkSize) {
+        this.incrementalSnapshotChunkSize = incrementalSnapshotChunkSize;
+    }
+
+    public int getIncrementalSnapshotChunkSize() {
+        return incrementalSnapshotChunkSize;
     }
 
     /**
@@ -894,6 +908,20 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
 
     public String getBinaryHandlingMode() {
         return binaryHandlingMode;
+    }
+
+    /**
+     * Specify how TRUNCATE operations are handled for change events (supported
+     * only on pg11+ pgoutput plugin), including: 'skip' to skip / ignore
+     * TRUNCATE events (default), 'include' to handle and include TRUNCATE
+     * events
+     */
+    public void setTruncateHandlingMode(String truncateHandlingMode) {
+        this.truncateHandlingMode = truncateHandlingMode;
+    }
+
+    public String getTruncateHandlingMode() {
+        return truncateHandlingMode;
     }
 
     /**
@@ -1201,6 +1229,7 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "max.queue.size", maxQueueSize);
         addPropertyIfNotNull(configBuilder, "snapshot.custom.class", snapshotCustomClass);
         addPropertyIfNotNull(configBuilder, "slot.name", slotName);
+        addPropertyIfNotNull(configBuilder, "incremental.snapshot.chunk.size", incrementalSnapshotChunkSize);
         addPropertyIfNotNull(configBuilder, "hstore.handling.mode", hstoreHandlingMode);
         addPropertyIfNotNull(configBuilder, "retriable.restart.connector.wait.ms", retriableRestartConnectorWaitMs);
         addPropertyIfNotNull(configBuilder, "snapshot.delay.ms", snapshotDelayMs);
@@ -1210,6 +1239,7 @@ public class PostgresConnectorEmbeddedDebeziumConfiguration
         addPropertyIfNotNull(configBuilder, "slot.retry.delay.ms", slotRetryDelayMs);
         addPropertyIfNotNull(configBuilder, "decimal.handling.mode", decimalHandlingMode);
         addPropertyIfNotNull(configBuilder, "binary.handling.mode", binaryHandlingMode);
+        addPropertyIfNotNull(configBuilder, "truncate.handling.mode", truncateHandlingMode);
         addPropertyIfNotNull(configBuilder, "table.ignore.builtin", tableIgnoreBuiltin);
         addPropertyIfNotNull(configBuilder, "database.tcpKeepAlive", databaseTcpkeepalive);
         addPropertyIfNotNull(configBuilder, "schema.exclude.list", schemaExcludeList);

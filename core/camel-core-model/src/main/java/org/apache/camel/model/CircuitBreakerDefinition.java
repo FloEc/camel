@@ -30,7 +30,10 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.DslProperty;
 
-@Metadata(label = "eip,routing,circuitbreaker")
+/**
+ * Route messages in a fault tolerance way using Circuit Breaker
+ */
+@Metadata(label = "eip,routing")
 @XmlRootElement(name = "circuitBreaker")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CircuitBreakerDefinition extends OutputDefinition<CircuitBreakerDefinition> {

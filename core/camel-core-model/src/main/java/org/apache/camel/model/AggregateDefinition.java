@@ -103,8 +103,8 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     @Metadata(javaType = "java.time.Duration")
     private String completionTimeout;
     @XmlAttribute
-    @Metadata(defaultValue = "1s", javaType = "java.time.Duration")
-    private String completionTimeoutCheckerInterval = "1s";
+    @Metadata(defaultValue = "1000", javaType = "java.time.Duration")
+    private String completionTimeoutCheckerInterval = "1000";
     @XmlAttribute
     @Metadata(javaType = "java.lang.Boolean")
     private String completionFromBatchConsumer;
@@ -214,6 +214,15 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     /**
      * The AggregationStrategy to use.
      * <p/>
+     * For example to lookup a bean with the name foo, the value is simply just foo. However its also possible to create
+     * a new class: Values can refer to creating new beans by their class name by prefixing with #class, eg
+     * #class:com.foo.MyClassType. The class is created using a default no-arg constructor, however if you need to
+     * create the instance via a factory method then you specify the method as shown:
+     * #class:com.foo.MyClassType#myFactoryMethod. And if the factory method requires parameters they can be specified
+     * as follows: #class:com.foo.MyClassType#myFactoryMethod('Hello World', 5, true). Or if you need to create the
+     * instance via constructor parameters then you can specify the parameters as shown: #class:com.foo.MyClass('Hello
+     * World', 5, true).
+     * <p/>
      * Configuring an AggregationStrategy is required, and is used to merge the incoming Exchange with the existing
      * already merged exchanges. At first call the oldExchange parameter is null. On subsequent invocations the
      * oldExchange contains the merged exchanges and newExchange is of course the new incoming Exchange.
@@ -228,6 +237,21 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
 
     /**
      * A reference to lookup the AggregationStrategy in the Registry.
+     * <p/>
+     * The value can either refer to a bean to lookup, or to lookup a singleton bean by its type, or to create a new
+     * bean:
+     * <ul>
+     * <li>Lookup bean - This is the default behavior to lookup an existing bean by the bean id (value)</li>
+     * <li>reference by type - Values can refer to singleton beans by their type in the registry by prefixing with
+     * #type: syntax, eg #type:com.foo.MyClassType</li>
+     * <li>reference new class - Values can refer to creating new beans by their class name by prefixing with #class, eg
+     * #class:com.foo.MyClassType. The class is created using a default no-arg constructor, however if you need to
+     * create the instance via a factory method then you specify the method as shown:
+     * #class:com.foo.MyClassType#myFactoryMethod. And if the factory method requires parameters they can be specified
+     * as follows: #class:com.foo.MyClassType#myFactoryMethod('Hello World', 5, true). Or if you need to create the
+     * instance via constructor parameters then you can specify the parameters as shown: #class:com.foo.MyClass('Hello
+     * World', 5, true)</li>.
+     * </ul>
      * <p/>
      * Configuring an AggregationStrategy is required, and is used to merge the incoming Exchange with the existing
      * already merged exchanges. At first call the oldExchange parameter is null. On subsequent invocations the
@@ -244,6 +268,21 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     /**
      * A reference to lookup the AggregationStrategy in the Registry.
      * <p/>
+     * The value can either refer to a bean to lookup, or to lookup a singleton bean by its type, or to create a new
+     * bean:
+     * <ul>
+     * <li>Lookup bean - This is the default behavior to lookup an existing bean by the bean id (value)</li>
+     * <li>reference by type - Values can refer to singleton beans by their type in the registry by prefixing with
+     * #type: syntax, eg #type:com.foo.MyClassType</li>
+     * <li>reference new class - Values can refer to creating new beans by their class name by prefixing with #class, eg
+     * #class:com.foo.MyClassType. The class is created using a default no-arg constructor, however if you need to
+     * create the instance via a factory method then you specify the method as shown:
+     * #class:com.foo.MyClassType#myFactoryMethod. And if the factory method requires parameters they can be specified
+     * as follows: #class:com.foo.MyClassType#myFactoryMethod('Hello World', 5, true). Or if you need to create the
+     * instance via constructor parameters then you can specify the parameters as shown: #class:com.foo.MyClass('Hello
+     * World', 5, true)</li>.
+     * </ul>
+     * <p/>
      * Configuring an AggregationStrategy is required, and is used to merge the incoming Exchange with the existing
      * already merged exchanges. At first call the oldExchange parameter is null. On subsequent invocations the
      * oldExchange contains the merged exchanges and newExchange is of course the new incoming Exchange.
@@ -257,7 +296,7 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     }
 
     /**
-     * This option can be used to explicit declare the method name to use, when using POJOs as the AggregationStrategy.
+     * This option can be used to explicit declare the method name to use, when using beans as the AggregationStrategy.
      */
     public void setAggregationStrategyMethodName(String strategyMethodName) {
         this.strategyMethodName = strategyMethodName;
@@ -272,7 +311,7 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     }
 
     /**
-     * This option can be used to explicit declare the method name to use, when using POJOs as the AggregationStrategy.
+     * This option can be used to explicit declare the method name to use, when using beans as the AggregationStrategy.
      */
     public void setStrategyMethodName(String strategyMethodName) {
         this.strategyMethodName = strategyMethodName;
@@ -280,7 +319,7 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
 
     /**
      * If this option is false then the aggregate method is not used for the very first aggregation. If this option is
-     * true then null values is used as the oldExchange (at the very first aggregation), when using POJOs as the
+     * true then null values is used as the oldExchange (at the very first aggregation), when using beans as the
      * AggregationStrategy.
      */
     public void setStrategyMethodAllowNull(String strategyMethodAllowNull) {
@@ -849,7 +888,7 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     }
 
     /**
-     * Sets the method name to use when using a POJO as {@link AggregationStrategy}.
+     * Sets the method name to use when using a bean as {@link AggregationStrategy}.
      *
      * @param  methodName the method name to call
      * @return            the builder
@@ -860,7 +899,7 @@ public class AggregateDefinition extends OutputDefinition<AggregateDefinition>
     }
 
     /**
-     * Sets allowing null when using a POJO as {@link AggregationStrategy}.
+     * Sets allowing null when using a bean as {@link AggregationStrategy}.
      *
      * @return the builder
      */

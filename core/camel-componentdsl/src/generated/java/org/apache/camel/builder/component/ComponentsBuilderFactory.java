@@ -306,7 +306,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.AwsSecretsManagerComponentBuilderFactory.awsSecretsManager();
     }
     /**
-     * AWS 2 Athena (camel-aws2-athena)
+     * AWS Athena (camel-aws2-athena)
      * Access AWS Athena service using AWS SDK version 2.x.
      * 
      * Category: cloud,database
@@ -319,7 +319,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2AthenaComponentBuilderFactory.aws2Athena();
     }
     /**
-     * AWS 2 CloudWatch (camel-aws2-cw)
+     * AWS CloudWatch (camel-aws2-cw)
      * Sending metrics to AWS CloudWatch using AWS SDK version 2.x.
      * 
      * Category: cloud,monitoring
@@ -332,7 +332,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2CwComponentBuilderFactory.aws2Cw();
     }
     /**
-     * AWS 2 DynamoDB (camel-aws2-ddb)
+     * AWS DynamoDB (camel-aws2-ddb)
      * Store and retrieve data from AWS DynamoDB service using AWS SDK version
      * 2.x.
      * 
@@ -346,7 +346,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2DdbComponentBuilderFactory.aws2Ddb();
     }
     /**
-     * AWS 2 DynamoDB Streams (camel-aws2-ddb)
+     * AWS DynamoDB Streams (camel-aws2-ddb)
      * Receive messages from AWS DynamoDB Stream service using AWS SDK version
      * 2.x.
      * 
@@ -360,7 +360,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2DdbstreamComponentBuilderFactory.aws2Ddbstream();
     }
     /**
-     * AWS 2 Elastic Compute Cloud (EC2) (camel-aws2-ec2)
+     * AWS Elastic Compute Cloud (EC2) (camel-aws2-ec2)
      * Manage AWS EC2 instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -373,7 +373,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2Ec2ComponentBuilderFactory.aws2Ec2();
     }
     /**
-     * AWS 2 Elastic Container Service (ECS) (camel-aws2-ecs)
+     * AWS Elastic Container Service (ECS) (camel-aws2-ecs)
      * Manage AWS ECS cluster instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -386,7 +386,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2EcsComponentBuilderFactory.aws2Ecs();
     }
     /**
-     * AWS 2 Elastic Kubernetes Service (EKS) (camel-aws2-eks)
+     * AWS Elastic Kubernetes Service (EKS) (camel-aws2-eks)
      * Manage AWS EKS cluster instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -399,7 +399,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2EksComponentBuilderFactory.aws2Eks();
     }
     /**
-     * AWS 2 Eventbridge (camel-aws2-eventbridge)
+     * AWS Eventbridge (camel-aws2-eventbridge)
      * Manage AWS Eventbridge cluster instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -412,7 +412,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2EventbridgeComponentBuilderFactory.aws2Eventbridge();
     }
     /**
-     * AWS 2 Identity and Access Management (IAM) (camel-aws2-iam)
+     * AWS Identity and Access Management (IAM) (camel-aws2-iam)
      * Manage AWS IAM instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -425,7 +425,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2IamComponentBuilderFactory.aws2Iam();
     }
     /**
-     * AWS 2 Kinesis (camel-aws2-kinesis)
+     * AWS Kinesis (camel-aws2-kinesis)
      * Consume and produce records from and to AWS Kinesis Streams using AWS SDK
      * version 2.x.
      * 
@@ -439,7 +439,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2KinesisComponentBuilderFactory.aws2Kinesis();
     }
     /**
-     * AWS 2 Kinesis Firehose (camel-aws2-kinesis)
+     * AWS Kinesis Firehose (camel-aws2-kinesis)
      * Produce data to AWS Kinesis Firehose streams using AWS SDK version 2.x.
      * 
      * Category: cloud,messaging
@@ -452,7 +452,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2KinesisFirehoseComponentBuilderFactory.aws2KinesisFirehose();
     }
     /**
-     * AWS 2 Key Management Service (KMS) (camel-aws2-kms)
+     * AWS Key Management Service (KMS) (camel-aws2-kms)
      * Manage keys stored in AWS KMS instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -465,7 +465,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2KmsComponentBuilderFactory.aws2Kms();
     }
     /**
-     * AWS 2 Lambda (camel-aws2-lambda)
+     * AWS Lambda (camel-aws2-lambda)
      * Manage and invoke AWS Lambda functions using AWS SDK version 2.x.
      * 
      * Category: cloud,computing,serverless
@@ -478,7 +478,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2LambdaComponentBuilderFactory.aws2Lambda();
     }
     /**
-     * AWS 2 MQ (camel-aws2-mq)
+     * AWS MQ (camel-aws2-mq)
      * Manage AWS MQ instances using AWS SDK version 2.x.
      * 
      * Category: cloud,messaging
@@ -491,7 +491,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2MqComponentBuilderFactory.aws2Mq();
     }
     /**
-     * AWS 2 Managed Streaming for Apache Kafka (MSK) (camel-aws2-msk)
+     * AWS Managed Streaming for Apache Kafka (MSK) (camel-aws2-msk)
      * Manage AWS MSK instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -504,7 +504,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2MskComponentBuilderFactory.aws2Msk();
     }
     /**
-     * AWS 2 S3 Storage Service (camel-aws2-s3)
+     * AWS S3 Storage Service (camel-aws2-s3)
      * Store and retrieve objects from AWS S3 Storage Service using AWS SDK
      * version 2.x.
      * 
@@ -518,7 +518,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2S3ComponentBuilderFactory.aws2S3();
     }
     /**
-     * AWS 2 Simple Email Service (SES) (camel-aws2-ses)
+     * AWS Simple Email Service (SES) (camel-aws2-ses)
      * Send e-mails through AWS SES service using AWS SDK version 2.x.
      * 
      * Category: cloud,mail
@@ -531,7 +531,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2SesComponentBuilderFactory.aws2Ses();
     }
     /**
-     * AWS 2 Simple Notification System (SNS) (camel-aws2-sns)
+     * AWS Simple Notification System (SNS) (camel-aws2-sns)
      * Send messages to an AWS Simple Notification Topic using AWS SDK version
      * 2.x.
      * 
@@ -545,9 +545,9 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2SnsComponentBuilderFactory.aws2Sns();
     }
     /**
-     * AWS 2 Simple Queue Service (SQS) (camel-aws2-sqs)
-     * Sending and receive messages to/from AWS SQS service using AWS SDK
-     * version 2.x.
+     * AWS Simple Queue Service (SQS) (camel-aws2-sqs)
+     * Send and receive messages to/from AWS SQS service using AWS SDK version
+     * 2.x.
      * 
      * Category: cloud,messaging
      * Since: 3.1
@@ -559,7 +559,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2SqsComponentBuilderFactory.aws2Sqs();
     }
     /**
-     * AWS 2 Security Token Service (STS) (camel-aws2-sts)
+     * AWS Security Token Service (STS) (camel-aws2-sts)
      * Manage AWS STS cluster instances using AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -572,7 +572,7 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.Aws2StsComponentBuilderFactory.aws2Sts();
     }
     /**
-     * AWS 2 Translate (camel-aws2-translate)
+     * AWS Translate (camel-aws2-translate)
      * Translate texts using AWS Translate and AWS SDK version 2.x.
      * 
      * Category: cloud,management
@@ -613,6 +613,24 @@ public interface ComponentsBuilderFactory {
      */
     static org.apache.camel.builder.component.dsl.AzureEventhubsComponentBuilderFactory.AzureEventhubsComponentBuilder azureEventhubs() {
         return org.apache.camel.builder.component.dsl.AzureEventhubsComponentBuilderFactory.azureEventhubs();
+    }
+    /**
+     * Azure ServiceBus (camel-azure-servicebus)
+     * The azure-servicebus component that integrates Azure ServiceBus. Azure
+     * ServiceBus is a fully managed enterprise integration message broker.
+     * Service Bus can decouple applications and services. Service Bus offers a
+     * reliable and secure platform for asynchronous transfer of data and state.
+     * Data is transferred between different applications and services using
+     * messages.
+     * 
+     * Category: cloud,messaging
+     * Since: 3.12
+     * Maven coordinates: org.apache.camel:camel-azure-servicebus
+     * 
+     * @return the dsl builder
+     */
+    static org.apache.camel.builder.component.dsl.AzureServicebusComponentBuilderFactory.AzureServicebusComponentBuilder azureServicebus() {
+        return org.apache.camel.builder.component.dsl.AzureServicebusComponentBuilderFactory.azureServicebus();
     }
     /**
      * Azure Storage Blob Service (camel-azure-storage-blob)
@@ -1310,7 +1328,7 @@ public interface ComponentsBuilderFactory {
     }
     /**
      * Elasticsearch Rest (camel-elasticsearch-rest)
-     * Send requests to with an ElasticSearch via REST API.
+     * Send requests to ElasticSearch via REST API
      * 
      * Category: search,monitoring
      * Since: 2.21
@@ -1616,7 +1634,7 @@ public interface ComponentsBuilderFactory {
      * Google Calendar Stream (camel-google-calendar)
      * Poll for changes in a Google Calendar.
      * 
-     * Category: api,cloud
+     * Category: cloud
      * Since: 2.23
      * Maven coordinates: org.apache.camel:camel-google-calendar
      * 
@@ -1668,7 +1686,7 @@ public interface ComponentsBuilderFactory {
      * Google Mail Stream (camel-google-mail)
      * Poll for incoming messages in Google Mail.
      * 
-     * Category: cloud,api,mail
+     * Category: cloud,mail
      * Since: 2.22
      * Maven coordinates: org.apache.camel:camel-google-mail
      * 
@@ -1707,7 +1725,7 @@ public interface ComponentsBuilderFactory {
      * Google Sheets Stream (camel-google-sheets)
      * Poll for changes in Google Sheets.
      * 
-     * Category: api,cloud,sheets
+     * Category: cloud,sheets
      * Since: 2.23
      * Maven coordinates: org.apache.camel:camel-google-sheets
      * 
@@ -1994,7 +2012,21 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.HttpsComponentBuilderFactory.https();
     }
     /**
-     * FunctionGraph (camel-huaweicloud-functiongraph)
+     * Huawei Distributed Message Service (DMS) (camel-huaweicloud-dms)
+     * To integrate with a fully managed, high-performance message queuing
+     * service on Huawei Cloud
+     * 
+     * Category: cloud
+     * Since: 3.12
+     * Maven coordinates: org.apache.camel:camel-huaweicloud-dms
+     * 
+     * @return the dsl builder
+     */
+    static org.apache.camel.builder.component.dsl.HwcloudDmsComponentBuilderFactory.HwcloudDmsComponentBuilder hwcloudDms() {
+        return org.apache.camel.builder.component.dsl.HwcloudDmsComponentBuilderFactory.hwcloudDms();
+    }
+    /**
+     * Huawei FunctionGraph (camel-huaweicloud-functiongraph)
      * To call serverless functions on Huawei Cloud
      * 
      * Category: cloud,serverless
@@ -2007,8 +2039,49 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.HwcloudFunctiongraphComponentBuilderFactory.hwcloudFunctiongraph();
     }
     /**
-     * SimpleNotification (camel-huaweicloud-smn)
-     * Huawei Cloud component to integrate with SimpleNotification services
+     * Huawei Identity and Access Management (IAM) (camel-huaweicloud-iam)
+     * To securely manage users on Huawei Cloud
+     * 
+     * Category: cloud
+     * Since: 3.11
+     * Maven coordinates: org.apache.camel:camel-huaweicloud-iam
+     * 
+     * @return the dsl builder
+     */
+    static org.apache.camel.builder.component.dsl.HwcloudIamComponentBuilderFactory.HwcloudIamComponentBuilder hwcloudIam() {
+        return org.apache.camel.builder.component.dsl.HwcloudIamComponentBuilderFactory.hwcloudIam();
+    }
+    /**
+     * Huawei Cloud Image Recognition (camel-huaweicloud-imagerecognition)
+     * To identify objects, scenes, and concepts in images on Huawei Cloud
+     * 
+     * Category: cloud,messaging
+     * Since: 3.12
+     * Maven coordinates: org.apache.camel:camel-huaweicloud-imagerecognition
+     * 
+     * @return the dsl builder
+     */
+    static org.apache.camel.builder.component.dsl.HwcloudImagerecognitionComponentBuilderFactory.HwcloudImagerecognitionComponentBuilder hwcloudImagerecognition() {
+        return org.apache.camel.builder.component.dsl.HwcloudImagerecognitionComponentBuilderFactory.hwcloudImagerecognition();
+    }
+    /**
+     * Huawei Object Storage Service (OBS) (camel-huaweicloud-obs)
+     * To provide stable, secure, efficient, and easy-to-use cloud storage
+     * service on Huawei Cloud
+     * 
+     * Category: cloud
+     * Since: 3.12
+     * Maven coordinates: org.apache.camel:camel-huaweicloud-obs
+     * 
+     * @return the dsl builder
+     */
+    static org.apache.camel.builder.component.dsl.HwcloudObsComponentBuilderFactory.HwcloudObsComponentBuilder hwcloudObs() {
+        return org.apache.camel.builder.component.dsl.HwcloudObsComponentBuilderFactory.hwcloudObs();
+    }
+    /**
+     * Huawei Simple Message Notification (SMN) (camel-huaweicloud-smn)
+     * To broadcast messages and connect cloud services through notifications on
+     * Huawei Cloud
      * 
      * Category: cloud,messaging
      * Since: 3.8
@@ -2470,6 +2543,19 @@ public interface ComponentsBuilderFactory {
         return org.apache.camel.builder.component.dsl.JsltComponentBuilderFactory.jslt();
     }
     /**
+     * JsonPatch (camel-json-patch)
+     * JsonPatch component which transform JSON using JSON patch (RFC 6902).
+     * 
+     * Category: transformation
+     * Since: 3.12
+     * Maven coordinates: org.apache.camel:camel-json-patch
+     * 
+     * @return the dsl builder
+     */
+    static org.apache.camel.builder.component.dsl.JsonPatchComponentBuilderFactory.JsonPatchComponentBuilder jsonPatch() {
+        return org.apache.camel.builder.component.dsl.JsonPatchComponentBuilderFactory.jsonPatch();
+    }
+    /**
      * JSON Schema Validator (camel-json-validator)
      * Validate JSON payloads using NetworkNT JSON Schema.
      * 
@@ -2546,6 +2632,7 @@ public interface ComponentsBuilderFactory {
      * 
      * @return the dsl builder
      */
+    @Deprecated
     static org.apache.camel.builder.component.dsl.KameletReifyComponentBuilderFactory.KameletReifyComponentBuilder kameletReify() {
         return org.apache.camel.builder.component.dsl.KameletReifyComponentBuilderFactory.kameletReify();
     }
@@ -3113,7 +3200,7 @@ public interface ComponentsBuilderFactory {
     }
     /**
      * Netty (camel-netty)
-     * Socket level networking using TCP or UDP with the Netty 4.x.
+     * Socket level networking using TCP or UDP with Netty 4.x.
      * 
      * Category: networking,tcp,udp
      * Since: 2.14

@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.camel.spi.Metadata;
 
 /**
- * Route to be executed when Hystrix EIP executes fallback
+ * Route to be executed when Circuit Breaker EIP executes fallback
  */
-@Metadata(label = "eip,routing,circuitbreaker")
+@Metadata(label = "eip,routing")
 @XmlRootElement(name = "onFallback")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OnFallbackDefinition extends OutputDefinition<OnFallbackDefinition> {

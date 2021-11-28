@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import javax.activation.DataHandler;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.vertx.core.VertxOptions;
 import org.apache.camel.CamelContext;
 import org.apache.camel.attachment.AttachmentMessage;
@@ -408,6 +409,35 @@ public class VertxPlatformHttpEngineTest {
     }
 
     @Test
+    public void testTextContentPost() throws Exception {
+        final CamelContext context = createCamelContext();
+
+        try {
+            context.addRoutes(new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from("platform-http:/text/post")
+                            .log("POST:/test/post has body ${body}");
+                }
+            });
+
+            context.start();
+
+            String payload = "Hello World";
+            given()
+                    .contentType(ContentType.TEXT)
+                    .body(payload)
+                    .when()
+                    .post("/text/post")
+                    .then()
+                    .statusCode(200)
+                    .body(is(payload));
+        } finally {
+            context.stop();
+        }
+    }
+
+    @Test
     public void testBodyClientRequestValidation() throws Exception {
         final CamelContext context = createCamelContext();
 
@@ -456,11 +486,11 @@ public class VertxPlatformHttpEngineTest {
         }
     }
 
-    private CamelContext createCamelContext() throws Exception {
+    static CamelContext createCamelContext() throws Exception {
         return createCamelContext(null);
     }
 
-    private CamelContext createCamelContext(ServerConfigurationCustomizer customizer) throws Exception {
+    private static CamelContext createCamelContext(ServerConfigurationCustomizer customizer) throws Exception {
         int port = AvailablePortFinder.getNextAvailable();
         VertxPlatformHttpServerConfiguration conf = new VertxPlatformHttpServerConfiguration();
         conf.setBindPort(port);

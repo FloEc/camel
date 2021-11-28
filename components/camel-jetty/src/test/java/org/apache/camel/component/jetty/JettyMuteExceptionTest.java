@@ -37,7 +37,7 @@ public class JettyMuteExceptionTest extends BaseJettyTest {
         HttpResponse response = client.execute(get);
 
         String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
-        assertEquals("Exception", responseString);
+        assertEquals("", responseString);
         assertEquals(500, response.getStatusLine().getStatusCode());
 
         client.close();

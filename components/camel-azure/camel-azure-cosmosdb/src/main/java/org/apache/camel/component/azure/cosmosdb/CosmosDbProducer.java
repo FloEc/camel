@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosDatabaseProperties;
@@ -33,6 +32,7 @@ import com.azure.cosmos.models.ThroughputResponse;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.azure.cosmosdb.client.CosmosAsyncClientWrapper;
 import org.apache.camel.component.azure.cosmosdb.operations.CosmosDbClientOperations;
 import org.apache.camel.component.azure.cosmosdb.operations.CosmosDbContainerOperations;
@@ -123,16 +123,12 @@ public class CosmosDbProducer extends DefaultAsyncProducer {
         if (fnToInvoke != null) {
             fnToInvoke.accept(exchange, callback);
         } else {
-            throw new RuntimeException("Operation not supported. Value: " + operationsToInvoke);
+            throw new RuntimeCamelException("Operation not supported. Value: " + operationsToInvoke);
         }
     }
 
     private CosmosDbConfiguration getConfiguration() {
         return getEndpoint().getConfiguration();
-    }
-
-    private CosmosAsyncClient getCosmosAsyncClient() {
-        return getEndpoint().getCosmosAsyncClient();
     }
 
     private BiConsumer<Exchange, AsyncCallback> listDatabases() {

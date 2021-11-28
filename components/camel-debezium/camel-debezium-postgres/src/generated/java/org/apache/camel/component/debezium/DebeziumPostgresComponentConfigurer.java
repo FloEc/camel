@@ -94,6 +94,8 @@ public class DebeziumPostgresComponentConfigurer extends PropertyConfigurerSuppo
         case "hstoreHandlingMode": getOrCreateConfiguration(target).setHstoreHandlingMode(property(camelContext, java.lang.String.class, value)); return true;
         case "includeunknowndatatypes":
         case "includeUnknownDatatypes": getOrCreateConfiguration(target).setIncludeUnknownDatatypes(property(camelContext, boolean.class, value)); return true;
+        case "incrementalsnapshotchunksize":
+        case "incrementalSnapshotChunkSize": getOrCreateConfiguration(target).setIncrementalSnapshotChunkSize(property(camelContext, int.class, value)); return true;
         case "internalkeyconverter":
         case "internalKeyConverter": getOrCreateConfiguration(target).setInternalKeyConverter(property(camelContext, java.lang.String.class, value)); return true;
         case "internalvalueconverter":
@@ -200,6 +202,8 @@ public class DebeziumPostgresComponentConfigurer extends PropertyConfigurerSuppo
         case "toastedValuePlaceholder": getOrCreateConfiguration(target).setToastedValuePlaceholder(property(camelContext, java.lang.String.class, value)); return true;
         case "tombstonesondelete":
         case "tombstonesOnDelete": getOrCreateConfiguration(target).setTombstonesOnDelete(property(camelContext, boolean.class, value)); return true;
+        case "truncatehandlingmode":
+        case "truncateHandlingMode": getOrCreateConfiguration(target).setTruncateHandlingMode(property(camelContext, java.lang.String.class, value)); return true;
         case "xminfetchintervalms":
         case "xminFetchIntervalMs": getOrCreateConfiguration(target).setXminFetchIntervalMs(property(camelContext, java.time.Duration.class, value).toMillis()); return true;
         default: return false;
@@ -275,6 +279,8 @@ public class DebeziumPostgresComponentConfigurer extends PropertyConfigurerSuppo
         case "hstoreHandlingMode": return java.lang.String.class;
         case "includeunknowndatatypes":
         case "includeUnknownDatatypes": return boolean.class;
+        case "incrementalsnapshotchunksize":
+        case "incrementalSnapshotChunkSize": return int.class;
         case "internalkeyconverter":
         case "internalKeyConverter": return java.lang.String.class;
         case "internalvalueconverter":
@@ -381,6 +387,8 @@ public class DebeziumPostgresComponentConfigurer extends PropertyConfigurerSuppo
         case "toastedValuePlaceholder": return java.lang.String.class;
         case "tombstonesondelete":
         case "tombstonesOnDelete": return boolean.class;
+        case "truncatehandlingmode":
+        case "truncateHandlingMode": return java.lang.String.class;
         case "xminfetchintervalms":
         case "xminFetchIntervalMs": return long.class;
         default: return null;
@@ -457,6 +465,8 @@ public class DebeziumPostgresComponentConfigurer extends PropertyConfigurerSuppo
         case "hstoreHandlingMode": return getOrCreateConfiguration(target).getHstoreHandlingMode();
         case "includeunknowndatatypes":
         case "includeUnknownDatatypes": return getOrCreateConfiguration(target).isIncludeUnknownDatatypes();
+        case "incrementalsnapshotchunksize":
+        case "incrementalSnapshotChunkSize": return getOrCreateConfiguration(target).getIncrementalSnapshotChunkSize();
         case "internalkeyconverter":
         case "internalKeyConverter": return getOrCreateConfiguration(target).getInternalKeyConverter();
         case "internalvalueconverter":
@@ -563,6 +573,8 @@ public class DebeziumPostgresComponentConfigurer extends PropertyConfigurerSuppo
         case "toastedValuePlaceholder": return getOrCreateConfiguration(target).getToastedValuePlaceholder();
         case "tombstonesondelete":
         case "tombstonesOnDelete": return getOrCreateConfiguration(target).isTombstonesOnDelete();
+        case "truncatehandlingmode":
+        case "truncateHandlingMode": return getOrCreateConfiguration(target).getTruncateHandlingMode();
         case "xminfetchintervalms":
         case "xminFetchIntervalMs": return getOrCreateConfiguration(target).getXminFetchIntervalMs();
         default: return null;

@@ -44,14 +44,14 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "checkCrcs": target.getConfiguration().setCheckCrcs(property(camelContext, java.lang.Boolean.class, value)); return true;
         case "clientid":
         case "clientId": target.getConfiguration().setClientId(property(camelContext, java.lang.String.class, value)); return true;
+        case "committimeoutms":
+        case "commitTimeoutMs": target.getConfiguration().setCommitTimeoutMs(property(camelContext, java.lang.Long.class, value)); return true;
         case "compressioncodec":
         case "compressionCodec": target.getConfiguration().setCompressionCodec(property(camelContext, java.lang.String.class, value)); return true;
         case "connectionmaxidlems":
         case "connectionMaxIdleMs": target.getConfiguration().setConnectionMaxIdleMs(property(camelContext, java.lang.Integer.class, value)); return true;
         case "consumerrequesttimeoutms":
         case "consumerRequestTimeoutMs": target.getConfiguration().setConsumerRequestTimeoutMs(property(camelContext, java.lang.Integer.class, value)); return true;
-        case "consumerstreams":
-        case "consumerStreams": target.getConfiguration().setConsumerStreams(property(camelContext, int.class, value)); return true;
         case "consumerscount":
         case "consumersCount": target.getConfiguration().setConsumersCount(property(camelContext, int.class, value)); return true;
         case "deliverytimeoutms":
@@ -70,6 +70,8 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "fetchWaitMaxMs": target.getConfiguration().setFetchWaitMaxMs(property(camelContext, java.lang.Integer.class, value)); return true;
         case "groupid":
         case "groupId": target.getConfiguration().setGroupId(property(camelContext, java.lang.String.class, value)); return true;
+        case "groupinstanceid":
+        case "groupInstanceId": target.getConfiguration().setGroupInstanceId(property(camelContext, java.lang.String.class, value)); return true;
         case "headerdeserializer":
         case "headerDeserializer": target.getConfiguration().setHeaderDeserializer(property(camelContext, org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer.class, value)); return true;
         case "headerfilterstrategy":
@@ -146,6 +148,8 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "requestRequiredAcks": target.getConfiguration().setRequestRequiredAcks(property(camelContext, java.lang.String.class, value)); return true;
         case "requesttimeoutms":
         case "requestTimeoutMs": target.getConfiguration().setRequestTimeoutMs(property(camelContext, java.lang.Integer.class, value)); return true;
+        case "resumestrategy":
+        case "resumeStrategy": target.getConfiguration().setResumeStrategy(property(camelContext, org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy.class, value)); return true;
         case "retries": target.getConfiguration().setRetries(property(camelContext, java.lang.Integer.class, value)); return true;
         case "retrybackoffms":
         case "retryBackoffMs": target.getConfiguration().setRetryBackoffMs(property(camelContext, java.lang.Integer.class, value)); return true;
@@ -242,14 +246,14 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "checkCrcs": return java.lang.Boolean.class;
         case "clientid":
         case "clientId": return java.lang.String.class;
+        case "committimeoutms":
+        case "commitTimeoutMs": return java.lang.Long.class;
         case "compressioncodec":
         case "compressionCodec": return java.lang.String.class;
         case "connectionmaxidlems":
         case "connectionMaxIdleMs": return java.lang.Integer.class;
         case "consumerrequesttimeoutms":
         case "consumerRequestTimeoutMs": return java.lang.Integer.class;
-        case "consumerstreams":
-        case "consumerStreams": return int.class;
         case "consumerscount":
         case "consumersCount": return int.class;
         case "deliverytimeoutms":
@@ -268,6 +272,8 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "fetchWaitMaxMs": return java.lang.Integer.class;
         case "groupid":
         case "groupId": return java.lang.String.class;
+        case "groupinstanceid":
+        case "groupInstanceId": return java.lang.String.class;
         case "headerdeserializer":
         case "headerDeserializer": return org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer.class;
         case "headerfilterstrategy":
@@ -344,6 +350,8 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "requestRequiredAcks": return java.lang.String.class;
         case "requesttimeoutms":
         case "requestTimeoutMs": return java.lang.Integer.class;
+        case "resumestrategy":
+        case "resumeStrategy": return org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy.class;
         case "retries": return java.lang.Integer.class;
         case "retrybackoffms":
         case "retryBackoffMs": return java.lang.Integer.class;
@@ -441,14 +449,14 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "checkCrcs": return target.getConfiguration().getCheckCrcs();
         case "clientid":
         case "clientId": return target.getConfiguration().getClientId();
+        case "committimeoutms":
+        case "commitTimeoutMs": return target.getConfiguration().getCommitTimeoutMs();
         case "compressioncodec":
         case "compressionCodec": return target.getConfiguration().getCompressionCodec();
         case "connectionmaxidlems":
         case "connectionMaxIdleMs": return target.getConfiguration().getConnectionMaxIdleMs();
         case "consumerrequesttimeoutms":
         case "consumerRequestTimeoutMs": return target.getConfiguration().getConsumerRequestTimeoutMs();
-        case "consumerstreams":
-        case "consumerStreams": return target.getConfiguration().getConsumerStreams();
         case "consumerscount":
         case "consumersCount": return target.getConfiguration().getConsumersCount();
         case "deliverytimeoutms":
@@ -467,6 +475,8 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "fetchWaitMaxMs": return target.getConfiguration().getFetchWaitMaxMs();
         case "groupid":
         case "groupId": return target.getConfiguration().getGroupId();
+        case "groupinstanceid":
+        case "groupInstanceId": return target.getConfiguration().getGroupInstanceId();
         case "headerdeserializer":
         case "headerDeserializer": return target.getConfiguration().getHeaderDeserializer();
         case "headerfilterstrategy":
@@ -543,6 +553,8 @@ public class KafkaEndpointConfigurer extends PropertyConfigurerSupport implement
         case "requestRequiredAcks": return target.getConfiguration().getRequestRequiredAcks();
         case "requesttimeoutms":
         case "requestTimeoutMs": return target.getConfiguration().getRequestTimeoutMs();
+        case "resumestrategy":
+        case "resumeStrategy": return target.getConfiguration().getResumeStrategy();
         case "retries": return target.getConfiguration().getRetries();
         case "retrybackoffms":
         case "retryBackoffMs": return target.getConfiguration().getRetryBackoffMs();

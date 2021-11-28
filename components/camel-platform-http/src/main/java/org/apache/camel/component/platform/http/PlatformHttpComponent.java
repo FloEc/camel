@@ -165,8 +165,7 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
 
         String url = RestComponentHelper.createRestConsumerUrl("platform-http", path, map);
 
-        PlatformHttpEndpoint endpoint = camelContext.getEndpoint(url, PlatformHttpEndpoint.class);
-        setProperties(endpoint, parameters);
+        PlatformHttpEndpoint endpoint = (PlatformHttpEndpoint) camelContext.getEndpoint(url, parameters);
         endpoint.setConsumes(consumes);
         endpoint.setProduces(produces);
 
@@ -209,4 +208,23 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
 
         return engine;
     }
+
+    @Override
+    protected void doInit() throws Exception {
+        super.doInit();
+
+        try {
+            RestConfiguration config = CamelContextHelper.getRestConfiguration(getCamelContext(), "platform-http");
+
+            // configure additional options on  configuration
+            if (config.getComponentProperties() != null && !config.getComponentProperties().isEmpty()) {
+                setProperties(this, config.getComponentProperties());
+            }
+        } catch (IllegalArgumentException e) {
+            // if there's a mismatch between the component and the rest-configuration,
+            // then getRestConfiguration throws IllegalArgumentException which can be
+            // safely ignored as it means there's no special conf for this component.
+        }
+    }
+
 }

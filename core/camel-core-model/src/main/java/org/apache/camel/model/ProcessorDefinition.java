@@ -54,6 +54,7 @@ import org.apache.camel.model.dataformat.CustomDataFormat;
 import org.apache.camel.model.language.ConstantExpression;
 import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.model.language.LanguageExpression;
+import org.apache.camel.model.language.SimpleExpression;
 import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.processor.loadbalancer.LoadBalancer;
 import org.apache.camel.spi.AsEndpointUri;
@@ -2240,7 +2241,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     }
 
     /**
-     * Marks this route as participating to a saga.
+     * Marks this route as participating in a saga.
      *
      * @return the saga definition
      */
@@ -2747,8 +2748,20 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     /**
      * Converts the IN message body to the specified type
      *
+     * @param  type      the type to convert to
+     * @param  mandatory whether to use mandatory type conversion or not
+     * @return           the builder
+     */
+    public Type convertBodyTo(Class<?> type, boolean mandatory) {
+        addOutput(new ConvertBodyDefinition(type, mandatory));
+        return asType();
+    }
+
+    /**
+     * Converts the IN message body to the specified type
+     *
      * @param  type    the type to convert to
-     * @param  charset the charset to use by type converters (not all converters support specifc charset)
+     * @param  charset the charset to use by type converters (not all converters support specific charset)
      * @return         the builder
      */
     public Type convertBodyTo(Class<?> type, String charset) {
@@ -3070,7 +3083,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
             @AsEndpointUri EndpointProducerBuilder resourceUri, AggregationStrategy aggregationStrategy,
             boolean aggregateOnException, boolean shareUnitOfWork) {
         EnrichDefinition answer = new EnrichDefinition();
-        answer.setExpression(resourceUri.expr());
+        answer.setExpression(new SimpleExpression(resourceUri.getUri()));
         answer.setAggregationStrategy(aggregationStrategy);
         answer.setAggregateOnException(Boolean.toString(aggregateOnException));
         answer.setShareUnitOfWork(Boolean.toString(shareUnitOfWork));
@@ -3194,7 +3207,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @see                org.apache.camel.processor.PollEnricher
      */
     public Type pollEnrich(EndpointConsumerBuilder resourceUri) {
-        return pollEnrich(resourceUri.expr(), -1, (String) null, false);
+        return pollEnrich(new SimpleExpression(resourceUri.getUri()), -1, (String) null, false);
     }
 
     /**
@@ -3419,7 +3432,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     public Type pollEnrich(
             @AsEndpointUri EndpointConsumerBuilder resourceUri, long timeout, AggregationStrategy aggregationStrategy,
             boolean aggregateOnException) {
-        return pollEnrich(resourceUri.expr(), timeout, aggregationStrategy, aggregateOnException);
+        return pollEnrich(new SimpleExpression(resourceUri.getUri()), timeout, aggregationStrategy, aggregateOnException);
     }
 
     /**
@@ -3446,7 +3459,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     public Type pollEnrich(
             @AsEndpointUri EndpointConsumerBuilder resourceUri, long timeout, String aggregationStrategyRef,
             boolean aggregateOnException) {
-        return pollEnrich(resourceUri.expr(), timeout, aggregationStrategyRef, aggregateOnException);
+        return pollEnrich(new SimpleExpression(resourceUri.getUri()), timeout, aggregationStrategyRef, aggregateOnException);
     }
 
     /**
@@ -3574,15 +3587,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     public OnCompletionDefinition onCompletion() {
         OnCompletionDefinition answer = new OnCompletionDefinition();
 
-        Collection<OnCompletionDefinition> col
-                = ProcessorDefinitionHelper.filterTypeInOutputs(getOutputs(), OnCompletionDefinition.class);
-        // check if there is a clash
-        for (OnCompletionDefinition ocd : col) {
-            if (ocd.isRouteScoped()) {
-                throw new IllegalArgumentException("Only 1 onCompletion is allowed per route.");
-            }
-        }
-        // remove all on completions as they would be global scoped and we add a route scoped which
+        // remove all on completions if they are global scoped and we add a route scoped which
         // should override the global
         answer.removeAllOnCompletionDefinition(this);
 

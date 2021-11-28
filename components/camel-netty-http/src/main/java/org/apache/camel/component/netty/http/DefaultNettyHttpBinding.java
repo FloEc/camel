@@ -430,9 +430,8 @@ public class DefaultNettyHttpBinding implements NettyHttpBinding, Cloneable {
             // and mark the exception as failure handled, as we handled it by returning it as the response
             ExchangeHelper.setFailureHandled(message.getExchange());
         } else if (cause != null && configuration.isMuteException()) {
-
-            // the body should hide the stacktrace (muteException enabled)
-            body = NettyConverter.toByteBuffer("Exception".getBytes());
+            // empty body
+            body = NettyConverter.toByteBuffer("".getBytes());
             // force content type to be text/plain
             message.setHeader(Exchange.CONTENT_TYPE, "text/plain");
 
@@ -552,7 +551,7 @@ public class DefaultNettyHttpBinding implements NettyHttpBinding, Cloneable {
         int codeToUse = currentCode == null ? defaultCode : currentCode;
 
         if (codeToUse != 500) {
-            if ((body == null) || (body instanceof String && ((String) body).trim().isEmpty())) {
+            if (body == null || body instanceof String && ((String) body).trim().isEmpty()) {
                 // no content 
                 codeToUse = currentCode == null ? 204 : currentCode;
             }

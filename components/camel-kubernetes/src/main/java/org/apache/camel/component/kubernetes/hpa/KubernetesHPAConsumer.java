@@ -29,6 +29,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.kubernetes.AbstractKubernetesEndpoint;
 import org.apache.camel.component.kubernetes.KubernetesConstants;
+import org.apache.camel.component.kubernetes.KubernetesHelper;
 import org.apache.camel.component.kubernetes.consumer.common.HPAEvent;
 import org.apache.camel.support.DefaultConsumer;
 import org.apache.camel.util.ObjectHelper;
@@ -68,15 +69,11 @@ public class KubernetesHPAConsumer extends DefaultConsumer {
 
         LOG.debug("Stopping Kubernetes HPA Consumer");
         if (executor != null) {
+            KubernetesHelper.close(hpasWatcher, hpasWatcher::getWatch);
+
             if (getEndpoint() != null && getEndpoint().getCamelContext() != null) {
-                if (hpasWatcher != null) {
-                    hpasWatcher.getWatch().close();
-                }
                 getEndpoint().getCamelContext().getExecutorServiceManager().shutdownNow(executor);
             } else {
-                if (hpasWatcher != null) {
-                    hpasWatcher.getWatch().close();
-                }
                 executor.shutdownNow();
             }
         }
@@ -92,17 +89,17 @@ public class KubernetesHPAConsumer extends DefaultConsumer {
             MixedOperation<HorizontalPodAutoscaler, HorizontalPodAutoscalerList, Resource<HorizontalPodAutoscaler>> w
                     = getEndpoint()
                             .getKubernetesClient().autoscaling().v1().horizontalPodAutoscalers();
-            if (ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getNamespace())) {
-                w.inNamespace(getEndpoint().getKubernetesConfiguration().getNamespace());
-            }
+
+            ObjectHelper.ifNotEmpty(getEndpoint().getKubernetesConfiguration().getNamespace(), w::inNamespace);
+
             if (ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getLabelKey())
                     && ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getLabelValue())) {
                 w.withLabel(getEndpoint().getKubernetesConfiguration().getLabelKey(),
                         getEndpoint().getKubernetesConfiguration().getLabelValue());
             }
-            if (ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getResourceName())) {
-                w.withName(getEndpoint().getKubernetesConfiguration().getResourceName());
-            }
+
+            ObjectHelper.ifNotEmpty(getEndpoint().getKubernetesConfiguration().getResourceName(), w::withName);
+
             watch = w.watch(new Watcher<HorizontalPodAutoscaler>() {
 
                 @Override

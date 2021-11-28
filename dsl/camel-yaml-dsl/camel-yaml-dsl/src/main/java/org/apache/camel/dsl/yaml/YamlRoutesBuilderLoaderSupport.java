@@ -77,10 +77,12 @@ public abstract class YamlRoutesBuilderLoaderSupport extends RouteBuilderLoaderS
 
         if (this.deserializationMode == null) {
             final Map<String, String> options = getCamelContext().getGlobalOptions();
-            final String mode = options.getOrDefault(DESERIALIZATION_MODE, YamlDeserializationMode.CLASSIC.name());
+            final String mode = options.get(DESERIALIZATION_MODE);
             if (mode != null) {
                 this.deserializationContext.setDeserializationMode(
                         YamlDeserializationMode.valueOf(mode.toUpperCase(Locale.US)));
+            } else {
+                this.deserializationContext.setDeserializationMode(YamlDeserializationMode.FLOW);
             }
         } else {
             this.deserializationContext.setDeserializationMode(deserializationMode);
@@ -109,9 +111,9 @@ public abstract class YamlRoutesBuilderLoaderSupport extends RouteBuilderLoaderS
         }
 
         try (InputStream is = resource.getInputStream()) {
-            final StreamReader reader = new StreamReader(new YamlUnicodeReader(is), settings);
-            final Parser parser = new ParserImpl(reader, settings);
-            final Composer composer = new Composer(parser, settings);
+            final StreamReader reader = new StreamReader(settings, new YamlUnicodeReader(is));
+            final Parser parser = new ParserImpl(settings, reader);
+            final Composer composer = new Composer(settings, parser);
 
             return composer.getSingleNode()
                     .map(this::builder)

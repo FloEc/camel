@@ -1,11 +1,13 @@
-[[gzipdeflater-dataformat]]
 = GZip Deflater DataFormat
-:docTitle: GZip Deflater
-:artifactId: camel-zip-deflater
+:doctitle: GZip Deflater
+:shortname: gzipdeflater
+:artifactid: camel-zip-deflater
 :description: Compress and decompress messages using java.util.zip.GZIPStream.
 :since: 2.0
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/gzipdeflater.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: zip-deflater
 
 *Since Camel {since}*
 
@@ -28,7 +30,7 @@ Instead use the zipfile dataformat.
 == Options
 
 // dataformat options: START
-The GZip Deflater dataformat has no options.
+include::partial$dataformat-options.adoc[]
 // dataformat options: END
 
 == Marshal
@@ -58,4 +60,5 @@ from("activemq:queue:MY_QUEUE").unmarshal().gzipDeflater().process(new UnGZipped
 This data format is provided in *camel-core* so no additional
 dependencies is needed.
 
-include::{page-component-version}@camel-spring-boot::page$zip-deflater-starter.adoc[]
+
+include::spring-boot:partial$starter.adoc[]

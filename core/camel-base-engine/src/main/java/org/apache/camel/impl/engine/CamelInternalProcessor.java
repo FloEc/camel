@@ -65,6 +65,7 @@ import org.apache.camel.support.SynchronizationAdapter;
 import org.apache.camel.support.UnitOfWorkHelper;
 import org.apache.camel.support.processor.DelegateAsyncProcessor;
 import org.apache.camel.support.service.ServiceHelper;
+import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -381,8 +382,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         } else {
             final UnitOfWork uow = exchange.getUnitOfWork();
 
-            // do uow before processing and if a value is returned the the uow wants to be processed after
-            // was well in the same thread
+            // optimize to only do before uow processing if really needed
             AsyncCallback async = afterTask;
             boolean beforeAndAfter = uow != null && uow.isBeforeAfterProcess();
             if (beforeAndAfter) {
@@ -395,23 +395,26 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Processing exchange for exchangeId: {} -> {}", exchange.getExchangeId(), exchange);
             }
-            processor.process(exchange, async);
+            boolean sync = processor.process(exchange, async);
             // ----------------------------------------------------------
             // CAMEL END USER - DEBUG ME HERE +++ END +++
             // ----------------------------------------------------------
 
             // optimize to only do after uow processing if really needed
             if (beforeAndAfter) {
-                // execute any after processor work (in current thread, not in the callback)
-                uow.afterProcess(processor, exchange, afterTask, false);
+                // use the same callback as with beforeProcess
+                final CamelInternalTask afterCallback = afterTask;
+                reactiveExecutor.schedule(() -> {
+                    uow.afterProcess(processor, exchange, afterCallback, sync);
+                });
             }
 
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Exchange processed and is continued routed asynchronously for exchangeId: {} -> {}",
+                LOG.trace("Exchange processed and is continued routed {} for exchangeId: {} -> {}",
+                        sync ? "synchronously" : "asynchronously",
                         exchange.getExchangeId(), exchange);
             }
-            // we are done asynchronously - must return false
-            return false;
+            return sync;
         }
     }
 
@@ -914,11 +917,15 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
                 sc.reset();
                 return sc;
             }
-            // cache the body and if we could do that replace it as the new body
-            boolean failed = exchange.getException(StreamCacheException.class) != null
-                    || exchange.getProperty(ExchangePropertyKey.EXCEPTION_CAUGHT, StreamCacheException.class) != null;
+            // check if we somewhere failed due to a stream caching exception
+            Throwable cause = exchange.getException();
+            if (cause == null) {
+                cause = exchange.getProperty(ExchangePropertyKey.EXCEPTION_CAUGHT, Throwable.class);
+            }
+            boolean failed = cause != null && ObjectHelper.getException(StreamCacheException.class, cause) != null;
             if (!failed) {
                 try {
+                    // cache the body and if we could do that replace it as the new body
                     StreamCache sc = strategy.cache(exchange);
                     if (sc != null) {
                         exchange.getIn().setBody(sc);
@@ -997,7 +1004,6 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         private final NamedNode processorDefinition;
         private final NamedRoute routeDefinition;
         private final Synchronization tracingAfterRoute;
-        private boolean added;
 
         public TracingAdvice(Tracer tracer, NamedNode processorDefinition, NamedRoute routeDefinition, boolean first) {
             this.tracer = tracer;
@@ -1009,23 +1015,25 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
 
         @Override
         public Object before(Exchange exchange) throws Exception {
-            if (!added && tracingAfterRoute != null) {
-                // add before route and after route tracing but only once per route, so check if there is already an existing
-                boolean contains = exchange.getUnitOfWork().containsSynchronization(tracingAfterRoute);
-                if (!contains) {
-                    added = true;
-                    tracer.traceBeforeRoute(routeDefinition, exchange);
-                    exchange.adapt(ExtendedExchange.class).addOnCompletion(tracingAfterRoute);
+            if (tracer.isEnabled()) {
+                if (tracingAfterRoute != null) {
+                    // add before route and after route tracing but only once per route, so check if there is already an existing
+                    boolean contains = exchange.getUnitOfWork().containsSynchronization(tracingAfterRoute);
+                    if (!contains) {
+                        tracer.traceBeforeRoute(routeDefinition, exchange);
+                        exchange.adapt(ExtendedExchange.class).addOnCompletion(tracingAfterRoute);
+                    }
                 }
+                tracer.traceBeforeNode(processorDefinition, exchange);
             }
-
-            tracer.traceBeforeNode(processorDefinition, exchange);
             return null;
         }
 
         @Override
         public void after(Exchange exchange, Object data) throws Exception {
-            tracer.traceAfterNode(processorDefinition, exchange);
+            if (tracer.isEnabled()) {
+                tracer.traceAfterNode(processorDefinition, exchange);
+            }
         }
 
         @Override

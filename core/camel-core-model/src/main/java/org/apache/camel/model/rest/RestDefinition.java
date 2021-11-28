@@ -84,10 +84,10 @@ public class RestDefinition extends OptionalIdentifiedDefinition<RestDefinition>
     @XmlAttribute
     private String apiDocs;
 
-    @XmlElement(name = "securityDefinitions") // use the name swagger uses
+    @XmlElement(name = "securityDefinitions") // use the name Swagger/OpenAPI uses
     private RestSecuritiesDefinition securityDefinitions;
 
-    @XmlElement(name = "securityRequirements") // use the name swagger/OpenAPI uses
+    @XmlElement(name = "securityRequirements") // use the name Swagger/OpenAPI uses
     private RestSecuritiesRequirement securityRequirements;
 
     @XmlElementRef
@@ -213,13 +213,12 @@ public class RestDefinition extends OptionalIdentifiedDefinition<RestDefinition>
     }
 
     /**
-     * Whether to enable validation of the client request to check whether the Content-Type and Accept headers from the
-     * client is supported by the Rest-DSL configuration of its consumes/produces settings.
-     * <p/>
-     * This can be turned on, to enable this check. In case of validation error, then HTTP Status codes 415 or 406 is
-     * returned.
-     * <p/>
-     * The default value is false.
+     * Whether to enable validation of the client request to check:
+     *
+     * 1) Content-Type header matches what the Rest DSL consumes; returns HTTP Status 415 if validation error. 2) Accept
+     * header matches what the Rest DSL produces; returns HTTP Status 406 if validation error. 3) Missing required data
+     * (query parameters, HTTP headers, body); returns HTTP Status 400 if validation error. 4) Parsing error of the
+     * message body (JSon, XML or Auto binding mode must be enabled); returns HTTP Status 400 if validation error.
      */
     public void setClientRequestValidation(String clientRequestValidation) {
         this.clientRequestValidation = clientRequestValidation;
@@ -445,6 +444,29 @@ public class RestDefinition extends OptionalIdentifiedDefinition<RestDefinition>
         }
         VerbDefinition verb = getVerbs().get(getVerbs().size() - 1);
         verb.getResponseMsgs().addAll(msgs);
+        return this;
+    }
+
+    public RestDefinition responseMessage(int code, String message) {
+        if (getVerbs().isEmpty()) {
+            throw new IllegalArgumentException("Must add verb first, such as get/post/delete");
+        }
+        VerbDefinition verb = getVerbs().get(getVerbs().size() - 1);
+        RestOperationResponseMsgDefinition msg = responseMessage(verb);
+        msg.setCode(String.valueOf(code));
+        msg.setMessage(message);
+        return this;
+    }
+
+    public RestDefinition responseMessage(String code, String message) {
+        if (getVerbs().isEmpty()) {
+            throw new IllegalArgumentException("Must add verb first, such as get/post/delete");
+        }
+        VerbDefinition verb = getVerbs().get(getVerbs().size() - 1);
+        RestOperationResponseMsgDefinition response = responseMessage(verb);
+        response.setCode(code);
+        response.setMessage(message);
+        verb.getResponseMsgs().add(response);
         return this;
     }
 
@@ -754,19 +776,16 @@ public class RestDefinition extends OptionalIdentifiedDefinition<RestDefinition>
         // create the from endpoint uri which is using the rest-api component
         String from = "rest-api:" + configuration.getApiContextPath();
 
-        // append options
-        Map<String, Object> options = new HashMap<>();
-
         String routeId = configuration.getApiContextRouteId();
         if (routeId == null) {
             routeId = answer.idOrCreate(camelContext.adapt(ExtendedCamelContext.class).getNodeIdFactory());
         }
-        options.put("routeId", routeId);
+
+        // append options
+        Map<String, Object> options = new HashMap<>();
+
         if (configuration.getComponent() != null && !configuration.getComponent().isEmpty()) {
             options.put("consumerComponentName", configuration.getComponent());
-        }
-        if (configuration.getComponent() != null && !configuration.getComponent().isEmpty()) {
-            options.put("producerComponentName", configuration.getProducerComponent());
         }
         if (configuration.getApiContextIdPattern() != null) {
             options.put("contextIdPattern", configuration.getApiContextIdPattern());

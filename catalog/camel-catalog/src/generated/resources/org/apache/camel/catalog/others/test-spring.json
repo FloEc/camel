@@ -4,12 +4,12 @@
     "name": "test-spring",
     "title": "Test Spring",
     "description": "Camel unit testing with Spring",
-    "deprecated": false,
+    "deprecated": true,
     "firstVersion": "2.10.0",
     "label": "testing,java,spring",
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-test-spring",
-    "version": "3.11.0-SNAPSHOT"
+    "version": "3.14.0-SNAPSHOT"
   }
 }

@@ -516,7 +516,7 @@ public class PropertiesComponent extends ServiceSupport
      *
      * The default mode (override) is to use system properties if present, and override any existing properties.
      *
-     * OS environment variable mode is checked before JVM system property mode
+     * OS environment variable mode is checked before JVM system property mode.
      *
      * @see #SYSTEM_PROPERTIES_MODE_NEVER
      * @see #SYSTEM_PROPERTIES_MODE_FALLBACK
@@ -536,7 +536,7 @@ public class PropertiesComponent extends ServiceSupport
      *
      * The default mode (override) is to use OS environment variables if present, and override any existing properties.
      *
-     * OS environment variable mode is checked before JVM system property mode
+     * OS environment variable mode is checked before JVM system property mode.
      *
      * @see #ENVIRONMENT_VARIABLES_MODE_NEVER
      * @see #ENVIRONMENT_VARIABLES_MODE_FALLBACK
@@ -617,14 +617,13 @@ public class PropertiesComponent extends ServiceSupport
                         LOG.info("PropertiesComponent added custom PropertiesSource (factory): {}", ps);
                     } else if (obj != null) {
                         LOG.warn(
-                                "PropertiesComponent cannot add custom PropertiesSource as the type is not a org.apache.camel.component.properties.PropertiesSource but: "
-                                 + type.getName());
+                                "PropertiesComponent cannot add custom PropertiesSource as the type is not a {} but: {}",
+                                PropertiesSource.class.getName(), type.getName());
                     }
                 }
             } catch (Exception e) {
-                LOG.debug("Error discovering and using custom PropertiesSource due to " + e.getMessage()
-                          + ". This exception is ignored",
-                        e);
+                LOG.debug("Error discovering and using custom PropertiesSource due to {}. This exception is ignored",
+                        e.getMessage(), e);
             }
         }
 

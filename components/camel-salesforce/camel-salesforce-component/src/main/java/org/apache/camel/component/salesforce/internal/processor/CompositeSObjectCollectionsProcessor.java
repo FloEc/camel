@@ -29,7 +29,6 @@ import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
 import org.apache.camel.component.salesforce.api.SalesforceException;
 import org.apache.camel.component.salesforce.api.dto.AbstractDescribedSObjectBase;
 import org.apache.camel.component.salesforce.api.dto.composite.SObjectCollection;
-import org.apache.camel.component.salesforce.internal.PayloadFormat;
 import org.apache.camel.component.salesforce.internal.client.CompositeSObjectCollectionsApiClient;
 import org.apache.camel.component.salesforce.internal.client.DefaultCompositeSObjectCollectionsApiClient;
 import org.apache.camel.component.salesforce.internal.dto.composite.RetrieveSObjectCollectionsDto;
@@ -51,10 +50,6 @@ public class CompositeSObjectCollectionsProcessor extends AbstractSalesforceProc
         final SalesforceEndpointConfig configuration = endpoint.getConfiguration();
         final String apiVersion = configuration.getApiVersion();
 
-        final PayloadFormat format = configuration.getFormat();
-        if (format != PayloadFormat.JSON) {
-            throw new SalesforceException("The Composite SObject Collections operations only support JSON format.", 0);
-        }
         compositeClient = new DefaultCompositeSObjectCollectionsApiClient(
                 configuration, apiVersion, session, httpClient, loginConfig);
 
@@ -116,20 +111,18 @@ public class CompositeSObjectCollectionsProcessor extends AbstractSalesforceProc
     private boolean processCreateSObjectCollections(final Exchange exchange, final AsyncCallback callback)
             throws SalesforceException {
         SObjectCollection collection = buildSObjectCollection(exchange);
-        compositeClient.submitCompositeCollections(collection, determineHeaders(exchange),
+        compositeClient.createCompositeCollections(collection, determineHeaders(exchange),
                 (response, responseHeaders, exception) -> processResponse(exchange, response, responseHeaders,
-                        exception, callback),
-                null, null, "POST");
+                        exception, callback));
         return false;
     }
 
     private boolean processUpdateSObjectCollections(final Exchange exchange, final AsyncCallback callback)
             throws SalesforceException {
         final SObjectCollection collection = buildSObjectCollection(exchange);
-        compositeClient.submitCompositeCollections(collection, determineHeaders(exchange),
+        compositeClient.updateCompositeCollections(collection, determineHeaders(exchange),
                 (response, responseHeaders, exception) -> processResponse(exchange, response, responseHeaders,
-                        exception, callback),
-                null, null, "PATCH");
+                        exception, callback));
         return false;
     }
 
@@ -139,10 +132,10 @@ public class CompositeSObjectCollectionsProcessor extends AbstractSalesforceProc
         String externalIdFieldName
                 = getParameter(SalesforceEndpointConfig.SOBJECT_EXT_ID_NAME, exchange, IGNORE_BODY, NOT_OPTIONAL);
         String sObjectName = getParameter(SalesforceEndpointConfig.SOBJECT_NAME, exchange, IGNORE_BODY, NOT_OPTIONAL);
-        compositeClient.submitCompositeCollections(collection, determineHeaders(exchange),
+        compositeClient.upsertCompositeCollections(collection, determineHeaders(exchange),
                 (response, responseHeaders, exception) -> processResponse(exchange, response, responseHeaders,
                         exception, callback),
-                sObjectName, externalIdFieldName, "PATCH");
+                sObjectName, externalIdFieldName);
 
         return false;
     }
@@ -158,6 +151,7 @@ public class CompositeSObjectCollectionsProcessor extends AbstractSalesforceProc
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private SObjectCollection buildSObjectCollection(Exchange exchange) throws SalesforceException {
         final List<AbstractDescribedSObjectBase> body;
         final Message in = exchange.getIn();

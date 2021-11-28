@@ -160,6 +160,12 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
                 throw RuntimeCamelException.wrapRuntimeCamelException(e);
             }
         }
+
+        ExceptionPolicyStrategy customExceptionPolicy
+                = CamelContextHelper.findByType(camelContext, ExceptionPolicyStrategy.class);
+        if (customExceptionPolicy != null) {
+            exceptionPolicy = customExceptionPolicy;
+        }
     }
 
     RedeliveryErrorHandler(Logger log) {
@@ -205,7 +211,7 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
 
         // Run it
         if (exchange.isTransacted()) {
-            reactiveExecutor.scheduleSync(task);
+            reactiveExecutor.scheduleQueue(task);
         } else {
             reactiveExecutor.scheduleMain(task);
         }
@@ -552,7 +558,7 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
             ee.setException(exchange.getProperty(ExchangePropertyKey.EXCEPTION_CAUGHT, Exception.class));
             // and put failure endpoint back as well
             ee.setProperty(ExchangePropertyKey.FAILURE_ENDPOINT, ee.getProperty(ExchangePropertyKey.TO_ENDPOINT));
-            // and store the route id so we know in which route we failed
+            // and store the route id, so we know in which route we failed
             Route rc = ExchangeHelper.getRoute(ee);
             if (rc != null) {
                 ee.setProperty(ExchangePropertyKey.FAILURE_ROUTE_ID, rc.getRouteId());
@@ -1139,6 +1145,15 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
                 // reset cached streams so they can be read again
                 MessageHelper.resetStreamCache(exchange.getIn());
 
+                // store the last to endpoint as the failure endpoint
+                exchange.setProperty(ExchangePropertyKey.FAILURE_ENDPOINT,
+                        exchange.getProperty(ExchangePropertyKey.TO_ENDPOINT));
+                // and store the route id, so we know in which route we failed
+                Route rc = ExchangeHelper.getRoute(exchange);
+                if (rc != null) {
+                    exchange.setProperty(ExchangePropertyKey.FAILURE_ROUTE_ID, rc.getRouteId());
+                }
+
                 // invoke custom on prepare
                 if (onPrepareProcessor != null) {
                     try {
@@ -1151,15 +1166,6 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
                 }
 
                 LOG.trace("Failure processor {} is processing Exchange: {}", processor, exchange);
-
-                // store the last to endpoint as the failure endpoint
-                exchange.setProperty(ExchangePropertyKey.FAILURE_ENDPOINT,
-                        exchange.getProperty(ExchangePropertyKey.TO_ENDPOINT));
-                // and store the route id so we know in which route we failed
-                Route rc = ExchangeHelper.getRoute(exchange);
-                if (rc != null) {
-                    exchange.setProperty(ExchangePropertyKey.FAILURE_ROUTE_ID, rc.getRouteId());
-                }
 
                 // fire event as we had a failure processor to handle it, which there is a event for
                 final boolean deadLetterChannel = processor == deadLetter;
@@ -1204,6 +1210,15 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
                 });
             } else {
                 try {
+                    // store the last to endpoint as the failure endpoint
+                    exchange.setProperty(ExchangePropertyKey.FAILURE_ENDPOINT,
+                            exchange.getProperty(ExchangePropertyKey.TO_ENDPOINT));
+                    // and store the route id, so we know in which route we failed
+                    Route rc = ExchangeHelper.getRoute(exchange);
+                    if (rc != null) {
+                        exchange.setProperty(ExchangePropertyKey.FAILURE_ROUTE_ID, rc.getRouteId());
+                    }
+
                     // invoke custom on prepare
                     if (onPrepareProcessor != null) {
                         try {

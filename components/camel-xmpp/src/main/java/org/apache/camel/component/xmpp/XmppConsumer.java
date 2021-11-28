@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.support.DefaultConsumer;
 import org.apache.camel.util.URISupport;
 import org.jivesoftware.smack.MessageListener;
@@ -72,7 +73,7 @@ public class XmppConsumer extends DefaultConsumer implements IncomingChatMessage
             connection = endpoint.createConnection();
         } catch (SmackException e) {
             if (endpoint.isTestConnectionOnStartup()) {
-                throw new RuntimeException("Could not connect to XMPP server.", e);
+                throw new RuntimeCamelException("Could not connect to XMPP server.", e);
             } else {
                 LOG.warn(e.getMessage());
                 if (getExceptionHandler() != null) {
@@ -119,7 +120,7 @@ public class XmppConsumer extends DefaultConsumer implements IncomingChatMessage
         super.doStart();
     }
 
-    protected void scheduleDelayedStart() throws Exception {
+    protected void scheduleDelayedStart() {
         Runnable startRunnable = new Runnable() {
             @Override
             public void run() {
@@ -135,7 +136,7 @@ public class XmppConsumer extends DefaultConsumer implements IncomingChatMessage
         getExecutor().schedule(startRunnable, endpoint.getConnectionPollDelay(), TimeUnit.SECONDS);
     }
 
-    private void startRobustConnectionMonitor() throws Exception {
+    private void startRobustConnectionMonitor() {
         Runnable connectionCheckRunnable = new Runnable() {
             @Override
             public void run() {

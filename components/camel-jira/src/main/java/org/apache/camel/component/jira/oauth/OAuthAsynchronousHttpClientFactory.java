@@ -22,8 +22,6 @@ import java.net.URI;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.annotation.Nonnull;
-
 import com.atlassian.event.api.EventPublisher;
 import com.atlassian.httpclient.apache.httpcomponents.DefaultHttpClientFactory;
 import com.atlassian.httpclient.api.HttpClient;
@@ -113,38 +111,32 @@ public class OAuthAsynchronousHttpClientFactory {
         /**
          * We'll always have an absolute URL as a client.
          */
-        @Nonnull
         @Override
         public String getBaseUrl(UrlMode urlMode) {
             return baseUrl;
         }
 
-        @Nonnull
         @Override
         public String getDisplayName() {
             return "Atlassian JIRA Rest Java Client";
         }
 
-        @Nonnull
         @Override
         public String getPlatformId() {
             return ApplicationProperties.PLATFORM_JIRA;
         }
 
-        @Nonnull
         @Override
         public String getVersion() {
             return JIRA_REST_CLIENT_VERSION;
         }
 
-        @Nonnull
         @Override
         public Date getBuildDate() {
             // TODO implement using MavenUtils, JRJC-123
             throw new UnsupportedOperationException();
         }
 
-        @Nonnull
         @Override
         public String getBuildNumber() {
             // TODO implement using MavenUtils, JRJC-123
@@ -169,7 +161,7 @@ public class OAuthAsynchronousHttpClientFactory {
         static String getVersion(String groupId, String artifactId) {
             final Properties props = new Properties();
             String pomProps = String.format("/META-INF/maven/%s/%s/pom.properties", groupId, artifactId);
-            try (InputStream resourceAsStream = AuthenticationHandler.class.getResourceAsStream(pomProps)) {
+            try (InputStream resourceAsStream = org.apache.camel.util.ObjectHelper.loadResourceAsStream(pomProps)) {
                 props.load(resourceAsStream);
                 return props.getProperty("version", UNKNOWN_VERSION);
             } catch (Exception e) {

@@ -3,7 +3,7 @@
     "kind": "language",
     "name": "ref",
     "title": "Ref",
-    "description": "Look up an expression in the Camel Registry and evaluate it.",
+    "description": "Uses an existing expression from the registry.",
     "deprecated": false,
     "firstVersion": "2.8.0",
     "label": "language,core",
@@ -11,7 +11,7 @@
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-core-languages",
-    "version": "3.11.0-SNAPSHOT",
+    "version": "3.14.0-SNAPSHOT",
     "modelName": "ref",
     "modelJavaType": "org.apache.camel.model.language.RefExpression"
   },

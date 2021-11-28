@@ -97,7 +97,7 @@ public class RestModelConverters {
             oasDocument.definitions = oasDocument.createDefinitions();
         }
 
-        Map<String, Schema> swaggerModel = MODEL_CONVERTERS.getInstance().readAll(clazz);
+        Map<String, Schema> swaggerModel = ModelConverters.getInstance().readAll(clazz);
         swaggerModel.forEach((key, schema) -> {
             Oas20SchemaDefinition model = oasDocument.definitions.createSchemaDefinition(key);
             oasDocument.definitions.addDefinition(key, model);
@@ -131,7 +131,7 @@ public class RestModelConverters {
                     if (schema.getProperties() != null) {
                         //noinspection unchecked
                         schema.getProperties().forEach((p, v) -> {
-                            OasSchema property = model.createPropertySchema((String) p);
+                            OasSchema property = (OasSchema) model.createPropertySchema((String) p);
                             model.addProperty((String) p, property);
                             processSchema(property, (Schema) v);
                         });
@@ -153,7 +153,7 @@ public class RestModelConverters {
                 case "integer":
                     break;
                 default:
-                    LOG.warn("Encountered unexpected type " + type + " in processing schema.");
+                    LOG.warn("Encountered unexpected type {} in processing schema.", type);
                     break;
             }
         }
@@ -161,6 +161,15 @@ public class RestModelConverters {
         if (schema.getRequired() != null) {
             //noinspection unchecked
             model.required = new ArrayList<String>(schema.getRequired());
+        }
+
+        String description = schema.getDescription();
+        if (description != null) {
+            model.description = description;
+        }
+        Object example = schema.getExample();
+        if (example != null) {
+            model.example = example;
         }
 
         if (schema.getAdditionalProperties() instanceof Schema) {

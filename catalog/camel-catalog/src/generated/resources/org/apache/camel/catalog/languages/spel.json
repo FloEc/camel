@@ -3,7 +3,7 @@
     "kind": "language",
     "name": "spel",
     "title": "SpEL",
-    "description": "Evaluate a Spring Expression Language (SpEL) expression against the Camel Exchange.",
+    "description": "Evaluates a Spring expression (SpEL).",
     "deprecated": false,
     "firstVersion": "2.7.0",
     "label": "language,spring",
@@ -11,7 +11,7 @@
     "supportLevel": "Stable",
     "groupId": "org.apache.camel",
     "artifactId": "camel-spring",
-    "version": "3.11.0-SNAPSHOT",
+    "version": "3.14.0-SNAPSHOT",
     "modelName": "spel",
     "modelJavaType": "org.apache.camel.model.language.SpELExpression"
   },

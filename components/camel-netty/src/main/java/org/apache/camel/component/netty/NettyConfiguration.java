@@ -33,6 +33,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.spi.Configurer;
 import org.apache.camel.spi.PropertyConfigurer;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriParams;
@@ -46,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @UriParams
+@Configurer
 public class NettyConfiguration extends NettyServerBootstrapConfiguration implements Cloneable {
     private static final Logger LOG = LoggerFactory.getLogger(NettyConfiguration.class);
 
@@ -246,11 +248,10 @@ public class NettyConfiguration extends NettyServerBootstrapConfiguration implem
                             ChannelHandlerFactories.newDelimiterBasedFrameDecoder(decoderMaxLineLength, delimiters, protocol));
                     decoders.add(ChannelHandlerFactories.newStringDecoder(charset, protocol));
 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(
-                                "Using textline encoders and decoders with charset: {}, delimiter: {} and decoderMaxLineLength: {}",
-                                new Object[] { charset, delimiter, decoderMaxLineLength });
-                    }
+                    LOG.debug(
+                            "Using textline encoders and decoders with charset: {}, delimiter: {} and decoderMaxLineLength: {}",
+                            charset, delimiter, decoderMaxLineLength);
+
                 } else if ("udp".equalsIgnoreCase(protocol) && isUdpByteArrayCodec()) {
                     encoders.add(ChannelHandlerFactories.newByteArrayEncoder(protocol));
                     decoders.add(ChannelHandlerFactories.newByteArrayDecoder(protocol));

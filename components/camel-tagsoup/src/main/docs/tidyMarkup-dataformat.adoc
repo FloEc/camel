@@ -1,11 +1,13 @@
-[[tidyMarkup-dataformat]]
 = TidyMarkup DataFormat
-:docTitle: TidyMarkup
-:artifactId: camel-tagsoup
+:doctitle: TidyMarkup
+:shortname: tidyMarkup
+:artifactid: camel-tagsoup
 :description: Parse (potentially invalid) HTML into valid HTML or DOM.
 :since: 2.0
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/tidyMarkup.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: tagsoup
 
 *Since Camel {since}*
 
@@ -28,16 +30,7 @@ as we really don't want to turn well formed HTML into ugly HTML.
 
 
 // dataformat options: START
-The TidyMarkup dataformat supports 2 options, which are listed below.
-
-
-
-[width="100%",cols="2s,1m,1m,6",options="header"]
-|===
-| Name | Default | Java Type | Description
-| dataObjectType | org.w3c.dom.Node | String | What data type to unmarshal as, can either be org.w3c.dom.Node or java.lang.String. Is by default org.w3c.dom.Node
-| omitXmlDeclaration | false | Boolean | When returning a String, do we omit the XML declaration in the top.
-|===
+include::partial$dataformat-options.adoc[]
 // dataformat options: END
 
 
@@ -88,4 +81,5 @@ the download page for the latest versions).
 </dependency>
 ----------------------------------------
 
-include::{page-component-version}@camel-spring-boot::page$tagsoup-starter.adoc[]
+
+include::spring-boot:partial$starter.adoc[]

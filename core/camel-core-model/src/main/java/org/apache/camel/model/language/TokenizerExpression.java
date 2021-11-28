@@ -24,9 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.camel.spi.Metadata;
 
 /**
- * Tokenize text payloads using the specified delimiter patterns.
- *
- * @see org.apache.camel.language.tokenizer.TokenizeLanguage
+ * Tokenize text payloads using delimiter patterns.
  */
 @Metadata(firstVersion = "2.0.0", label = "language,core", title = "Tokenize")
 @XmlRootElement(name = "tokenize")

@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.NoFactoryAvailableException;
 import org.apache.camel.spi.HeaderFilterStrategy;
 import org.apache.camel.support.DefaultProducer;
 import org.apache.camel.util.ObjectHelper;
@@ -38,6 +37,8 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageResponse;
+import software.amazon.awssdk.services.sqs.model.DeleteQueueRequest;
+import software.amazon.awssdk.services.sqs.model.DeleteQueueResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
@@ -57,9 +58,11 @@ public class Sqs2Producer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(Sqs2Producer.class);
 
+    private static final int MAX_ATTRIBUTES = 10;
+
     private transient String sqsProducerToString;
 
-    public Sqs2Producer(Sqs2Endpoint endpoint) throws NoFactoryAvailableException {
+    public Sqs2Producer(Sqs2Endpoint endpoint) {
         super(endpoint);
         if (endpoint.getConfiguration().isFifoQueue()
                 && ObjectHelper.isEmpty(getEndpoint().getConfiguration().getMessageGroupIdStrategy())) {
@@ -85,6 +88,9 @@ public class Sqs2Producer extends DefaultProducer {
                     break;
                 case purgeQueue:
                     purgeQueue(getClient(), exchange);
+                    break;
+                case deleteQueue:
+                    deleteQueue(getClient(), exchange);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported operation");
@@ -186,6 +192,16 @@ public class Sqs2Producer extends DefaultProducer {
         message.setBody(result);
     }
 
+    private void deleteQueue(SqsClient amazonSQS, Exchange exchange) {
+        DeleteQueueRequest.Builder request = DeleteQueueRequest.builder();
+        if (ObjectHelper.isNotEmpty(exchange.getIn().getHeader(Sqs2Constants.SQS_QUEUE_PREFIX))) {
+            request.queueUrl(getQueueUrl());
+        }
+        DeleteQueueResponse result = amazonSQS.deleteQueue(request.build());
+        Message message = getMessageForResponse(exchange);
+        message.setBody(result);
+    }
+
     private void configureFifoAttributes(SendMessageRequest.Builder request, Exchange exchange) {
         if (getEndpoint().getConfiguration().isFifoQueue()) {
             // use strategies
@@ -280,53 +296,56 @@ public class Sqs2Producer extends DefaultProducer {
             // only put the message header which is not filtered into the
             // message attribute
             if (!headerFilterStrategy.applyFilterToCamelHeaders(entry.getKey(), entry.getValue(), exchange)) {
-                Object value = entry.getValue();
-                if (value instanceof String && !((String) value).isEmpty()) {
-                    MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
-                    mav.dataType("String");
-                    mav.stringValue((String) value);
-                    result.put(entry.getKey(), mav.build());
-                } else if (value instanceof ByteBuffer) {
-                    MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
-                    mav.dataType("Binary");
-                    mav.binaryValue(SdkBytes.fromByteBuffer((ByteBuffer) value));
-                    result.put(entry.getKey(), mav.build());
-                } else if (value instanceof Boolean) {
-                    MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
-                    mav.dataType("Number.Boolean");
-                    mav.stringValue(((Boolean) value) ? "1" : "0");
-                    result.put(entry.getKey(), mav.build());
-                } else if (value instanceof Number) {
-                    MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
-                    final String dataType;
-                    if (value instanceof Integer) {
-                        dataType = "Number.int";
-                    } else if (value instanceof Byte) {
-                        dataType = "Number.byte";
-                    } else if (value instanceof Double) {
-                        dataType = "Number.double";
-                    } else if (value instanceof Float) {
-                        dataType = "Number.float";
-                    } else if (value instanceof Long) {
-                        dataType = "Number.long";
-                    } else if (value instanceof Short) {
-                        dataType = "Number.short";
+                // We are going to put the first MAX_ATTRIBUTES headers, because this is the maximum Attributes an SQS Message could accept
+                if (result.size() < MAX_ATTRIBUTES) {
+                    Object value = entry.getValue();
+                    if (value instanceof String && !((String) value).isEmpty()) {
+                        MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
+                        mav.dataType("String");
+                        mav.stringValue((String) value);
+                        result.put(entry.getKey(), mav.build());
+                    } else if (value instanceof ByteBuffer) {
+                        MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
+                        mav.dataType("Binary");
+                        mav.binaryValue(SdkBytes.fromByteBuffer((ByteBuffer) value));
+                        result.put(entry.getKey(), mav.build());
+                    } else if (value instanceof Boolean) {
+                        MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
+                        mav.dataType("Number.Boolean");
+                        mav.stringValue(((Boolean) value) ? "1" : "0");
+                        result.put(entry.getKey(), mav.build());
+                    } else if (value instanceof Number) {
+                        MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
+                        final String dataType;
+                        if (value instanceof Integer) {
+                            dataType = "Number.int";
+                        } else if (value instanceof Byte) {
+                            dataType = "Number.byte";
+                        } else if (value instanceof Double) {
+                            dataType = "Number.double";
+                        } else if (value instanceof Float) {
+                            dataType = "Number.float";
+                        } else if (value instanceof Long) {
+                            dataType = "Number.long";
+                        } else if (value instanceof Short) {
+                            dataType = "Number.short";
+                        } else {
+                            dataType = "Number";
+                        }
+                        mav.dataType(dataType);
+                        mav.stringValue(value.toString());
+                        result.put(entry.getKey(), mav.build());
+                    } else if (value instanceof Date) {
+                        MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
+                        mav.dataType("String");
+                        mav.stringValue(value.toString());
+                        result.put(entry.getKey(), mav.build());
                     } else {
-                        dataType = "Number";
+                        // cannot translate the message header to message attribute
+                        // value
+                        LOG.warn("Cannot put the message header key={}, value={} into Sqs MessageAttribute", entry.getKey(),
+                                entry.getValue());
                     }
-                    mav.dataType(dataType);
-                    mav.stringValue(value.toString());
-                    result.put(entry.getKey(), mav.build());
-                } else if (value instanceof Date) {
-                    MessageAttributeValue.Builder mav = MessageAttributeValue.builder();
-                    mav.dataType("String");
-                    mav.stringValue(value.toString());
-                    result.put(entry.getKey(), mav.build());
-                } else {
-                    // cannot translate the message header to message attribute
-                    // value
-                    LOG.warn("Cannot put the message header key={}, value={} into Sqs MessageAttribute", entry.getKey(),
-                            entry.getValue());
                 }
             }
         }

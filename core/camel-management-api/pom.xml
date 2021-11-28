@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>core</artifactId>
-        <version>3.11.0-SNAPSHOT</version>
+        <version>3.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-management-api</artifactId>
@@ -206,19 +206,7 @@
                 </plugins>
             </build>
         </profile>
-
-        <!-- skip management tests on AIX as it hangs CI servers -->
-        <profile>
-            <id>aix</id>
-            <activation>
-                <os>
-                    <name>aix</name>
-                </os>
-            </activation>
-            <properties>
-                <platform.skip.tests>org/apache/camel/management/**/*.java</platform.skip.tests>
-            </properties>
-        </profile>
+        
         <profile>
             <id>xalan</id>
             <dependencies>

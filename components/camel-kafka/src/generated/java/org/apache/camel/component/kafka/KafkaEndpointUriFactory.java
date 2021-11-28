@@ -20,7 +20,7 @@ public class KafkaEndpointUriFactory extends org.apache.camel.support.component.
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
     static {
-        Set<String> props = new HashSet<>(99);
+        Set<String> props = new HashSet<>(101);
         props.add("synchronous");
         props.add("queueBufferingMaxMessages");
         props.add("allowManualCommit");
@@ -32,7 +32,6 @@ public class KafkaEndpointUriFactory extends org.apache.camel.support.component.
         props.add("sslTruststoreType");
         props.add("sendBufferBytes");
         props.add("heartbeatIntervalMs");
-        props.add("consumerStreams");
         props.add("interceptorClasses");
         props.add("sslKeystoreType");
         props.add("breakOnFirstError");
@@ -66,6 +65,7 @@ public class KafkaEndpointUriFactory extends org.apache.camel.support.component.
         props.add("sslTrustmanagerAlgorithm");
         props.add("compressionCodec");
         props.add("autoCommitOnStop");
+        props.add("commitTimeoutMs");
         props.add("workerPoolCoreSize");
         props.add("autoCommitEnable");
         props.add("consumerRequestTimeoutMs");
@@ -86,6 +86,7 @@ public class KafkaEndpointUriFactory extends org.apache.camel.support.component.
         props.add("lazyStartProducer");
         props.add("sslKeystorePassword");
         props.add("sslEndpointAlgorithm");
+        props.add("resumeStrategy");
         props.add("topic");
         props.add("sslProtocol");
         props.add("sslKeymanagerAlgorithm");
@@ -93,6 +94,7 @@ public class KafkaEndpointUriFactory extends org.apache.camel.support.component.
         props.add("exceptionHandler");
         props.add("maxBlockMs");
         props.add("kerberosBeforeReloginMinTime");
+        props.add("groupInstanceId");
         props.add("bufferMemorySize");
         props.add("metadataMaxAgeMs");
         props.add("sslCipherSuites");

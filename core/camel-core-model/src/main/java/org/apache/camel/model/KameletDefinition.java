@@ -16,9 +16,12 @@
  */
 package org.apache.camel.model;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.camel.spi.Metadata;
@@ -26,7 +29,7 @@ import org.apache.camel.spi.Metadata;
 /**
  * To call Kamelets
  */
-@Metadata(label = "eip,routing,kamelet")
+@Metadata(label = "eip,routing")
 @XmlRootElement(name = "kamelet")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class KameletDefinition extends OutputDefinition<KameletDefinition> {
@@ -42,8 +45,14 @@ public class KameletDefinition extends OutputDefinition<KameletDefinition> {
     }
 
     @Override
-    public String toString() {
-        return "Kamelet[" + getOutputs() + "]";
+    public List<ProcessorDefinition<?>> getOutputs() {
+        return outputs;
+    }
+
+    @XmlElementRef
+    @Override
+    public void setOutputs(List<ProcessorDefinition<?>> outputs) {
+        super.setOutputs(outputs);
     }
 
     @Override

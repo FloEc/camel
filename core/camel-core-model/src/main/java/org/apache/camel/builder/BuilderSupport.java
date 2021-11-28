@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.CamelContextAware;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Expression;
 import org.apache.camel.NoSuchEndpointException;
@@ -28,6 +29,7 @@ import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.model.language.DatasonnetExpression;
 import org.apache.camel.model.language.ExchangePropertyExpression;
 import org.apache.camel.model.language.HeaderExpression;
+import org.apache.camel.model.language.SimpleExpression;
 import org.apache.camel.model.language.XPathExpression;
 import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.util.ObjectHelper;
@@ -36,15 +38,15 @@ import org.apache.camel.util.ObjectHelper;
  * Base class for implementation inheritance for different clauses in the
  * <a href="http://camel.apache.org/dsl.html">Java DSL</a>
  */
-public abstract class BuilderSupport {
-    private CamelContext context;
+public abstract class BuilderSupport implements CamelContextAware {
+    private CamelContext camelContext;
     private ErrorHandlerBuilder errorHandlerBuilder;
 
     protected BuilderSupport() {
     }
 
     protected BuilderSupport(CamelContext context) {
-        this.context = context;
+        this.camelContext = context;
     }
 
     // Builder methods
@@ -104,6 +106,13 @@ public abstract class BuilderSupport {
     /**
      * Returns a constant expression value builder
      */
+    public ValueBuilder constant(Object value, boolean trim) {
+        return Builder.constant(value, trim);
+    }
+
+    /**
+     * Returns a constant expression value builder
+     */
     public ValueBuilder constant(Object... value) {
         return Builder.constant(value);
     }
@@ -154,65 +163,60 @@ public abstract class BuilderSupport {
     }
 
     /**
-     * Returns a Datasonnet expression value builder
+     * Returns a datasonnet expression value builder
      */
     public ValueBuilder datasonnet(String value) {
-        DatasonnetExpression exp = new DatasonnetExpression(value);
-        return new ValueBuilder(exp);
+        return datasonnet(value, null);
     }
 
     /**
-     * Returns a Datasonnet expression value builder
-     */
-    public ValueBuilder datasonnet(Expression value) {
-        DatasonnetExpression exp = new DatasonnetExpression(value);
-        return new ValueBuilder(exp);
-    }
-
-    /**
-     * Returns a Datasonnet expression value builder
+     * Returns a datasonnet expression value builder
      */
     public ValueBuilder datasonnet(String value, Class<?> resultType) {
-        DatasonnetExpression exp = new DatasonnetExpression(value);
-        exp.setResultType(resultType);
-        return new ValueBuilder(exp);
+        return datasonnet(value, resultType, null, null);
     }
 
     /**
-     * Returns a Datasonnet expression value builder
+     * Returns a datasonnet expression value builder
      */
-    public ValueBuilder datasonnet(Expression value, Class<?> resultType) {
+    public ValueBuilder datasonnet(String value, Class<?> resultType, String bodyMediaType, String outputMediaType) {
         DatasonnetExpression exp = new DatasonnetExpression(value);
         exp.setResultType(resultType);
+        exp.setBodyMediaType(bodyMediaType);
+        exp.setOutputMediaType(outputMediaType);
         return new ValueBuilder(exp);
     }
 
     /**
      * Returns a simple expression value builder
      */
-    public SimpleBuilder simple(String value) {
-        return SimpleBuilder.simple(value);
+    public ValueBuilder simple(String value) {
+        return simple(value, null);
     }
 
     /**
      * Returns a simple expression value builder
      */
-    public SimpleBuilder simple(String value, Class<?> resultType) {
-        return SimpleBuilder.simple(value, resultType);
+    public ValueBuilder simple(String value, Class<?> resultType) {
+        SimpleExpression exp = new SimpleExpression(value);
+        exp.setResultType(resultType);
+        return new ValueBuilder(exp);
     }
 
     /**
      * Returns a simple expression value builder, using String.format style
      */
-    public SimpleBuilder simpleF(String format, Object... values) {
-        return SimpleBuilder.simpleF(format, values);
+    public ValueBuilder simpleF(String format, Object... values) {
+        String exp = String.format(format, values);
+        return simple(exp);
     }
 
     /**
      * Returns a simple expression value builder, using String.format style
      */
-    public SimpleBuilder simpleF(String format, Class<?> resultType, Object... values) {
-        return SimpleBuilder.simpleF(format, resultType, values);
+    public ValueBuilder simpleF(String format, Class<?> resultType, Object... values) {
+        String exp = String.format(format, values);
+        return simple(exp, resultType);
     }
 
     /**
@@ -444,13 +448,33 @@ public abstract class BuilderSupport {
     // Properties
     // -------------------------------------------------------------------------
 
-    public CamelContext getContext() {
-        return context;
+    @Override
+    public CamelContext getCamelContext() {
+        return camelContext;
     }
 
+    @Override
+    public void setCamelContext(CamelContext camelContext) {
+        if (camelContext != null) {
+            this.camelContext = camelContext;
+        }
+    }
+
+    /**
+     * Get the {@link CamelContext}
+     *
+     * @return camelContext the Camel context
+     */
+    public CamelContext getContext() {
+        return getCamelContext();
+    }
+
+    /**
+     * @deprecated use {@link #setCamelContext(CamelContext)}
+     */
+    @Deprecated
     public void setContext(CamelContext context) {
-        ObjectHelper.notNull(context, "CamelContext", this);
-        this.context = context;
+        setCamelContext(context);
     }
 
     public boolean hasErrorHandlerBuilder() {

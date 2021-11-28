@@ -330,7 +330,7 @@ public class MulticastProcessor extends AsyncProcessorSupport
             executorService.submit(() -> reactiveExecutor.schedule(state));
         } else {
             if (exchange.isTransacted()) {
-                reactiveExecutor.scheduleSync(state);
+                reactiveExecutor.scheduleQueue(state);
             } else {
                 reactiveExecutor.scheduleMain(state);
             }
@@ -537,16 +537,11 @@ public class MulticastProcessor extends AsyncProcessorSupport
                     return;
                 }
 
+                // TODO looks like pair can still be null as the if above has composite condition?
                 Exchange exchange = pair.getExchange();
                 int index = nbExchangeSent.getAndIncrement();
                 updateNewExchange(exchange, index, pairs, hasNext);
-
-                // Schedule the processing of the next pair
-                if (hasNext) {
-                    if (isParallelProcessing()) {
-                        schedule(this);
-                    }
-                } else {
+                if (!hasNext) {
                     allSent.set(true);
                 }
 
@@ -592,12 +587,15 @@ public class MulticastProcessor extends AsyncProcessorSupport
                         }
                     });
                 });
+                // after submitting this pair then move on to the next pair (if in parallel mode)
+                if (hasNext && isParallelProcessing()) {
+                    schedule(this);
+                }
             } catch (Exception e) {
                 original.setException(e);
                 doDone(null, false);
             }
         }
-
     }
 
     /**
@@ -652,16 +650,11 @@ public class MulticastProcessor extends AsyncProcessorSupport
                 return false;
             }
 
+            // TODO looks like pair can still be null as the if above has composite condition?
             Exchange exchange = pair.getExchange();
             int index = nbExchangeSent.getAndIncrement();
             updateNewExchange(exchange, index, pairs, hasNext);
-
-            // Schedule the processing of the next pair
-            if (hasNext) {
-                if (isParallelProcessing()) {
-                    schedule(this);
-                }
-            } else {
+            if (!hasNext) {
                 allSent.set(true);
             }
 
@@ -670,28 +663,15 @@ public class MulticastProcessor extends AsyncProcessorSupport
             // compute time taken if sending to another endpoint
             StopWatch watch = beforeSend(pair);
 
-            // when running as transacted and processing is performed from the same single thread
-            // that involves the Aggregate EIP that triggers an completion, then the reactive
-            // routing engine could lead to out of order work tasks. Which means that if
-            // the processing below was executed with synchronous processor, and AsyncProcessorAwaitManager
-            // would wait for the callback to signal its done, then that callback (due to out of order)
-            // would not happen, and the AsyncProcessorAwaitManager would block and wait
-            // (made worse because its all done by the same single thread).
-            // The solution is to use async processing but draining the work queues at both
-            // the callback and after the process method. This simulates being processed synchronously
-            // to sync up the processing order, which means that when executing afterSend then
-            // all pending work tasks from the thread has been completed (see CAMEL-16550).
-            AsyncProcessor async = AsyncProcessorConverterHelper.convert(pair.getProcessor());
-            async.process(exchange, doneSync -> {
-                while (reactiveExecutor.executeFromQueue()) {
-                    LOG.trace("Draining work queue before done callback: {}", exchange);
-                }
-            });
-
-            while (reactiveExecutor.executeFromQueue()) {
-                LOG.trace("Draining work queue before continue processing: {}", exchange);
+            // use synchronous processing in transacted mode
+            Processor sync = pair.getProcessor();
+            try {
+                sync.process(exchange);
+            } catch (Exception e) {
+                exchange.setException(e);
+            } finally {
+                afterSend(pair, watch);
             }
-            afterSend(pair, watch);
 
             // Decide whether to continue with the multicast or not; similar logic to the Pipeline
             // remember to test for stop on exception and aggregate before copying back results
@@ -723,6 +703,11 @@ public class MulticastProcessor extends AsyncProcessorSupport
                 // aggregate exchanges if any
                 aggregate();
             });
+
+            // after submitting this pair then move on to the next pair (if in parallel mode)
+            if (hasNext && isParallelProcessing()) {
+                schedule(this);
+            }
 
             // next step
             boolean next = hasNext && !isParallelProcessing();
@@ -1049,6 +1034,14 @@ public class MulticastProcessor extends AsyncProcessorSupport
                 // here we don't cache the child unit of work
                 if (!child) {
                     // add to cache
+                    // TODO returned value ignored intentionally?
+                    // Findbugs alert:
+                    // The putIfAbsent method is typically used to ensure that a single value
+                    // is associated with a given key (the first value for which put if absent succeeds).
+                    // If you ignore the return value and retain a reference to the value passed in,
+                    // you run the risk of retaining a value that is not the one that is associated
+                    // with the key in the map. If it matters which one you use and you use the one
+                    // that isn't stored in the map, your program will behave incorrectly.
                     errorHandlers.putIfAbsent(key, answer);
                 }
 

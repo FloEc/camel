@@ -62,18 +62,24 @@ public class DebeziumSqlserverComponentConfigurer extends PropertyConfigurerSupp
         case "databaseHistoryKafkaRecoveryPollIntervalMs": getOrCreateConfiguration(target).setDatabaseHistoryKafkaRecoveryPollIntervalMs(property(camelContext, int.class, value)); return true;
         case "databasehistorykafkatopic":
         case "databaseHistoryKafkaTopic": getOrCreateConfiguration(target).setDatabaseHistoryKafkaTopic(property(camelContext, java.lang.String.class, value)); return true;
+        case "databasehistoryskipunparseableddl":
+        case "databaseHistorySkipUnparseableDdl": getOrCreateConfiguration(target).setDatabaseHistorySkipUnparseableDdl(property(camelContext, boolean.class, value)); return true;
+        case "databasehistorystoreonlycapturedtablesddl":
+        case "databaseHistoryStoreOnlyCapturedTablesDdl": getOrCreateConfiguration(target).setDatabaseHistoryStoreOnlyCapturedTablesDdl(property(camelContext, boolean.class, value)); return true;
+        case "databasehistorystoreonlymonitoredtablesddl":
+        case "databaseHistoryStoreOnlyMonitoredTablesDdl": getOrCreateConfiguration(target).setDatabaseHistoryStoreOnlyMonitoredTablesDdl(property(camelContext, boolean.class, value)); return true;
         case "databasehostname":
         case "databaseHostname": getOrCreateConfiguration(target).setDatabaseHostname(property(camelContext, java.lang.String.class, value)); return true;
         case "databaseinstance":
         case "databaseInstance": getOrCreateConfiguration(target).setDatabaseInstance(property(camelContext, java.lang.String.class, value)); return true;
+        case "databasenames":
+        case "databaseNames": getOrCreateConfiguration(target).setDatabaseNames(property(camelContext, java.lang.String.class, value)); return true;
         case "databasepassword":
         case "databasePassword": getOrCreateConfiguration(target).setDatabasePassword(property(camelContext, java.lang.String.class, value)); return true;
         case "databaseport":
         case "databasePort": getOrCreateConfiguration(target).setDatabasePort(property(camelContext, int.class, value)); return true;
         case "databaseservername":
         case "databaseServerName": getOrCreateConfiguration(target).setDatabaseServerName(property(camelContext, java.lang.String.class, value)); return true;
-        case "databaseservertimezone":
-        case "databaseServerTimezone": getOrCreateConfiguration(target).setDatabaseServerTimezone(property(camelContext, java.lang.String.class, value)); return true;
         case "databaseuser":
         case "databaseUser": getOrCreateConfiguration(target).setDatabaseUser(property(camelContext, java.lang.String.class, value)); return true;
         case "datatypepropagatesourcetype":
@@ -94,6 +100,8 @@ public class DebeziumSqlserverComponentConfigurer extends PropertyConfigurerSupp
         case "internalValueConverter": getOrCreateConfiguration(target).setInternalValueConverter(property(camelContext, java.lang.String.class, value)); return true;
         case "maxbatchsize":
         case "maxBatchSize": getOrCreateConfiguration(target).setMaxBatchSize(property(camelContext, int.class, value)); return true;
+        case "maxiterationtransactions":
+        case "maxIterationTransactions": getOrCreateConfiguration(target).setMaxIterationTransactions(property(camelContext, int.class, value)); return true;
         case "maxqueuesize":
         case "maxQueueSize": getOrCreateConfiguration(target).setMaxQueueSize(property(camelContext, int.class, value)); return true;
         case "maxqueuesizeinbytes":
@@ -205,18 +213,24 @@ public class DebeziumSqlserverComponentConfigurer extends PropertyConfigurerSupp
         case "databaseHistoryKafkaRecoveryPollIntervalMs": return int.class;
         case "databasehistorykafkatopic":
         case "databaseHistoryKafkaTopic": return java.lang.String.class;
+        case "databasehistoryskipunparseableddl":
+        case "databaseHistorySkipUnparseableDdl": return boolean.class;
+        case "databasehistorystoreonlycapturedtablesddl":
+        case "databaseHistoryStoreOnlyCapturedTablesDdl": return boolean.class;
+        case "databasehistorystoreonlymonitoredtablesddl":
+        case "databaseHistoryStoreOnlyMonitoredTablesDdl": return boolean.class;
         case "databasehostname":
         case "databaseHostname": return java.lang.String.class;
         case "databaseinstance":
         case "databaseInstance": return java.lang.String.class;
+        case "databasenames":
+        case "databaseNames": return java.lang.String.class;
         case "databasepassword":
         case "databasePassword": return java.lang.String.class;
         case "databaseport":
         case "databasePort": return int.class;
         case "databaseservername":
         case "databaseServerName": return java.lang.String.class;
-        case "databaseservertimezone":
-        case "databaseServerTimezone": return java.lang.String.class;
         case "databaseuser":
         case "databaseUser": return java.lang.String.class;
         case "datatypepropagatesourcetype":
@@ -237,6 +251,8 @@ public class DebeziumSqlserverComponentConfigurer extends PropertyConfigurerSupp
         case "internalValueConverter": return java.lang.String.class;
         case "maxbatchsize":
         case "maxBatchSize": return int.class;
+        case "maxiterationtransactions":
+        case "maxIterationTransactions": return int.class;
         case "maxqueuesize":
         case "maxQueueSize": return int.class;
         case "maxqueuesizeinbytes":
@@ -349,18 +365,24 @@ public class DebeziumSqlserverComponentConfigurer extends PropertyConfigurerSupp
         case "databaseHistoryKafkaRecoveryPollIntervalMs": return getOrCreateConfiguration(target).getDatabaseHistoryKafkaRecoveryPollIntervalMs();
         case "databasehistorykafkatopic":
         case "databaseHistoryKafkaTopic": return getOrCreateConfiguration(target).getDatabaseHistoryKafkaTopic();
+        case "databasehistoryskipunparseableddl":
+        case "databaseHistorySkipUnparseableDdl": return getOrCreateConfiguration(target).isDatabaseHistorySkipUnparseableDdl();
+        case "databasehistorystoreonlycapturedtablesddl":
+        case "databaseHistoryStoreOnlyCapturedTablesDdl": return getOrCreateConfiguration(target).isDatabaseHistoryStoreOnlyCapturedTablesDdl();
+        case "databasehistorystoreonlymonitoredtablesddl":
+        case "databaseHistoryStoreOnlyMonitoredTablesDdl": return getOrCreateConfiguration(target).isDatabaseHistoryStoreOnlyMonitoredTablesDdl();
         case "databasehostname":
         case "databaseHostname": return getOrCreateConfiguration(target).getDatabaseHostname();
         case "databaseinstance":
         case "databaseInstance": return getOrCreateConfiguration(target).getDatabaseInstance();
+        case "databasenames":
+        case "databaseNames": return getOrCreateConfiguration(target).getDatabaseNames();
         case "databasepassword":
         case "databasePassword": return getOrCreateConfiguration(target).getDatabasePassword();
         case "databaseport":
         case "databasePort": return getOrCreateConfiguration(target).getDatabasePort();
         case "databaseservername":
         case "databaseServerName": return getOrCreateConfiguration(target).getDatabaseServerName();
-        case "databaseservertimezone":
-        case "databaseServerTimezone": return getOrCreateConfiguration(target).getDatabaseServerTimezone();
         case "databaseuser":
         case "databaseUser": return getOrCreateConfiguration(target).getDatabaseUser();
         case "datatypepropagatesourcetype":
@@ -381,6 +403,8 @@ public class DebeziumSqlserverComponentConfigurer extends PropertyConfigurerSupp
         case "internalValueConverter": return getOrCreateConfiguration(target).getInternalValueConverter();
         case "maxbatchsize":
         case "maxBatchSize": return getOrCreateConfiguration(target).getMaxBatchSize();
+        case "maxiterationtransactions":
+        case "maxIterationTransactions": return getOrCreateConfiguration(target).getMaxIterationTransactions();
         case "maxqueuesize":
         case "maxQueueSize": return getOrCreateConfiguration(target).getMaxQueueSize();
         case "maxqueuesizeinbytes":

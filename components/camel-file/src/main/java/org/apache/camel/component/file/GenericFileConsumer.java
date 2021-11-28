@@ -569,7 +569,7 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
      * @param  files       files in the directory
      * @return             <tt>true</tt> to include the file, <tt>false</tt> to skip it
      */
-    protected boolean isValidFile(GenericFile<T> file, boolean isDirectory, List<T> files) {
+    protected boolean isValidFile(GenericFile<T> file, boolean isDirectory, T[] files) {
         String absoluteFilePath = file.getAbsoluteFilePath();
 
         if (!isMatched(file, isDirectory, files)) {
@@ -590,21 +590,10 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
             return false;
         }
 
-        // if its a file then check we have the file in the idempotent registry
+        // if it is a file then check we have the file in the idempotent registry
         // already
         if (endpoint.isIdempotent()) {
-            // use absolute file path as default key, but evaluate if an
-            // expression key was configured
-            String key = file.getAbsoluteFilePath();
-            if (endpoint.getIdempotentKey() != null) {
-                Exchange dummy = endpoint.createExchange(file);
-                key = endpoint.getIdempotentKey().evaluate(dummy, String.class);
-                LOG.trace("Evaluated idempotentKey: {} for file: {}", key, file);
-            }
-            if (key != null && endpoint.getIdempotentRepository().contains(key)) {
-                LOG.trace(
-                        "This consumer is idempotent and the file has been consumed before matching idempotentKey: {}. Will skip this file: {}",
-                        key, file);
+            if (notUnique(file)) {
                 return false;
             }
         }
@@ -613,6 +602,24 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
         // are the
         // only thread processing this file
         return endpoint.getInProgressRepository().add(absoluteFilePath);
+    }
+
+    private boolean notUnique(GenericFile<T> file) {
+        // use absolute file path as default key, but evaluate if an
+        // expression key was configured
+        String key = file.getAbsoluteFilePath();
+        if (endpoint.getIdempotentKey() != null) {
+            Exchange dummy = endpoint.createExchange(file);
+            key = endpoint.getIdempotentKey().evaluate(dummy, String.class);
+            LOG.trace("Evaluated idempotentKey: {} for file: {}", key, file);
+        }
+        if (key != null && endpoint.getIdempotentRepository().contains(key)) {
+            LOG.trace(
+                    "This consumer is idempotent and the file has been consumed before matching idempotentKey: {}. Will skip this file: {}",
+                    key, file);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -630,7 +637,7 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
      * @param  files       files in the directory
      * @return             <tt>true</tt> if the file is matched, <tt>false</tt> if not
      */
-    protected boolean isMatched(GenericFile<T> file, boolean isDirectory, List<T> files) {
+    protected boolean isMatched(GenericFile<T> file, boolean isDirectory, T[] files) {
         String name = file.getFileNameOnly();
 
         // folders/names starting with dot is always skipped (eg. ".", ".camel",
@@ -750,7 +757,7 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
      * @param  files        files in the directory
      * @return              <tt>true</tt> if the file is matched, <tt>false</tt> if not
      */
-    protected abstract boolean isMatched(GenericFile<T> file, String doneFileName, List<T> files);
+    protected abstract boolean isMatched(GenericFile<T> file, String doneFileName, T[] files);
 
     protected String evaluateFileExpression(Exchange exchange) {
         String result = endpoint.getFileName().evaluate(exchange, String.class);

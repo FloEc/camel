@@ -34,10 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thoughtworks.xstream.XStream;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.component.salesforce.SalesforceHttpClient;
@@ -47,7 +44,6 @@ import org.apache.camel.component.salesforce.api.TypeReferences;
 import org.apache.camel.component.salesforce.api.dto.RestError;
 import org.apache.camel.component.salesforce.internal.PayloadFormat;
 import org.apache.camel.component.salesforce.internal.SalesforceSession;
-import org.apache.camel.component.salesforce.internal.dto.RestErrors;
 import org.apache.camel.support.service.ServiceSupport;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpContentResponse;
@@ -89,12 +85,12 @@ public abstract class AbstractClientBase extends ServiceSupport
     private long terminationTimeout;
 
     public AbstractClientBase(String version, SalesforceSession session, SalesforceHttpClient httpClient,
-                              SalesforceLoginConfig loginConfig) throws SalesforceException {
+                              SalesforceLoginConfig loginConfig) {
         this(version, session, httpClient, loginConfig, DEFAULT_TERMINATION_TIMEOUT);
     }
 
     AbstractClientBase(String version, SalesforceSession session, SalesforceHttpClient httpClient,
-                       SalesforceLoginConfig loginConfig, int terminationTimeout) throws SalesforceException {
+                       SalesforceLoginConfig loginConfig, int terminationTimeout) {
         this.version = version;
         this.session = session;
         this.httpClient = httpClient;
@@ -202,12 +198,14 @@ public abstract class AbstractClientBase extends ServiceSupport
                         // from SalesforceSecurityHandler
                         Throwable failure = result.getFailure();
                         if (failure instanceof SalesforceException) {
-                            callback.onResponse(null, headers, (SalesforceException) failure);
+                            httpClient.getWorkerPool()
+                                    .execute(() -> callback.onResponse(null, headers, (SalesforceException) failure));
                         } else {
                             final String msg = String.format("Unexpected error {%s:%s} executing {%s:%s}", response.getStatus(),
                                     response.getReason(), request.getMethod(),
                                     request.getURI());
-                            callback.onResponse(null, headers, new SalesforceException(msg, response.getStatus(), failure));
+                            httpClient.getWorkerPool().execute(() -> callback.onResponse(null, headers,
+                                    new SalesforceException(msg, response.getStatus(), failure)));
                         }
                     } else {
 
@@ -226,14 +224,14 @@ public abstract class AbstractClientBase extends ServiceSupport
                                 session.parseLoginResponse(contentResponse, getContentAsString());
                                 final String msg = String.format("Unexpected Error {%s:%s} executing {%s:%s}", status,
                                         response.getReason(), request.getMethod(), request.getURI());
-                                callback.onResponse(null, headers, new SalesforceException(msg, null));
-
+                                httpClient.getWorkerPool()
+                                        .execute(() -> callback.onResponse(null, headers, new SalesforceException(msg, null)));
                             } catch (SalesforceException e) {
 
                                 final String msg = String.format("Error {%s:%s} executing {%s:%s}", status,
                                         response.getReason(), request.getMethod(), request.getURI());
-                                callback.onResponse(null, headers, new SalesforceException(msg, response.getStatus(), e));
-
+                                httpClient.getWorkerPool().execute(() -> callback.onResponse(null, headers,
+                                        new SalesforceException(msg, response.getStatus(), e)));
                             }
                         } else if (status < HttpStatus.OK_200 || status >= HttpStatus.MULTIPLE_CHOICES_300) {
                             // Salesforce HTTP failure!
@@ -241,11 +239,13 @@ public abstract class AbstractClientBase extends ServiceSupport
 
                             // for APIs that return body on status 400, such as
                             // Composite API we need content as well
-                            callback.onResponse(getContentAsInputStream(), headers, exception);
+                            httpClient.getWorkerPool()
+                                    .execute(() -> callback.onResponse(getContentAsInputStream(), headers, exception));
                         } else {
 
                             // Success!!!
-                            callback.onResponse(getContentAsInputStream(), headers, null);
+                            httpClient.getWorkerPool()
+                                    .execute(() -> callback.onResponse(getContentAsInputStream(), headers, null));
                         }
                     }
                 } finally {
@@ -278,22 +278,15 @@ public abstract class AbstractClientBase extends ServiceSupport
 
     final List<RestError> readErrorsFrom(
             final InputStream responseContent, final PayloadFormat format, final ObjectMapper objectMapper)
-            throws IOException, JsonParseException, JsonMappingException {
-        return readErrorsFrom(responseContent, format, objectMapper, null);
+            throws IOException {
+        return readErrorsFrom(responseContent, objectMapper);
     }
 
     final List<RestError> readErrorsFrom(
-            final InputStream responseContent, final PayloadFormat format, final ObjectMapper objectMapper,
-            final XStream xStream)
-            throws IOException, JsonParseException, JsonMappingException {
+            final InputStream responseContent, final ObjectMapper objectMapper)
+            throws IOException {
         final List<RestError> restErrors;
-        if (PayloadFormat.JSON.equals(format)) {
-            restErrors = objectMapper.readValue(responseContent, TypeReferences.REST_ERROR_LIST_TYPE);
-        } else {
-            RestErrors errors = new RestErrors();
-            xStream.fromXML(responseContent, errors);
-            restErrors = errors.getErrors();
-        }
+        restErrors = objectMapper.readValue(responseContent, TypeReferences.REST_ERROR_LIST_TYPE);
         return restErrors;
     }
 
@@ -312,6 +305,8 @@ public abstract class AbstractClientBase extends ServiceSupport
                 answer.put(headerName, header.getValue());
             }
         }
+        answer.put(Exchange.HTTP_RESPONSE_CODE, String.valueOf(response.getStatus()));
+        answer.put(Exchange.HTTP_RESPONSE_TEXT, response.getReason());
 
         return answer;
     }

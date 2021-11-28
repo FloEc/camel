@@ -104,7 +104,7 @@ public class RestConfigurationProperties extends RestConfiguration implements Bo
     }
 
     /**
-     * To use an specific hostname for the API documentation (eg swagger)
+     * To use a specific hostname for the API documentation (such as swagger or openapi)
      * <p/>
      * This can be used to override the generated host with this configured hostname
      */
@@ -189,6 +189,7 @@ public class RestConfigurationProperties extends RestConfiguration implements Bo
      * The pattern <tt>#name#</tt> refers to the CamelContext name, to match on the current CamelContext only. For any
      * other value, the pattern uses the rules from {@link PatternHelper#matchPattern(String, String)}
      */
+    @Deprecated
     public RestConfigurationProperties withApiContextIdPattern(String apiContextIdPattern) {
         setApiContextIdPattern(apiContextIdPattern);
         return this;
@@ -198,6 +199,7 @@ public class RestConfigurationProperties extends RestConfiguration implements Bo
      * Sets whether listing of all available CamelContext's with REST services in the JVM is enabled. If enabled it
      * allows to discover these contexts, if <tt>false</tt> then only the current CamelContext is in use.
      */
+    @Deprecated
     public RestConfigurationProperties withApiContextListing(boolean apiContextListing) {
         setApiContextListing(apiContextListing);
         return this;
@@ -242,13 +244,12 @@ public class RestConfigurationProperties extends RestConfiguration implements Bo
     }
 
     /**
-     * Whether to enable validation of the client request to check whether the Content-Type and Accept headers from the
-     * client is supported by the Rest-DSL configuration of its consumes/produces settings.
-     * <p/>
-     * This can be turned on, to enable this check. In case of validation error, then HTTP Status codes 415 or 406 is
-     * returned.
-     * <p/>
-     * The default value is false.
+     * Whether to enable validation of the client request to check:
+     *
+     * 1) Content-Type header matches what the Rest DSL consumes; returns HTTP Status 415 if validation error. 2) Accept
+     * header matches what the Rest DSL produces; returns HTTP Status 406 if validation error. 3) Missing required data
+     * (query parameters, HTTP headers, body); returns HTTP Status 400 if validation error. 4) Parsing error of the
+     * message body (JSon, XML or Auto binding mode must be enabled); returns HTTP Status 400 if validation error.
      */
     public RestConfigurationProperties withClientRequestValidation(boolean clientRequestValidation) {
         setClientRequestValidation(clientRequestValidation);

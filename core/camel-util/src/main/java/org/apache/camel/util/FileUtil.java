@@ -382,9 +382,6 @@ public final class FileUtil {
 
     private static void delete(File f) {
         if (!f.delete()) {
-            if (isWindows()) {
-                System.gc();
-            }
             try {
                 Thread.sleep(RETRY_SLEEP_MILLIS);
             } catch (InterruptedException ex) {

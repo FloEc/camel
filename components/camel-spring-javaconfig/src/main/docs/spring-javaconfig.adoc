@@ -1,14 +1,14 @@
-[[spring-javaconfig-other]]
 = Spring Java Configuration Component (deprecated)
-:docTitle: Spring Java Configuration
-:artifactId: camel-spring-javaconfig
+:doctitle: Spring Java Configuration
+:shortname: spring-javaconfig
+:artifactid: camel-spring-javaconfig
 :description: Using Camel with Spring Java Configuration
 :since: 2.0
-:supportLevel: Stable-deprecated
+:supportlevel: Stable-deprecated
 :deprecated: *deprecated*
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/others/spring-javaconfig.adoc[opts=optional]
 //Manually maintained attributes
-:group: Spring
+:camel-spring-boot-name: spring-javaconfig
 
 *Since Camel {since}*
 
@@ -96,3 +96,5 @@ Spring Testing framework to load the
 from *SingleRouteCamelConfiguration* which is a helper Spring Java
 Config class which will configure the CamelContext for us and then
 register the RouteBuilder we create.
+
+include::spring-boot:partial$starter.adoc[]

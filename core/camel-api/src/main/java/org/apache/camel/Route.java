@@ -44,6 +44,7 @@ public interface Route extends RuntimeConfiguration {
     String REST_PROPERTY = "rest";
     String TEMPLATE_PROPERTY = "template";
     String DESCRIPTION_PROPERTY = "description";
+    String CONFIGURATION_ID_PROPERTY = "configurationId";
 
     /**
      * Gets the route id
@@ -53,6 +54,13 @@ public interface Route extends RuntimeConfiguration {
     String getId();
 
     /**
+     * Whether the route id is custom assigned or auto assigned
+     *
+     * @return true if custom id, false if auto assigned id
+     */
+    boolean isCustomId();
+
+    /**
      * Gets the route group
      *
      * @return the route group
@@ -60,7 +68,7 @@ public interface Route extends RuntimeConfiguration {
     String getGroup();
 
     /**
-     * Gets the uptime in a human readable format
+     * Gets the uptime in a human-readable format
      *
      * @return the uptime in days/hours/minutes
      */
@@ -114,6 +122,16 @@ public interface Route extends RuntimeConfiguration {
      * @return the description, or <tt>null</tt> if no description has been configured.
      */
     String getDescription();
+
+    /**
+     * Gets the route configuration id(s) the route has been applied with. Multiple ids is separated by comma.
+     * <p/>
+     * The configuration ids is configured using the {@link #CONFIGURATION_ID_PROPERTY} as key in the
+     * {@link #getProperties()}.
+     *
+     * @return the configuration, or <tt>null</tt> if no configuration has been configured.
+     */
+    String getConfigurationId();
 
     /**
      * Gets the camel context
@@ -171,14 +189,22 @@ public interface Route extends RuntimeConfiguration {
     void warmUp();
 
     /**
-     * Gets the last error.
+     * Gets the last error that happened during changing the route lifecycle, i.e. such as when an exception was thrown
+     * during starting the route.
+     * <p/>
+     * This is only errors for route lifecycle changes, it is not exceptions thrown during routing messsages with the
+     * Camel routing engine.
      *
      * @return the error
      */
     RouteError getLastError();
 
     /**
-     * Sets the last error.
+     * Sets the last error that happened during changing the route lifecycle, i.e. such as when an exception was thrown
+     * during starting the route.
+     * <p/>
+     * This is only errors for route lifecycle changes, it is not exceptions thrown during routing messsages with the
+     * Camel routing engine.
      *
      * @param error the error
      */

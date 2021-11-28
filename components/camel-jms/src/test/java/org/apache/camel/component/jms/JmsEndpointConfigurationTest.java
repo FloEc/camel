@@ -42,6 +42,7 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import static org.apache.camel.test.junit5.TestSupport.assertIsInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -198,7 +199,7 @@ public class JmsEndpointConfigurationTest extends CamelTestSupport {
         JmsOperations operations = consumer.getEndpointMessageListener().getTemplate();
         assertTrue(operations instanceof JmsTemplate);
         JmsTemplate template = (JmsTemplate) operations;
-        assertTrue(template.getDeliveryMode() == DeliveryMode.NON_PERSISTENT,
+        assertEquals(DeliveryMode.NON_PERSISTENT, template.getDeliveryMode(),
                 "Wrong delivery mode on reply template; expected  " + " DeliveryMode.NON_PERSISTENT but was DeliveryMode.PERSISTENT");
     }
 
@@ -336,9 +337,9 @@ public class JmsEndpointConfigurationTest extends CamelTestSupport {
         assertEquals(0, endpoint.getMaxConcurrentConsumers());
         assertEquals(-1, endpoint.getMaxMessagesPerTask());
         assertNull(endpoint.getMessageConverter());
-        assertNotNull(endpoint.getPriority());
-        assertNotNull(endpoint.getReceiveTimeout());
-        assertNotNull(endpoint.getRecoveryInterval());
+        assertNotEquals(0, endpoint.getPriority());
+        assertNotEquals(0, endpoint.getReceiveTimeout());
+        assertNotEquals(0, endpoint.getRecoveryInterval());
         assertNull(endpoint.getReplyTo());
         assertNull(endpoint.getReplyToType());
         assertNull(endpoint.getReplyToCacheLevelName());

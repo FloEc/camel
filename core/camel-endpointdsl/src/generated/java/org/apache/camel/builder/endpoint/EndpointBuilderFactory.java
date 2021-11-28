@@ -79,6 +79,7 @@ public interface EndpointBuilderFactory
             org.apache.camel.builder.endpoint.dsl.CxfEndpointBuilderFactory.CxfBuilders,
             org.apache.camel.builder.endpoint.dsl.CxfRsEndpointBuilderFactory.CxfRsBuilders,
             org.apache.camel.builder.endpoint.dsl.DJLEndpointBuilderFactory.DJLBuilders,
+            org.apache.camel.builder.endpoint.dsl.DMSEndpointBuilderFactory.DMSBuilders,
             org.apache.camel.builder.endpoint.dsl.DataFormatEndpointBuilderFactory.DataFormatBuilders,
             org.apache.camel.builder.endpoint.dsl.DataLakeEndpointBuilderFactory.DataLakeBuilders,
             org.apache.camel.builder.endpoint.dsl.DataSetEndpointBuilderFactory.DataSetBuilders,
@@ -161,6 +162,7 @@ public interface EndpointBuilderFactory
             org.apache.camel.builder.endpoint.dsl.HdfsEndpointBuilderFactory.HdfsBuilders,
             org.apache.camel.builder.endpoint.dsl.HttpEndpointBuilderFactory.HttpBuilders,
             org.apache.camel.builder.endpoint.dsl.IAM2EndpointBuilderFactory.IAM2Builders,
+            org.apache.camel.builder.endpoint.dsl.IAMEndpointBuilderFactory.IAMBuilders,
             org.apache.camel.builder.endpoint.dsl.IOTAEndpointBuilderFactory.IOTABuilders,
             org.apache.camel.builder.endpoint.dsl.IPFSEndpointBuilderFactory.IPFSBuilders,
             org.apache.camel.builder.endpoint.dsl.IgniteCacheEndpointBuilderFactory.IgniteCacheBuilders,
@@ -170,6 +172,7 @@ public interface EndpointBuilderFactory
             org.apache.camel.builder.endpoint.dsl.IgniteMessagingEndpointBuilderFactory.IgniteMessagingBuilders,
             org.apache.camel.builder.endpoint.dsl.IgniteQueueEndpointBuilderFactory.IgniteQueueBuilders,
             org.apache.camel.builder.endpoint.dsl.IgniteSetEndpointBuilderFactory.IgniteSetBuilders,
+            org.apache.camel.builder.endpoint.dsl.ImageRecognitionEndpointBuilderFactory.ImageRecognitionBuilders,
             org.apache.camel.builder.endpoint.dsl.InfinispanEmbeddedEndpointBuilderFactory.InfinispanEmbeddedBuilders,
             org.apache.camel.builder.endpoint.dsl.InfinispanRemoteEndpointBuilderFactory.InfinispanRemoteBuilders,
             org.apache.camel.builder.endpoint.dsl.InfluxDbEndpointBuilderFactory.InfluxDbBuilders,
@@ -192,6 +195,7 @@ public interface EndpointBuilderFactory
             org.apache.camel.builder.endpoint.dsl.JooqEndpointBuilderFactory.JooqBuilders,
             org.apache.camel.builder.endpoint.dsl.JpaEndpointBuilderFactory.JpaBuilders,
             org.apache.camel.builder.endpoint.dsl.JsltEndpointBuilderFactory.JsltBuilders,
+            org.apache.camel.builder.endpoint.dsl.JsonPatchEndpointBuilderFactory.JsonPatchBuilders,
             org.apache.camel.builder.endpoint.dsl.JsonValidatorEndpointBuilderFactory.JsonValidatorBuilders,
             org.apache.camel.builder.endpoint.dsl.JsonataEndpointBuilderFactory.JsonataBuilders,
             org.apache.camel.builder.endpoint.dsl.Jt400EndpointBuilderFactory.Jt400Builders,
@@ -254,6 +258,7 @@ public interface EndpointBuilderFactory
             org.apache.camel.builder.endpoint.dsl.NovaEndpointBuilderFactory.NovaBuilders,
             org.apache.camel.builder.endpoint.dsl.NsqEndpointBuilderFactory.NsqBuilders,
             org.apache.camel.builder.endpoint.dsl.OAIPMHEndpointBuilderFactory.OAIPMHBuilders,
+            org.apache.camel.builder.endpoint.dsl.OBSEndpointBuilderFactory.OBSBuilders,
             org.apache.camel.builder.endpoint.dsl.Olingo2EndpointBuilderFactory.Olingo2Builders,
             org.apache.camel.builder.endpoint.dsl.Olingo4EndpointBuilderFactory.Olingo4Builders,
             org.apache.camel.builder.endpoint.dsl.OpenshiftBuildConfigsEndpointBuilderFactory.OpenshiftBuildConfigsBuilders,
@@ -291,6 +296,7 @@ public interface EndpointBuilderFactory
             org.apache.camel.builder.endpoint.dsl.SecretsManagerEndpointBuilderFactory.SecretsManagerBuilders,
             org.apache.camel.builder.endpoint.dsl.SedaEndpointBuilderFactory.SedaBuilders,
             org.apache.camel.builder.endpoint.dsl.ServerEndpointBuilderFactory.ServerBuilders,
+            org.apache.camel.builder.endpoint.dsl.ServiceBusEndpointBuilderFactory.ServiceBusBuilders,
             org.apache.camel.builder.endpoint.dsl.ServiceEndpointBuilderFactory.ServiceBuilders,
             org.apache.camel.builder.endpoint.dsl.ServiceNowEndpointBuilderFactory.ServiceNowBuilders,
             org.apache.camel.builder.endpoint.dsl.ServletEndpointBuilderFactory.ServletBuilders,
@@ -367,13 +373,20 @@ public interface EndpointBuilderFactory
     default org.apache.camel.Expression endpoints(
             org.apache.camel.builder.EndpointProducerBuilder... endpoints) {
         return new org.apache.camel.support.ExpressionAdapter() {
-            List<org.apache.camel.Expression> expressions = Stream.of(endpoints)
-                .map(org.apache.camel.builder.EndpointProducerBuilder::expr)
-                .collect(Collectors.toList());
+        
+            private List<org.apache.camel.Expression> expressions = null;
         
             @Override
             public Object evaluate(org.apache.camel.Exchange exchange) {
                 return expressions.stream().map(e -> e.evaluate(exchange, Object.class)).collect(Collectors.toList());
+            }
+        
+            @Override
+            public void init(org.apache.camel.CamelContext context) {
+                super.init(context);
+                expressions = Stream.of(endpoints)
+                        .map(epb -> epb.expr(context))
+                        .collect(Collectors.toList());
             }
         };
     }

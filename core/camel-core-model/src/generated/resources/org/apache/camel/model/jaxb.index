@@ -63,6 +63,8 @@ Resilience4jConfigurationDefinition
 RestContextRefDefinition
 RollbackDefinition
 RouteBuilderDefinition
+RouteConfigurationDefinition
+RouteConfigurationsDefinition
 RouteContextRefDefinition
 RouteDefinition
 RouteTemplateBeanDefinition
@@ -98,5 +100,4 @@ TryDefinition
 UnmarshalDefinition
 ValidateDefinition
 WhenDefinition
-WhenSkipSendToEndpointDefinition
 WireTapDefinition

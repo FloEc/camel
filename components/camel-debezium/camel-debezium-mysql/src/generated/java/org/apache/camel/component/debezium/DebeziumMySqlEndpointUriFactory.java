@@ -20,7 +20,7 @@ public class DebeziumMySqlEndpointUriFactory extends org.apache.camel.support.co
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
     static {
-        Set<String> props = new HashSet<>(89);
+        Set<String> props = new HashSet<>(95);
         props.add("databaseJdbcDriver");
         props.add("maxBatchSize");
         props.add("internalKeyConverter");
@@ -42,8 +42,10 @@ public class DebeziumMySqlEndpointUriFactory extends org.apache.camel.support.co
         props.add("decimalHandlingMode");
         props.add("skippedOperations");
         props.add("sourceStructVersion");
+        props.add("binaryHandlingMode");
         props.add("bigintUnsignedHandlingMode");
         props.add("databaseHostname");
+        props.add("databaseHistorySkipUnparseableDdl");
         props.add("databaseSslKeystorePassword");
         props.add("eventProcessingFailureHandlingMode");
         props.add("offsetCommitTimeoutMs");
@@ -51,6 +53,7 @@ public class DebeziumMySqlEndpointUriFactory extends org.apache.camel.support.co
         props.add("snapshotSelectStatementOverrides");
         props.add("databaseIncludeList");
         props.add("gtidSourceFilterDmlEvents");
+        props.add("minRowCountToStreamResults");
         props.add("offsetFlushIntervalMs");
         props.add("offsetStorageFileName");
         props.add("columnBlacklist");
@@ -70,6 +73,7 @@ public class DebeziumMySqlEndpointUriFactory extends org.apache.camel.support.co
         props.add("databaseHistory");
         props.add("includeQuery");
         props.add("columnPropagateSourceType");
+        props.add("databaseHistoryStoreOnlyCapturedTablesDdl");
         props.add("offsetStorage");
         props.add("includeSchemaChanges");
         props.add("internalValueConverter");
@@ -84,6 +88,7 @@ public class DebeziumMySqlEndpointUriFactory extends org.apache.camel.support.co
         props.add("sanitizeFieldNames");
         props.add("databaseHistoryKafkaTopic");
         props.add("tableWhitelist");
+        props.add("databaseHistoryStoreOnlyMonitoredTablesDdl");
         props.add("tableIgnoreBuiltin");
         props.add("signalDataCollection");
         props.add("exchangePattern");
@@ -102,6 +107,7 @@ public class DebeziumMySqlEndpointUriFactory extends org.apache.camel.support.co
         props.add("tableExcludeList");
         props.add("offsetCommitPolicy");
         props.add("tableIncludeList");
+        props.add("incrementalSnapshotChunkSize");
         props.add("columnExcludeList");
         props.add("gtidSourceIncludes");
         props.add("columnIncludeList");

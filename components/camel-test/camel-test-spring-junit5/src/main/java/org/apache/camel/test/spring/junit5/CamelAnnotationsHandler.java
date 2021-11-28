@@ -70,7 +70,7 @@ public final class CamelAnnotationsHandler {
         String key = SpringCamelContext.EXCLUDE_ROUTES;
         String exists = System.getProperty(key);
         if (exists != null) {
-            LOGGER.warn("The JVM property " + key + " is set, but not supported anymore.");
+            LOGGER.warn("The JVM property {} is set, but not supported anymore.", key);
         }
 
         if (testClass.isAnnotationPresent(ExcludeRoutes.class)) {
@@ -210,6 +210,10 @@ public final class CamelAnnotationsHandler {
 
                 public void execute(String contextName, SpringCamelContext camelContext)
                         throws Exception {
+
+                    // automatic turn on debugging when we have breakpoints
+                    camelContext.setDebugging(true);
+
                     Debugger debugger = camelContext.getDebugger();
                     if (debugger == null) {
                         debugger = new DefaultDebugger();

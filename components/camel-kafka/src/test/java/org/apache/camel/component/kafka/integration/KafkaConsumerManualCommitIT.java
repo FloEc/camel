@@ -28,7 +28,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -73,14 +73,14 @@ public class KafkaConsumerManualCommitIT extends BaseEmbeddedKafkaTestSupport {
                 from(from).routeId("foo").to(to).process(e -> {
                     KafkaManualCommit manual = e.getIn().getHeader(KafkaConstants.MANUAL_COMMIT, KafkaManualCommit.class);
                     assertNotNull(manual);
-                    manual.commitSync();
+                    manual.commit();
                 });
                 from(from).routeId("bar").autoStartup(false).to(toBar);
             }
         };
     }
 
-    @Test
+    @RepeatedTest(4)
     public void kafkaAutoCommitDisabledDuringRebalance() throws Exception {
         to.expectedMessageCount(1);
         String firstMessage = "message-0";
@@ -107,9 +107,6 @@ public class KafkaConsumerManualCommitIT extends BaseEmbeddedKafkaTestSupport {
         // start a new route in order to rebalance kafka
         context.getRouteController().startRoute("bar");
         toBar.expectedMessageCount(1);
-        synchronized (this) {
-            Thread.sleep(1000);
-        }
 
         toBar.assertIsSatisfied();
 
@@ -120,15 +117,10 @@ public class KafkaConsumerManualCommitIT extends BaseEmbeddedKafkaTestSupport {
         to.expectedMessageCount(1);
         to.expectedBodiesReceivedInAnyOrder("message-1");
 
-        // give some time for the route to start again
-        synchronized (this) {
-            Thread.sleep(1000);
-        }
-
         to.assertIsSatisfied(3000);
     }
 
-    @Test
+    @RepeatedTest(4)
     public void kafkaManualCommit() throws Exception {
         to.expectedMessageCount(5);
         to.expectedBodiesReceivedInAnyOrder("message-0", "message-1", "message-2", "message-3", "message-4");
@@ -165,11 +157,7 @@ public class KafkaConsumerManualCommitIT extends BaseEmbeddedKafkaTestSupport {
         // we will expect to consume from the latest committed offset e.g from offset 5
         context.getRouteController().startRoute("foo");
         to.expectedMessageCount(3);
-
-        // give some time for the route to start again
-        synchronized (this) {
-            Thread.sleep(1000);
-        }
+        to.expectedBodiesReceivedInAnyOrder("message-5", "message-6", "message-7");
 
         to.assertIsSatisfied(3000);
     }

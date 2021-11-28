@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A bunch of useful testing methods
  */
+@Deprecated
 public abstract class TestSupport extends Assert {
 
     protected static final String LS = System.lineSeparator();
@@ -218,7 +219,7 @@ public abstract class TestSupport extends Assert {
         try {
             PredicateAssertHelper.assertMatches(predicate, "Predicate should match: ", exchange);
         } catch (AssertionError e) {
-            LOG.debug("Caught expected assertion error: {}", e);
+            LOG.debug("Caught expected assertion error: {}", e.getMessage(), e);
         }
         assertPredicate(predicate, exchange, false);
     }
@@ -355,7 +356,7 @@ public abstract class TestSupport extends Assert {
         int tries = 0;
         int maxTries = 5;
         boolean exists = true;
-        while (exists && (tries < maxTries)) {
+        while (exists && tries < maxTries) {
             recursivelyDeleteDirectory(file);
             tries++;
             exists = file.exists();

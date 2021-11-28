@@ -28,6 +28,7 @@ import org.apache.camel.component.salesforce.api.dto.AbstractDescribedSObjectBas
 import org.apache.camel.component.salesforce.api.dto.CreateSObjectResult;
 import org.apache.camel.component.salesforce.api.dto.DeleteSObjectResult;
 import org.apache.camel.component.salesforce.api.dto.SaveSObjectResult;
+import org.apache.camel.component.salesforce.api.dto.UpsertSObjectResult;
 import org.apache.camel.component.salesforce.dto.generated.Account;
 import org.apache.camel.test.junit5.params.Parameter;
 import org.apache.camel.test.junit5.params.Parameterized;
@@ -45,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Parameterized
 public class CompositeApiCollectionsIntegrationTest extends AbstractSalesforceTestBase {
 
-    private static final Set<String> VERSIONS = new HashSet<>(Arrays.asList("46.0", "50.0"));
+    private static final Set<String> VERSIONS = new HashSet<>(Arrays.asList("46.0", SalesforceEndpointConfig.DEFAULT_VERSION));
 
     @Parameter
     private String version;
@@ -154,7 +155,7 @@ public class CompositeApiCollectionsIntegrationTest extends AbstractSalesforceTe
         account.setExternal_Id__c("AAA");
         final List<Account> accounts = Collections.singletonList(account);
 
-        List<SaveSObjectResult> result = (List<SaveSObjectResult>) template.requestBody(
+        List<UpsertSObjectResult> result = (List<UpsertSObjectResult>) template.requestBody(
                 "salesforce:compositeUpsertSObjectCollections?sObjectName=Account&sObjectIdName=External_Id__c",
                 accounts);
         assertNotNull(result, "Response was null.");

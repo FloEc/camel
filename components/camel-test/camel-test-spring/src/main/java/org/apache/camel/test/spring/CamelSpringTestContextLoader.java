@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
  * Replacement for the default {@link GenericXmlContextLoader} that provides hooks for processing some class level Camel
  * related test annotations.
  */
+@Deprecated
 public class CamelSpringTestContextLoader extends AbstractContextLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(CamelSpringTestContextLoader.class);
@@ -90,7 +91,7 @@ public class CamelSpringTestContextLoader extends AbstractContextLoader {
         Class<?> testClass = getTestClass();
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Loading ApplicationContext for locations [" + StringUtils.arrayToCommaDelimitedString(locations) + "].");
+            LOG.debug("Loading ApplicationContext for locations [{}].", StringUtils.arrayToCommaDelimitedString(locations));
         }
 
         try {
@@ -180,9 +181,9 @@ public class CamelSpringTestContextLoader extends AbstractContextLoader {
 
             if (excludedClasses.length > 0) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Setting up package scanning excluded classes as ExcludeRoutes "
-                              + "annotation was found. Excluding [" + StringUtils.arrayToCommaDelimitedString(excludedClasses)
-                              + "].");
+                    LOG.debug(
+                            "Setting up package scanning excluded classes as ExcludeRoutes annotation was found. Excluding [{}].",
+                            StringUtils.arrayToCommaDelimitedString(excludedClasses));
                 }
 
                 if (parentContext == null) {

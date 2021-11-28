@@ -130,19 +130,19 @@ public class XmppEndpoint extends DefaultEndpoint implements HeaderFilterStrateg
         }
     }
 
-    public Producer createGroupChatProducer() throws Exception {
+    public Producer createGroupChatProducer() {
         return new XmppGroupChatProducer(this);
     }
 
-    public Producer createPrivateChatProducer(String participant) throws Exception {
+    public Producer createPrivateChatProducer(String participant) {
         return new XmppPrivateChatProducer(this, participant);
     }
 
-    public Producer createDirectProducer() throws Exception {
+    public Producer createDirectProducer() {
         return new XmppDirectProducer(this);
     }
 
-    public Producer createPubSubProducer() throws Exception {
+    public Producer createPubSubProducer() {
         return new XmppPubSubProducer(this);
     }
 

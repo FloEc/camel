@@ -47,6 +47,7 @@ import org.apache.camel.model.RouteTemplateDefinition;
 import org.apache.camel.model.RouteTemplatesDefinition;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.spi.ModelToXMLDumper;
+import org.apache.camel.spi.PropertiesComponent;
 import org.apache.camel.spi.annotations.JdkService;
 import org.apache.camel.util.xml.XmlLineNumberParser;
 
@@ -54,6 +55,7 @@ import static org.apache.camel.xml.jaxb.JaxbHelper.extractNamespaces;
 import static org.apache.camel.xml.jaxb.JaxbHelper.getJAXBContext;
 import static org.apache.camel.xml.jaxb.JaxbHelper.modelToXml;
 import static org.apache.camel.xml.jaxb.JaxbHelper.newXmlConverter;
+import static org.apache.camel.xml.jaxb.JaxbHelper.resolveEndpointDslUris;
 
 /**
  * JAXB based {@link ModelToXMLDumper}.
@@ -72,18 +74,22 @@ public class JaxbModelToXMLDumper implements ModelToXMLDumper {
             List<RouteTemplateDefinition> templates = ((RouteTemplatesDefinition) definition).getRouteTemplates();
             for (RouteTemplateDefinition route : templates) {
                 extractNamespaces(route.getRoute(), namespaces);
+                resolveEndpointDslUris(route.getRoute());
             }
         } else if (definition instanceof RouteTemplateDefinition) {
             RouteTemplateDefinition template = (RouteTemplateDefinition) definition;
             extractNamespaces(template.getRoute(), namespaces);
+            resolveEndpointDslUris(template.getRoute());
         } else if (definition instanceof RoutesDefinition) {
             List<RouteDefinition> routes = ((RoutesDefinition) definition).getRoutes();
             for (RouteDefinition route : routes) {
                 extractNamespaces(route, namespaces);
+                resolveEndpointDslUris(route);
             }
         } else if (definition instanceof RouteDefinition) {
             RouteDefinition route = (RouteDefinition) definition;
             extractNamespaces(route, namespaces);
+            resolveEndpointDslUris(route);
         }
 
         Marshaller marshaller = jaxbContext.createMarshaller();
@@ -156,10 +162,24 @@ public class JaxbModelToXMLDumper implements ModelToXMLDumper {
                     }
 
                     if (resolvePlaceholders) {
+                        PropertiesComponent pc = context.getPropertiesComponent();
+                        if (definition instanceof RouteDefinition) {
+                            RouteDefinition routeDefinition = (RouteDefinition) definition;
+                            // if the route definition was created via a route template then we need to prepare its parameters when the route is being created and started
+                            if (routeDefinition.isTemplate() != null && routeDefinition.isTemplate()
+                                    && routeDefinition.getTemplateParameters() != null) {
+                                Properties prop = new Properties();
+                                prop.putAll(routeDefinition.getTemplateParameters());
+                                pc.setLocalProperties(prop);
+                            }
+                        }
                         try {
                             after = context.resolvePropertyPlaceholders(after);
                         } catch (Exception e) {
                             // ignore
+                        } finally {
+                            // clear local after the route is dumped
+                            pc.setLocalProperties(null);
                         }
                     }
 

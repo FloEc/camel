@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.support.PropertyBindingSupport;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.TestInstance;
@@ -52,7 +53,7 @@ public class AbstractZendeskTestSupport extends CamelTestSupport {
         try {
             properties.load(AbstractZendeskTestSupport.class.getResourceAsStream(TEST_OPTIONS_PROPERTIES));
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load test properties", e);
+            throw new RuntimeCamelException("Unable to load test properties", e);
         }
         return properties;
     }
@@ -94,8 +95,8 @@ public class AbstractZendeskTestSupport extends CamelTestSupport {
         configuration.setToken(System.getProperty(SYSPROP_ZENDESK_TOKEN, configuration.getToken()));
         configuration.setOauthToken(System.getProperty(SYSPROP_ZENDESK_OAUTH_TOKEN, configuration.getOauthToken()));
         if (configuration.getServerUrl() == null || configuration.getUsername() == null
-                || (configuration.getPassword() == null && configuration.getToken() == null
-                        && configuration.getOauthToken() == null)) {
+                || configuration.getPassword() == null && configuration.getToken() == null
+                        && configuration.getOauthToken() == null) {
             throw new IllegalArgumentException("Zendesk configuration is missing");
         }
 

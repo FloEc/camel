@@ -1,15 +1,22 @@
-[[kamelet-eip]]
 = Kamelet EIP
-:docTitle: Kamelet
+:doctitle: Kamelet
+:shortname: kamelet
 :description: To call Kamelets
 :since: 
-:supportLevel: Stable
+:supportlevel: Stable
 
 Kamelets (Kamel route snippets) allow users to connect to external systems via a simplified interface,
 hiding all the low level details about how those connections are implemented.
 
-The Kamelet EIP allows to call Kamelets (route templates).
+The Kamelet EIP allows calling Kamelets (i.e. xref:manual::route-template.adoc[Route Template]).
 When calling a Kamelet you may just refer to the name (template id) of the Kamelet in the EIP as shown below:
+
+== Options
+// eip options: START
+include::partial$eip-options.adoc[]
+// eip options: END
+
+== Using Kamelet EIP
 
 [source,java]
 ----
@@ -18,32 +25,21 @@ from("direct:start")
     .to("mock:result");
 ----
 
+And in XML
+
 [source,xml]
 ----
-<camelContext xmlns="http://camel.apache.org/schema/spring">
-  <route>
+<route>
     <from uri="direct:start"/>
     <kamelet name="foo"/>
     <to uri="mock:result"/>
-  </route>
-</camelContext>
+</route>
 ----
 
 Camel will then, when starting:
 
-* lookup the route template with the given id (i.e. foo) from the Camel context
-* create a new route based on the route template
-
-== Options
-// eip options: START
-The Kamelet EIP supports 1 options which are listed below:
-
-[width="100%",cols="2,5,^1,2",options="header"]
-|===
-| Name | Description | Default | Type
-| *name* | *Required* Name of the Kamelet (templateId/routeId) to call. Options for the kamelet can be specified using uri syntax, eg mynamecount=4&type=gold. |  | String
-|===
-// eip options: END
+* Lookup the xref:manual::route-template.adoc[Route Template] with the given id (in the example above its foo) from the `CamelContext`
+* Create a new route based on the xref:manual::route-template.adoc[Route Template]
 
 == Dependency
 
@@ -58,3 +54,7 @@ The implementation of the Kamelet EIP is located in the `camel-kamelet` JAR, so 
     <version>x.y.z</version>
 </dependency>
 ----
+
+== See Also
+
+See the example https://github.com/apache/camel-examples/tree/master/examples/kamelet[camel-example-kamelet].

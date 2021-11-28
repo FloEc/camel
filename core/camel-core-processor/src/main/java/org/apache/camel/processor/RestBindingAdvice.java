@@ -307,6 +307,16 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
                 jsonUnmarshal.process(exchange);
                 ExchangeHelper.prepareOutToIn(exchange);
             }
+            if (clientRequestValidation && exchange.isFailed()) {
+                // this is a bad request, the client included message body that cannot be parsed to json
+                exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
+                exchange.getMessage().setBody("Invalid JSon payload.");
+                // clear exception
+                exchange.setException(null);
+                // stop routing and return
+                exchange.setRouteStop(true);
+                return;
+            }
             return;
         } else if (isXml && xmlUnmarshal != null) {
             // add reverse operation
@@ -314,6 +324,16 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
             if (ObjectHelper.isNotEmpty(body)) {
                 xmlUnmarshal.process(exchange);
                 ExchangeHelper.prepareOutToIn(exchange);
+            }
+            if (clientRequestValidation && exchange.isFailed()) {
+                // this is a bad request, the client included message body that cannot be parsed to XML
+                exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
+                exchange.getMessage().setBody("Invalid XML payload.");
+                // clear exception
+                exchange.setException(null);
+                // stop routing and return
+                exchange.setRouteStop(true);
+                return;
             }
             return;
         }
@@ -525,19 +545,24 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
 
         // Any MIME type
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept#Directives
-        if ("*/*".equals(target)) {
+        if (target.contains("*/*")) {
             return true;
         }
 
-        boolean isXml = valid.toLowerCase(Locale.ENGLISH).contains("xml");
-        boolean isJson = valid.toLowerCase(Locale.ENGLISH).contains("json");
+        valid = valid.toLowerCase(Locale.ENGLISH);
+        target = target.toLowerCase(Locale.ENGLISH);
 
-        String type = target.toLowerCase(Locale.ENGLISH);
+        if (valid.contains(target)) {
+            return true;
+        }
 
-        if (isXml && !type.contains("xml")) {
+        boolean isXml = valid.contains("xml");
+        boolean isJson = valid.contains("json");
+
+        if (isXml && !target.contains("xml")) {
             return false;
         }
-        if (isJson && !type.contains("json")) {
+        if (isJson && !target.contains("json")) {
             return false;
         }
 

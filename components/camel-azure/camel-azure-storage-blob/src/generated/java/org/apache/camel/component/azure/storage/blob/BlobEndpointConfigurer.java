@@ -43,6 +43,12 @@ public class BlobEndpointConfigurer extends PropertyConfigurerSupport implements
         case "blockListType": target.getConfiguration().setBlockListType(property(camelContext, com.azure.storage.blob.models.BlockListType.class, value)); return true;
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": target.setBridgeErrorHandler(property(camelContext, boolean.class, value)); return true;
+        case "changefeedcontext":
+        case "changeFeedContext": target.getConfiguration().setChangeFeedContext(property(camelContext, com.azure.core.util.Context.class, value)); return true;
+        case "changefeedendtime":
+        case "changeFeedEndTime": target.getConfiguration().setChangeFeedEndTime(property(camelContext, java.time.OffsetDateTime.class, value)); return true;
+        case "changefeedstarttime":
+        case "changeFeedStartTime": target.getConfiguration().setChangeFeedStartTime(property(camelContext, java.time.OffsetDateTime.class, value)); return true;
         case "closestreamafterread":
         case "closeStreamAfterRead": target.getConfiguration().setCloseStreamAfterRead(property(camelContext, boolean.class, value)); return true;
         case "closestreamafterwrite":
@@ -94,6 +100,8 @@ public class BlobEndpointConfigurer extends PropertyConfigurerSupport implements
         case "sendEmptyMessageWhenIdle": target.setSendEmptyMessageWhenIdle(property(camelContext, boolean.class, value)); return true;
         case "serviceclient":
         case "serviceClient": target.getConfiguration().setServiceClient(property(camelContext, com.azure.storage.blob.BlobServiceClient.class, value)); return true;
+        case "sourceblobaccesskey":
+        case "sourceBlobAccessKey": target.getConfiguration().setSourceBlobAccessKey(property(camelContext, java.lang.String.class, value)); return true;
         case "startscheduler":
         case "startScheduler": target.setStartScheduler(property(camelContext, boolean.class, value)); return true;
         case "timeunit":
@@ -135,6 +143,12 @@ public class BlobEndpointConfigurer extends PropertyConfigurerSupport implements
         case "blockListType": return com.azure.storage.blob.models.BlockListType.class;
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return boolean.class;
+        case "changefeedcontext":
+        case "changeFeedContext": return com.azure.core.util.Context.class;
+        case "changefeedendtime":
+        case "changeFeedEndTime": return java.time.OffsetDateTime.class;
+        case "changefeedstarttime":
+        case "changeFeedStartTime": return java.time.OffsetDateTime.class;
         case "closestreamafterread":
         case "closeStreamAfterRead": return boolean.class;
         case "closestreamafterwrite":
@@ -186,6 +200,8 @@ public class BlobEndpointConfigurer extends PropertyConfigurerSupport implements
         case "sendEmptyMessageWhenIdle": return boolean.class;
         case "serviceclient":
         case "serviceClient": return com.azure.storage.blob.BlobServiceClient.class;
+        case "sourceblobaccesskey":
+        case "sourceBlobAccessKey": return java.lang.String.class;
         case "startscheduler":
         case "startScheduler": return boolean.class;
         case "timeunit":
@@ -223,6 +239,12 @@ public class BlobEndpointConfigurer extends PropertyConfigurerSupport implements
         case "blockListType": return target.getConfiguration().getBlockListType();
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return target.isBridgeErrorHandler();
+        case "changefeedcontext":
+        case "changeFeedContext": return target.getConfiguration().getChangeFeedContext();
+        case "changefeedendtime":
+        case "changeFeedEndTime": return target.getConfiguration().getChangeFeedEndTime();
+        case "changefeedstarttime":
+        case "changeFeedStartTime": return target.getConfiguration().getChangeFeedStartTime();
         case "closestreamafterread":
         case "closeStreamAfterRead": return target.getConfiguration().isCloseStreamAfterRead();
         case "closestreamafterwrite":
@@ -274,6 +296,8 @@ public class BlobEndpointConfigurer extends PropertyConfigurerSupport implements
         case "sendEmptyMessageWhenIdle": return target.isSendEmptyMessageWhenIdle();
         case "serviceclient":
         case "serviceClient": return target.getConfiguration().getServiceClient();
+        case "sourceblobaccesskey":
+        case "sourceBlobAccessKey": return target.getConfiguration().getSourceBlobAccessKey();
         case "startscheduler":
         case "startScheduler": return target.isStartScheduler();
         case "timeunit":

@@ -49,6 +49,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.ResolveEndpointFailedException;
 import org.apache.camel.Route;
+import org.apache.camel.RouteConfigurationsBuilder;
 import org.apache.camel.RouteTemplateContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.RuntimeCamelException;
@@ -743,8 +744,8 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
     }
 
     @Override
-    public List<String> getComponentNames() {
-        return new ArrayList<>(components.keySet());
+    public Set<String> getComponentNames() {
+        return Collections.unmodifiableSet(components.keySet());
     }
 
     @Override
@@ -952,7 +953,7 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
     }
 
     @Override
-    public List<String> getLanguageNames() {
+    public Set<String> getLanguageNames() {
         throw new UnsupportedOperationException();
     }
 
@@ -1077,6 +1078,16 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
     @Override
     public void setInflightRepository(InflightRepository repository) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setTracingStandby(boolean tracingStandby) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isTracingStandby() {
+        return false;
     }
 
     //
@@ -1289,7 +1300,6 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
                 throw new ResolveEndpointFailedException(uri, e);
             }
         }
-        final String rawUri = uri;
         // normalize uri so we can do endpoint hits with minor mistakes and
         // parameters is not in the same order
         if (!normalized) {
@@ -1320,7 +1330,6 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
                 throw new ResolveEndpointFailedException(uri, e);
             }
         }
-        final String rawUri = uri;
         // normalize uri so we can do endpoint hits with minor mistakes and
         // parameters is not in the same order
         if (!normalized) {
@@ -1865,6 +1874,11 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
     }
 
     @Override
+    public void addRoutesConfigurations(RouteConfigurationsBuilder builder) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean removeRoute(String routeId) throws Exception {
         throw new UnsupportedOperationException();
     }
@@ -1927,6 +1941,11 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
     }
 
     @Override
+    public void removeRouteTemplates(String pattern) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setLightweight(boolean lightweight) {
         throw new UnsupportedOperationException();
     }
@@ -1976,6 +1995,16 @@ public class LightweightRuntimeCamelContext implements ExtendedCamelContext, Cat
 
             @Override
             public void startAllRoutes() throws Exception {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void stopAllRoutes() throws Exception {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void removeAllRoutes() throws Exception {
                 throw new UnsupportedOperationException();
             }
 

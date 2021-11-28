@@ -41,7 +41,7 @@ import software.amazon.awssdk.utils.AttributeMap;
 /**
  * Receive messages from AWS DynamoDB Stream service using AWS SDK version 2.x.
  */
-@UriEndpoint(firstVersion = "3.1.0", scheme = "aws2-ddbstream", title = "AWS 2 DynamoDB Streams", consumerOnly = true,
+@UriEndpoint(firstVersion = "3.1.0", scheme = "aws2-ddbstream", title = "AWS DynamoDB Streams", consumerOnly = true,
              syntax = "aws2-ddbstream:tableName", category = { Category.CLOUD, Category.MESSAGING, Category.STREAMS })
 public class Ddb2StreamEndpoint extends ScheduledPollEndpoint {
 
@@ -95,22 +95,6 @@ public class Ddb2StreamEndpoint extends ScheduledPollEndpoint {
         return ddbStreamClient;
     }
 
-    public String getSequenceNumber() {
-        switch (configuration.getIteratorType()) {
-            case AFTER_SEQUENCE_NUMBER:
-            case AT_SEQUENCE_NUMBER:
-                if (null == configuration.getSequenceNumberProvider()) {
-                    throw new IllegalStateException(
-                            "sequenceNumberProvider must be" + " provided, either as an implementation of"
-                                                    + " SequenceNumberProvider or a literal String.");
-                } else {
-                    return configuration.getSequenceNumberProvider().getSequenceNumber();
-                }
-            default:
-                return "";
-        }
-    }
-
     DynamoDbStreamsClient createDdbStreamClient() {
         DynamoDbStreamsClient client = null;
         DynamoDbStreamsClientBuilder clientBuilder = DynamoDbStreamsClient.builder();
@@ -161,8 +145,7 @@ public class Ddb2StreamEndpoint extends ScheduledPollEndpoint {
     public String toString() {
         return "DdbStreamEndpoint{" + "tableName=" + configuration.getTableName()
                + ", amazonDynamoDbStreamsClient=[redacted], maxResultsPerRequest="
-               + configuration.getMaxResultsPerRequest() + ", iteratorType=" + configuration.getIteratorType()
-               + ", sequenceNumberProvider="
-               + configuration.getSequenceNumberProvider() + ", uri=" + getEndpointUri() + '}';
+               + configuration.getMaxResultsPerRequest() + ", streamIteratorType=" + configuration.getStreamIteratorType()
+               + ", uri=" + getEndpointUri() + '}';
     }
 }

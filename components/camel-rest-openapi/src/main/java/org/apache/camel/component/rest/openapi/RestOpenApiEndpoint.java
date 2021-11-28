@@ -340,15 +340,19 @@ public final class RestOpenApiEndpoint extends DefaultEndpoint {
             final Document openapi, final OasOperation operation, final String method,
             final String uriTemplate)
             throws Exception {
-        final String basePath = determineBasePath(openapi);
-        final String componentEndpointUri = "rest:" + method + ":" + basePath + ":" + uriTemplate;
 
-        final CamelContext camelContext = getCamelContext();
-
-        final Endpoint endpoint = camelContext.getEndpoint(componentEndpointUri);
+        CamelContext camelContext = getCamelContext();
 
         Map<String, Object> params = determineEndpointParameters(openapi, operation);
         boolean hasHost = params.containsKey("host");
+
+        String basePath = determineBasePath(openapi);
+        String componentEndpointUri = "rest:" + method + ":" + basePath + ":" + uriTemplate;
+        if (hasHost) {
+            componentEndpointUri += "?host=" + params.get("host");
+        }
+
+        Endpoint endpoint = camelContext.getEndpoint(componentEndpointUri);
         // let the rest endpoint configure itself
         endpoint.configureProperties(params);
 
@@ -478,8 +482,7 @@ public final class RestOpenApiEndpoint extends DefaultEndpoint {
             parameters.put("consumes", determinedConsumes);
         }
 
-        // what we produce is what the API defined by OpenApi specification
-        // consumes
+        // what we produce is what the API defined by OpenApi specification consumes
 
         List<String> specificationLevelProducers = new ArrayList<>();
         if (openapi instanceof Oas20Document) {
@@ -493,7 +496,6 @@ public final class RestOpenApiEndpoint extends DefaultEndpoint {
             if (oas30Operation.requestBody != null && oas30Operation.requestBody.content != null) {
                 operationLevelProducers.addAll(oas30Operation.requestBody.content.keySet());
             }
-
         }
 
         final String determinedProducers = determineOption(specificationLevelProducers, operationLevelProducers,
@@ -522,10 +524,26 @@ public final class RestOpenApiEndpoint extends DefaultEndpoint {
             componentParameters.put("sslContextParameters", component.getSslContextParameters());
         }
 
+        final Map<Object, Object> nestedParameters = new HashMap<>();
         if (!componentParameters.isEmpty()) {
-            final Map<Object, Object> nestedParameters = new HashMap<>();
             nestedParameters.put("component", componentParameters);
+        }
 
+        // Add rest endpoint parameters
+        if (this.parameters != null && operation.getParameters() != null) {
+            for (Map.Entry<String, Object> entry : this.parameters.entrySet()) {
+                for (OasParameter param : operation.getParameters()) {
+                    // skip parameters that are part of the operation as path as otherwise
+                    // it will be duplicated as query parameter as well
+                    boolean clash = "path".equals(param.in) && entry.getKey().equals(param.getName());
+                    if (!clash) {
+                        nestedParameters.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+
+        if (!nestedParameters.isEmpty()) {
             // we're trying to set RestEndpoint.parameters['component']
             parameters.put("parameters", nestedParameters);
         }
@@ -737,7 +755,6 @@ public final class RestOpenApiEndpoint extends DefaultEndpoint {
             } else {
                 throw new IllegalStateException("We only support OpenApi 2.0 or 3.0 document here");
             }
-
         }
 
         if (operation.getParameters() != null) {

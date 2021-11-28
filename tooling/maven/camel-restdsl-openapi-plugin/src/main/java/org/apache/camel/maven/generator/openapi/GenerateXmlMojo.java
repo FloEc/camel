@@ -81,12 +81,19 @@ public class GenerateXmlMojo extends AbstractGenerateMojo {
 
         if (ObjectHelper.isNotEmpty(destinationGenerator)) {
             final DestinationGenerator destinationGeneratorObject = createDestinationGenerator();
-
             generator.withDestinationGenerator(destinationGeneratorObject);
+        } else if (ObjectHelper.isNotEmpty(destinationToSyntax)) {
+            generator.withDestinationToSyntax(destinationToSyntax);
         }
 
         if (restConfiguration) {
             generator.withRestComponent(findAppropriateComponent());
+            if (clientRequestValidation) {
+                generator.withClientRequestValidation();
+            }
+            if (ObjectHelper.isNotEmpty(apiContextPath)) {
+                generator.withApiContextPath(apiContextPath);
+            }
         }
 
         try {

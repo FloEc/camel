@@ -16,10 +16,14 @@
  */
 package org.apache.camel.main;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.ManagementStatisticsLevel;
 import org.apache.camel.StartupSummaryLevel;
 import org.apache.camel.spi.Metadata;
+import org.apache.camel.spi.Tracer;
 import org.apache.camel.support.PatternHelper;
 
 /**
@@ -33,6 +37,8 @@ public abstract class DefaultConfigurationProperties<T> {
     private int durationMaxSeconds;
     private int durationMaxIdleSeconds;
     private int durationMaxMessages;
+    @Metadata(defaultValue = "shutdown", enums = "shutdown,stop")
+    private String durationMaxAction = "shutdown";
     private int shutdownTimeout = 45;
     private boolean shutdownSuppressLoggingOnTimeout;
     private boolean shutdownNowOnTimeout = true;
@@ -59,6 +65,7 @@ public abstract class DefaultConfigurationProperties<T> {
     private boolean streamCachingStatisticsEnabled;
     private boolean backlogTracing;
     private boolean tracing;
+    private boolean tracingStandby;
     private String tracingPattern;
     private boolean messageHistory;
     private boolean logMask;
@@ -88,6 +95,15 @@ public abstract class DefaultConfigurationProperties<T> {
     private String javaRoutesExcludePattern;
     private String routesIncludePattern = "classpath:camel/*,classpath:camel-template/*,classpath:camel-rest/*";
     private String routesExcludePattern;
+    private boolean routesReloadEnabled;
+    @Metadata(defaultValue = "src/main/resources/camel")
+    private String routesReloadDirectory = "src/main/resources/camel";
+    private boolean routesReloadDirectoryRecursive;
+    private String routesReloadPattern;
+    @Metadata(defaultValue = "true")
+    private boolean routesReloadRemoveAllRoutes = true;
+    @Metadata(defaultValue = "true")
+    private boolean routesReloadRestartDuration = true;
     private boolean lightweight;
     private boolean eagerClassloading;
     @Metadata(defaultValue = "default", enums = "default,prototype,pooled")
@@ -95,6 +111,7 @@ public abstract class DefaultConfigurationProperties<T> {
     private int exchangeFactoryCapacity = 100;
     private boolean exchangeFactoryStatisticsEnabled;
     private boolean dumpRoutes;
+    private Map<String, String> globalOptions;
     // route controller
     @Metadata(defaultValue = "DEBUG")
     @Deprecated
@@ -178,6 +195,18 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setDurationMaxMessages(int durationMaxMessages) {
         this.durationMaxMessages = durationMaxMessages;
+    }
+
+    public String getDurationMaxAction() {
+        return durationMaxAction;
+    }
+
+    /**
+     * Controls whether the Camel application should shutdown the JVM, or stop all routes, when duration max is
+     * triggered.
+     */
+    public void setDurationMaxAction(String durationMaxAction) {
+        this.durationMaxAction = durationMaxAction;
     }
 
     public int getShutdownTimeout() {
@@ -481,6 +510,18 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setTracing(boolean tracing) {
         this.tracing = tracing;
+    }
+
+    public boolean isTracingStandby() {
+        return tracingStandby;
+    }
+
+    /**
+     * Whether to set tracing on standby. If on standby then the tracer is installed and made available. Then the tracer
+     * can be enabled later at runtime via JMX or via {@link Tracer#setEnabled(boolean)}.
+     */
+    public void setTracingStandby(boolean tracingStandby) {
+        this.tracingStandby = tracingStandby;
     }
 
     public String getTracingPattern() {
@@ -935,6 +976,86 @@ public abstract class DefaultConfigurationProperties<T> {
         this.routesExcludePattern = routesExcludePattern;
     }
 
+    public boolean isRoutesReloadEnabled() {
+        return routesReloadEnabled;
+    }
+
+    /**
+     * Used for enabling automatic routes reloading. If enabled then Camel will watch for file changes in the given
+     * reload directory, and trigger reloading routes if files are changed.
+     */
+    public void setRoutesReloadEnabled(boolean routesReloadEnabled) {
+        this.routesReloadEnabled = routesReloadEnabled;
+    }
+
+    public String getRoutesReloadDirectory() {
+        return routesReloadDirectory;
+    }
+
+    /**
+     * Directory to scan for route changes. Camel cannot scan the classpath, so this must be configured to a file
+     * directory. Development with Maven as build tool, you can configure the directory to be src/main/resources to scan
+     * for Camel routes in XML or YAML files.
+     */
+    public void setRoutesReloadDirectory(String routesReloadDirectory) {
+        this.routesReloadDirectory = routesReloadDirectory;
+    }
+
+    public boolean isRoutesReloadDirectoryRecursive() {
+        return routesReloadDirectoryRecursive;
+    }
+
+    /**
+     * Whether the directory to scan should include sub directories.
+     *
+     * Depending on the number of sub directories, then this can cause the JVM to startup slower as Camel uses the JDK
+     * file-watch service to scan for file changes.
+     */
+    public void setRoutesReloadDirectoryRecursive(boolean routesReloadDirectoryRecursive) {
+        this.routesReloadDirectoryRecursive = routesReloadDirectoryRecursive;
+    }
+
+    public String getRoutesReloadPattern() {
+        return routesReloadPattern;
+    }
+
+    /**
+     * Used for inclusive filtering of routes from directories.
+     *
+     * Typical used for specifying to accept routes in XML or YAML files, such as <tt>*.yaml,*.xml</tt>. Multiple
+     * patterns can be specified separated by comma.
+     */
+    public void setRoutesReloadPattern(String routesReloadPattern) {
+        this.routesReloadPattern = routesReloadPattern;
+    }
+
+    public boolean isRoutesReloadRemoveAllRoutes() {
+        return routesReloadRemoveAllRoutes;
+    }
+
+    /**
+     * When reloading routes should all existing routes be stopped and removed.
+     *
+     * By default, Camel will stop and remove all existing routes before reloading routes. This ensures that only the
+     * reloaded routes will be active. If disabled then only routes with the same route id is updated, and any existing
+     * routes are continued to run.
+     */
+    public void setRoutesReloadRemoveAllRoutes(boolean routesReloadRemoveAllRoutes) {
+        this.routesReloadRemoveAllRoutes = routesReloadRemoveAllRoutes;
+    }
+
+    public boolean isRoutesReloadRestartDuration() {
+        return routesReloadRestartDuration;
+    }
+
+    /**
+     * Whether to restart max duration when routes are reloaded. For example if max duration is 60 seconds, and a route
+     * is reloaded after 25 seconds, then this will restart the count and wait 60 seconds again.
+     */
+    public void setRoutesReloadRestartDuration(boolean routesReloadRestartDuration) {
+        this.routesReloadRestartDuration = routesReloadRestartDuration;
+    }
+
     public boolean isLightweight() {
         return lightweight;
     }
@@ -1013,6 +1134,20 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setDumpRoutes(boolean dumpRoutes) {
         this.dumpRoutes = dumpRoutes;
+    }
+
+    public Map<String, String> getGlobalOptions() {
+        return globalOptions;
+    }
+
+    /**
+     * Sets global options that can be referenced in the camel context
+     * <p/>
+     * <b>Important:</b> This has nothing to do with property placeholders, and is just a plain set of key/value pairs
+     * which are used to configure global options on CamelContext, such as a maximum debug logging length etc.
+     */
+    public void setGlobalOptions(Map<String, String> globalOptions) {
+        this.globalOptions = globalOptions;
     }
 
     @Deprecated
@@ -1300,6 +1435,15 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Controls whether the Camel application should shutdown the JVM, or stop all routes, when duration max is
+     * triggered.
+     */
+    public T withDurationMaxAction(String durationMaxAction) {
+        this.durationMaxAction = durationMaxAction;
+        return (T) this;
+    }
+
+    /**
      * Timeout in seconds to graceful shutdown Camel.
      */
     public T withShutdownTimeout(int shutdownTimeout) {
@@ -1516,6 +1660,17 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withTracing(boolean tracing) {
         this.tracing = tracing;
+        return (T) this;
+    }
+
+    /**
+     * Whether to set tracing on standby. If on standby then the tracer is installed and made available. Then the tracer
+     * can be enabled later at runtime via JMX or via {@link Tracer#setEnabled(boolean)}.
+     *
+     * Default is false.
+     */
+    public T withTracingStandby(boolean tracingStandby) {
+        this.tracingStandby = tracingStandby;
         return (T) this;
     }
 
@@ -1846,13 +2001,89 @@ public abstract class DefaultConfigurationProperties<T> {
         return (T) this;
     }
 
+    /**
+     * Used for inclusive filtering of routes from directories. The exclusive filtering takes precedence over inclusive
+     * filtering. The pattern is using Ant-path style pattern.
+     *
+     * Multiple patterns can be specified separated by comma, as example, to include all the routes from a directory
+     * whose name contains foo use: &#42;&#42;/*foo*.
+     */
     public T withRoutesIncludePattern(String routesIncludePattern) {
         this.routesIncludePattern = routesIncludePattern;
         return (T) this;
     }
 
+    /**
+     * Used for exclusive filtering of routes from directories. The exclusive filtering takes precedence over inclusive
+     * filtering. The pattern is using Ant-path style pattern.
+     *
+     * Multiple patterns can be specified separated by comma, as example, to exclude all the routes from a directory
+     * whose name contains foo use: &#42;&#42;/*foo*.
+     */
     public T withRoutesExcludePattern(String routesExcludePattern) {
         this.routesExcludePattern = routesExcludePattern;
+        return (T) this;
+    }
+
+    /**
+     * Used for enabling automatic routes reloading. If enabled then Camel will watch for file changes in the given
+     * reload directory, and trigger reloading routes if files are changed.
+     */
+    public T withRoutesReloadEnabled(boolean routesReloadEnabled) {
+        this.routesReloadEnabled = routesReloadEnabled;
+        return (T) this;
+    }
+
+    /**
+     * Directory to scan (incl subdirectories) for route changes. Camel cannot scan the classpath, so this must be
+     * configured to a file directory. Development with Maven as build tool, you can configure the directory to be
+     * src/main/resources to scan for Camel routes in XML or YAML files.
+     */
+    public T withRoutesReloadDirectory(String routesReloadDirectory) {
+        this.routesReloadDirectory = routesReloadDirectory;
+        return (T) this;
+    }
+
+    /**
+     * Whether the directory to scan should include sub directories.
+     *
+     * Depending on the number of sub directories, then this can cause the JVM to startup slower as Camel uses the JDK
+     * file-watch service to scan for file changes.
+     */
+    public T withRoutesReloadDirectoryRecursive(boolean routesReloadDirectoryRecursive) {
+        this.routesReloadDirectoryRecursive = routesReloadDirectoryRecursive;
+        return (T) this;
+    }
+
+    /**
+     * Used for inclusive filtering of routes from directories.
+     *
+     * Typical used for specifying to accept routes in XML or YAML files. The default pattern is <tt>*.yaml,*.xml</tt>
+     * Multiple patterns can be specified separated by comma.
+     */
+    public T withRoutesReloadPattern(String routesReloadPattern) {
+        this.routesReloadPattern = routesReloadPattern;
+        return (T) this;
+    }
+
+    /**
+     * When reloading routes should all existing routes be stopped and removed.
+     *
+     * By default, Camel will stop and remove all existing routes before reloading routes. This ensures that only the
+     * reloaded routes will be active. If disabled then only routes with the same route id is updated, and any existing
+     * routes are continued to run.
+     */
+    public T withRoutesReloadRemoveAllRoutes(boolean routesReloadRemoveAllRoutes) {
+        this.routesReloadRemoveAllRoutes = routesReloadRemoveAllRoutes;
+        return (T) this;
+    }
+
+    /**
+     * Whether to restart max duration when routes are reloaded. For example if max duration is 60 seconds, and a route
+     * is reloaded after 25 seconds, then this will restart the count and wait 60 seconds again.
+     */
+    public T withRoutesReloadRestartDuration(boolean routesReloadRestartDuration) {
+        this.routesReloadRestartDuration = routesReloadRestartDuration;
         return (T) this;
     }
 
@@ -1914,6 +2145,34 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withDumpRoutes(boolean dumpRoutes) {
         this.dumpRoutes = dumpRoutes;
+        return (T) this;
+    }
+
+    /**
+     * Sets global options that can be referenced in the camel context
+     * <p/>
+     * <b>Important:</b> This has nothing to do with property placeholders, and is just a plain set of key/value pairs
+     * which are used to configure global options on CamelContext, such as a maximum debug logging length etc.
+     */
+    public T withGlobalOptions(Map<String, String> globalOptions) {
+        if (this.globalOptions == null) {
+            this.globalOptions = new HashMap<>();
+        }
+        this.globalOptions.putAll(globalOptions);
+        return (T) this;
+    }
+
+    /**
+     * Sets global options that can be referenced in the camel context
+     * <p/>
+     * <b>Important:</b> This has nothing to do with property placeholders, and is just a plain set of key/value pairs
+     * which are used to configure global options on CamelContext, such as a maximum debug logging length etc.
+     */
+    public T withGlobalOption(String key, String value) {
+        if (this.globalOptions == null) {
+            this.globalOptions = new HashMap<>();
+        }
+        this.globalOptions.put(key, value);
         return (T) this;
     }
 

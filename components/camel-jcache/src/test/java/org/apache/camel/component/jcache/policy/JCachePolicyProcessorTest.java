@@ -23,14 +23,13 @@ import javax.cache.configuration.MutableConfiguration;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.language.simple.types.SimpleIllegalSyntaxException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.camel.test.junit5.TestSupport.assertIsInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -207,25 +206,6 @@ public class JCachePolicyProcessorTest extends JCachePolicyTestBase {
 
     }
 
-    //Use an invalid key expression causing an exception
-    @Test
-    public void testInvalidKeyExpression() throws Exception {
-        final String body = randomString();
-        MockEndpoint mock = getMockEndpoint("mock:value");
-        Cache cache = lookupCache("simple");
-
-        //Send
-        Exchange response = this.template().request("direct:cached-invalidkey",
-                e -> e.getMessage().setBody(body));
-
-        //Exception is on the exchange, cache is empty, onException was called.
-        assertIsInstanceOf(SimpleIllegalSyntaxException.class, response.getException());
-        assertEquals("exception-" + body, response.getMessage().getBody());
-        assertEquals(0, mock.getExchanges().size());
-        assertFalse(cache.iterator().hasNext());
-
-    }
-
     //Value is cached after handled exception
     @Test
     public void testHandledException() throws Exception {
@@ -249,7 +229,7 @@ public class JCachePolicyProcessorTest extends JCachePolicyTestBase {
         final String key = randomString();
         MockEndpoint mock = getMockEndpoint("mock:value");
         mock.whenAnyExchangeReceived(e -> {
-            throw new RuntimeException("unexpected");
+            throw new RuntimeCamelException("unexpected");
         });
 
         Cache cache = lookupCache("simple");
@@ -317,19 +297,6 @@ public class JCachePolicyProcessorTest extends JCachePolicyTestBase {
                 jcachePolicy.setKeyExpression(simple("${header.mykey}"));
 
                 from("direct:cached-byheader")
-                        .policy(jcachePolicy)
-                        .to("mock:value");
-
-                //Use an invalid keyExpression
-                jcachePolicy = new JCachePolicy();
-                jcachePolicy.setCache(cacheManager.getCache("simple"));
-                jcachePolicy.setKeyExpression(simple("${unexpected}"));
-
-                from("direct:cached-invalidkey")
-                        .onException(Exception.class)
-                        .setBody(simple("exception-${body}"))
-                        .end()
-
                         .policy(jcachePolicy)
                         .to("mock:value");
             }

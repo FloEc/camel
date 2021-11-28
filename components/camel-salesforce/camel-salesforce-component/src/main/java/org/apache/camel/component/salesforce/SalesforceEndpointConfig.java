@@ -41,7 +41,7 @@ import org.apache.camel.spi.UriParams;
 public class SalesforceEndpointConfig implements Cloneable {
 
     // default API version
-    public static final String DEFAULT_VERSION = "50.0";
+    public static final String DEFAULT_VERSION = "53.0";
 
     // general parameter
     public static final String API_VERSION = "apiVersion";
@@ -75,6 +75,8 @@ public class SalesforceEndpointConfig implements Cloneable {
     public static final String BATCH_ID = "batchId";
     public static final String RESULT_ID = "resultId";
     public static final String QUERY_LOCATOR = "queryLocator";
+    public static final String LOCATOR = "locator";
+    public static final String MAX_RECORDS = "maxRecords";
     public static final String PK_CHUNKING = "pkChunking";
     public static final String PK_CHUNKING_CHUNK_SIZE = "pkChunkingChunkSize";
     public static final String PK_CHUNKING_PARENT = "pkChunkingParent";
@@ -88,6 +90,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
     // parameters for Streaming API
     public static final String DEFAULT_REPLAY_ID = "defaultReplayId";
+    public static final String FALL_BACK_REPLAY_ID = "fallBackReplayId";
     public static final String INITIAL_REPLAY_ID_MAP = "initialReplayIdMap";
     public static final long REPLAY_FROM_TIP = -1L;
 
@@ -161,6 +164,10 @@ public class SalesforceEndpointConfig implements Cloneable {
     @UriParam
     private String queryLocator;
     @UriParam
+    private String locator;
+    @UriParam(javaType = "java.lang.Integer")
+    private Integer maxRecords;
+    @UriParam
     private Boolean pkChunking;
     @UriParam
     private Integer pkChunkingChunkSize;
@@ -199,6 +206,11 @@ public class SalesforceEndpointConfig implements Cloneable {
     @UriParam(description = "Default replayId setting if no value is found in initialReplayIdMap",
               defaultValue = "" + REPLAY_FROM_TIP)
     private Long defaultReplayId = REPLAY_FROM_TIP;
+
+    @UriParam(description = "ReplayId to fall back to after an Invalid Replay Id response",
+              defaultValue = "" + REPLAY_FROM_TIP)
+    private Long fallBackReplayId = REPLAY_FROM_TIP;
+
     @UriParam
     private Map<String, Long> initialReplayIdMap;
 
@@ -253,7 +265,8 @@ public class SalesforceEndpointConfig implements Cloneable {
     }
 
     /**
-     * Payload format to use for Salesforce API calls, either JSON or XML, defaults to JSON
+     * Payload format to use for Salesforce API calls, either JSON or XML, defaults to JSON. As of Camel 3.12, this
+     * option only applies to the Raw operation.
      */
     public void setFormat(PayloadFormat format) {
         this.format = format;
@@ -508,6 +521,32 @@ public class SalesforceEndpointConfig implements Cloneable {
         this.queryLocator = queryLocator;
     }
 
+    public String getLocator() {
+        return locator;
+    }
+
+    /**
+     * Locator provided by salesforce Bulk 2.0 API for use in getting results for a Query job.
+     */
+    public void setLocator(String locator) {
+        this.locator = locator;
+    }
+
+    public Integer getMaxRecords() {
+        return maxRecords;
+    }
+
+    /**
+     * The maximum number of records to retrieve per set of results for a Bulk 2.0 Query. The request is still subject
+     * to the size limits. If you are working with a very large number of query results, you may experience a timeout
+     * before receiving all the data from Salesforce. To prevent a timeout, specify the maximum number of records your
+     * client is expecting to receive in the maxRecords parameter. This splits the results into smaller sets with this
+     * value as the maximum size.
+     */
+    public void setMaxRecords(Integer maxRecords) {
+        this.maxRecords = maxRecords;
+    }
+
     public Boolean getPkChunking() {
         return pkChunking;
     }
@@ -756,6 +795,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
         // add streaming API properties
         valueMap.put(DEFAULT_REPLAY_ID, defaultReplayId);
+        valueMap.put(FALL_BACK_REPLAY_ID, fallBackReplayId);
         valueMap.put(INITIAL_REPLAY_ID_MAP, initialReplayIdMap);
 
         valueMap.put(NOT_FOUND_BEHAVIOUR, notFoundBehaviour);
@@ -790,6 +830,17 @@ public class SalesforceEndpointConfig implements Cloneable {
      */
     public void setInitialReplayIdMap(Map<String, Long> initialReplayIdMap) {
         this.initialReplayIdMap = initialReplayIdMap;
+    }
+
+    public Long getFallBackReplayId() {
+        return fallBackReplayId;
+    }
+
+    /**
+     * ReplayId to fall back to after an Invalid Replay Id response
+     */
+    public void setFallBackReplayId(Long fallBackReplayId) {
+        this.fallBackReplayId = fallBackReplayId;
     }
 
     public Integer getLimit() {

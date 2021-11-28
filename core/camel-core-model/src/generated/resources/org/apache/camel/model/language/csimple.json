@@ -3,10 +3,10 @@
     "kind": "model",
     "name": "csimple",
     "title": "CSimple",
-    "description": "Evaluate a compile simple expression language.",
+    "description": "Evaluate a compiled simple expression.",
     "deprecated": false,
     "firstVersion": "3.7.0",
-    "label": "language",
+    "label": "language,java",
     "javaType": "org.apache.camel.model.language.CSimpleExpression",
     "input": false,
     "output": false

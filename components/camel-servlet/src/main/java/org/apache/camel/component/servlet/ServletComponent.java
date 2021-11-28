@@ -76,7 +76,7 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
         // must extract well known parameters before we create the endpoint
         Boolean throwExceptionOnFailure = getAndRemoveParameter(parameters, "throwExceptionOnFailure", Boolean.class);
         Boolean transferException = getAndRemoveParameter(parameters, "transferException", Boolean.class);
-        Boolean muteException = getAndRemoveParameter(parameters, "muteException", Boolean.class);
+        boolean muteException = getAndRemoveParameter(parameters, "muteException", boolean.class, isMuteException());
         Boolean bridgeEndpoint = getAndRemoveParameter(parameters, "bridgeEndpoint", Boolean.class);
         HttpBinding binding = resolveAndRemoveReferenceParameter(parameters, "httpBinding", HttpBinding.class);
         Boolean matchOnUriPrefix = getAndRemoveParameter(parameters, "matchOnUriPrefix", Boolean.class);
@@ -132,9 +132,7 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
         if (transferException != null) {
             endpoint.setTransferException(transferException);
         }
-        if (muteException != null) {
-            endpoint.setMuteException(muteException);
-        }
+        endpoint.setMuteException(muteException);
         if (bridgeEndpoint != null) {
             endpoint.setBridgeEndpoint(bridgeEndpoint);
         }
@@ -300,7 +298,6 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
         }
 
         Map<String, Object> map = RestComponentHelper.initRestEndpointProperties("servlet", config);
-
         boolean cors = config.isEnableCORS();
         if (cors) {
             // allow HTTP Options as we want to handle CORS in rest-dsl
@@ -315,8 +312,7 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
 
         String url = RestComponentHelper.createRestConsumerUrl("servlet", path, map);
 
-        ServletEndpoint endpoint = camelContext.getEndpoint(url, ServletEndpoint.class);
-        setProperties(endpoint, parameters);
+        ServletEndpoint endpoint = (ServletEndpoint) camelContext.getEndpoint(url, parameters);
 
         if (!map.containsKey("httpBinding")) {
             // use the rest binding, if not using a custom http binding
@@ -338,20 +334,20 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
     }
 
     @Override
-    protected void doStart() throws Exception {
-        super.doStart();
+    protected void doInit() throws Exception {
+        super.doInit();
 
         try {
             RestConfiguration config = CamelContextHelper.getRestConfiguration(getCamelContext(), "servlet");
 
-            // configure additional options on jetty configuration
+            // configure additional options on servlet configuration
             if (config.getComponentProperties() != null && !config.getComponentProperties().isEmpty()) {
                 setProperties(this, config.getComponentProperties());
             }
         } catch (IllegalArgumentException e) {
             // if there's a mismatch between the component and the rest-configuration,
             // then getRestConfiguration throws IllegalArgumentException which can be
-            // safely ignored as it means there's no special conf for this componet.
+            // safely ignored as it means there's no special conf for this component.
         }
     }
 }

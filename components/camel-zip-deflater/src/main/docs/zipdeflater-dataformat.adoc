@@ -1,11 +1,13 @@
-[[zipdeflater-dataformat]]
 = Zip Deflate Compression DataFormat
-:docTitle: Zip Deflate Compression
-:artifactId: camel-zip-deflater
+:doctitle: Zip Deflate Compression
+:shortname: zipdeflater
+:artifactid: camel-zip-deflater
 :description: Compress and decompress streams using java.util.zip.Deflater and java.util.zip.Inflater.
 :since: 2.12
-:supportLevel: Stable
+:supportlevel: Stable
 include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/zipdeflater.adoc[opts=optional]
+//Manually maintained attributes
+:camel-spring-boot-name: zip-deflater
 
 *Since Camel {since}*
 
@@ -27,15 +29,7 @@ Instead use the zipfile dataformat.
 == Options
 
 // dataformat options: START
-The Zip Deflate Compression dataformat supports 1 options, which are listed below.
-
-
-
-[width="100%",cols="2s,1m,1m,6",options="header"]
-|===
-| Name | Default | Java Type | Description
-| compressionLevel | -1 | Integer | To specify a specific compression between 0-9. -1 is default compression, 0 is no compression, and 9 is best compression.
-|===
+include::partial$dataformat-options.adoc[]
 // dataformat options: END
 
 == Marshal
@@ -70,4 +64,5 @@ unmarshalling to avoid errors.
 from("activemq:queue:MY_QUEUE").unmarshal().zipDeflater().process(new UnZippedMessageProcessor()); 
 ----
 
-include::{page-component-version}@camel-spring-boot::page$zip-deflater-starter.adoc[]
+
+include::spring-boot:partial$starter.adoc[]

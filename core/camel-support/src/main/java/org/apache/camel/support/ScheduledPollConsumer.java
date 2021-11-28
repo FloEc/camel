@@ -29,10 +29,12 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.PollingConsumerPollingStrategy;
 import org.apache.camel.Processor;
 import org.apache.camel.Suspendable;
+import org.apache.camel.health.HealthCheckAware;
 import org.apache.camel.spi.PollingConsumerPollStrategy;
 import org.apache.camel.spi.ScheduledPollConsumerScheduler;
 import org.apache.camel.support.service.ServiceHelper;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.util.PropertiesHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * A useful base class for any consumer which is polling based
  */
 public abstract class ScheduledPollConsumer extends DefaultConsumer
-        implements Runnable, Suspendable, PollingConsumerPollingStrategy {
+        implements Runnable, Suspendable, PollingConsumerPollingStrategy, HealthCheckAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledPollConsumer.class);
 
@@ -69,6 +71,8 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
     private volatile int backoffCounter;
     private volatile long idleCounter;
     private volatile long errorCounter;
+    private volatile long successCounter;
+    private volatile Throwable lastError;
     private final AtomicLong counter = new AtomicLong();
 
     public ScheduledPollConsumer(Endpoint endpoint, Processor processor) {
@@ -121,7 +125,9 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
 
         } catch (Error e) {
             // must catch Error, to ensure the task is re-scheduled
-            LOG.error("Error occurred during running scheduled task on: {}, due: {}", this.getEndpoint(), e.getMessage(), e);
+            LOG.error("Error occurred during running scheduled task on: {}, due: {}."
+                      + " This exception is ignored and the task will run again on next poll.",
+                    this.getEndpoint(), e.getMessage(), e);
         }
     }
 
@@ -151,6 +157,7 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
                 idleCounter = 0;
                 errorCounter = 0;
                 backoffCounter = 0;
+                successCounter = 0;
                 LOG.trace("doRun() backoff finished, resetting counters.");
             }
         }
@@ -245,12 +252,17 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
 
         if (cause != null) {
             idleCounter = 0;
+            successCounter = 0;
             errorCounter++;
+            lastError = cause;
         } else {
             idleCounter = polledMessages == 0 ? ++idleCounter : 0;
+            successCounter++;
             errorCounter = 0;
+            lastError = null;
         }
-        LOG.trace("doRun() done with idleCounter={}, errorCounter={}", idleCounter, errorCounter);
+        LOG.trace("doRun() done with idleCounter={}, successCounter={}, errorCounter={}", idleCounter, successCounter,
+                errorCounter);
 
         // avoid this thread to throw exceptions because the thread pool wont re-schedule a new thread
     }
@@ -420,12 +432,56 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
     // -------------------------------------------------------------------------
 
     /**
+     * Gets the error counter. If the counter is > 0 that means the consumer failed polling for the last N number of
+     * times. When the consumer is successfully again, then the error counter resets to zero.
+     *
+     * @see #getSuccessCounter()
+     */
+    protected long getErrorCounter() {
+        return errorCounter;
+    }
+
+    /**
+     * Gets the success counter. If the success is > 0 that means the consumer succeeded polling for the last N number
+     * of times. When the consumer is failing again, then the success counter resets to zero.
+     *
+     * @see #getErrorCounter()
+     */
+    protected long getSuccessCounter() {
+        return successCounter;
+    }
+
+    /**
+     * Gets the total number of polls run.
+     */
+    protected long getCounter() {
+        return counter.get();
+    }
+
+    /**
+     * Gets the last caused error (exception) for the last poll that failed. When the consumer is successfully again,
+     * then the error resets to null.
+     */
+    protected Throwable getLastError() {
+        return lastError;
+    }
+
+    /**
      * The polling method which is invoked periodically to poll this consumer
      *
      * @return           number of messages polled, will be <tt>0</tt> if no message was polled at all.
      * @throws Exception can be thrown if an exception occurred during polling
      */
     protected abstract int poll() throws Exception;
+
+    @Override
+    protected void doBuild() throws Exception {
+        if (getHealthCheck() == null) {
+            String id = "consumer:" + getRouteId();
+            setHealthCheck(new ScheduledPollConsumerHealthCheck(this, id));
+        }
+        super.doBuild();
+    }
 
     @Override
     protected void doInit() throws Exception {
@@ -465,6 +521,12 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
             // need to use a copy in case the consumer is restarted so we keep the properties
             Map<String, Object> copy = new LinkedHashMap<>(schedulerProperties);
             PropertyBindingSupport.build().bind(getEndpoint().getCamelContext(), scheduler, copy);
+            // special for trigger and job parameters
+            Map<String, Object> triggerParameters = PropertiesHelper.extractProperties(copy, "trigger.");
+            Map<String, Object> jobParameters = PropertiesHelper.extractProperties(copy, "job.");
+            PropertyBindingSupport.build().bind(getEndpoint().getCamelContext(), scheduler, "triggerParameters",
+                    triggerParameters);
+            PropertyBindingSupport.build().bind(getEndpoint().getCamelContext(), scheduler, "jobParameters", jobParameters);
             if (copy.size() > 0) {
                 throw new FailedToCreateConsumerException(
                         getEndpoint(), "There are " + copy.size()
@@ -506,6 +568,7 @@ public abstract class ScheduledPollConsumer extends DefaultConsumer
         backoffCounter = 0;
         idleCounter = 0;
         errorCounter = 0;
+        successCounter = 0;
         counter.set(0);
 
         super.doStop();

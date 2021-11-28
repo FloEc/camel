@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.camel.Processor;
 import org.apache.camel.support.DefaultConsumer;
+import org.apache.camel.support.task.BlockingTask;
 import org.jsmpp.DefaultPDUReader;
 import org.jsmpp.DefaultPDUSender;
 import org.jsmpp.SynchronizedPDUSender;
@@ -36,6 +37,10 @@ import org.jsmpp.session.SessionStateListener;
 import org.jsmpp.util.DefaultComposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.camel.component.smpp.SmppUtils.isServiceStopping;
+import static org.apache.camel.component.smpp.SmppUtils.isSessionClosed;
+import static org.apache.camel.component.smpp.SmppUtils.newReconnectTask;
 
 /**
  * An implementation of consumer which use the SMPP protocol
@@ -137,51 +142,34 @@ public class SmppConsumer extends DefaultConsumer {
         }
     }
 
+    private boolean doReconnect() {
+        if (isServiceStopping(this)) {
+            return true;
+        }
+
+        if (isSessionClosed(session)) {
+            try {
+                LOG.info("Trying to reconnect to {}", getEndpoint().getConnectionString());
+                session = createSession();
+                return true;
+            } catch (IOException e) {
+                LOG.warn("Failed to reconnect to {}", getEndpoint().getConnectionString());
+                closeSession();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void reconnect(final long initialReconnectDelay) {
         if (reconnectLock.tryLock()) {
+            BlockingTask task = newReconnectTask(this, getEndpoint(), initialReconnectDelay,
+                    configuration.getMaxReconnect());
+
             try {
-                Runnable r = new Runnable() {
-                    public void run() {
-                        boolean reconnected = false;
-
-                        LOG.info("Schedule reconnect after {} millis", initialReconnectDelay);
-                        try {
-                            Thread.sleep(initialReconnectDelay);
-                        } catch (InterruptedException e) {
-                            // ignore
-                        }
-
-                        int attempt = 0;
-                        while (!(isStopping() || isStopped())
-                                && (session == null || session.getSessionState().equals(SessionState.CLOSED))
-                                && attempt < configuration.getMaxReconnect()) {
-                            try {
-                                attempt++;
-                                LOG.info("Trying to reconnect to {} - attempt #{}", getEndpoint().getConnectionString(),
-                                        attempt);
-                                session = createSession();
-                                reconnected = true;
-                            } catch (IOException e) {
-                                LOG.warn("Failed to reconnect to {}", getEndpoint().getConnectionString());
-                                closeSession();
-                                try {
-                                    Thread.sleep(configuration.getReconnectDelay());
-                                } catch (InterruptedException ee) {
-                                }
-                            }
-                        }
-
-                        if (reconnected) {
-                            LOG.info("Reconnected to {}", getEndpoint().getConnectionString());
-                        }
-                    }
-                };
-
-                Thread t = new Thread(r);
-                t.start();
-                t.join();
-            } catch (InterruptedException e) {
-                // noop
+                task.run(this::doReconnect);
             } finally {
                 reconnectLock.unlock();
             }

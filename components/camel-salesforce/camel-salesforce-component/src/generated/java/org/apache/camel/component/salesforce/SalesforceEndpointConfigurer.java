@@ -47,6 +47,8 @@ public class SalesforceEndpointConfigurer extends PropertyConfigurerSupport impl
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
         case "exchangePattern": target.setExchangePattern(property(camelContext, org.apache.camel.ExchangePattern.class, value)); return true;
+        case "fallbackreplayid":
+        case "fallBackReplayId": target.getConfiguration().setFallBackReplayId(property(camelContext, java.lang.Long.class, value)); return true;
         case "format": target.getConfiguration().setFormat(property(camelContext, org.apache.camel.component.salesforce.internal.PayloadFormat.class, value)); return true;
         case "httpclient":
         case "httpClient": target.getConfiguration().setHttpClient(property(camelContext, org.apache.camel.component.salesforce.SalesforceHttpClient.class, value)); return true;
@@ -61,8 +63,11 @@ public class SalesforceEndpointConfigurer extends PropertyConfigurerSupport impl
         case "lazystartproducer":
         case "lazyStartProducer": target.setLazyStartProducer(property(camelContext, boolean.class, value)); return true;
         case "limit": target.getConfiguration().setLimit(property(camelContext, java.lang.Integer.class, value)); return true;
+        case "locator": target.getConfiguration().setLocator(property(camelContext, java.lang.String.class, value)); return true;
         case "maxbackoff":
         case "maxBackoff": target.getConfiguration().setMaxBackoff(property(camelContext, java.time.Duration.class, value).toMillis()); return true;
+        case "maxrecords":
+        case "maxRecords": target.getConfiguration().setMaxRecords(property(camelContext, java.lang.Integer.class, value)); return true;
         case "notfoundbehaviour":
         case "notFoundBehaviour": target.getConfiguration().setNotFoundBehaviour(property(camelContext, org.apache.camel.component.salesforce.NotFoundBehaviour.class, value)); return true;
         case "notifyforfields":
@@ -160,6 +165,8 @@ public class SalesforceEndpointConfigurer extends PropertyConfigurerSupport impl
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
         case "exchangePattern": return org.apache.camel.ExchangePattern.class;
+        case "fallbackreplayid":
+        case "fallBackReplayId": return java.lang.Long.class;
         case "format": return org.apache.camel.component.salesforce.internal.PayloadFormat.class;
         case "httpclient":
         case "httpClient": return org.apache.camel.component.salesforce.SalesforceHttpClient.class;
@@ -174,8 +181,11 @@ public class SalesforceEndpointConfigurer extends PropertyConfigurerSupport impl
         case "lazystartproducer":
         case "lazyStartProducer": return boolean.class;
         case "limit": return java.lang.Integer.class;
+        case "locator": return java.lang.String.class;
         case "maxbackoff":
         case "maxBackoff": return long.class;
+        case "maxrecords":
+        case "maxRecords": return java.lang.Integer.class;
         case "notfoundbehaviour":
         case "notFoundBehaviour": return org.apache.camel.component.salesforce.NotFoundBehaviour.class;
         case "notifyforfields":
@@ -274,6 +284,8 @@ public class SalesforceEndpointConfigurer extends PropertyConfigurerSupport impl
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
         case "exchangePattern": return target.getExchangePattern();
+        case "fallbackreplayid":
+        case "fallBackReplayId": return target.getConfiguration().getFallBackReplayId();
         case "format": return target.getConfiguration().getFormat();
         case "httpclient":
         case "httpClient": return target.getConfiguration().getHttpClient();
@@ -288,8 +300,11 @@ public class SalesforceEndpointConfigurer extends PropertyConfigurerSupport impl
         case "lazystartproducer":
         case "lazyStartProducer": return target.isLazyStartProducer();
         case "limit": return target.getConfiguration().getLimit();
+        case "locator": return target.getConfiguration().getLocator();
         case "maxbackoff":
         case "maxBackoff": return target.getConfiguration().getMaxBackoff();
+        case "maxrecords":
+        case "maxRecords": return target.getConfiguration().getMaxRecords();
         case "notfoundbehaviour":
         case "notFoundBehaviour": return target.getConfiguration().getNotFoundBehaviour();
         case "notifyforfields":

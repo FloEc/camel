@@ -388,7 +388,7 @@ public interface Exchange {
     Object removeProperty(String name);
 
     /**
-     * Remove all of the properties associated with the exchange matching a specific pattern
+     * Remove all the properties associated with the exchange matching a specific pattern
      *
      * @param  pattern pattern of names
      * @return         boolean whether any properties matched
@@ -397,7 +397,7 @@ public interface Exchange {
 
     /**
      * Removes the properties from this exchange that match the given <tt>pattern</tt>, except for the ones matching one
-     * ore more <tt>excludePatterns</tt>
+     * or more <tt>excludePatterns</tt>
      * 
      * @param  pattern         pattern of names that should be removed
      * @param  excludePatterns one or more pattern of properties names that should be excluded (= preserved)
@@ -414,9 +414,9 @@ public interface Exchange {
     Map<String, Object> getProperties();
 
     /**
-     * Returns all (both internal and custom) of the properties associated with the exchange
+     * Returns all (both internal and custom) properties associated with the exchange
      *
-     * @return all (both internal and custom) the properties in a Map
+     * @return all (both internal and custom) properties in a Map
      * @see    #getProperties()
      */
     Map<String, Object> getAllProperties();
@@ -562,9 +562,9 @@ public interface Exchange {
     void setException(Throwable t);
 
     /**
-     * Returns true if this exchange failed due to either an exception or fault
+     * Returns true if this exchange failed due to an exception
      *
-     * @return true if this exchange failed due to either an exception or fault
+     * @return true if this exchange failed due to an exception
      * @see    Exchange#getException()
      */
     boolean isFailed();

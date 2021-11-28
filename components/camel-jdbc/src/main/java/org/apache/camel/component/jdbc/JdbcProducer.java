@@ -48,7 +48,7 @@ public class JdbcProducer extends DefaultProducer {
     private final Map<String, Object> parameters;
 
     public JdbcProducer(JdbcEndpoint endpoint, DataSource dataSource, ConnectionStrategy connectionStrategy,
-                        int readSize, Map<String, Object> parameters) throws Exception {
+                        int readSize, Map<String, Object> parameters) {
         super(endpoint);
         this.dataSource = dataSource;
         this.connectionStrategy = connectionStrategy;
@@ -191,12 +191,14 @@ public class JdbcProducer extends DefaultProducer {
     }
 
     private boolean doCreateAndExecuteSqlStatement(Exchange exchange, String sql, Connection conn) throws Exception {
-        Statement stmt = null;
+
         ResultSet rs = null;
         boolean shouldCloseResources = true;
 
         try {
-            stmt = conn.createStatement();
+            // We might need to leave it open to allow post-processing of the result set. This is why we
+            // are not using try-with-resources here.
+            Statement stmt = conn.createStatement();
 
             if (parameters != null && !parameters.isEmpty()) {
                 Map<String, Object> copy = new HashMap<>(parameters);
@@ -241,7 +243,6 @@ public class JdbcProducer extends DefaultProducer {
         } finally {
             if (shouldCloseResources) {
                 closeQuietly(rs);
-                closeQuietly(stmt);
             }
         }
         return shouldCloseResources;

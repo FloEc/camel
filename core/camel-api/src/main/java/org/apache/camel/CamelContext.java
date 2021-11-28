@@ -385,7 +385,7 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      *
      * @return a readonly list with the names of the components
      */
-    List<String> getComponentNames();
+    Set<String> getComponentNames();
 
     /**
      * Removes a previously added component.
@@ -573,6 +573,14 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
     void addRoutes(RoutesBuilder builder) throws Exception;
 
     /**
+     * Adds the routes configurations (global configuration for all routes) from the routes builder.
+     *
+     * @param  builder   the builder which has routes configurations
+     * @throws Exception if the routes configurations could not be created for whatever reason
+     */
+    void addRoutesConfigurations(RouteConfigurationsBuilder builder) throws Exception;
+
+    /**
      * Removes the given route (the route <b>must</b> be stopped before it can be removed).
      * <p/>
      * A route which is removed will be unregistered from JMX, have its services stopped/shutdown and the route
@@ -592,7 +600,7 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      *
      * @param  routeId   the route id
      * @return           <tt>true</tt> if the route was removed, <tt>false</tt> if the route could not be removed
-     *                   because its not stopped
+     *                   because it's not stopped
      * @throws Exception is thrown if the route could not be shutdown for whatever reason
      */
     boolean removeRoute(String routeId) throws Exception;
@@ -625,6 +633,14 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      */
     String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
             throws Exception;
+
+    /**
+     * Removes the route templates matching the pattern
+     *
+     * @param  pattern   pattern, such as * for all, or foo* to remove all foo templates
+     * @throws Exception is thrown if error during removing route templates
+     */
+    void removeRouteTemplates(String pattern) throws Exception;
 
     /**
      * Adds the given route policy factory
@@ -776,7 +792,7 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * @deprecated not in use
      */
     @Deprecated
-    List<String> getLanguageNames();
+    Set<String> getLanguageNames();
 
     /**
      * Creates a new {@link ProducerTemplate} which is <b>started</b> and therefore ready to use right away.
@@ -1112,6 +1128,18 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * Sets a custom {@link Tracer}
      */
     void setTracer(Tracer tracer);
+
+    /**
+     * Whether to set tracing on standby. If on standby then the tracer is installed and made available. Then the tracer
+     * can be enabled later at runtime via JMX or via {@link Tracer#setEnabled(boolean)}.
+     */
+    void setTracingStandby(boolean tracingStandby);
+
+    /**
+     * Whether to set tracing on standby. If on standby then the tracer is installed and made available. Then the tracer
+     * can be enabled later at runtime via JMX or via {@link Tracer#setEnabled(boolean)}.
+     */
+    boolean isTracingStandby();
 
     /**
      * Gets the current {@link UuidGenerator}

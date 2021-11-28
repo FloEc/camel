@@ -41,6 +41,7 @@ import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.Route;
+import org.apache.camel.RouteConfigurationsBuilder;
 import org.apache.camel.RouteTemplateContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.Service;
@@ -61,6 +62,7 @@ import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.ModelLifecycleStrategy;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.Resilience4jConfigurationDefinition;
+import org.apache.camel.model.RouteConfigurationDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RouteTemplateDefinition;
 import org.apache.camel.model.cloud.ServiceCallConfigurationDefinition;
@@ -446,7 +448,7 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
     }
 
     @Override
-    public List<String> getComponentNames() {
+    public Set<String> getComponentNames() {
         return delegate.getComponentNames();
     }
 
@@ -549,6 +551,11 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
     @Override
     public void addRoutes(RoutesBuilder builder) throws Exception {
         delegate.addRoutes(builder);
+    }
+
+    @Override
+    public void addRoutesConfigurations(RouteConfigurationsBuilder builder) throws Exception {
+        delegate.addRoutesConfigurations(builder);
     }
 
     @Override
@@ -658,7 +665,7 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
 
     @Override
     @Deprecated
-    public List<String> getLanguageNames() {
+    public Set<String> getLanguageNames() {
         return delegate.getLanguageNames();
     }
 
@@ -835,6 +842,16 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
     @Override
     public void setTracer(Tracer tracer) {
         delegate.setTracer(tracer);
+    }
+
+    @Override
+    public void setTracingStandby(boolean tracingStandby) {
+        delegate.setTracingStandby(tracingStandby);
+    }
+
+    @Override
+    public boolean isTracingStandby() {
+        return delegate.isTracingStandby();
     }
 
     @Override
@@ -1105,6 +1122,11 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
     @Override
     public void setAutowiredEnabled(Boolean autowiredEnabled) {
         delegate.setAutowiredEnabled(autowiredEnabled);
+    }
+
+    @Override
+    public void removeRouteTemplates(String pattern) throws Exception {
+        delegate.removeRouteTemplates(pattern);
     }
 
     //
@@ -1687,6 +1709,21 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
     }
 
     @Override
+    public void addRouteConfiguration(RouteConfigurationDefinition routesConfiguration) {
+        getModelCamelContext().addRouteConfiguration(routesConfiguration);
+    }
+
+    @Override
+    public void addRouteConfigurations(List<RouteConfigurationDefinition> routesConfigurations) {
+        getModelCamelContext().addRouteConfigurations(routesConfigurations);
+    }
+
+    @Override
+    public List<RouteConfigurationDefinition> getRouteConfigurationDefinitions() {
+        return getModelCamelContext().getRouteConfigurationDefinitions();
+    }
+
+    @Override
     public List<RouteDefinition> getRouteDefinitions() {
         return getModelCamelContext().getRouteDefinitions();
     }
@@ -1761,6 +1798,11 @@ public class LightweightCamelContext implements ExtendedCamelContext, CatalogCam
     public String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
             throws Exception {
         return getModelCamelContext().addRouteFromTemplate(routeId, routeTemplateId, routeTemplateContext);
+    }
+
+    @Override
+    public void removeRouteTemplateDefinitions(String pattern) throws Exception {
+        getModelCamelContext().removeRouteTemplateDefinitions(pattern);
     }
 
     @Override

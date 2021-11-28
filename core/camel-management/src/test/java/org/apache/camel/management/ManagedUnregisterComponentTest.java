@@ -24,11 +24,14 @@ import javax.management.ObjectName;
 import org.apache.camel.ServiceStatus;
 import org.apache.camel.builder.RouteBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisabledOnOs(OS.AIX)
 public class ManagedUnregisterComponentTest extends ManagementTestSupport {
 
     @Test
@@ -36,7 +39,7 @@ public class ManagedUnregisterComponentTest extends ManagementTestSupport {
         MBeanServer mbeanServer = getMBeanServer();
 
         Set<ObjectName> set = mbeanServer.queryNames(new ObjectName("*:type=components,*"), null);
-        assertEquals(2, set.size());
+        assertEquals(2 + 1, set.size()); // + 1 since seda is automatic added in ContextTestSupport
 
         ObjectName on = set.iterator().next();
         assertTrue(mbeanServer.isRegistered(on), "Should be registered");

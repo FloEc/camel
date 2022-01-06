@@ -31,7 +31,6 @@ import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriParams;
 import org.apache.camel.support.MessageHelper;
 import org.apache.camel.util.ObjectHelper;
-import org.apache.camel.util.StringHelper;
 
 /**
  * Default {@link ExchangeFormatter} that have fine grained options to configure what to include in the output.
@@ -97,6 +96,8 @@ public class DefaultExchangeFormatter implements ExchangeFormatter {
     @UriParam(label = "formatting", enums = "Default,Tab,Fixed", defaultValue = "Default",
               description = "Sets the outputs style to use.")
     private OutputStyle style = OutputStyle.Default;
+    @UriParam(defaultValue = "false", description = "If enabled only the body will be printed out")
+    private boolean plain;
 
     private StringBuilder style(StringBuilder sb, String label) {
         if (style == OutputStyle.Default) {
@@ -119,6 +120,11 @@ public class DefaultExchangeFormatter implements ExchangeFormatter {
         Message in = exchange.getIn();
 
         StringBuilder sb = new StringBuilder();
+
+        if (plain) {
+            return getBodyAsString(in);
+        }
+
         if (showAll || showExchangeId) {
             if (multiline) {
                 sb.append(SEPARATOR);
@@ -160,8 +166,8 @@ public class DefaultExchangeFormatter implements ExchangeFormatter {
                 sb.append(SEPARATOR);
             }
             String body = getBodyAsString(in);
-            if (skipBodyLineSeparator) {
-                body = StringHelper.replaceAll(body, LS, "");
+            if (skipBodyLineSeparator && body != null) {
+                body = body.replace(LS, "");
             }
             style(sb, "Body").append(body);
         }
@@ -442,6 +448,17 @@ public class DefaultExchangeFormatter implements ExchangeFormatter {
      */
     public void setStyle(OutputStyle style) {
         this.style = style;
+    }
+
+    public boolean isPlain() {
+        return plain;
+    }
+
+    /**
+     * If enabled only the body will be printed out
+     */
+    public void setPlain(boolean plain) {
+        this.plain = plain;
     }
 
     // Implementation methods

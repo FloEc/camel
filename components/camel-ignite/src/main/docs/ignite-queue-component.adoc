@@ -2,11 +2,10 @@
 :doctitle: Ignite Queues
 :shortname: ignite-queue
 :artifactid: camel-ignite
-:description: Interact with Ignite Queue data structures.
+:description: Interact with .
 :since: 2.17
 :supportlevel: Stable
 :component-header: Only producer is supported
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/components/ignite-queue.adoc[opts=optional]
 //Manually maintained attributes
 :group: Ignite
 :camel-spring-boot-name: ignite

@@ -2,12 +2,11 @@
 :doctitle: Timer
 :shortname: timer
 :artifactid: camel-timer
-:description: Generate messages in specified intervals using java.util.Timer.
+:description: Generate messages in specified intervals using <code>java.util.Timer.
 :since: 1.0
 :supportlevel: Stable
 :component-header: Only consumer is supported
 :core:
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/components/timer.adoc[opts=optional]
 //Manually maintained attributes
 :camel-spring-boot-name: timer
 

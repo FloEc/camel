@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.camel.component.kafka.consumer.support;
 
 import java.time.Duration;
@@ -34,8 +33,8 @@ import org.apache.camel.component.kafka.serde.KafkaHeaderDeserializer;
 import org.apache.camel.spi.ExceptionHandler;
 import org.apache.camel.spi.HeaderFilterStrategy;
 import org.apache.camel.spi.StateRepository;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
@@ -50,37 +49,13 @@ public class KafkaRecordProcessor {
     private final boolean autoCommitEnabled;
     private final KafkaConfiguration configuration;
     private final Processor processor;
-    private final KafkaConsumer<?, ?> consumer;
+    private final Consumer<?, ?> consumer;
     private final KafkaManualCommitFactory manualCommitFactory;
     private final String threadId;
     private final ConcurrentLinkedQueue<KafkaAsyncManualCommit> asyncCommits;
 
-    public static final class ProcessResult {
-        private static final ProcessResult UNPROCESSED_RESULT = new ProcessResult(false, START_OFFSET);
-
-        private boolean breakOnErrorHit;
-        private long partitionLastOffset;
-
-        private ProcessResult(boolean breakOnErrorHit, long partitionLastOffset) {
-            this.breakOnErrorHit = breakOnErrorHit;
-            this.partitionLastOffset = partitionLastOffset;
-        }
-
-        public boolean isBreakOnErrorHit() {
-            return breakOnErrorHit;
-        }
-
-        public long getPartitionLastOffset() {
-            return partitionLastOffset;
-        }
-
-        public static ProcessResult newUnprocessed() {
-            return UNPROCESSED_RESULT;
-        }
-    }
-
     public KafkaRecordProcessor(boolean autoCommitEnabled, KafkaConfiguration configuration,
-                                Processor processor, KafkaConsumer<?, ?> consumer,
+                                Processor processor, Consumer<?, ?> consumer,
                                 KafkaManualCommitFactory manualCommitFactory,
                                 String threadId, ConcurrentLinkedQueue<KafkaAsyncManualCommit> asyncCommits) {
         this.autoCommitEnabled = autoCommitEnabled;
@@ -122,9 +97,9 @@ public class KafkaRecordProcessor {
                         headerDeserializer.deserialize(header.key(), header.value())));
     }
 
-    public ProcessResult processExchange(
+    public ProcessingResult processExchange(
             Exchange exchange, TopicPartition partition, boolean partitionHasNext,
-            boolean recordHasNext, ConsumerRecord<Object, Object> record, ProcessResult lastResult,
+            boolean recordHasNext, ConsumerRecord<Object, Object> record, ProcessingResult lastResult,
             ExceptionHandler exceptionHandler) {
 
         Message message = exchange.getMessage();
@@ -157,10 +132,10 @@ public class KafkaRecordProcessor {
             boolean breakOnErrorExit = processException(exchange, partition, lastResult.getPartitionLastOffset(),
                     exceptionHandler);
 
-            return new ProcessResult(breakOnErrorExit, lastResult.getPartitionLastOffset());
+            return new ProcessingResult(breakOnErrorExit, lastResult.getPartitionLastOffset());
         }
 
-        return new ProcessResult(false, record.offset());
+        return new ProcessingResult(false, record.offset());
     }
 
     private boolean processException(
@@ -194,7 +169,7 @@ public class KafkaRecordProcessor {
     }
 
     public static void commitOffset(
-            KafkaConfiguration configuration, KafkaConsumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset,
+            KafkaConfiguration configuration, Consumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset,
             boolean stopping, boolean forceCommit, String threadId) {
 
         if (partitionLastOffset == START_OFFSET) {
@@ -221,7 +196,7 @@ public class KafkaRecordProcessor {
     }
 
     private static void commitOffset(
-            KafkaConfiguration configuration, KafkaConsumer<?, ?> consumer, TopicPartition partition,
+            KafkaConfiguration configuration, Consumer<?, ?> consumer, TopicPartition partition,
             long partitionLastOffset) {
         long timeout = configuration.getCommitTimeoutMs();
         consumer.commitSync(
@@ -230,7 +205,7 @@ public class KafkaRecordProcessor {
     }
 
     private static void forceSyncCommit(
-            KafkaConfiguration configuration, KafkaConsumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset,
+            KafkaConfiguration configuration, Consumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset,
             String threadId) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Forcing commitSync {} [topic: {} partition: {} offset: {}]", threadId, partition.topic(),
@@ -247,7 +222,7 @@ public class KafkaRecordProcessor {
     }
 
     private static void commitSync(
-            KafkaConfiguration configuration, KafkaConsumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset,
+            KafkaConfiguration configuration, Consumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset,
             String threadId) {
 
         if (LOG.isDebugEnabled()) {
@@ -258,7 +233,7 @@ public class KafkaRecordProcessor {
     }
 
     private static void commitAsync(
-            KafkaConsumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset, String threadId) {
+            Consumer<?, ?> consumer, TopicPartition partition, long partitionLastOffset, String threadId) {
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Auto commitAsync on stop {} from topic {}", threadId, partition.topic());

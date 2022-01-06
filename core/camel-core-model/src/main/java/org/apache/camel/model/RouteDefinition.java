@@ -46,6 +46,7 @@ import org.apache.camel.model.rest.RestBindingDefinition;
 import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.spi.AsEndpointUri;
 import org.apache.camel.spi.Metadata;
+import org.apache.camel.spi.Resource;
 import org.apache.camel.spi.RoutePolicy;
 
 /**
@@ -88,6 +89,7 @@ public class RouteDefinition extends OutputDefinition<RouteDefinition> implement
     private List<PropertyDefinition> routeProperties;
     private Map<String, Object> templateParameters;
     private RouteTemplateContext routeTemplateContext;
+    private Resource resource;
 
     public RouteDefinition() {
     }
@@ -702,9 +704,19 @@ public class RouteDefinition extends OutputDefinition<RouteDefinition> implement
         this.routeTemplateContext = routeTemplateContext;
     }
 
+    public Resource getResource() {
+        return resource;
+    }
+
+    @XmlTransient
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
     // Properties
     // -----------------------------------------------------------------------
 
+    @Override
     public FromDefinition getInput() {
         return input;
     }
@@ -718,8 +730,18 @@ public class RouteDefinition extends OutputDefinition<RouteDefinition> implement
             throw new IllegalArgumentException("Only one input is allowed per route. Cannot accept input: " + input);
         }
         // required = false: in rest-dsl you can embed an in-lined route which
-        // does not have a <from> as its implied to be the rest endpoint
+        // does not have a <from> as it is implied to be the rest endpoint
         this.input = input;
+
+        if (getCamelContext() != null && (getCamelContext().isSourceLocationEnabled() || getCamelContext().isDebugging()
+                || getCamelContext().isTracing())) {
+            // we want to capture source location:line for every output
+            ProcessorDefinitionHelper.prepareSourceLocation(input);
+            if (log.isDebugEnabled()) {
+                log.debug("{} located in {}:{}", input.getShortName(), input.getLocation(),
+                        input.getLineNumber());
+            }
+        }
     }
 
     @Override

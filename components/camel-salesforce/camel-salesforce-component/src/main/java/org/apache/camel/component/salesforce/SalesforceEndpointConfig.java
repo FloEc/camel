@@ -619,7 +619,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     }
 
     /**
-     * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API version < 29.0)
+     * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API version &lt; 29.0)
      */
     public void setNotifyForOperations(NotifyForOperationsEnum notifyForOperations) {
         this.notifyForOperations = notifyForOperations;

@@ -2,10 +2,9 @@
 :doctitle: JSonApi
 :shortname: jsonApi
 :artifactid: camel-jsonapi
-:description: Marshal and unmarshal JSON:API resources using JSONAPI-Converter library.
+:description: Marshal and unmarshal .
 :since: 3.0
 :supportlevel: Stable
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/jsonApi.adoc[opts=optional]
 //Manually maintained attributes
 :camel-spring-boot-name: jsonapi
 

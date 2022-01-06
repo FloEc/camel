@@ -57,6 +57,7 @@ import org.apache.camel.model.PackageScanDefinition;
 import org.apache.camel.model.Resilience4jConfigurationDefinition;
 import org.apache.camel.model.RestContextRefDefinition;
 import org.apache.camel.model.RouteBuilderDefinition;
+import org.apache.camel.model.RouteConfigurationContextRefDefinition;
 import org.apache.camel.model.RouteConfigurationDefinition;
 import org.apache.camel.model.RouteContextRefDefinition;
 import org.apache.camel.model.RouteDefinition;
@@ -123,6 +124,9 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     private String messageHistory;
     @XmlAttribute
     @Metadata(defaultValue = "false")
+    private String sourceLocationEnabled;
+    @XmlAttribute
+    @Metadata(defaultValue = "false")
     private String logMask;
     @XmlAttribute
     private String logExhaustedMessageBody;
@@ -175,10 +179,13 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     @Metadata(defaultValue = "CompleteCurrentTaskOnly")
     private ShutdownRunningTask shutdownRunningTask;
     @XmlAttribute
-    @Metadata(defaultValue = "true")
+    @Metadata(defaultValue = "false")
     private String loadTypeConverters;
     @XmlAttribute
     private String typeConverterStatisticsEnabled;
+    @XmlAttribute
+    @Metadata(defaultValue = "false")
+    private String loadHealthChecks;
     @XmlAttribute
     private String inflightRepositoryBrowseEnabled;
     @XmlAttribute
@@ -228,6 +235,8 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     private FaultToleranceConfigurationDefinition defaultFaultToleranceConfiguration;
     @XmlElement(name = "faultToleranceConfiguration", type = Resilience4jConfigurationDefinition.class)
     private List<FaultToleranceConfigurationDefinition> faultToleranceConfigurations;
+    @XmlElement(name = "routeConfigurationContextRef")
+    private List<RouteConfigurationContextRefDefinition> routeConfigurationRefs = new ArrayList<>();
     @XmlElement(name = "routeTemplateContextRef")
     private List<RouteTemplateContextRefDefinition> routeTemplateRefs = new ArrayList<>();
     @XmlElement(name = "routeBuilder")
@@ -852,6 +861,22 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     }
 
     @Override
+    public String getSourceLocationEnabled() {
+        return sourceLocationEnabled;
+    }
+
+    /**
+     * Whether to capture precise source location:line-number for all EIPs in Camel routes.
+     *
+     * Enabling this will impact parsing Java based routes (also Groovy, Kotlin, etc.) on startup as this uses JDK
+     * StackTraceElement to calculate the location from the Camel route, which comes with a performance cost. This only
+     * impact startup, not the performance of the routes at runtime.
+     */
+    public void setSourceLocationEnabled(String sourceLocationEnabled) {
+        this.sourceLocationEnabled = sourceLocationEnabled;
+    }
+
+    @Override
     public String getLogMask() {
         return logMask;
     }
@@ -1146,14 +1171,24 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     }
 
     /**
-     * Sets whether to load custom type converters by scanning classpath. This can be turned off if you are only using
-     * Camel components that does not provide type converters which is needed at runtime. In such situations setting
-     * this option to false, can speedup starting Camel.
-     *
-     * @param loadTypeConverters whether to load custom type converters.
+     * Whether to load custom type converters by scanning classpath. This is used for backwards compatibility with Camel
+     * 2.x. Its recommended to migrate to use fast type converter loading by setting @Converter(loader = true) on your
+     * custom type converter classes.
      */
     public void setLoadTypeConverters(String loadTypeConverters) {
         this.loadTypeConverters = loadTypeConverters;
+    }
+
+    @Override
+    public String getLoadHealthChecks() {
+        return loadHealthChecks;
+    }
+
+    /**
+     * Whether to load custom health checks by scanning classpath.
+     */
+    public void setLoadHealthChecks(String loadHealthChecks) {
+        this.loadHealthChecks = loadHealthChecks;
     }
 
     @Override
@@ -1207,6 +1242,18 @@ public class CamelContextFactoryBean extends AbstractCamelContextFactoryBean<Spr
     @Override
     public CamelJMXAgentDefinition getCamelJMXAgent() {
         return camelJMXAgent;
+    }
+
+    @Override
+    public List<RouteConfigurationContextRefDefinition> getRouteConfigurationRefs() {
+        return routeConfigurationRefs;
+    }
+
+    /**
+     * Refers to XML route configurations to include as route configurations in this CamelContext.
+     */
+    public void setRouteConfigurationRefs(List<RouteConfigurationContextRefDefinition> routeConfigurationRefs) {
+        this.routeConfigurationRefs = routeConfigurationRefs;
     }
 
     @Override

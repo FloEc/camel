@@ -2,11 +2,10 @@
 :doctitle: Async HTTP Client (AHC) Websocket
 :shortname: ahc-ws
 :artifactid: camel-ahc-ws
-:description: Exchange data with external Websocket servers using Async Http Client.
+:description: Exchange data with external Websocket servers using .
 :since: 2.14
 :supportlevel: Stable
 :component-header: Both producer and consumer are supported
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/components/ahc-ws.adoc[opts=optional]
 //Manually maintained attributes
 :camel-spring-boot-name: ahc-ws
 

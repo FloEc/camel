@@ -43,10 +43,12 @@ import org.apache.camel.SuspendableService;
 import org.apache.camel.spi.IdAware;
 import org.apache.camel.spi.InterceptStrategy;
 import org.apache.camel.spi.ManagementInterceptStrategy;
+import org.apache.camel.spi.Resource;
 import org.apache.camel.spi.RouteController;
 import org.apache.camel.spi.RouteError;
 import org.apache.camel.spi.RouteIdAware;
 import org.apache.camel.spi.RoutePolicy;
+import org.apache.camel.support.LoggerHelper;
 import org.apache.camel.support.PatternHelper;
 import org.apache.camel.support.service.ServiceHelper;
 import org.apache.camel.support.service.ServiceSupport;
@@ -66,6 +68,8 @@ public class DefaultRoute extends ServiceSupport implements Route {
     private NamedNode route;
     private final String routeId;
     private final String routeDescription;
+    private final Resource sourceResource;
+    private final String sourceLocation;
     private final List<Processor> eventDrivenProcessors = new ArrayList<>();
     private final List<InterceptStrategy> interceptStrategies = new ArrayList<>(0);
     private ManagementInterceptStrategy managementInterceptStrategy;
@@ -100,12 +104,14 @@ public class DefaultRoute extends ServiceSupport implements Route {
     private Consumer consumer;
 
     public DefaultRoute(CamelContext camelContext, NamedNode route, String routeId,
-                        String routeDescription, Endpoint endpoint) {
+                        String routeDescription, Endpoint endpoint, Resource resource) {
         this.camelContext = camelContext;
         this.route = route;
         this.routeId = routeId;
         this.routeDescription = routeDescription;
         this.endpoint = endpoint;
+        this.sourceResource = resource;
+        this.sourceLocation = LoggerHelper.getLineNumberLoggerName(route);
     }
 
     @Override
@@ -165,6 +171,16 @@ public class DefaultRoute extends ServiceSupport implements Route {
     public String getConfigurationId() {
         Object value = properties.get(Route.CONFIGURATION_ID_PROPERTY);
         return value != null ? (String) value : null;
+    }
+
+    @Override
+    public Resource getSourceResource() {
+        return sourceResource;
+    }
+
+    @Override
+    public String getSourceLocation() {
+        return sourceLocation;
     }
 
     @Override
@@ -631,7 +647,7 @@ public class DefaultRoute extends ServiceSupport implements Route {
     public Navigate<Processor> navigate() {
         Processor answer = getProcessor();
 
-        // we want navigating routes to be easy, so skip the initial channel
+        // we want to navigate routes to be easy, so skip the initial channel
         // and navigate to its output where it all starts from end user point of view
         if (answer instanceof Navigate) {
             Navigate<Processor> nav = (Navigate<Processor>) answer;

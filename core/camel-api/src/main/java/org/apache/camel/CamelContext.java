@@ -788,10 +788,8 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
     /**
      * Gets a readonly list with the names of the languages currently registered.
      *
-     * @return     a readonly list with the names of the languages
-     * @deprecated not in use
+     * @return a readonly list with the names of the languages
      */
-    @Deprecated
     Set<String> getLanguageNames();
 
     /**
@@ -917,6 +915,13 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * @return      the created data format, or <tt>null</tt> if not found
      */
     DataFormat createDataFormat(String name);
+
+    /**
+     * Gets a readonly list of names of the data formats currently registered
+     *
+     * @return a readonly list with the names of the data formats
+     */
+    Set<String> getDataFormatNames();
 
     /**
      * Resolve a transformer given a scheme
@@ -1170,6 +1175,34 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * @param loadTypeConverters whether to load custom type converters using classpath scanning.
      */
     void setLoadTypeConverters(Boolean loadTypeConverters);
+
+    /**
+     * Whether to load custom health checks by scanning classpath.
+     */
+    Boolean isLoadHealthChecks();
+
+    /**
+     * Whether to load custom health checks by scanning classpath.
+     */
+    void setLoadHealthChecks(Boolean loadHealthChecks);
+
+    /**
+     * Whether to capture precise source location:line-number for all EIPs in Camel routes.
+     *
+     * Enabling this will impact parsing Java based routes (also Groovy, Kotlin, etc.) on startup as this uses
+     * {@link StackTraceElement} to calculate the location from the Camel route, which comes with a performance cost.
+     * This only impact startup, not the performance of the routes at runtime.
+     */
+    Boolean isSourceLocationEnabled();
+
+    /**
+     * Whether to capture precise source location:line-number for all EIPs in Camel routes.
+     *
+     * Enabling this will impact parsing Java based routes (also Groovy, Kotlin, etc.) on startup as this uses
+     * {@link StackTraceElement} to calculate the location from the Camel route, which comes with a performance cost.
+     * This only impact startup, not the performance of the routes at runtime.
+     */
+    void setSourceLocationEnabled(Boolean sourceLocationEnabled);
 
     /**
      * Whether or not type converter statistics is enabled.

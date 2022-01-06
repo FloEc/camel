@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.camel.catalog.RuntimeCamelCatalog;
+import org.apache.camel.health.HealthCheckResolver;
 import org.apache.camel.spi.AnnotationBasedProcessorFactory;
 import org.apache.camel.spi.AsyncProcessorAwaitManager;
 import org.apache.camel.spi.BeanIntrospection;
@@ -76,7 +77,7 @@ import org.apache.camel.spi.XMLRoutesDefinitionLoader;
 public interface ExtendedCamelContext extends CamelContext {
 
     /**
-     * Sets the name (id) of the this context.
+     * Sets the name (id) of this context.
      * <p/>
      * This operation is mostly only used by different Camel runtimes such as camel-spring, camel-cdi, camel-spring-boot
      * etc. Important: Setting the name should only be set before CamelContext is started.
@@ -333,6 +334,20 @@ public interface ExtendedCamelContext extends CamelContext {
      * @param dataFormatResolver the resolver
      */
     void setDataFormatResolver(DataFormatResolver dataFormatResolver);
+
+    /**
+     * Gets the current health check resolver
+     *
+     * @return the resolver
+     */
+    HealthCheckResolver getHealthCheckResolver();
+
+    /**
+     * Sets a custom health check resolver
+     *
+     * @param healthCheckResolver the resolver
+     */
+    void setHealthCheckResolver(HealthCheckResolver healthCheckResolver);
 
     /**
      * Returns the package scanning class resolver
@@ -777,7 +792,7 @@ public interface ExtendedCamelContext extends CamelContext {
     void disposeModel();
 
     /**
-     * Used during unit-testing where its possible to specify a set of routes to exclude from discovery
+     * Used during unit-testing where it is possible to specify a set of routes to exclude from discovery
      */
     String getTestExcludeRoutes();
 

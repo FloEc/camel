@@ -213,7 +213,6 @@ public final class DefaultConfigurationConfigurer {
             LOG.warn("Using OffUuidGenerator (Only intended for development purposes)");
         }
 
-        camelContext.setMessageHistory(config.isMessageHistory());
         camelContext.setLogMask(config.isLogMask());
         camelContext.setLogExhaustedMessageBody(config.isLogExhaustedMessageBody());
         camelContext.setAutoStartup(config.isAutoStartup());
@@ -226,6 +225,7 @@ public final class DefaultConfigurationConfigurer {
         camelContext.setUseMDCLogging(config.isUseMdcLogging());
         camelContext.setMDCLoggingKeysPattern(config.getMdcLoggingKeysPattern());
         camelContext.setLoadTypeConverters(config.isLoadTypeConverters());
+        camelContext.setLoadHealthChecks(config.isLoadHealthChecks());
         if (config.isRoutesReloadEnabled()) {
             RouteWatcherReloadStrategy reloader = new RouteWatcherReloadStrategy(
                     config.getRoutesReloadDirectory(), config.isRoutesReloadDirectoryRecursive());
@@ -257,6 +257,18 @@ public final class DefaultConfigurationConfigurer {
         camelContext.getGlobalEndpointConfiguration().setAutowiredEnabled(config.isAutowiredEnabled());
         camelContext.getGlobalEndpointConfiguration().setBridgeErrorHandler(config.isEndpointBridgeErrorHandler());
         camelContext.getGlobalEndpointConfiguration().setLazyStartProducer(config.isEndpointLazyStartProducer());
+
+        // debug may be enabled via camel-debug JAR on classpath so if config is false (default)
+        // then do not change setting on camel-context
+        if (config.isDebugging()) {
+            camelContext.setDebugging(true);
+        }
+        if (config.isMessageHistory()) {
+            camelContext.setMessageHistory(true);
+        }
+        if (config.isSourceLocationEnabled()) {
+            camelContext.setSourceLocationEnabled(true);
+        }
 
         camelContext.setBacklogTracing(config.isBacklogTracing());
         camelContext.setTracing(config.isTracing());

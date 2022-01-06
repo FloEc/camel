@@ -18,6 +18,7 @@ package org.apache.camel.dsl.yaml.common;
 
 import java.util.Locale;
 
+import org.apache.camel.LineNumberAware;
 import org.apache.camel.util.StringHelper;
 import org.snakeyaml.engine.v2.api.ConstructNode;
 import org.snakeyaml.engine.v2.nodes.MappingNode;
@@ -41,16 +42,35 @@ public abstract class YamlDeserializerBase<T> extends YamlDeserializerSupport im
     public Object construct(Node node) {
         final T target;
 
+        int line = -1;
+        if (node.getStartMark().isPresent()) {
+            line = node.getStartMark().get().getLine();
+        }
+
         if (node.getNodeType() == NodeType.SCALAR) {
             ScalarNode mn = (ScalarNode) node;
             target = newInstance(mn.getValue());
+            // line number points to the scalar itself, so it should be +1
+            if (line != -1) {
+                line++;
+            }
         } else if (node.getNodeType() == NodeType.MAPPING) {
             MappingNode mn = (MappingNode) node;
             target = newInstance();
-
             setProperties(target, mn);
         } else {
             throw new IllegalArgumentException("Unsupported node type: " + node);
+        }
+
+        // enrich model with source location:line number
+        if (target instanceof LineNumberAware && line != -1) {
+            LineNumberAware lna = (LineNumberAware) target;
+            lna.setLineNumber(line);
+
+            YamlDeserializationContext ctx = getDeserializationContext(node);
+            if (ctx != null) {
+                lna.setLocation(ctx.getResource().getLocation());
+            }
         }
 
         return target;

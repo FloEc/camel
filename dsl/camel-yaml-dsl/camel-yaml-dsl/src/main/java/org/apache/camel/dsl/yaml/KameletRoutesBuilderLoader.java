@@ -25,6 +25,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dsl.yaml.common.YamlDeserializationContext;
 import org.apache.camel.model.RouteTemplateDefinition;
 import org.apache.camel.model.RouteTemplateParameterDefinition;
+import org.apache.camel.spi.Resource;
 import org.apache.camel.spi.annotations.RoutesLoader;
 import org.snakeyaml.engine.v2.nodes.Node;
 import org.snakeyaml.engine.v2.nodes.NodeTuple;
@@ -33,6 +34,7 @@ import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.asMapping
 import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.asStringSet;
 import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.asText;
 import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.nodeAt;
+import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.setDeserializationContext;
 
 @ManagedResource(description = "Managed Kamelet RoutesBuilderLoader")
 @RoutesLoader(KameletRoutesBuilderLoader.EXTENSION)
@@ -44,21 +46,24 @@ public class KameletRoutesBuilderLoader extends YamlRoutesBuilderLoaderSupport {
     }
 
     @Override
-    protected RouteBuilder builder(Node node) {
-        Node template = nodeAt(node, "/spec/template");
+    protected RouteBuilder builder(final Node root, final Resource resource) {
+        getDeserializationContext().setResource(resource);
+        setDeserializationContext(root, getDeserializationContext());
+
+        Node template = nodeAt(root, "/spec/template");
         if (template == null) {
             // fallback till flows get removed
-            template = nodeAt(node, "/spec/flows");
+            template = nodeAt(root, "/spec/flows");
         }
         if (template == null) {
             // fallback till flow get removed
-            template = nodeAt(node, "/spec/flow");
+            template = nodeAt(root, "/spec/flow");
         }
         if (template == null) {
             throw new IllegalArgumentException("No template defined");
         }
 
-        Set<String> required = asStringSet(nodeAt(node, "/spec/definition/required"));
+        Set<String> required = asStringSet(nodeAt(root, "/spec/definition/required"));
         if (required == null) {
             required = Collections.emptySet();
         }
@@ -66,9 +71,9 @@ public class KameletRoutesBuilderLoader extends YamlRoutesBuilderLoaderSupport {
         final YamlDeserializationContext context = this.getDeserializationContext();
         final RouteTemplateDefinition rtd = context.construct(template, RouteTemplateDefinition.class);
 
-        rtd.id(asText(nodeAt(node, "/metadata/name")));
+        rtd.id(asText(nodeAt(root, "/metadata/name")));
 
-        Node properties = nodeAt(node, "/spec/definition/properties");
+        Node properties = nodeAt(root, "/spec/definition/properties");
         if (properties != null) {
 
             rtd.setTemplateParameters(new ArrayList<>());

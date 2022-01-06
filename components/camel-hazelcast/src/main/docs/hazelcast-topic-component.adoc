@@ -2,11 +2,10 @@
 :doctitle: Hazelcast Topic
 :shortname: hazelcast-topic
 :artifactid: camel-hazelcast
-:description: Send and receive messages to/from Hazelcast distributed topic.
+:description: Send and receive messages to/from distributed topic.
 :since: 2.15
 :supportlevel: Stable
 :component-header: Both producer and consumer are supported
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/components/hazelcast-topic.adoc[opts=optional]
 //Manually maintained attributes
 :group: Hazelcast
 :camel-spring-boot-name: hazelcast

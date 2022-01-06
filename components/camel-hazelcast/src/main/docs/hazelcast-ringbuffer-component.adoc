@@ -2,11 +2,10 @@
 :doctitle: Hazelcast Ringbuffer
 :shortname: hazelcast-ringbuffer
 :artifactid: camel-hazelcast
-:description: Perform operations on Hazelcast distributed ringbuffer.
+:description: Perform operations on distributed ringbuffer.
 :since: 2.16
 :supportlevel: Stable
 :component-header: Only producer is supported
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/components/hazelcast-ringbuffer.adoc[opts=optional]
 //Manually maintained attributes
 :group: Hazelcast
 :camel-spring-boot-name: hazelcast

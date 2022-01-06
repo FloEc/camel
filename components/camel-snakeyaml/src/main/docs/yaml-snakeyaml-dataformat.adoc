@@ -2,10 +2,9 @@
 :doctitle: YAML SnakeYAML
 :shortname: yaml-snakeyaml
 :artifactid: camel-snakeyaml
-:description: Marshal and unmarshal Java objects to and from YAML using SnakeYAML
+:description: Marshal and unmarshal Java objects to and from YAML using
 :since: 2.17
 :supportlevel: Stable
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/yaml-snakeyaml.adoc[opts=optional]
 //Manually maintained attributes
 :camel-spring-boot-name: snakeyaml
 

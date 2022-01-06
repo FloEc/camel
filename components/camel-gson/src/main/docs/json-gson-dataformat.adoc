@@ -2,10 +2,9 @@
 :doctitle: JSON Gson
 :shortname: json-gson
 :artifactid: camel-gson
-:description: Marshal POJOs to JSON and back using Gson
+:description: Marshal POJOs to JSON and back using
 :since: 2.10
 :supportlevel: Stable
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/dataformats/json-gson.adoc[opts=optional]
 //Manually maintained attributes
 :camel-spring-boot-name: gson
 

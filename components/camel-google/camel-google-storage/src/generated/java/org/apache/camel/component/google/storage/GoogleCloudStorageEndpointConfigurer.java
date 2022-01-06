@@ -36,10 +36,13 @@ public class GoogleCloudStorageEndpointConfigurer extends PropertyConfigurerSupp
         case "deleteAfterRead": target.getConfiguration().setDeleteAfterRead(property(camelContext, boolean.class, value)); return true;
         case "destinationbucket":
         case "destinationBucket": target.getConfiguration().setDestinationBucket(property(camelContext, java.lang.String.class, value)); return true;
+        case "downloadfilename":
+        case "downloadFileName": target.getConfiguration().setDownloadFileName(property(camelContext, java.lang.String.class, value)); return true;
         case "exceptionhandler":
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
         case "exchangePattern": target.setExchangePattern(property(camelContext, org.apache.camel.ExchangePattern.class, value)); return true;
+        case "filter": target.getConfiguration().setFilter(property(camelContext, java.lang.String.class, value)); return true;
         case "greedy": target.setGreedy(property(camelContext, boolean.class, value)); return true;
         case "includebody":
         case "includeBody": target.getConfiguration().setIncludeBody(property(camelContext, boolean.class, value)); return true;
@@ -108,10 +111,13 @@ public class GoogleCloudStorageEndpointConfigurer extends PropertyConfigurerSupp
         case "deleteAfterRead": return boolean.class;
         case "destinationbucket":
         case "destinationBucket": return java.lang.String.class;
+        case "downloadfilename":
+        case "downloadFileName": return java.lang.String.class;
         case "exceptionhandler":
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
         case "exchangePattern": return org.apache.camel.ExchangePattern.class;
+        case "filter": return java.lang.String.class;
         case "greedy": return boolean.class;
         case "includebody":
         case "includeBody": return boolean.class;
@@ -176,10 +182,13 @@ public class GoogleCloudStorageEndpointConfigurer extends PropertyConfigurerSupp
         case "deleteAfterRead": return target.getConfiguration().isDeleteAfterRead();
         case "destinationbucket":
         case "destinationBucket": return target.getConfiguration().getDestinationBucket();
+        case "downloadfilename":
+        case "downloadFileName": return target.getConfiguration().getDownloadFileName();
         case "exceptionhandler":
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
         case "exchangePattern": return target.getExchangePattern();
+        case "filter": return target.getConfiguration().getFilter();
         case "greedy": return target.isGreedy();
         case "includebody":
         case "includeBody": return target.getConfiguration().isIncludeBody();

@@ -35,6 +35,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.BeanScope;
+import org.apache.camel.CamelContext;
+import org.apache.camel.CamelContextAware;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
@@ -85,12 +87,14 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     @XmlTransient
     private ProcessorDefinition<?> parent;
     @XmlTransient
+    private RouteConfigurationDefinition routeConfiguration;
+    @XmlTransient
     private final List<InterceptStrategy> interceptStrategies = new ArrayList<>();
     @XmlTransient
     private final int index;
 
     protected ProcessorDefinition() {
-        // every time we create a definition we should inc the COUNTER counter
+        // every time we create a definition we should inc the counter
         index = COUNTER.getAndIncrement();
     }
 
@@ -160,6 +164,31 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
 
     @Override
     public void addOutput(ProcessorDefinition<?> output) {
+        // grab camel context depends on if this is a regular route or a route configuration
+        CamelContext context = this.getCamelContext();
+        if (context == null) {
+            RouteDefinition route = ProcessorDefinitionHelper.getRoute(this);
+            if (route != null) {
+                context = route.getCamelContext();
+            } else {
+                RouteConfigurationDefinition rc = this.getRouteConfiguration();
+                if (rc != null) {
+                    context = rc.getCamelContext();
+                }
+            }
+        }
+        if (context != null && (context.isSourceLocationEnabled() || context.isDebugging() || context.isTracing())) {
+            // we want to capture source location:line for every output
+            ProcessorDefinitionHelper.prepareSourceLocation(output);
+            if (log.isDebugEnabled()) {
+                log.debug("{} located in {}:{}", output.getShortName(), output.getLocation(),
+                        output.getLineNumber());
+            }
+        }
+
+        // inject context
+        CamelContextAware.trySetCamelContext(output, context);
+
         if (!(this instanceof OutputNode)) {
             getParent().addOutput(output);
             return;
@@ -3726,6 +3755,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
 
     // Properties
     // -------------------------------------------------------------------------
+
     @Override
     public ProcessorDefinition<?> getParent() {
         return parent;
@@ -3733,6 +3763,14 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
 
     public void setParent(ProcessorDefinition<?> parent) {
         this.parent = parent;
+    }
+
+    public RouteConfigurationDefinition getRouteConfiguration() {
+        return routeConfiguration;
+    }
+
+    public void setRouteConfiguration(RouteConfigurationDefinition routeConfiguration) {
+        this.routeConfiguration = routeConfiguration;
     }
 
     public List<InterceptStrategy> getInterceptStrategies() {

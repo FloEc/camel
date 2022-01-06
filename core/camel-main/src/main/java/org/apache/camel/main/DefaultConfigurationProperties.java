@@ -52,6 +52,7 @@ public abstract class DefaultConfigurationProperties<T> {
     private int producerTemplateCacheSize = 1000;
     private int consumerTemplateCacheSize = 1000;
     private boolean loadTypeConverters;
+    private boolean loadHealthChecks;
     private int logDebugMaxChars;
     private boolean streamCachingEnabled;
     private String streamCachingSpoolDirectory;
@@ -63,10 +64,12 @@ public abstract class DefaultConfigurationProperties<T> {
     private int streamCachingBufferSize;
     private boolean streamCachingRemoveSpoolDirectoryWhenStopping = true;
     private boolean streamCachingStatisticsEnabled;
+    private boolean debugging;
     private boolean backlogTracing;
     private boolean tracing;
     private boolean tracingStandby;
     private String tracingPattern;
+    private boolean sourceLocationEnabled;
     private boolean messageHistory;
     private boolean logMask;
     private boolean logExhaustedMessageBody;
@@ -363,6 +366,17 @@ public abstract class DefaultConfigurationProperties<T> {
         this.loadTypeConverters = loadTypeConverters;
     }
 
+    public boolean isLoadHealthChecks() {
+        return loadHealthChecks;
+    }
+
+    /**
+     * Whether to load custom health checks by scanning classpath.
+     */
+    public void setLoadHealthChecks(boolean loadHealthChecks) {
+        this.loadHealthChecks = loadHealthChecks;
+    }
+
     public int getLogDebugMaxChars() {
         return logDebugMaxChars;
     }
@@ -536,6 +550,19 @@ public abstract class DefaultConfigurationProperties<T> {
         this.tracingPattern = tracingPattern;
     }
 
+    public boolean isDebugging() {
+        return debugging;
+    }
+
+    /**
+     * Sets whether debugging is enabled or not.
+     *
+     * Default is false.
+     */
+    public void setDebugging(boolean debugging) {
+        this.debugging = debugging;
+    }
+
     public boolean isBacklogTracing() {
         return backlogTracing;
     }
@@ -560,6 +587,21 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setMessageHistory(boolean messageHistory) {
         this.messageHistory = messageHistory;
+    }
+
+    public boolean isSourceLocationEnabled() {
+        return sourceLocationEnabled;
+    }
+
+    /**
+     * Whether to capture precise source location:line-number for all EIPs in Camel routes.
+     *
+     * Enabling this will impact parsing Java based routes (also Groovy, Kotlin, etc.) on startup as this uses JDK
+     * StackTraceElement to calculate the location from the Camel route, which comes with a performance cost. This only
+     * impact startup, not the performance of the routes at runtime.
+     */
+    public void setSourceLocationEnabled(boolean sourceLocationEnabled) {
+        this.sourceLocationEnabled = sourceLocationEnabled;
     }
 
     public boolean isLogMask() {
@@ -1551,6 +1593,14 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Whether to load custom health checks by scanning classpath.
+     */
+    public T withLoadHealthChecks(boolean loadHealthChecks) {
+        this.loadHealthChecks = loadHealthChecks;
+        return (T) this;
+    }
+
+    /**
      * Is used to limit the maximum length of the logging Camel message bodies. If the message body is longer than the
      * limit, the log message is clipped. Use -1 to have unlimited length. Use for example 1000 to log at most 1000
      * characters.
@@ -1691,6 +1741,18 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withMessageHistory(boolean messageHistory) {
         this.messageHistory = messageHistory;
+        return (T) this;
+    }
+
+    /**
+     * Whether to capture precise source location:line-number for all EIPs in Camel routes.
+     *
+     * Enabling this will impact parsing Java based routes (also Groovy, Kotlin, etc.) on startup as this uses JDK
+     * StackTraceElement to calculate the location from the Camel route, which comes with a performance cost. This only
+     * impact startup, not the performance of the routes at runtime.
+     */
+    public T withSourceLocationEnabled(boolean sourceLocationEnabled) {
+        this.sourceLocationEnabled = sourceLocationEnabled;
         return (T) this;
     }
 
@@ -1940,6 +2002,16 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withTracingPattern(String tracingPattern) {
         this.tracingPattern = tracingPattern;
+        return (T) this;
+    }
+
+    /**
+     * Sets whether debugging is enabled or not.
+     *
+     * Default is false.
+     */
+    public T withDebugging(boolean debugging) {
+        this.debugging = debugging;
         return (T) this;
     }
 

@@ -2,11 +2,10 @@
 :doctitle: RabbitMQ
 :shortname: rabbitmq
 :artifactid: camel-rabbitmq
-:description: Send and receive messages from RabbitMQ instances.
+:description: Send and receive messages from instances.
 :since: 2.12
 :supportlevel: Stable
 :component-header: Both producer and consumer are supported
-include::{cq-version}@camel-quarkus:ROOT:partial$reference/components/rabbitmq.adoc[opts=optional]
 //Manually maintained attributes
 :camel-spring-boot-name: rabbitmq
 

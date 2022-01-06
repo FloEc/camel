@@ -28,6 +28,7 @@ import org.apache.camel.model.errorhandler.DefaultErrorHandlerProperties;
 import org.apache.camel.processor.errorhandler.DefaultErrorHandler;
 import org.apache.camel.processor.errorhandler.RedeliveryPolicy;
 import org.apache.camel.spi.CamelLogger;
+import org.apache.camel.spi.Configurer;
 import org.apache.camel.spi.Language;
 import org.apache.camel.support.ExpressionToPredicateAdapter;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The default error handler builder.
  */
+@Configurer
 public class DefaultErrorHandlerBuilder extends ErrorHandlerBuilderSupport implements DefaultErrorHandlerProperties {
 
     private final DefaultErrorHandlerConfiguration configuration;
@@ -351,7 +353,7 @@ public class DefaultErrorHandlerBuilder extends ErrorHandlerBuilderSupport imple
      * are connected using internal endpoints such as direct or seda. When messages is passed via external endpoints
      * such as JMS or HTTP then the consumer will create a new unit of work, with the message it received as input as
      * the original input. Also some EIP patterns such as splitter, multicast, will create a new unit of work boundary
-     * for the messages in their sub-route (eg the splitted message); however these EIPs have an option named
+     * for the messages in their sub-route (eg the split message); however these EIPs have an option named
      * <tt>shareUnitOfWork</tt> which allows to combine with the parent unit of work in regard to error handling and
      * therefore use the parent original message.
      * <p/>
@@ -388,7 +390,7 @@ public class DefaultErrorHandlerBuilder extends ErrorHandlerBuilderSupport imple
      * are connected using internal endpoints such as direct or seda. When messages is passed via external endpoints
      * such as JMS or HTTP then the consumer will create a new unit of work, with the message it received as input as
      * the original input. Also some EIP patterns such as splitter, multicast, will create a new unit of work boundary
-     * for the messages in their sub-route (eg the splitted message); however these EIPs have an option named
+     * for the messages in their sub-route (eg the split message); however these EIPs have an option named
      * <tt>shareUnitOfWork</tt> which allows to combine with the parent unit of work in regard to error handling and
      * therefore use the parent original message.
      * <p/>

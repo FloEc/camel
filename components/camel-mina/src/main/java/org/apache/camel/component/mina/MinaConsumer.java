@@ -22,6 +22,7 @@ import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.camel.CamelException;
 import org.apache.camel.Exchange;
@@ -82,14 +83,14 @@ public class MinaConsumer extends DefaultConsumer {
         String protocol = configuration.getProtocol();
         if (protocol.equals("tcp")) {
             if (configuration.isClientMode()) {
-                setupClientSocketProtocol(protocol, configuration);
+                setupClientSocketProtocol(configuration);
             } else {
-                setupSocketProtocol(protocol, configuration);
+                setupSocketProtocol(configuration);
             }
         } else if (configuration.isDatagramProtocol()) {
-            setupDatagramProtocol(protocol, configuration);
+            setupDatagramProtocol(configuration);
         } else if (protocol.equals("vm")) {
-            setupVmProtocol(protocol, configuration);
+            setupVmProtocol(configuration);
         }
     }
 
@@ -149,7 +150,7 @@ public class MinaConsumer extends DefaultConsumer {
 
     // Implementation methods
     //-------------------------------------------------------------------------
-    protected void setupVmProtocol(String uri, MinaConfiguration configuration) {
+    protected void setupVmProtocol(MinaConfiguration configuration) {
 
         boolean minaLogger = configuration.isMinaLogger();
         List<IoFilter> filters = configuration.getFilters();
@@ -169,7 +170,7 @@ public class MinaConsumer extends DefaultConsumer {
         }
     }
 
-    protected void setupSocketProtocol(String uri, MinaConfiguration configuration) throws Exception {
+    protected void setupSocketProtocol(MinaConfiguration configuration) throws Exception {
         LOG.debug("createSocketEndpoint");
         boolean minaLogger = configuration.isMinaLogger();
         List<IoFilter> filters = configuration.getFilters();
@@ -182,28 +183,34 @@ public class MinaConsumer extends DefaultConsumer {
         // acceptor connectorConfig
         configureCodecFactory("MinaConsumer", acceptor, configuration);
         ((NioSocketAcceptor) acceptor).setReuseAddress(true);
+        setupNioSocketAcceptor(configuration, minaLogger, filters);
+        if (configuration.getSslContextParameters() != null) {
+            SslFilter filter = new SslFilter(
+                    configuration.getSslContextParameters().createSSLContext(getEndpoint().getCamelContext()));
+            acceptor.getFilterChain().addFirst("sslFilter", filter);
+        }
+    }
+
+    private void setupNioSocketAcceptor(MinaConfiguration configuration, boolean minaLogger, List<IoFilter> filters) {
         acceptor.setCloseOnDeactivation(true);
 
-        if (configuration.isOrderedThreadPoolExecutor()) {
-            workerPool = new OrderedThreadPoolExecutor(configuration.getMaximumPoolSize());
-        } else {
-            workerPool = new UnorderedThreadPoolExecutor(configuration.getMaximumPoolSize());
-        }
+        workerPool = createThreadPool(configuration);
         acceptor.getFilterChain().addLast("threadPool", new ExecutorFilter(workerPool));
         if (minaLogger) {
             acceptor.getFilterChain().addLast("logger", new LoggingFilter());
         }
         appendIoFiltersToChain(filters, acceptor.getFilterChain());
-        if (configuration.getSslContextParameters() != null) {
-            SslFilter filter = new SslFilter(
-                    configuration.getSslContextParameters().createSSLContext(getEndpoint().getCamelContext()),
-                    configuration.isAutoStartTls());
-            filter.setUseClientMode(false);
-            acceptor.getFilterChain().addFirst("sslFilter", filter);
+    }
+
+    private ThreadPoolExecutor createThreadPool(MinaConfiguration configuration) {
+        if (configuration.isOrderedThreadPoolExecutor()) {
+            return new OrderedThreadPoolExecutor(configuration.getMaximumPoolSize());
+        } else {
+            return new UnorderedThreadPoolExecutor(configuration.getMaximumPoolSize());
         }
     }
 
-    protected void setupClientSocketProtocol(String uri, MinaConfiguration configuration) throws Exception {
+    protected void setupClientSocketProtocol(MinaConfiguration configuration) throws Exception {
         boolean minaLogger = configuration.isMinaLogger();
         long timeout = configuration.getTimeout();
         List<IoFilter> filters = configuration.getFilters();
@@ -213,11 +220,7 @@ public class MinaConsumer extends DefaultConsumer {
         final int processorCount = Runtime.getRuntime().availableProcessors() + 1;
         connector = new NioSocketConnector(processorCount);
 
-        if (configuration.isOrderedThreadPoolExecutor()) {
-            workerPool = new OrderedThreadPoolExecutor(configuration.getMaximumPoolSize());
-        } else {
-            workerPool = new UnorderedThreadPoolExecutor(configuration.getMaximumPoolSize());
-        }
+        workerPool = createThreadPool(configuration);
         connector.getFilterChain().addLast("threadPool", new ExecutorFilter(workerPool));
         if (minaLogger) {
             connector.getFilterChain().addLast("logger", new LoggingFilter());
@@ -225,9 +228,7 @@ public class MinaConsumer extends DefaultConsumer {
         appendIoFiltersToChain(filters, connector.getFilterChain());
         if (configuration.getSslContextParameters() != null) {
             SslFilter filter = new SslFilter(
-                    configuration.getSslContextParameters().createSSLContext(getEndpoint().getCamelContext()),
-                    configuration.isAutoStartTls());
-            filter.setUseClientMode(true);
+                    configuration.getSslContextParameters().createSSLContext(getEndpoint().getCamelContext()));
             connector.getFilterChain().addFirst("sslFilter", filter);
         }
         configureCodecFactory("MinaConsumer", connector, configuration);
@@ -267,7 +268,7 @@ public class MinaConsumer extends DefaultConsumer {
         }
     }
 
-    protected void setupDatagramProtocol(String uri, MinaConfiguration configuration) {
+    protected void setupDatagramProtocol(MinaConfiguration configuration) {
         boolean minaLogger = configuration.isMinaLogger();
         List<IoFilter> filters = configuration.getFilters();
 
@@ -276,18 +277,7 @@ public class MinaConsumer extends DefaultConsumer {
 
         // acceptor connectorConfig
         configureDataGramCodecFactory("MinaConsumer", acceptor, configuration);
-        acceptor.setCloseOnDeactivation(true);
-        // reuse address is default true for datagram
-        if (configuration.isOrderedThreadPoolExecutor()) {
-            workerPool = new OrderedThreadPoolExecutor(configuration.getMaximumPoolSize());
-        } else {
-            workerPool = new UnorderedThreadPoolExecutor(configuration.getMaximumPoolSize());
-        }
-        acceptor.getFilterChain().addLast("threadPool", new ExecutorFilter(workerPool));
-        if (minaLogger) {
-            acceptor.getFilterChain().addLast("logger", new LoggingFilter());
-        }
-        appendIoFiltersToChain(filters, acceptor.getFilterChain());
+        setupNioSocketAcceptor(configuration, minaLogger, filters);
         if (configuration.getSslContextParameters() != null) {
             LOG.warn("Using datagram protocol, {}, but an SSLContextParameters instance was provided. "
                      + "SSLContextParameters is only supported on the TCP protocol.",

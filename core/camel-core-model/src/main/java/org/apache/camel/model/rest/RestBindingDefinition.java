@@ -21,11 +21,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.model.OptionalIdentifiedDefinition;
 import org.apache.camel.spi.Metadata;
@@ -40,48 +40,41 @@ public class RestBindingDefinition extends OptionalIdentifiedDefinition<RestBind
 
     @XmlTransient
     private Map<String, String> defaultValues;
-
     @XmlTransient
     private Boolean requiredBody;
-
     @XmlTransient
     private Set<String> requiredHeaders;
-
     @XmlTransient
     private Set<String> requiredQueryParameters;
 
     @XmlAttribute
     private String consumes;
-
     @XmlAttribute
     private String produces;
-
     @XmlAttribute
-    @Metadata(defaultValue = "off")
+    @Metadata(defaultValue = "off", enums = "off,auto,json,xml,json_xml")
     private String bindingMode;
-
     @XmlAttribute
+    @Metadata(label = "advanced")
     private String type;
-
     @XmlTransient
     private Class<?> typeClass;
-
     @XmlAttribute
+    @Metadata(label = "advanced")
     private String outType;
-
     @XmlTransient
     private Class<?> outTypeClass;
-
     @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
     private String skipBindingOnErrorCode;
-
     @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
     private String clientRequestValidation;
-
     @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
     private String enableCORS;
-
     @XmlAttribute
+    @Metadata(label = "advanced")
     private String component;
 
     public RestBindingDefinition() {

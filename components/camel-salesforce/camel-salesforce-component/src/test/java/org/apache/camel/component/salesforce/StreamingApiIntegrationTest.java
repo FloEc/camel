@@ -107,19 +107,19 @@ public class StreamingApiIntegrationTest extends AbstractSalesforceTestBase {
             public void configure() throws Exception {
 
                 // test topic subscription
-                from("salesforce:CamelTestTopic?notifyForFields=ALL&"
+                from("salesforce:subscribe:CamelTestTopic?notifyForFields=ALL&"
                      + "notifyForOperationCreate=true&notifyForOperationDelete=true&notifyForOperationUpdate=true&"
                      + "sObjectName=Merchandise__c&" + "updateTopic=true&sObjectQuery=SELECT Id, Name FROM Merchandise__c")
-                             .to("mock:CamelTestTopic");
+                        .to("mock:CamelTestTopic");
 
-                from("salesforce:CamelTestTopic?rawPayload=true&notifyForFields=ALL&"
+                from("salesforce:subscribe:CamelTestTopic?rawPayload=true&notifyForFields=ALL&"
                      + "notifyForOperationCreate=true&notifyForOperationDelete=true&notifyForOperationUpdate=true&"
                      + "updateTopic=true&sObjectQuery=SELECT Id, Name FROM Merchandise__c").to("mock:RawPayloadCamelTestTopic");
 
-                from("salesforce:CamelFallbackTestTopic?notifyForFields=ALL&defaultReplayId=9999&"
+                from("salesforce:subscribe:CamelFallbackTestTopic?notifyForFields=ALL&defaultReplayId=9999&"
                      + "notifyForOperationCreate=true&notifyForOperationDelete=true&notifyForOperationUpdate=true&"
                      + "sObjectName=Merchandise__c&" + "updateTopic=true&sObjectQuery=SELECT Id, Name FROM Merchandise__c")
-                             .to("mock:CamelFallbackTestTopic");
+                        .to("mock:CamelFallbackTestTopic");
 
                 // route for creating test record
                 from("direct:upsertSObject").to("salesforce:upsertSObject?sObjectIdName=Name");

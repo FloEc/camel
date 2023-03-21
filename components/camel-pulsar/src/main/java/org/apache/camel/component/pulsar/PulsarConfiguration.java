@@ -27,6 +27,7 @@ import org.apache.pulsar.client.api.BatcherBuilder;
 import org.apache.pulsar.client.api.CompressionType;
 import org.apache.pulsar.client.api.MessageRouter;
 import org.apache.pulsar.client.api.MessageRoutingMode;
+import org.apache.pulsar.client.api.RedeliveryBackoff;
 import org.apache.pulsar.client.api.RegexSubscriptionMode;
 
 import static org.apache.camel.component.pulsar.utils.consumers.SubscriptionInitialPosition.LATEST;
@@ -65,6 +66,10 @@ public class PulsarConfiguration implements Cloneable {
     private long ackTimeoutMillis = 10000;
     @UriParam(label = "consumer", defaultValue = "60000000")
     private long negativeAckRedeliveryDelayMicros = 60000000;
+    @UriParam(label = "consumer", description = "RedeliveryBackoff to use for ack timeout redelivery backoff.")
+    private RedeliveryBackoff ackTimeoutRedeliveryBackoff;
+    @UriParam(label = "consumer", description = "RedeliveryBackoff to use for negative ack redelivery backoff.")
+    private RedeliveryBackoff negativeAckRedeliveryBackoff;
     @UriParam(label = "consumer", defaultValue = "100")
     private long ackGroupTimeMillis = 100;
     @UriParam(label = "consumer", defaultValue = "LATEST")
@@ -97,6 +102,7 @@ public class PulsarConfiguration implements Cloneable {
               description = "The maximum number of pending messages for partitioned topics. The maxPendingMessages value will be reduced if "
                             + "(number of partitions * maxPendingMessages) exceeds this value. Partitioned topics have a pending message queue for each partition.",
               defaultValue = "50000")
+    @Deprecated
     private int maxPendingMessagesAcrossPartitions = 50000;
     @UriParam(label = "producer",
               description = "The maximum time period within which the messages sent will be batched if batchingEnabled is true.",
@@ -114,6 +120,9 @@ public class PulsarConfiguration implements Cloneable {
     private long initialSequenceId = -1;
     @UriParam(label = "producer", description = "Compression type to use", defaultValue = "NONE")
     private CompressionType compressionType = CompressionType.NONE;
+    @UriParam(label = "producer", description = "Control whether chunking of messages is enabled for the producer.",
+              defaultValue = "false")
+    private boolean chunkingEnabled;
     @UriParam(label = "producer", description = "Message Routing Mode to use", defaultValue = "RoundRobinPartition")
     private MessageRoutingMode messageRoutingMode = MessageRoutingMode.RoundRobinPartition;
     @UriParam(label = "producer", description = "Custom Message Router to use")
@@ -307,12 +316,15 @@ public class PulsarConfiguration implements Cloneable {
     }
 
     /**
-     * Set the number of max pending messages across all the partitions. Default is 50000.
+     * Set the number of max pending messages across all the partitions. Default is 50000. This option is deprecated and
+     * will be removed in a future version.
      */
+    @Deprecated
     public void setMaxPendingMessagesAcrossPartitions(int maxPendingMessagesAcrossPartitions) {
         this.maxPendingMessagesAcrossPartitions = maxPendingMessagesAcrossPartitions;
     }
 
+    @Deprecated
     public int getMaxPendingMessagesAcrossPartitions() {
         return maxPendingMessagesAcrossPartitions;
     }
@@ -423,6 +435,17 @@ public class PulsarConfiguration implements Cloneable {
     }
 
     /**
+     * Control whether chunking of messages is enabled for the producer. Default is false.
+     */
+    public void setChunkingEnabled(boolean chunkingEnabled) {
+        this.chunkingEnabled = chunkingEnabled;
+    }
+
+    public boolean isChunkingEnabled() {
+        return chunkingEnabled;
+    }
+
+    /**
      * Set the message routing mode for the producer.
      */
     public MessageRoutingMode getMessageRoutingMode() {
@@ -453,6 +476,28 @@ public class PulsarConfiguration implements Cloneable {
      */
     public void setNegativeAckRedeliveryDelayMicros(long negativeAckRedeliveryDelayMicros) {
         this.negativeAckRedeliveryDelayMicros = negativeAckRedeliveryDelayMicros;
+    }
+
+    public RedeliveryBackoff getAckTimeoutRedeliveryBackoff() {
+        return ackTimeoutRedeliveryBackoff;
+    }
+
+    /**
+     * Set a RedeliveryBackoff to use for ack timeout redelivery backoff.
+     */
+    public void setAckTimeoutRedeliveryBackoff(RedeliveryBackoff redeliveryBackoff) {
+        this.ackTimeoutRedeliveryBackoff = redeliveryBackoff;
+    }
+
+    public RedeliveryBackoff getNegativeAckRedeliveryBackoff() {
+        return negativeAckRedeliveryBackoff;
+    }
+
+    /**
+     * Set a RedeliveryBackoff to use for negative ack redelivery backoff.
+     */
+    public void setNegativeAckRedeliveryBackoff(RedeliveryBackoff redeliveryBackoff) {
+        this.negativeAckRedeliveryBackoff = redeliveryBackoff;
     }
 
     public Integer getMaxRedeliverCount() {

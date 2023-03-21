@@ -27,14 +27,14 @@ import org.apache.camel.support.DefaultEndpoint;
 
 /**
  * Manage and invoke Google Cloud Functions
- * 
+ *
  * Google Functions Endpoint definition represents a function within the GCP and contains configuration to customize the
  * behavior of Producer.
  */
 @UriEndpoint(firstVersion = "3.9.0", scheme = "google-functions", title = "Google Cloud Functions",
              syntax = "google-functions:functionName", category = {
                      Category.CLOUD },
-             producerOnly = true)
+             producerOnly = true, headersClass = GoogleCloudFunctionsConstants.class)
 public class GoogleCloudFunctionsEndpoint extends DefaultEndpoint {
 
     @UriParam

@@ -58,7 +58,7 @@ import static org.apache.camel.component.mongodb.MongoDbOutputType.MongoIterable
  * Perform operations on MongoDB documents and collections.
  */
 @UriEndpoint(firstVersion = "2.19.0", scheme = "mongodb", title = "MongoDB", syntax = "mongodb:connectionBean",
-             category = { Category.DATABASE, Category.NOSQL })
+             category = { Category.DATABASE, Category.NOSQL }, headersClass = MongoDbConstants.class)
 public class MongoDbEndpoint extends DefaultEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(MongoDbEndpoint.class);
@@ -66,7 +66,7 @@ public class MongoDbEndpoint extends DefaultEndpoint {
     @UriParam(description = "Sets the connection bean used as a client for connecting to a database.")
     private MongoClient mongoConnection;
 
-    @UriPath(description = "Sets the connection bean reference used to lookup a client for connecting to a database.")
+    @UriPath(description = "Sets the connection bean reference used to lookup a client for connecting to a database if no hosts parameter is present.")
     @Metadata(required = true)
     private String connectionBean;
 
@@ -76,6 +76,8 @@ public class MongoDbEndpoint extends DefaultEndpoint {
     private String password;
     @UriParam
     private String hosts;
+    @UriParam(label = "security")
+    private String authSource;
     @UriParam
     private String database;
     @UriParam
@@ -341,7 +343,9 @@ public class MongoDbEndpoint extends DefaultEndpoint {
                 credentials += this.password == null ? "@" : ":" + password + "@";
             }
 
-            mongoClient = MongoClients.create(String.format("mongodb://%s%s", credentials, hosts));
+            String connectionOptions = authSource == null ? "" : "/?authSource=" + authSource;
+
+            mongoClient = MongoClients.create(String.format("mongodb://%s%s%s", credentials, hosts, connectionOptions));
             LOG.debug("Connection created using provided credentials");
         } else {
             mongoClient = CamelContextHelper.mandatoryLookup(getCamelContext(), connectionBean, MongoClient.class);
@@ -732,7 +736,7 @@ public class MongoDbEndpoint extends DefaultEndpoint {
 
     /**
      * Host address of mongodb server in `[host]:[port]` format. It's possible also use more than one address, as comma
-     * separated list of hosts: `[host1]:[port1],[host2]:[port2]`. If hosts parameter is specified, provided
+     * separated list of hosts: `[host1]:[port1],[host2]:[port2]`. If the hosts parameter is specified, the provided
      * connectionBean is ignored.
      *
      * @param hosts
@@ -741,4 +745,16 @@ public class MongoDbEndpoint extends DefaultEndpoint {
         this.hosts = hosts;
     }
 
+    public String getAuthSource() {
+        return authSource;
+    }
+
+    /**
+     * The database name associated with the user's credentials.
+     *
+     * @param authSource
+     */
+    public void setAuthSource(String authSource) {
+        this.authSource = authSource;
+    }
 }

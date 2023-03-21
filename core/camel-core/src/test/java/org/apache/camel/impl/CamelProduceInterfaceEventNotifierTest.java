@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.ContextTestSupport;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Produce;
 import org.apache.camel.spi.CamelBeanPostProcessor;
 import org.apache.camel.spi.CamelEvent;
@@ -34,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CamelProduceInterfaceEventNotifierTest extends ContextTestSupport {
 
-    private static List<CamelEvent> events = new ArrayList<>();
+    private final List<CamelEvent> events = new ArrayList<>();
 
     private CamelBeanPostProcessor postProcessor;
 
@@ -82,7 +81,7 @@ public class CamelProduceInterfaceEventNotifierTest extends ContextTestSupport {
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        postProcessor = context.adapt(ExtendedCamelContext.class).getBeanPostProcessor();
+        postProcessor = context.getCamelContextExtension().getBeanPostProcessor();
     }
 
     interface FooService {
@@ -90,7 +89,7 @@ public class CamelProduceInterfaceEventNotifierTest extends ContextTestSupport {
         void sayHello(String hello);
     }
 
-    class MySender {
+    static class MySender {
 
         @Produce("mock:result")
         FooService hello;

@@ -42,12 +42,12 @@ public class FromFtpConsumerTemplateIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testConsumerTemplate() throws Exception {
+    public void testConsumerTemplate() {
         String body = consumer.receiveBody(getFtpUrl(), 2000, String.class);
         assertEquals("Hello World this file will be deleted", body);
 
         // assert the file is deleted
-        File file = ftpFile("deletefile/hello.txt").toFile();
+        File file = service.ftpFile("deletefile/hello.txt").toFile();
         assertFalse(file.exists(), "The file should have been deleted");
     }
 
@@ -65,7 +65,7 @@ public class FromFtpConsumerTemplateIT extends FtpServerTestSupport {
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("deletefile/hello.txt").toFile();
+        File file = service.ftpFile("deletefile/hello.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 

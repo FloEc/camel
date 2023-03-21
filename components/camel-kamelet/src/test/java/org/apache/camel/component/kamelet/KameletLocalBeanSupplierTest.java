@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ public class KameletLocalBeanSupplierTest extends CamelTestSupport {
         template.sendBody("direct:hello", "John");
         template.sendBody("direct:hi", "Mary");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // **********************************************
@@ -44,10 +45,10 @@ public class KameletLocalBeanSupplierTest extends CamelTestSupport {
     // **********************************************
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 routeTemplate("whereTo")
                         .templateParameter("foo")
                         .templateBean("myBar", () -> new MyStaticBar(counter.incrementAndGet()))

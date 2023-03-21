@@ -19,8 +19,8 @@ package org.apache.camel.component.mail;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.mail.Message;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.Message;
+import jakarta.mail.internet.MimeMultipart;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit5.CamelTestSupport;
@@ -77,9 +77,9 @@ public class MailContentTypeTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:a").to("smtp://claus@localhost?contentType=text/html");
                 from("direct:b").to("smtp://claus@localhost?contentType=text/plain");
                 from("direct:c").to("smtp://claus@localhost");

@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -41,158 +41,6 @@ public interface AtomEndpointBuilderFactory {
     public interface AtomEndpointBuilder extends EndpointConsumerBuilder {
         default AdvancedAtomEndpointBuilder advanced() {
             return (AdvancedAtomEndpointBuilder) this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder bridgeErrorHandler(String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Sets whether to add the feed object as a header.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: consumer
-         * 
-         * @param feedHeader the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder feedHeader(boolean feedHeader) {
-            doSetProperty("feedHeader", feedHeader);
-            return this;
-        }
-        /**
-         * Sets whether to add the feed object as a header.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: true
-         * Group: consumer
-         * 
-         * @param feedHeader the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder feedHeader(String feedHeader) {
-            doSetProperty("feedHeader", feedHeader);
-            return this;
-        }
-        /**
-         * Sets whether to use filtering or not of the entries.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: consumer
-         * 
-         * @param filter the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder filter(boolean filter) {
-            doSetProperty("filter", filter);
-            return this;
-        }
-        /**
-         * Sets whether to use filtering or not of the entries.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: true
-         * Group: consumer
-         * 
-         * @param filter the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder filter(String filter) {
-            doSetProperty("filter", filter);
-            return this;
-        }
-        /**
-         * Sets the timestamp to be used for filtering entries from the atom
-         * feeds. This options is only in conjunction with the splitEntries.
-         * 
-         * The option is a: &lt;code&gt;java.util.Date&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param lastUpdate the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder lastUpdate(Date lastUpdate) {
-            doSetProperty("lastUpdate", lastUpdate);
-            return this;
-        }
-        /**
-         * Sets the timestamp to be used for filtering entries from the atom
-         * feeds. This options is only in conjunction with the splitEntries.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.Date&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param lastUpdate the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder lastUpdate(String lastUpdate) {
-            doSetProperty("lastUpdate", lastUpdate);
-            return this;
-        }
-        /**
-         * Sets the password to be used for basic authentication when polling
-         * from a HTTP feed.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param password the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder password(String password) {
-            doSetProperty("password", password);
-            return this;
         }
         /**
          * If the polling consumer did not poll any files, you can enable this
@@ -328,21 +176,6 @@ public interface AtomEndpointBuilderFactory {
          */
         default AtomEndpointBuilder throttleEntries(String throttleEntries) {
             doSetProperty("throttleEntries", throttleEntries);
-            return this;
-        }
-        /**
-         * Sets the username to be used for basic authentication when polling
-         * from a HTTP feed.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param username the value to set
-         * @return the dsl builder
-         */
-        default AtomEndpointBuilder username(String username) {
-            doSetProperty("username", username);
             return this;
         }
         /**
@@ -682,8 +515,8 @@ public interface AtomEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -702,8 +535,8 @@ public interface AtomEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -813,6 +646,40 @@ public interface AtomEndpointBuilderFactory {
             doSetProperty("useFixedDelay", useFixedDelay);
             return this;
         }
+        /**
+         * Sets the password to be used for basic authentication when polling
+         * from a HTTP feed.Notice: Basic authentication is not a secured
+         * method, and is not recommended to be used.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param password the value to set
+         * @return the dsl builder
+         */
+        @Deprecated
+        default AtomEndpointBuilder password(String password) {
+            doSetProperty("password", password);
+            return this;
+        }
+        /**
+         * Sets the username to be used for basic authentication when polling
+         * from a HTTP feed. Notice: Basic authentication is not a secured
+         * method, and is not recommended to be used.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param username the value to set
+         * @return the dsl builder
+         */
+        @Deprecated
+        default AtomEndpointBuilder username(String username) {
+            doSetProperty("username", username);
+            return this;
+        }
     }
 
     /**
@@ -823,6 +690,51 @@ public interface AtomEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default AtomEndpointBuilder basic() {
             return (AtomEndpointBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAtomEndpointBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAtomEndpointBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -931,9 +843,53 @@ public interface AtomEndpointBuilderFactory {
             doSetProperty("pollStrategy", pollStrategy);
             return this;
         }
+        /**
+         * Sets whether to add the feed object as a header.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: advanced
+         * 
+         * @param feedHeader the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAtomEndpointBuilder feedHeader(boolean feedHeader) {
+            doSetProperty("feedHeader", feedHeader);
+            return this;
+        }
+        /**
+         * Sets whether to add the feed object as a header.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: true
+         * Group: advanced
+         * 
+         * @param feedHeader the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAtomEndpointBuilder feedHeader(String feedHeader) {
+            doSetProperty("feedHeader", feedHeader);
+            return this;
+        }
     }
 
     public interface AtomBuilders {
+        /**
+         * Atom (camel-atom)
+         * Poll Atom RSS feeds.
+         * 
+         * Category: rss
+         * Since: 1.2
+         * Maven coordinates: org.apache.camel:camel-atom
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default AtomHeaderNameBuilder atom() {
+            return AtomHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Atom (camel-atom)
          * Poll Atom RSS feeds.
@@ -973,6 +929,31 @@ public interface AtomEndpointBuilderFactory {
          */
         default AtomEndpointBuilder atom(String componentName, String path) {
             return AtomEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Atom component.
+     */
+    public static class AtomHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final AtomHeaderNameBuilder INSTANCE = new AtomHeaderNameBuilder();
+
+        /**
+         * When consuming the org.apache.abdera.model.Feed object is set to this
+         * header.
+         * 
+         * The option is a: {@code org.apache.abdera.model.Feed} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code AtomFeed}.
+         */
+        public String atomFeed() {
+            return "AtomFeed";
         }
     }
     static AtomEndpointBuilder endpointBuilder(String componentName, String path) {

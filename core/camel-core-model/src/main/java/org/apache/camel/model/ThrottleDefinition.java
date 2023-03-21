@@ -18,13 +18,13 @@ package org.apache.camel.model;
 
 import java.util.concurrent.ExecutorService;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.camel.Expression;
 import org.apache.camel.builder.ExpressionBuilder;
@@ -40,23 +40,25 @@ import org.apache.camel.spi.Metadata;
 @XmlType(propOrder = { "expression", "correlationExpression" })
 public class ThrottleDefinition extends ExpressionNode implements ExecutorServiceAwareDefinition<ThrottleDefinition> {
 
+    @XmlTransient
+    private ExecutorService executorServiceBean;
+
     @XmlElement(name = "correlationExpression")
     private ExpressionSubElementDefinition correlationExpression;
-    @XmlTransient
-    private ExecutorService executorService;
     @XmlAttribute
-    private String executorServiceRef;
+    @Metadata(label = "advanced", javaType = "java.util.concurrent.ExecutorService")
+    private String executorService;
     @XmlAttribute
     @Metadata(defaultValue = "1000", javaType = "java.time.Duration")
     private String timePeriodMillis;
     @XmlAttribute
-    @Metadata(javaType = "java.lang.Boolean")
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean")
     private String asyncDelayed;
     @XmlAttribute
-    @Metadata(defaultValue = "true", javaType = "java.lang.Boolean")
+    @Metadata(label = "advanced", defaultValue = "true", javaType = "java.lang.Boolean")
     private String callerRunsWhenRejected;
     @XmlAttribute
-    @Metadata(javaType = "java.lang.Boolean")
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean")
     private String rejectExecution;
 
     public ThrottleDefinition() {
@@ -257,24 +259,34 @@ public class ThrottleDefinition extends ExpressionNode implements ExecutorServic
      */
     @Override
     public ThrottleDefinition executorService(ExecutorService executorService) {
-        setExecutorService(executorService);
+        this.executorServiceBean = executorService;
         return this;
     }
 
     /**
      * To use a custom thread pool (ScheduledExecutorService) by the throttler.
      *
-     * @param  executorServiceRef the reference id of the thread pool (must be scheduled)
-     * @return                    the builder
+     * @param  executorService the reference id of the thread pool (must be scheduled)
+     * @return                 the builder
      */
     @Override
-    public ThrottleDefinition executorServiceRef(String executorServiceRef) {
-        setExecutorServiceRef(executorServiceRef);
+    public ThrottleDefinition executorService(String executorService) {
+        setExecutorService(executorService);
         return this;
     }
 
     // Properties
     // -------------------------------------------------------------------------
+
+    @Override
+    public ExecutorService getExecutorServiceBean() {
+        return executorServiceBean;
+    }
+
+    @Override
+    public String getExecutorServiceRef() {
+        return executorService;
+    }
 
     /**
      * Expression to configure the maximum number of messages to throttle per request
@@ -309,26 +321,6 @@ public class ThrottleDefinition extends ExpressionNode implements ExecutorServic
         this.callerRunsWhenRejected = callerRunsWhenRejected;
     }
 
-    @Override
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
-
-    @Override
-    public void setExecutorService(ExecutorService executorService) {
-        this.executorService = executorService;
-    }
-
-    @Override
-    public String getExecutorServiceRef() {
-        return executorServiceRef;
-    }
-
-    @Override
-    public void setExecutorServiceRef(String executorServiceRef) {
-        this.executorServiceRef = executorServiceRef;
-    }
-
     public String getRejectExecution() {
         return rejectExecution;
     }
@@ -347,5 +339,13 @@ public class ThrottleDefinition extends ExpressionNode implements ExecutorServic
 
     public ExpressionSubElementDefinition getCorrelationExpression() {
         return correlationExpression;
+    }
+
+    public String getExecutorService() {
+        return executorService;
+    }
+
+    public void setExecutorService(String executorService) {
+        this.executorService = executorService;
     }
 }

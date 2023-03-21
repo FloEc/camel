@@ -36,7 +36,7 @@ public class StreamCachingSpoolDirectoryQuarkusTest extends ContextTestSupport {
 
     private MyCustomSpoolRule spoolRule = new MyCustomSpoolRule();
 
-    private class MyCamelContext extends DefaultCamelContext {
+    private static class MyCamelContext extends DefaultCamelContext {
 
         public MyCamelContext(boolean init) {
             super(init);
@@ -53,7 +53,7 @@ public class StreamCachingSpoolDirectoryQuarkusTest extends ContextTestSupport {
     protected CamelContext createCamelContext() throws Exception {
         DefaultCamelContext context = new MyCamelContext(false);
         context.disableJMX();
-        context.setRegistry(createRegistry());
+        context.getCamelContextExtension().setRegistry(createRegistry());
         context.setLoadTypeConverters(isLoadTypeConverters());
         return context;
     }
@@ -77,7 +77,7 @@ public class StreamCachingSpoolDirectoryQuarkusTest extends ContextTestSupport {
         assertMockEndpointsSatisfied();
     }
 
-    private final class MyInputStream extends FilterInputStream {
+    private static final class MyInputStream extends FilterInputStream {
 
         private MyInputStream(InputStream in) {
             super(in);
@@ -90,6 +90,7 @@ public class StreamCachingSpoolDirectoryQuarkusTest extends ContextTestSupport {
             @Override
             public void configure() throws Exception {
                 context.getStreamCachingStrategy().setSpoolDirectory(testDirectory().toFile());
+                context.getStreamCachingStrategy().setSpoolEnabled(true);
                 context.getStreamCachingStrategy().addSpoolRule(spoolRule);
                 context.getStreamCachingStrategy().setAnySpoolRules(true);
                 context.setStreamCaching(true);

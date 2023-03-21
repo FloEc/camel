@@ -24,13 +24,13 @@ import javax.management.ObjectName;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.ServiceStatus;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.engine.PooledExchangeFactory;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @DisabledOnOs(OS.AIX)
+@DisabledIfSystemProperty(named = "ci.env.name", matches = "github.com", disabledReason = "Flaky on Github CI")
 public class ManagedPooledExchangeTest extends ManagementTestSupport {
 
     private final AtomicInteger counter = new AtomicInteger();
@@ -51,18 +52,13 @@ public class ManagedPooledExchangeTest extends ManagementTestSupport {
         PooledExchangeFactory pef = new PooledExchangeFactory();
         pef.setStatisticsEnabled(true);
         pef.setCapacity(123);
-        context.adapt(ExtendedCamelContext.class).setExchangeFactory(pef);
+        context.getCamelContextExtension().setExchangeFactory(pef);
 
         return context;
     }
 
     @Test
     public void testSameExchange() throws Exception {
-        // JMX tests dont work well on AIX CI servers (hangs them)
-        if (isPlatform("aix")) {
-            return;
-        }
-
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(3);
         mock.expectedPropertyValuesReceivedInAnyOrder("myprop", 1, 3, 5);

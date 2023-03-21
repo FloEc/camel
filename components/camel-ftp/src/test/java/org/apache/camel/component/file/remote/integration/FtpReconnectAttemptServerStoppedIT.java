@@ -46,7 +46,7 @@ public class FtpReconnectAttemptServerStoppedIT extends FtpServerTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(0);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         mock.reset();
         mock.expectedMessageCount(1);
@@ -54,14 +54,14 @@ public class FtpReconnectAttemptServerStoppedIT extends FtpServerTestSupport {
         // resume the server so we can connect
         service.resume();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         Awaitility.await().untilAsserted(() -> Assertions.assertEquals(1, service.countConnections()));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

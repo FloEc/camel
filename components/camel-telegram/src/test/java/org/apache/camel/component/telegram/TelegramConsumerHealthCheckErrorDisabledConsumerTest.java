@@ -26,7 +26,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.telegram.util.TelegramMockRoutes;
 import org.apache.camel.component.telegram.util.TelegramTestSupport;
 import org.apache.camel.health.HealthCheck;
-import org.apache.camel.health.HealthCheckConfiguration;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.health.HealthCheckRepository;
 import org.awaitility.Awaitility;
@@ -45,16 +44,11 @@ public class TelegramConsumerHealthCheckErrorDisabledConsumerTest extends Telegr
         // enabling routes health check is a bit cumbersome via low-level Java code
         HealthCheckRegistry hcr = context.getExtension(HealthCheckRegistry.class);
         HealthCheckRepository repo = hcr.getRepository("routes").orElse((HealthCheckRepository) hcr.resolveById("routes"));
-        // add some slack so the check should fail 5 times in a row to be DOWN
-        repo.addConfiguration("*", HealthCheckConfiguration.builder().failureThreshold(5).build());
         repo.setEnabled(true);
         hcr.register(repo);
         // enabling consumers health check is a bit cumbersome via low-level Java code
         repo = hcr.getRepository("consumers").orElse((HealthCheckRepository) hcr.resolveById("consumers"));
-        // add some slack so the check should fail 5 times in a row to be DOWN
-        repo.addConfiguration("consumer:telegram", HealthCheckConfiguration.builder().failureThreshold(5).build());
         // turn off all consumer health checks
-        repo.addConfiguration("consumer:*", HealthCheckConfiguration.builder().enabled(false).build());
         repo.setEnabled(true);
         hcr.register(repo);
 
@@ -62,7 +56,7 @@ public class TelegramConsumerHealthCheckErrorDisabledConsumerTest extends Telegr
     }
 
     @Test
-    public void testReceptionOfTwoMessages() throws Exception {
+    public void testReceptionOfTwoMessages() {
         HealthCheckRegistry hcr = context.getExtension(HealthCheckRegistry.class);
         HealthCheckRepository repo = hcr.getRepository("routes").get();
 
@@ -85,12 +79,12 @@ public class TelegramConsumerHealthCheckErrorDisabledConsumerTest extends Telegr
     }
 
     @Override
-    protected RoutesBuilder[] createRouteBuilders() throws Exception {
+    protected RoutesBuilder[] createRouteBuilders() {
         return new RoutesBuilder[] {
                 getMockRoutes(),
                 new RouteBuilder() {
                     @Override
-                    public void configure() throws Exception {
+                    public void configure() {
                         from("telegram:bots?authorizationToken=mock-token").routeId("telegram")
                                 .convertBodyTo(String.class)
                                 .to("mock:telegram");

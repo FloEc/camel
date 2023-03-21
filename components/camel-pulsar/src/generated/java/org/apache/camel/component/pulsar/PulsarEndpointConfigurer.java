@@ -25,6 +25,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "ackGroupTimeMillis": target.getPulsarConfiguration().setAckGroupTimeMillis(property(camelContext, long.class, value)); return true;
         case "acktimeoutmillis":
         case "ackTimeoutMillis": target.getPulsarConfiguration().setAckTimeoutMillis(property(camelContext, long.class, value)); return true;
+        case "acktimeoutredeliverybackoff":
+        case "ackTimeoutRedeliveryBackoff": target.getPulsarConfiguration().setAckTimeoutRedeliveryBackoff(property(camelContext, org.apache.pulsar.client.api.RedeliveryBackoff.class, value)); return true;
         case "allowmanualacknowledgement":
         case "allowManualAcknowledgement": target.getPulsarConfiguration().setAllowManualAcknowledgement(property(camelContext, boolean.class, value)); return true;
         case "authenticationclass":
@@ -43,6 +45,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "blockIfQueueFull": target.getPulsarConfiguration().setBlockIfQueueFull(property(camelContext, boolean.class, value)); return true;
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": target.setBridgeErrorHandler(property(camelContext, boolean.class, value)); return true;
+        case "chunkingenabled":
+        case "chunkingEnabled": target.getPulsarConfiguration().setChunkingEnabled(property(camelContext, boolean.class, value)); return true;
         case "compressiontype":
         case "compressionType": target.getPulsarConfiguration().setCompressionType(property(camelContext, org.apache.pulsar.client.api.CompressionType.class, value)); return true;
         case "consumername":
@@ -73,6 +77,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "messageRouter": target.getPulsarConfiguration().setMessageRouter(property(camelContext, org.apache.pulsar.client.api.MessageRouter.class, value)); return true;
         case "messageroutingmode":
         case "messageRoutingMode": target.getPulsarConfiguration().setMessageRoutingMode(property(camelContext, org.apache.pulsar.client.api.MessageRoutingMode.class, value)); return true;
+        case "negativeackredeliverybackoff":
+        case "negativeAckRedeliveryBackoff": target.getPulsarConfiguration().setNegativeAckRedeliveryBackoff(property(camelContext, org.apache.pulsar.client.api.RedeliveryBackoff.class, value)); return true;
         case "negativeackredeliverydelaymicros":
         case "negativeAckRedeliveryDelayMicros": target.getPulsarConfiguration().setNegativeAckRedeliveryDelayMicros(property(camelContext, long.class, value)); return true;
         case "numberofconsumerthreads":
@@ -108,6 +114,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "ackGroupTimeMillis": return long.class;
         case "acktimeoutmillis":
         case "ackTimeoutMillis": return long.class;
+        case "acktimeoutredeliverybackoff":
+        case "ackTimeoutRedeliveryBackoff": return org.apache.pulsar.client.api.RedeliveryBackoff.class;
         case "allowmanualacknowledgement":
         case "allowManualAcknowledgement": return boolean.class;
         case "authenticationclass":
@@ -126,6 +134,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "blockIfQueueFull": return boolean.class;
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return boolean.class;
+        case "chunkingenabled":
+        case "chunkingEnabled": return boolean.class;
         case "compressiontype":
         case "compressionType": return org.apache.pulsar.client.api.CompressionType.class;
         case "consumername":
@@ -156,6 +166,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "messageRouter": return org.apache.pulsar.client.api.MessageRouter.class;
         case "messageroutingmode":
         case "messageRoutingMode": return org.apache.pulsar.client.api.MessageRoutingMode.class;
+        case "negativeackredeliverybackoff":
+        case "negativeAckRedeliveryBackoff": return org.apache.pulsar.client.api.RedeliveryBackoff.class;
         case "negativeackredeliverydelaymicros":
         case "negativeAckRedeliveryDelayMicros": return long.class;
         case "numberofconsumerthreads":
@@ -192,6 +204,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "ackGroupTimeMillis": return target.getPulsarConfiguration().getAckGroupTimeMillis();
         case "acktimeoutmillis":
         case "ackTimeoutMillis": return target.getPulsarConfiguration().getAckTimeoutMillis();
+        case "acktimeoutredeliverybackoff":
+        case "ackTimeoutRedeliveryBackoff": return target.getPulsarConfiguration().getAckTimeoutRedeliveryBackoff();
         case "allowmanualacknowledgement":
         case "allowManualAcknowledgement": return target.getPulsarConfiguration().isAllowManualAcknowledgement();
         case "authenticationclass":
@@ -210,6 +224,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "blockIfQueueFull": return target.getPulsarConfiguration().isBlockIfQueueFull();
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return target.isBridgeErrorHandler();
+        case "chunkingenabled":
+        case "chunkingEnabled": return target.getPulsarConfiguration().isChunkingEnabled();
         case "compressiontype":
         case "compressionType": return target.getPulsarConfiguration().getCompressionType();
         case "consumername":
@@ -240,6 +256,8 @@ public class PulsarEndpointConfigurer extends PropertyConfigurerSupport implemen
         case "messageRouter": return target.getPulsarConfiguration().getMessageRouter();
         case "messageroutingmode":
         case "messageRoutingMode": return target.getPulsarConfiguration().getMessageRoutingMode();
+        case "negativeackredeliverybackoff":
+        case "negativeAckRedeliveryBackoff": return target.getPulsarConfiguration().getNegativeAckRedeliveryBackoff();
         case "negativeackredeliverydelaymicros":
         case "negativeAckRedeliveryDelayMicros": return target.getPulsarConfiguration().getNegativeAckRedeliveryDelayMicros();
         case "numberofconsumerthreads":

@@ -18,6 +18,7 @@ package org.apache.camel.component.kamelet;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,7 @@ public class KameletEipFilterTest extends CamelTestSupport {
             template.sendBody("direct:start", i);
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // **********************************************
@@ -41,10 +42,10 @@ public class KameletEipFilterTest extends CamelTestSupport {
     // **********************************************
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 routeTemplate("filter")
                         .from("kamelet:source")
                         .filter().simple("${body} range '5..10'")

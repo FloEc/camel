@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -160,10 +160,9 @@ public interface ImapComponentBuilderFactory {
          * If the mail consumer cannot retrieve a given mail message, then this
          * option allows to handle the caused exception by the consumer's error
          * handler. By enable the bridge error handler on the consumer, then the
-         * Camel routing error handler can handle the exception instead.
-         * &lt;p/&gt; The default behavior would be the consumer throws an
-         * exception and no mails from the batch would be able to be routed by
-         * Camel.
+         * Camel routing error handler can handle the exception instead. The
+         * default behavior would be the consumer throws an exception and no
+         * mails from the batch would be able to be routed by Camel.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -212,11 +211,11 @@ public interface ImapComponentBuilderFactory {
             return this;
         }
         /**
-         * Will mark the javax.mail.Message as peeked before processing the mail
-         * message. This applies to IMAPMessage messages types only. By using
-         * peek the mail will not be eager marked as SEEN on the mail server,
-         * which allows us to rollback the mail message if there is an error
-         * processing in Camel.
+         * Will mark the jakarta.mail.Message as peeked before processing the
+         * mail message. This applies to IMAPMessage messages types only. By
+         * using peek the mail will not be eager marked as SEEN on the mail
+         * server, which allows us to rollback the mail message if there is an
+         * error processing in Camel.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -233,9 +232,9 @@ public interface ImapComponentBuilderFactory {
         /**
          * If the mail consumer cannot retrieve a given mail message, then this
          * option allows to skip the message and move on to retrieve the next
-         * mail message. &lt;p/&gt; The default behavior would be the consumer
-         * throws an exception and no mails from the batch would be able to be
-         * routed by Camel.
+         * mail message. The default behavior would be the consumer throws an
+         * exception and no mails from the batch would be able to be routed by
+         * Camel.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -262,6 +261,25 @@ public interface ImapComponentBuilderFactory {
          */
         default ImapComponentBuilder unseen(boolean unseen) {
             doSetProperty("unseen", unseen);
+            return this;
+        }
+        /**
+         * Whether to fail processing the mail if the mail message contains
+         * attachments with duplicate file names. If set to false, then the
+         * duplicate attachment is skipped and a WARN is logged. If set to true
+         * then an exception is thrown failing to process the mail message.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param failOnDuplicateFileAttachment the value to set
+         * @return the dsl builder
+         */
+        default ImapComponentBuilder failOnDuplicateFileAttachment(
+                boolean failOnDuplicateFileAttachment) {
+            doSetProperty("failOnDuplicateFileAttachment", failOnDuplicateFileAttachment);
             return this;
         }
         /**
@@ -300,14 +318,52 @@ public interface ImapComponentBuilderFactory {
             return this;
         }
         /**
+         * Set this to 'uuid' to set a UUID for the filename of the attachment
+         * if no filename was set.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param generateMissingAttachmentNames the value to set
+         * @return the dsl builder
+         */
+        default ImapComponentBuilder generateMissingAttachmentNames(
+                java.lang.String generateMissingAttachmentNames) {
+            doSetProperty("generateMissingAttachmentNames", generateMissingAttachmentNames);
+            return this;
+        }
+        /**
+         * Set the strategy to handle duplicate filenames of attachments never:
+         * attachments that have a filename which is already present in the
+         * attachments will be ignored unless failOnDuplicateFileAttachment is
+         * set to true. uuidPrefix: this will prefix the duplicate attachment
+         * filenames each with a uuid and underscore
+         * (uuid_filename.fileextension). uuidSuffix: this will suffix the
+         * duplicate attachment filenames each with a underscore and uuid
+         * (filename_uuid.fileextension).
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param handleDuplicateAttachmentNames the value to set
+         * @return the dsl builder
+         */
+        default ImapComponentBuilder handleDuplicateAttachmentNames(
+                java.lang.String handleDuplicateAttachmentNames) {
+            doSetProperty("handleDuplicateAttachmentNames", handleDuplicateAttachmentNames);
+            return this;
+        }
+        /**
          * Specifies whether Camel should map the received mail message to Camel
          * body/headers/attachments. If set to true, the body of the mail
          * message is mapped to the body of the Camel IN message, the mail
          * headers are mapped to IN headers, and the attachments to Camel IN
          * attachment message. If this option is set to false then the IN
-         * message contains a raw javax.mail.Message. You can retrieve this raw
-         * message by calling
-         * exchange.getIn().getBody(javax.mail.Message.class).
+         * message contains a raw jakarta.mail.Message. You can retrieve this
+         * raw message by calling
+         * exchange.getIn().getBody(jakarta.mail.Message.class).
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -507,9 +563,9 @@ public interface ImapComponentBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -682,14 +738,14 @@ public interface ImapComponentBuilderFactory {
          * using a custom mail session, then the hostname and port from the mail
          * session will be used (if configured on the session).
          * 
-         * The option is a: &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
          * @param session the value to set
          * @return the dsl builder
          */
-        default ImapComponentBuilder session(javax.mail.Session session) {
+        default ImapComponentBuilder session(jakarta.mail.Session session) {
             doSetProperty("session", session);
             return this;
         }
@@ -823,8 +879,11 @@ public interface ImapComponentBuilderFactory {
             case "peek": getOrCreateConfiguration((MailComponent) component).setPeek((boolean) value); return true;
             case "skipFailedMessage": getOrCreateConfiguration((MailComponent) component).setSkipFailedMessage((boolean) value); return true;
             case "unseen": getOrCreateConfiguration((MailComponent) component).setUnseen((boolean) value); return true;
+            case "failOnDuplicateFileAttachment": getOrCreateConfiguration((MailComponent) component).setFailOnDuplicateFileAttachment((boolean) value); return true;
             case "fetchSize": getOrCreateConfiguration((MailComponent) component).setFetchSize((int) value); return true;
             case "folderName": getOrCreateConfiguration((MailComponent) component).setFolderName((java.lang.String) value); return true;
+            case "generateMissingAttachmentNames": getOrCreateConfiguration((MailComponent) component).setGenerateMissingAttachmentNames((java.lang.String) value); return true;
+            case "handleDuplicateAttachmentNames": getOrCreateConfiguration((MailComponent) component).setHandleDuplicateAttachmentNames((java.lang.String) value); return true;
             case "mapMailMessage": getOrCreateConfiguration((MailComponent) component).setMapMailMessage((boolean) value); return true;
             case "bcc": getOrCreateConfiguration((MailComponent) component).setBcc((java.lang.String) value); return true;
             case "cc": getOrCreateConfiguration((MailComponent) component).setCc((java.lang.String) value); return true;
@@ -847,7 +906,7 @@ public interface ImapComponentBuilderFactory {
             case "ignoreUnsupportedCharset": getOrCreateConfiguration((MailComponent) component).setIgnoreUnsupportedCharset((boolean) value); return true;
             case "ignoreUriScheme": getOrCreateConfiguration((MailComponent) component).setIgnoreUriScheme((boolean) value); return true;
             case "javaMailProperties": getOrCreateConfiguration((MailComponent) component).setJavaMailProperties((java.util.Properties) value); return true;
-            case "session": getOrCreateConfiguration((MailComponent) component).setSession((javax.mail.Session) value); return true;
+            case "session": getOrCreateConfiguration((MailComponent) component).setSession((jakarta.mail.Session) value); return true;
             case "useInlineAttachments": getOrCreateConfiguration((MailComponent) component).setUseInlineAttachments((boolean) value); return true;
             case "headerFilterStrategy": ((MailComponent) component).setHeaderFilterStrategy((org.apache.camel.spi.HeaderFilterStrategy) value); return true;
             case "password": getOrCreateConfiguration((MailComponent) component).setPassword((java.lang.String) value); return true;

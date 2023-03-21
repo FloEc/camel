@@ -16,12 +16,8 @@
  */
 package org.apache.camel.component.as2.api;
 
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Receives EDI Messages over HTTP
@@ -47,8 +43,6 @@ public class AS2ServerManager {
      */
     public static final String FROM = CAMEL_AS2_SERVER_PREFIX + "from";
 
-    private static final Logger LOG = LoggerFactory.getLogger(AS2ServerManager.class);
-
     private AS2ServerConnection as2ServerConnection;
 
     public AS2ServerManager(AS2ServerConnection as2ServerConnection) {
@@ -64,7 +58,7 @@ public class AS2ServerManager {
     }
 
     public void handleMDNResponse(
-            HttpEntityEnclosingRequest request, HttpResponse response, HttpContext httpContext, String subject, String from) {
+            HttpContext httpContext, String subject, String from) {
         // Add Context attributes for Response
         httpContext.setAttribute(SUBJECT, subject);
         httpContext.setAttribute(FROM, from);

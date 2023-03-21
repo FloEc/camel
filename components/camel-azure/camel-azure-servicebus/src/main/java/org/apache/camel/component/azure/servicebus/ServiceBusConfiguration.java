@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.core.amqp.AmqpTransportType;
 import com.azure.core.amqp.ProxyOptions;
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.util.ClientOptions;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverAsyncClient;
@@ -40,12 +41,15 @@ public class ServiceBusConfiguration implements Cloneable {
 
     @UriPath
     private String topicOrQueueName;
-    @UriParam(label = "security", secret = true)
-    @Metadata(required = true)
-    private String connectionString;
     @UriParam(label = "common", defaultValue = "queue")
     @Metadata(required = true)
     private ServiceBusType serviceBusType = ServiceBusType.queue;
+    @UriParam(label = "security", secret = true)
+    private String connectionString;
+    @UriParam(label = "security")
+    private String fullyQualifiedNamespace;
+    @UriParam(label = "security", secret = true)
+    private TokenCredential tokenCredential;
     @UriParam(label = "common")
     private ClientOptions clientOptions;
     @UriParam(label = "common")
@@ -61,13 +65,13 @@ public class ServiceBusConfiguration implements Cloneable {
     private ServiceBusReceiverAsyncClient receiverAsyncClient;
     @UriParam(label = "consumer")
     private String subscriptionName;
-    @UriParam(label = "consumer", defaultValue = "false")
+    @UriParam(label = "consumer")
     private boolean disableAutoComplete;
     @UriParam(label = "consumer", defaultValue = "PEEK_LOCK")
     private ServiceBusReceiveMode serviceBusReceiveMode = ServiceBusReceiveMode.PEEK_LOCK;
-    @UriParam(label = "consumer", defaultValue = "5min")
+    @UriParam(label = "consumer", defaultValue = "5m")
     private Duration maxAutoLockRenewDuration = Duration.ofMinutes(5);
-    @UriParam(label = "consumer", defaultValue = "0")
+    @UriParam(label = "consumer")
     private int prefetchCount;
     @UriParam(label = "consumer")
     private SubQueue subQueue;
@@ -120,7 +124,7 @@ public class ServiceBusConfiguration implements Cloneable {
 
     /**
      * Sets the name of the subscription in the topic to listen to. topicOrQueueName and serviceBusType=topic must also
-     * be set.
+     * be set. This property is required if serviceBusType=topic and the consumer is in use.
      */
     public String getSubscriptionName() {
         return subscriptionName;
@@ -179,7 +183,7 @@ public class ServiceBusConfiguration implements Cloneable {
     }
 
     /**
-     * Sets the receiverAsyncClient in order to consume messages in the Consumer
+     * Sets the receiverAsyncClient in order to consume messages by the consumer
      */
     public ServiceBusReceiverAsyncClient getReceiverAsyncClient() {
         return receiverAsyncClient;
@@ -262,6 +266,28 @@ public class ServiceBusConfiguration implements Cloneable {
 
     public void setSenderAsyncClient(ServiceBusSenderAsyncClient senderAsyncClient) {
         this.senderAsyncClient = senderAsyncClient;
+    }
+
+    /**
+     * Fully Qualified Namespace of the service bus
+     */
+    public String getFullyQualifiedNamespace() {
+        return fullyQualifiedNamespace;
+    }
+
+    public void setFullyQualifiedNamespace(String fullyQualifiedNamespace) {
+        this.fullyQualifiedNamespace = fullyQualifiedNamespace;
+    }
+
+    /**
+     * A {@link TokenCredential} for Azure AD authentication, implemented in {@link com.azure.identity}
+     */
+    public TokenCredential getTokenCredential() {
+        return tokenCredential;
+    }
+
+    public void setTokenCredential(TokenCredential tokenCredential) {
+        this.tokenCredential = tokenCredential;
     }
 
     /**

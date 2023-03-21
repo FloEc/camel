@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -38,6 +38,9 @@ public interface VertxHttpEndpointBuilderFactory {
      * Builder for endpoint for the Vert.x HTTP Client component.
      */
     public interface VertxHttpEndpointBuilder extends EndpointProducerBuilder {
+        default AdvancedVertxHttpEndpointBuilder advanced() {
+            return (AdvancedVertxHttpEndpointBuilder) this;
+        }
         /**
          * The amount of time in milliseconds until a connection is established.
          * A timeout value of zero is interpreted as an infinite timeout.
@@ -179,55 +182,6 @@ public interface VertxHttpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default VertxHttpEndpointBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default VertxHttpEndpointBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * The status codes which are considered a success response. The values
          * are inclusive. Multiple ranges can be defined, separated by comma,
          * e.g. 200-204,209,301-304. Each range must be a single number or
@@ -356,8 +310,8 @@ public interface VertxHttpEndpointBuilderFactory {
         /**
          * The amount of time in milliseconds after which if the request does
          * not return any data within the timeout period a TimeoutException
-         * fails the request. &lt;p/&gt; Setting zero or a negative value
-         * disables the timeout.
+         * fails the request. Setting zero or a negative value disables the
+         * timeout.
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -374,8 +328,8 @@ public interface VertxHttpEndpointBuilderFactory {
         /**
          * The amount of time in milliseconds after which if the request does
          * not return any data within the timeout period a TimeoutException
-         * fails the request. &lt;p/&gt; Setting zero or a negative value
-         * disables the timeout.
+         * fails the request. Setting zero or a negative value disables the
+         * timeout.
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -395,10 +349,10 @@ public interface VertxHttpEndpointBuilderFactory {
          * as a application/x-java-serialized-object content type. On the
          * producer side the exception will be deserialized and thrown as is,
          * instead of HttpOperationFailedException. The caused exception is
-         * required to be serialized. &lt;p/&gt; This is by default turned off.
-         * If you enable this then be aware that Camel will deserialize the
-         * incoming data from the request to a Java object, which can be a
-         * potential security risk.
+         * required to be serialized. This is by default turned off. If you
+         * enable this then be aware that Camel will deserialize the incoming
+         * data from the request to a Java object, which can be a potential
+         * security risk.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -419,10 +373,10 @@ public interface VertxHttpEndpointBuilderFactory {
          * as a application/x-java-serialized-object content type. On the
          * producer side the exception will be deserialized and thrown as is,
          * instead of HttpOperationFailedException. The caused exception is
-         * required to be serialized. &lt;p/&gt; This is by default turned off.
-         * If you enable this then be aware that Camel will deserialize the
-         * incoming data from the request to a Java object, which can be a
-         * potential security risk.
+         * required to be serialized. This is by default turned off. If you
+         * enable this then be aware that Camel will deserialize the incoming
+         * data from the request to a Java object, which can be a potential
+         * security risk.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -719,7 +673,80 @@ public interface VertxHttpEndpointBuilderFactory {
         }
     }
 
+    /**
+     * Advanced builder for endpoint for the Vert.x HTTP Client component.
+     */
+    public interface AdvancedVertxHttpEndpointBuilder
+            extends
+                EndpointProducerBuilder {
+        default VertxHttpEndpointBuilder basic() {
+            return (VertxHttpEndpointBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedVertxHttpEndpointBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedVertxHttpEndpointBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+    }
+
     public interface VertxHttpBuilders {
+        /**
+         * Vert.x HTTP Client (camel-vertx-http)
+         * Send requests to external HTTP servers using Vert.x
+         * 
+         * Category: http
+         * Since: 3.5
+         * Maven coordinates: org.apache.camel:camel-vertx-http
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default VertxHttpHeaderNameBuilder vertxHttp() {
+            return VertxHttpHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Vert.x HTTP Client (camel-vertx-http)
          * Send requests to external HTTP servers using Vert.x
@@ -763,10 +790,133 @@ public interface VertxHttpEndpointBuilderFactory {
             return VertxHttpEndpointBuilderFactory.endpointBuilder(componentName, path);
         }
     }
+
+    /**
+     * The builder of headers' name for the Vert.x HTTP Client component.
+     */
+    public static class VertxHttpHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final VertxHttpHeaderNameBuilder INSTANCE = new VertxHttpHeaderNameBuilder();
+
+        /**
+         * The http method.
+         * 
+         * The option is a: {@code io.vertx.core.http.HttpMethod} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HttpMethod}.
+         */
+        public String httpMethod() {
+            return "HttpMethod";
+        }
+
+        /**
+         * The HTTP response code from the external server.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HttpResponseCode}.
+         */
+        public String httpResponseCode() {
+            return "HttpResponseCode";
+        }
+
+        /**
+         * The HTTP response text from the external server.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HttpResponseText}.
+         */
+        public String httpResponseText() {
+            return "HttpResponseText";
+        }
+
+        /**
+         * The HTTP content type. Is set on both the IN and OUT message to
+         * provide a content type, such as text/html.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code Content-Type}.
+         */
+        public String contentType() {
+            return "Content-Type";
+        }
+
+        /**
+         * URI parameters. Will override existing URI parameters set directly on
+         * the endpoint.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HttpQuery}.
+         */
+        public String httpQuery() {
+            return "HttpQuery";
+        }
+
+        /**
+         * URI to call. Will override the existing URI set directly on the
+         * endpoint. This URI is the URI of the http server to call. Its not the
+         * same as the Camel endpoint URI, where you can configure endpoint
+         * options such as security etc. This header does not support that, its
+         * only the URI of the http server.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HttpUri}.
+         */
+        public String httpUri() {
+            return "HttpUri";
+        }
+
+        /**
+         * Request URI's path, the header will be used to build the request URI
+         * with the HTTP_URI.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HttpPath}.
+         */
+        public String httpPath() {
+            return "HttpPath";
+        }
+
+        /**
+         * The HTTP content encoding. Is set to provide a content encoding, such
+         * as gzip.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code Content-Encoding}.
+         */
+        public String contentEncoding() {
+            return "Content-Encoding";
+        }
+    }
     static VertxHttpEndpointBuilder endpointBuilder(
             String componentName,
             String path) {
-        class VertxHttpEndpointBuilderImpl extends AbstractEndpointBuilder implements VertxHttpEndpointBuilder {
+        class VertxHttpEndpointBuilderImpl extends AbstractEndpointBuilder implements VertxHttpEndpointBuilder, AdvancedVertxHttpEndpointBuilder {
             public VertxHttpEndpointBuilderImpl(String path) {
                 super(componentName, path);
             }

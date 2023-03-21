@@ -21,12 +21,12 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
@@ -206,7 +206,7 @@ public class JmsProducer extends DefaultAsyncProducer {
 
         final String correlationProperty = configuration.getCorrelationProperty();
 
-        final String correlationPropertyToUse = ofNullable(correlationProperty).orElse("JMSCorrelationID");
+        final String correlationPropertyToUse = ofNullable(correlationProperty).orElse(JmsConstants.JMS_HEADER_CORRELATION_ID);
 
         final String originalCorrelationId = in.getHeader(correlationPropertyToUse, String.class);
 
@@ -247,7 +247,7 @@ public class JmsProducer extends DefaultAsyncProducer {
                             correlationPropertyToUse, correlationId, replyTo, timeout);
                 }
 
-                LOG.trace("Created javax.jms.Message: {}", answer);
+                LOG.trace("Created jakarta.jms.Message: {}", answer);
                 return answer;
             }
         };
@@ -338,7 +338,7 @@ public class JmsProducer extends DefaultAsyncProducer {
                     // if the binding did not create the reply to then we have to try to create it here
                     if (jmsReplyTo == null) {
                         // prefer reply to from header over endpoint configured
-                        jmsReplyTo = exchange.getIn().getHeader("JMSReplyTo", String.class);
+                        jmsReplyTo = exchange.getIn().getHeader(JmsConstants.JMS_HEADER_REPLY_TO, String.class);
                         if (jmsReplyTo == null) {
                             jmsReplyTo = endpoint.getReplyTo();
                         }
@@ -384,7 +384,7 @@ public class JmsProducer extends DefaultAsyncProducer {
                     JmsMessageHelper.setJMSReplyTo(answer, null);
                 }
 
-                LOG.trace("Created javax.jms.Message: {}", answer);
+                LOG.trace("Created jakarta.jms.Message: {}", answer);
                 return answer;
             }
         };

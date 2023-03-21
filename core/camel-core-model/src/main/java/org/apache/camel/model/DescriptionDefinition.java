@@ -16,11 +16,10 @@
  */
 package org.apache.camel.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlValue;
 
 import org.apache.camel.spi.Metadata;
 
@@ -31,8 +30,7 @@ import org.apache.camel.spi.Metadata;
 @XmlRootElement(name = "description")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DescriptionDefinition {
-    @XmlAttribute
-    private String lang;
+
     @XmlValue
     private String text;
 
@@ -43,23 +41,12 @@ public class DescriptionDefinition {
         this.text = text;
     }
 
-    public String getLang() {
-        return lang;
-    }
-
-    /**
-     * Language, such as en for english.
-     */
-    public void setLang(String lang) {
-        this.lang = lang;
-    }
-
     public String getText() {
         return text;
     }
 
     /**
-     * The description as human readable text
+     * The description as human-readable text
      */
     public void setText(String text) {
         this.text = text;

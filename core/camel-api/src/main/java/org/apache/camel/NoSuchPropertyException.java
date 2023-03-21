@@ -18,9 +18,9 @@ package org.apache.camel;
 
 /**
  * An exception caused when a mandatory property is not available on a message {@link Exchange}
- * 
+ *
  * @see org.apache.camel.support.ExchangeHelper#getMandatoryProperty(Exchange, String, Class)
- * 
+ *
  */
 public class NoSuchPropertyException extends CamelExchangeException {
 
@@ -51,6 +51,6 @@ public class NoSuchPropertyException extends CamelExchangeException {
         if (value == null) {
             return "";
         }
-        return " but has value: " + value + " of type: " + value.getClass().getCanonicalName();
+        return " but has type: " + value.getClass().getCanonicalName();
     }
 }

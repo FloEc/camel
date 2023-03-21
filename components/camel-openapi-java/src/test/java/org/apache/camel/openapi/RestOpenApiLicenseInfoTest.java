@@ -36,7 +36,7 @@ public class RestOpenApiLicenseInfoTest {
         CamelContext context = new DefaultCamelContext();
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 restConfiguration()
                         .apiProperty("openapi.version", openApiVersion)
                         .apiProperty("api.contact.name", "Mr Camel")
@@ -46,10 +46,8 @@ public class RestOpenApiLicenseInfoTest {
                         .apiProperty("api.license.url", "https://www.apache.org/licenses/LICENSE-2.0");
 
                 rest("/api")
-                        .get("/api")
-                            .route()
-                                .setBody().constant("Hello World")
-                            .end();
+                        .get("/api").to("direct:api");
+                from("direct:api").setBody().constant("Hello World");
             }
         });
 

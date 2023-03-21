@@ -30,12 +30,12 @@ public final class Ddb2StreamClientFactory {
 
     /**
      * Return the correct AWS DynamoDB client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               DynamoDBClient
      */
     public static Ddb2StreamInternalClient getDynamoDBStreamClient(Ddb2StreamConfiguration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new Ddb2StreamClientIAMOptimizedImpl(configuration) : new Ddb2StreamClientStandardImpl(configuration);
     }
 }

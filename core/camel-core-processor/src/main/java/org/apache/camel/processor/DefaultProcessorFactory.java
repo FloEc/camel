@@ -18,12 +18,12 @@ package org.apache.camel.processor;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LineNumberAware;
 import org.apache.camel.NamedNode;
 import org.apache.camel.NoFactoryAvailableException;
@@ -43,8 +43,6 @@ import org.apache.camel.spi.annotations.JdkService;
  * name of the {@link ProcessorFactory} the Camel component implement, which gets called for creating the
  * {@link Processor}s for the EIP.
  * <p/>
- * The Hystrix EIP is such an example where the circuit breaker EIP (CircuitBreakerDefinition) is implemented in the
- * <tt>camel-hystrix</tt> component.
  */
 @JdkService(ProcessorFactory.FACTORY)
 public class DefaultProcessorFactory implements ProcessorFactory, BootstrapCloseable {
@@ -65,7 +63,7 @@ public class DefaultProcessorFactory implements ProcessorFactory, BootstrapClose
     public Processor createChildProcessor(Route route, NamedNode definition, boolean mandatory) throws Exception {
         String name = definition.getClass().getSimpleName();
         if (finder == null) {
-            finder = route.getCamelContext().adapt(ExtendedCamelContext.class).getFactoryFinderResolver()
+            finder = route.getCamelContext().getCamelContextExtension().getFactoryFinderResolver()
                     .resolveBootstrapFactoryFinder(route.getCamelContext().getClassResolver(), RESOURCE_PATH);
         }
         try {
@@ -73,11 +71,7 @@ public class DefaultProcessorFactory implements ProcessorFactory, BootstrapClose
             if (object instanceof ProcessorFactory) {
                 ProcessorFactory pc = (ProcessorFactory) object;
                 Processor processor = pc.createChildProcessor(route, definition, mandatory);
-                if (processor instanceof LineNumberAware) {
-                    LineNumberAware lna = (LineNumberAware) processor;
-                    lna.setLineNumber(definition.getLineNumber());
-                    lna.setLocation(definition.getLocation());
-                }
+                LineNumberAware.trySetLineNumberAware(processor, definition);
                 return processor;
             }
         } catch (NoFactoryAvailableException e) {
@@ -91,20 +85,15 @@ public class DefaultProcessorFactory implements ProcessorFactory, BootstrapClose
     public Processor createProcessor(Route route, NamedNode definition) throws Exception {
         String name = definition.getClass().getSimpleName();
         if (finder == null) {
-            finder = route.getCamelContext().adapt(ExtendedCamelContext.class).getFactoryFinderResolver()
+            finder = route.getCamelContext().getCamelContextExtension().getFactoryFinderResolver()
                     .resolveBootstrapFactoryFinder(route.getCamelContext().getClassResolver(), RESOURCE_PATH);
         }
         ProcessorFactory pc = finder.newInstance(name, ProcessorFactory.class).orElse(null);
         if (pc != null) {
             Processor processor = pc.createProcessor(route, definition);
-            if (processor instanceof LineNumberAware) {
-                LineNumberAware lna = (LineNumberAware) processor;
-                lna.setLineNumber(definition.getLineNumber());
-                lna.setLocation(definition.getLocation());
-            }
+            LineNumberAware.trySetLineNumberAware(processor, definition);
             return processor;
         }
-
         return null;
     }
 
@@ -129,6 +118,9 @@ public class DefaultProcessorFactory implements ProcessorFactory, BootstrapClose
             return new MulticastProcessor(
                     camelContext, null, processors, null, true, executor, shutdownExecutorService, false, false, 0,
                     null, false, false);
+        } else if ("Pipeline".equals(definitionName)) {
+            List<Processor> processors = (List<Processor>) args[0];
+            return Pipeline.newInstance(camelContext, processors);
         }
 
         return null;

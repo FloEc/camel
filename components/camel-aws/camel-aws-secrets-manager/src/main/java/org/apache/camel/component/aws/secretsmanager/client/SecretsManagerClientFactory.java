@@ -30,12 +30,12 @@ public final class SecretsManagerClientFactory {
 
     /**
      * Return the correct aws Secrets Manager client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               SecretsManagerClient
      */
     public static SecretsManagerInternalClient getSecretsManagerClient(SecretsManagerConfiguration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new SecretsManagerClientIAMOptimized(configuration) : new SecretsManagerClientStandardImpl(configuration);
     }
 }

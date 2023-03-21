@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component.google.calendar;
 
+import java.util.List;
+
 import com.google.api.services.calendar.CalendarScopes;
 import org.apache.camel.component.google.calendar.internal.GoogleCalendarApiName;
 import org.apache.camel.spi.Configurer;
@@ -38,7 +40,7 @@ public class GoogleCalendarConfiguration {
     @Metadata(required = true)
     private String methodName;
     @UriParam(defaultValue = CalendarScopes.CALENDAR)
-    private String scopes = CalendarScopes.CALENDAR;
+    private List<String> scopes;
     @UriParam
     private String clientId;
     @UriParam
@@ -55,6 +57,11 @@ public class GoogleCalendarConfiguration {
     private String p12FileName;
     @UriParam(label = "security", secret = true)
     private String user;
+    /* Service account */
+    @UriParam(label = "security")
+    private String serviceAccountKey;
+    @UriParam
+    private String delegate;
 
     public GoogleCalendarApiName getApiName() {
         return apiName;
@@ -145,7 +152,7 @@ public class GoogleCalendarConfiguration {
         this.applicationName = applicationName;
     }
 
-    public String getScopes() {
+    public List<String> getScopes() {
         return scopes;
     }
 
@@ -153,7 +160,7 @@ public class GoogleCalendarConfiguration {
      * Specifies the level of permissions you want a calendar application to have to a user account. You can separate
      * multiple scopes by comma. See https://developers.google.com/google-apps/calendar/auth for more info.
      */
-    public void setScopes(String scopes) {
+    public void setScopes(List<String> scopes) {
         this.scopes = scopes;
     }
 
@@ -179,4 +186,28 @@ public class GoogleCalendarConfiguration {
         this.user = user;
     }
 
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    /**
+     * Service account key in json format to authenticate an application as a service account. Accept base64 adding the
+     * prefix "base64:"
+     *
+     * @param serviceAccountKey String file, classpath, base64, or http url
+     */
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
+    }
+
+    public String getDelegate() {
+        return delegate;
+    }
+
+    /**
+     * Delegate for wide-domain service account
+     */
+    public void setDelegate(String delegate) {
+        this.delegate = delegate;
+    }
 }

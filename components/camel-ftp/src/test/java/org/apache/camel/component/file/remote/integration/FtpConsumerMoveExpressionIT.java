@@ -34,7 +34,7 @@ import static org.awaitility.Awaitility.await;
 public class FtpConsumerMoveExpressionIT extends FtpServerTestSupport {
 
     @BindToRegistry("myguidgenerator")
-    private MyGuidGenerator guid = new MyGuidGenerator();
+    private final MyGuidGenerator guid = new MyGuidGenerator();
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/filelanguage?password=admin&delay=5000";
@@ -47,25 +47,25 @@ public class FtpConsumerMoveExpressionIT extends FtpServerTestSupport {
 
         sendFile(getFtpUrl(), "Reports", "report2.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // give time for consumer to rename file
         String now = new SimpleDateFormat("yyyyMMdd").format(new Date());
         await().atMost(1, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertFileExists(ftpFile("filelanguage/backup/" + now + "/123-report2.bak")));
+                .untilAsserted(() -> assertFileExists(service.ftpFile("filelanguage/backup/" + now + "/123-report2.bak")));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl() + "&move=backup/${date:now:yyyyMMdd}/${bean:myguidgenerator}" + "-${file:name.noext}.bak")
                         .to("mock:result");
             }
         };
     }
 
-    public class MyGuidGenerator {
+    public static class MyGuidGenerator {
         public String guid() {
             return "123";
         }

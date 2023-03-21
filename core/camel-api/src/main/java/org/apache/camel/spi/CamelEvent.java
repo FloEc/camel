@@ -41,6 +41,9 @@ public interface CamelEvent {
         CamelContextStopping,
         CamelContextSuspended,
         CamelContextSuspending,
+        CamelContextReloading,
+        CamelContextReloaded,
+        CamelContextReloadFailure,
         ExchangeCompleted,
         ExchangeCreated,
         ExchangeFailed,
@@ -49,6 +52,7 @@ public interface CamelEvent {
         ExchangeRedelivery,
         ExchangeSending,
         ExchangeSent,
+        ExchangeAsyncProcessingStarted,
         RoutesStarting,
         RoutesStarted,
         RoutesStopping,
@@ -71,6 +75,14 @@ public interface CamelEvent {
     Type getType();
 
     Object getSource();
+
+    /**
+     * Timestamp for each event, when the event occurred. By default, the timestamp is not included and this method
+     * returns 0.
+     */
+    long getTimestamp();
+
+    void setTimestamp(long timestamp);
 
     /**
      * This interface is implemented by all events that contain an exception and is used to retrieve the exception in a
@@ -209,6 +221,27 @@ public interface CamelEvent {
         @Override
         default Type getType() {
             return Type.RoutesStopped;
+        }
+    }
+
+    interface CamelContextReloadingEvent extends CamelContextEvent {
+        @Override
+        default Type getType() {
+            return Type.CamelContextReloading;
+        }
+    }
+
+    interface CamelContextReloadedEvent extends CamelContextEvent {
+        @Override
+        default Type getType() {
+            return Type.CamelContextReloaded;
+        }
+    }
+
+    interface CamelContextReloadFailureEvent extends CamelContextEvent, FailureEvent {
+        @Override
+        default Type getType() {
+            return Type.CamelContextReloadFailure;
         }
     }
 
@@ -417,4 +450,13 @@ public interface CamelEvent {
         }
     }
 
+    /**
+     * Special event only in use for camel-tracing / camel-opentelemtry. This event is NOT (by default) in use.
+     */
+    interface ExchangeAsyncProcessingStartedEvent extends ExchangeEvent {
+        @Override
+        default Type getType() {
+            return Type.ExchangeAsyncProcessingStarted;
+        }
+    }
 }

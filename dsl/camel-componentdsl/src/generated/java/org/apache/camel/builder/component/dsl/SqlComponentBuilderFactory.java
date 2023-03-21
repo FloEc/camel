@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -129,8 +129,7 @@ public interface SqlComponentBuilderFactory {
         }
         /**
          * Sets whether to use placeholder and replace all placeholder
-         * characters with sign in the SQL queries. &lt;p/&gt; This option is
-         * default &lt;tt&gt;true.
+         * characters with sign in the SQL queries. This option is default true.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 

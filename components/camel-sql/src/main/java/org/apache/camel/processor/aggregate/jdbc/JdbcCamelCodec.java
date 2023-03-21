@@ -28,9 +28,9 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.support.DefaultExchangeHolder;
+import org.apache.camel.util.ClassLoadingAwareObjectInputStream;
 import org.apache.camel.util.IOHelper;
 
 /**
@@ -38,15 +38,15 @@ import org.apache.camel.util.IOHelper;
  */
 public class JdbcCamelCodec {
 
-    public byte[] marshallExchange(CamelContext camelContext, Exchange exchange, boolean allowSerializedHeaders)
+    public byte[] marshallExchange(Exchange exchange, boolean allowSerializedHeaders)
             throws IOException {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        marshallExchange(camelContext, exchange, allowSerializedHeaders, bytesOut);
+        marshallExchange(exchange, allowSerializedHeaders, bytesOut);
         return bytesOut.toByteArray();
     }
 
     public void marshallExchange(
-            CamelContext camelContext, Exchange exchange, boolean allowSerializedHeaders, OutputStream outputStream)
+            Exchange exchange, boolean allowSerializedHeaders, OutputStream outputStream)
             throws IOException {
         // use DefaultExchangeHolder to marshal to a serialized object
         DefaultExchangeHolder pe = DefaultExchangeHolder.marshal(exchange, false, allowSerializedHeaders);
@@ -87,7 +87,7 @@ public class JdbcCamelCodec {
         if (fromEndpointUri != null) {
             Endpoint fromEndpoint = camelContext.hasEndpoint(fromEndpointUri);
             if (fromEndpoint != null) {
-                answer.adapt(ExtendedExchange.class).setFromEndpoint(fromEndpoint);
+                answer.getExchangeExtension().setFromEndpoint(fromEndpoint);
             }
         }
         return answer;
@@ -104,7 +104,7 @@ public class JdbcCamelCodec {
         ObjectInputStream objectIn = null;
         Object obj = null;
         try {
-            objectIn = new ClassLoadingAwareObjectInputStream(camelContext, bytesIn);
+            objectIn = new ClassLoadingAwareObjectInputStream(camelContext.getApplicationContextClassLoader(), bytesIn);
             obj = objectIn.readObject();
         } finally {
             IOHelper.close(objectIn);

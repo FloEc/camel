@@ -51,6 +51,7 @@ public class ManagedCamelContextTest extends ManagementTestSupport {
         CamelContext context = super.createCamelContext();
         // to force a different management name than the camel id
         context.getManagementNameStrategy().setNamePattern("19-#name#");
+        context.getCamelContextExtension().setDescription("My special Camel description");
         context.setNameStrategy(new ExplicitCamelContextNameStrategy("my-camel-context"));
         // debugger needed for source locations
         context.setDebugging(true);
@@ -63,6 +64,7 @@ public class ManagedCamelContextTest extends ManagementTestSupport {
         assertNotNull(client);
 
         assertEquals("my-camel-context", client.getCamelId());
+        assertEquals("My special Camel description", client.getCamelDescription());
         assertEquals("Started", client.getState());
     }
 
@@ -253,28 +255,6 @@ public class ManagedCamelContextTest extends ManagementTestSupport {
         Set<String> names = (Set<String>) mbeanServer.invoke(on, "dataFormatNames", null, null);
         Assertions.assertEquals(1, names.size());
         Assertions.assertTrue(names.contains("reverse"));
-    }
-
-    @Test
-    public void testSourceLocations() throws Exception {
-        MBeanServer mbeanServer = getMBeanServer();
-        ObjectName on = getContextObjectName();
-
-        String xml = (String) mbeanServer.invoke(on, "dumpRoutesSourceLocationsAsXml", null, null);
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains(
-                "sourceLocation=\"org.apache.camel.management.ManagedCamelContextTest$1\" sourceLineNumber=\"285\"/>"));
-        Assertions.assertTrue(xml.contains(
-                "sourceLocation=\"org.apache.camel.management.ManagedCamelContextTest$1\" sourceLineNumber=\"286\"/>"));
-        Assertions.assertTrue(xml.contains(
-                "sourceLocation=\"org.apache.camel.management.ManagedCamelContextTest$1\" sourceLineNumber=\"287\"/>"));
-
-        Assertions.assertTrue(xml.contains(
-                "sourceLocation=\"org.apache.camel.management.ManagedCamelContextTest$1\" sourceLineNumber=\"289\"/>"));
-        Assertions.assertTrue(xml.contains(
-                "sourceLocation=\"org.apache.camel.management.ManagedCamelContextTest$1\" sourceLineNumber=\"290\"/>"));
-        Assertions.assertTrue(xml.contains(
-                "sourceLocation=\"org.apache.camel.management.ManagedCamelContextTest$1\" sourceLineNumber=\"291\"/>"));
     }
 
     @Override

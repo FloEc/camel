@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -40,6 +40,9 @@ public interface GoogleBigQueryEndpointBuilderFactory {
     public interface GoogleBigQueryEndpointBuilder
             extends
                 EndpointProducerBuilder {
+        default AdvancedGoogleBigQueryEndpointBuilder advanced() {
+            return (AdvancedGoogleBigQueryEndpointBuilder) this;
+        }
         /**
          * ConnectionFactory to obtain connection to Bigquery Service. If not
          * provided the default one will be used.
@@ -75,6 +78,47 @@ public interface GoogleBigQueryEndpointBuilderFactory {
             return this;
         }
         /**
+         * Field name to use as insert id.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: producer
+         * 
+         * @param useAsInsertId the value to set
+         * @return the dsl builder
+         */
+        default GoogleBigQueryEndpointBuilder useAsInsertId(String useAsInsertId) {
+            doSetProperty("useAsInsertId", useAsInsertId);
+            return this;
+        }
+        /**
+         * Service account key in json format to authenticate an application as
+         * a service account to google cloud platform.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleBigQueryEndpointBuilder serviceAccountKey(
+                String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint for the Google BigQuery component.
+     */
+    public interface AdvancedGoogleBigQueryEndpointBuilder
+            extends
+                EndpointProducerBuilder {
+        default GoogleBigQueryEndpointBuilder basic() {
+            return (GoogleBigQueryEndpointBuilder) this;
+        }
+        /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
          * startup in situations where a producer may otherwise fail during
@@ -88,12 +132,12 @@ public interface GoogleBigQueryEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default GoogleBigQueryEndpointBuilder lazyStartProducer(
+        default AdvancedGoogleBigQueryEndpointBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -113,33 +157,32 @@ public interface GoogleBigQueryEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default GoogleBigQueryEndpointBuilder lazyStartProducer(
+        default AdvancedGoogleBigQueryEndpointBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Field name to use as insert id.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: producer
-         * 
-         * @param useAsInsertId the value to set
-         * @return the dsl builder
-         */
-        default GoogleBigQueryEndpointBuilder useAsInsertId(String useAsInsertId) {
-            doSetProperty("useAsInsertId", useAsInsertId);
             return this;
         }
     }
 
     public interface GoogleBigQueryBuilders {
+        /**
+         * Google BigQuery (camel-google-bigquery)
+         * Google BigQuery data warehouse for analytics.
+         * 
+         * Category: cloud,bigdata
+         * Since: 2.20
+         * Maven coordinates: org.apache.camel:camel-google-bigquery
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default GoogleBigQueryHeaderNameBuilder googleBigquery() {
+            return GoogleBigQueryHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Google BigQuery (camel-google-bigquery)
          * Google BigQuery data warehouse for analytics.
@@ -195,10 +238,75 @@ public interface GoogleBigQueryEndpointBuilderFactory {
             return GoogleBigQueryEndpointBuilderFactory.endpointBuilder(componentName, path);
         }
     }
+
+    /**
+     * The builder of headers' name for the Google BigQuery component.
+     */
+    public static class GoogleBigQueryHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final GoogleBigQueryHeaderNameBuilder INSTANCE = new GoogleBigQueryHeaderNameBuilder();
+
+        /**
+         * Table suffix to use when inserting data.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code GoogleBigQueryTableSuffix}.
+         */
+        public String googleBigQueryTableSuffix() {
+            return "GoogleBigQueryTableSuffix";
+        }
+
+        /**
+         * Table id where data will be submitted. If specified will override
+         * endpoint configuration.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code GoogleBigQueryTableId}.
+         */
+        public String googleBigQueryTableId() {
+            return "GoogleBigQueryTableId";
+        }
+
+        /**
+         * InsertId to use when inserting data.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code GoogleBigQueryInsertId}.
+         */
+        public String googleBigQueryInsertId() {
+            return "GoogleBigQueryInsertId";
+        }
+
+        /**
+         * Partition decorator to indicate partition to use when inserting data.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * GoogleBigQueryPartitionDecorator}.
+         */
+        public String googleBigQueryPartitionDecorator() {
+            return "GoogleBigQueryPartitionDecorator";
+        }
+    }
     static GoogleBigQueryEndpointBuilder endpointBuilder(
             String componentName,
             String path) {
-        class GoogleBigQueryEndpointBuilderImpl extends AbstractEndpointBuilder implements GoogleBigQueryEndpointBuilder {
+        class GoogleBigQueryEndpointBuilderImpl extends AbstractEndpointBuilder implements GoogleBigQueryEndpointBuilder, AdvancedGoogleBigQueryEndpointBuilder {
             public GoogleBigQueryEndpointBuilderImpl(String path) {
                 super(componentName, path);
             }

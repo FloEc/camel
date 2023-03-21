@@ -16,11 +16,13 @@
  */
 package org.apache.camel.catalog;
 
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.camel.tooling.model.ArtifactModel;
 import org.apache.camel.tooling.model.BaseModel;
 import org.apache.camel.tooling.model.ComponentModel;
 import org.apache.camel.tooling.model.DataFormatModel;
@@ -28,6 +30,7 @@ import org.apache.camel.tooling.model.EipModel;
 import org.apache.camel.tooling.model.LanguageModel;
 import org.apache.camel.tooling.model.MainModel;
 import org.apache.camel.tooling.model.OtherModel;
+import org.apache.camel.tooling.model.ReleaseModel;
 
 /**
  * Catalog of components, data formats, models (EIPs), languages, and more from this Apache Camel release.
@@ -321,13 +324,6 @@ public interface CamelCatalog {
     Set<String> findOtherLabels();
 
     /**
-     * Returns the Apache Camel Maven Archetype catalog in XML format.
-     *
-     * @return the catalog in XML
-     */
-    String archetypeCatalogAsXml();
-
-    /**
      * Returns the Camel Spring XML schema
      *
      * @return the spring XML schema
@@ -536,6 +532,8 @@ public interface CamelCatalog {
     MainModel mainModel();
 
     /**
+     * Lookup the model for the given kind and name
+     *
      * @param  kind the requested kind
      * @param  name the name to look up
      * @return      the requested model or {@code null} in case it is not available in this {@link CamelCatalog}
@@ -556,5 +554,34 @@ public interface CamelCatalog {
                 throw new IllegalArgumentException("Unexpected kind " + kind);
         }
     }
+
+    /**
+     * Lookup the model for the given Maven GAV
+     *
+     * @param  groupId    maven group id
+     * @param  artifactId maven artifact id
+     * @param  version    maven version (optional)
+     * @return            the requested model or {@code null} in case it is not available in this {@link CamelCatalog}
+     */
+    ArtifactModel<?> modelFromMavenGAV(String groupId, String artifactId, String version);
+
+    /**
+     * Load resource from catalog classpath
+     *
+     * @param  kind The resource kind, ex. camel-jbang
+     * @param  name The resource name
+     * @return      An input stream for reading the resource; null if the resource could not be found
+     */
+    InputStream loadResource(String kind, String name);
+
+    /**
+     * Load all Camel releases (core and spring-boot) from catalog
+     */
+    List<ReleaseModel> camelReleases();
+
+    /**
+     * Load all Camel Quarkus releases from catalog
+     */
+    List<ReleaseModel> camelQuarkusReleases();
 
 }

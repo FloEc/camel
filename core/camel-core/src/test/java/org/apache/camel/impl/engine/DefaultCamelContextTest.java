@@ -18,7 +18,6 @@ package org.apache.camel.impl.engine;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.camel.CamelContext;
@@ -34,6 +33,7 @@ import org.apache.camel.component.bean.BeanComponent;
 import org.apache.camel.component.direct.DirectComponent;
 import org.apache.camel.component.log.LogComponent;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.spi.EndpointRegistry;
 import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.support.CamelContextHelper;
 import org.apache.camel.support.DefaultUuidGenerator;
@@ -273,7 +273,7 @@ public class DefaultCamelContextTest extends TestSupport {
         assertNotNull(ctx.hasEndpoint("mock://foo"));
         assertNull(ctx.hasEndpoint("mock://bar"));
 
-        Map<String, Endpoint> map = ctx.getEndpointMap();
+        EndpointRegistry map = ctx.getEndpointRegistry();
         assertEquals(1, map.size());
 
         try {
@@ -315,24 +315,24 @@ public class DefaultCamelContextTest extends TestSupport {
         DefaultCamelContext ctx = new DefaultCamelContext(false);
         ctx.disableJMX();
 
-        assertEquals(false, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.start();
-        assertEquals(true, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertTrue(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.suspend();
-        assertEquals(false, ctx.isStarted());
-        assertEquals(true, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertTrue(ctx.isSuspended());
 
         ctx.suspend();
-        assertEquals(false, ctx.isStarted());
-        assertEquals(true, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertTrue(ctx.isSuspended());
 
         ctx.stop();
-        assertEquals(false, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
     }
 
     @Test
@@ -340,48 +340,48 @@ public class DefaultCamelContextTest extends TestSupport {
         DefaultCamelContext ctx = new DefaultCamelContext(false);
         ctx.disableJMX();
 
-        assertEquals(false, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.start();
-        assertEquals(true, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertTrue(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.resume();
-        assertEquals(true, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertTrue(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.resume();
-        assertEquals(true, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertTrue(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.stop();
-        assertEquals(false, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
     }
 
     @Test
     public void testSuspendResume() throws Exception {
         DefaultCamelContext ctx = new DefaultCamelContext();
 
-        assertEquals(false, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.start();
-        assertEquals(true, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertTrue(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.suspend();
-        assertEquals(false, ctx.isStarted());
-        assertEquals(true, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertTrue(ctx.isSuspended());
 
         ctx.resume();
-        assertEquals(true, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertTrue(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
 
         ctx.stop();
-        assertEquals(false, ctx.isStarted());
-        assertEquals(false, ctx.isSuspended());
+        assertFalse(ctx.isStarted());
+        assertFalse(ctx.isSuspended());
     }
 
     @Test

@@ -21,8 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.mongodb.client.MongoIterable;
+import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mongodb.MongoDbConstants;
+import org.apache.camel.test.infra.core.annotations.RouteFixture;
+import org.apache.camel.test.infra.core.api.ConfigurableRoute;
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
 
@@ -31,10 +34,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MongoDbAggregateOperationIT extends AbstractMongoDbITSupport {
+public class MongoDbAggregateOperationIT extends AbstractMongoDbITSupport implements ConfigurableRoute {
 
     @Test
-    public void testAggregate() throws Exception {
+    public void testAggregate() {
         // Test that the collection has 0 documents in it
         assertEquals(0, testCollection.countDocuments());
         pumpDataIntoTestCollection();
@@ -110,8 +113,7 @@ public class MongoDbAggregateOperationIT extends AbstractMongoDbITSupport {
         assertEquals(200, count, "Result does not contain 200 elements");
     }
 
-    @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:aggregate")
@@ -121,5 +123,11 @@ public class MongoDbAggregateOperationIT extends AbstractMongoDbITSupport {
                         .to("mock:resultAggregateDBCursor");
             }
         };
+    }
+
+    @RouteFixture
+    @Override
+    public void createRouteBuilder(CamelContext context) throws Exception {
+        context.addRoutes(createRouteBuilder());
     }
 }

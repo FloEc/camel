@@ -17,6 +17,7 @@
 package org.apache.camel.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -1111,4 +1112,57 @@ public final class StringHelper {
         }
         return text;
     }
+
+    /**
+     * Pad the string with leading spaces
+     *
+     * @param level level (2 blanks per level)
+     */
+    public static String padString(int level) {
+        return padString(level, 2);
+    }
+
+    /**
+     * Pad the string with leading spaces
+     *
+     * @param level  level
+     * @param blanks number of blanks per level
+     */
+    public static String padString(int level, int blanks) {
+        if (level == 0) {
+            return "";
+        } else {
+            byte[] arr = new byte[level * blanks];
+            byte space = ' ';
+            Arrays.fill(arr, space);
+            return new String(arr);
+        }
+    }
+
+    /**
+     * Fills the string with repeating chars
+     *
+     * @param ch    the char
+     * @param count number of chars
+     */
+    public static String fillChars(char ch, int count) {
+        if (count <= 0) {
+            return "";
+        } else {
+            byte[] arr = new byte[count];
+            byte b = (byte) ch;
+            Arrays.fill(arr, b);
+            return new String(arr);
+        }
+    }
+
+    public static boolean isDigit(String s) {
+        for (char ch : s.toCharArray()) {
+            if (!Character.isDigit(ch)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

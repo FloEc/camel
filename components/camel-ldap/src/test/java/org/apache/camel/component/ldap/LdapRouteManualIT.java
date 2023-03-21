@@ -72,7 +72,7 @@ public class LdapRouteManualIT extends AbstractLdapTestUnit {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         camel.stop();
     }
 
@@ -139,7 +139,7 @@ public class LdapRouteManualIT extends AbstractLdapTestUnit {
         assertEquals("tcruise", theOneResultAtts.get("uid").get());
         assertEquals("Tom Cruise", theOneResultAtts.get("cn").get());
 
-        // make sure this att is NOT returned anymore 
+        // make sure this att is NOT returned anymore
         assertNull(theOneResultAtts.get("sn"));
     }
 
@@ -182,10 +182,10 @@ public class LdapRouteManualIT extends AbstractLdapTestUnit {
         return false;
     }
 
-    protected RouteBuilder createRouteBuilder(final String ldapEndpointUrl) throws Exception {
+    protected RouteBuilder createRouteBuilder(final String ldapEndpointUrl) {
         return new RouteBuilder() {
             // START SNIPPET: route
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to(ldapEndpointUrl);
             }
             // END SNIPPET: route

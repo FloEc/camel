@@ -25,14 +25,12 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Navigate;
 import org.apache.camel.Processor;
 import org.apache.camel.Traceable;
 import org.apache.camel.spi.IdAware;
 import org.apache.camel.spi.ReactiveExecutor;
 import org.apache.camel.spi.RouteIdAware;
-import org.apache.camel.spi.annotations.EagerClassloaded;
 import org.apache.camel.support.AsyncProcessorConverterHelper;
 import org.apache.camel.support.AsyncProcessorSupport;
 import org.apache.camel.support.ExchangeHelper;
@@ -46,7 +44,6 @@ import static org.apache.camel.processor.PipelineHelper.continueProcessing;
  * Creates a Pipeline pattern where the output of the previous step is sent as input to the next step, reusing the same
  * message exchanges
  */
-@EagerClassloaded
 public class Pipeline extends AsyncProcessorSupport implements Navigate<Processor>, Traceable, IdAware, RouteIdAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(Pipeline.class);
@@ -98,10 +95,7 @@ public class Pipeline extends AsyncProcessorSupport implements Navigate<Processo
             if (!stop && more && (first || continueProcessing(exchange, "so breaking out of pipeline", LOG))) {
 
                 // prepare for next run
-                if (exchange.hasOut()) {
-                    exchange.setIn(exchange.getOut());
-                    exchange.setOut(null);
-                }
+                ExchangeHelper.prepareOutToIn(exchange);
 
                 // get the next processor
                 AsyncProcessor processor = processors.get(index++);
@@ -112,7 +106,7 @@ public class Pipeline extends AsyncProcessorSupport implements Navigate<Processo
                 ExchangeHelper.copyResults(exchange, exchange);
 
                 // logging nextExchange as it contains the exchange that might have altered the payload and since
-                // we are logging the completion if will be confusing if we log the original instead
+                // we are logging the completion it will be confusing if we log the original instead
                 // we could also consider logging the original and the nextExchange then we have *before* and *after* snapshots
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Processing complete for exchangeId: {} >>> {}", exchange.getExchangeId(), exchange);
@@ -127,24 +121,9 @@ public class Pipeline extends AsyncProcessorSupport implements Navigate<Processo
 
     public Pipeline(CamelContext camelContext, Collection<Processor> processors) {
         this.camelContext = camelContext;
-        this.reactiveExecutor = camelContext.adapt(ExtendedCamelContext.class).getReactiveExecutor();
+        this.reactiveExecutor = camelContext.getCamelContextExtension().getReactiveExecutor();
         this.processors = processors.stream().map(AsyncProcessorConverterHelper::convert).collect(Collectors.toList());
         this.size = processors.size();
-    }
-
-    private Pipeline(Logger log) {
-        // used for eager loading
-        camelContext = null;
-        reactiveExecutor = null;
-        processors = null;
-        size = 0;
-        PipelineTask task = new PipelineTask();
-        log.trace("Loaded {}", task.getClass().getSimpleName());
-    }
-
-    public static void onClassloaded(Logger log) {
-        Pipeline dummy = new Pipeline(log);
-        log.trace("Loaded {}", dummy.getClass().getSimpleName());
     }
 
     public static Processor newInstance(CamelContext camelContext, List<Processor> processors) {
@@ -175,20 +154,26 @@ public class Pipeline extends AsyncProcessorSupport implements Navigate<Processo
 
     @Override
     public boolean process(Exchange exchange, AsyncCallback callback) {
-        // create task which has state used during routing
-        PooledExchangeTask task = taskFactory.acquire(exchange, callback);
+        try {
+            // create task which has state used during routing
+            PooledExchangeTask task = taskFactory.acquire(exchange, callback);
 
-        if (exchange.isTransacted()) {
-            reactiveExecutor.scheduleQueue(task);
-        } else {
-            reactiveExecutor.scheduleMain(task);
+            if (exchange.isTransacted()) {
+                reactiveExecutor.scheduleQueue(task);
+            } else {
+                reactiveExecutor.scheduleMain(task);
+            }
+            return false;
+        } catch (Throwable e) {
+            exchange.setException(e);
+            callback.done(true);
+            return true;
         }
-        return false;
     }
 
     @Override
     protected void doBuild() throws Exception {
-        boolean pooled = camelContext.adapt(ExtendedCamelContext.class).getExchangeFactory().isPooled();
+        boolean pooled = camelContext.getCamelContextExtension().getExchangeFactory().isPooled();
         if (pooled) {
             taskFactory = new PooledTaskFactory(getId()) {
                 @Override
@@ -196,7 +181,7 @@ public class Pipeline extends AsyncProcessorSupport implements Navigate<Processo
                     return new PipelineTask();
                 }
             };
-            int capacity = camelContext.adapt(ExtendedCamelContext.class).getExchangeFactory().getCapacity();
+            int capacity = camelContext.getCamelContextExtension().getExchangeFactory().getCapacity();
             taskFactory.setCapacity(capacity);
         } else {
             taskFactory = new PrototypeTaskFactory() {

@@ -28,28 +28,44 @@ import org.apache.camel.StaticService;
 import org.apache.camel.spi.ScriptingLanguage;
 import org.apache.camel.spi.annotations.Language;
 import org.apache.camel.support.ExpressionToPredicateAdapter;
-import org.apache.camel.support.LanguageSupport;
 import org.apache.camel.support.ScriptHelper;
+import org.apache.camel.support.TypedLanguageSupport;
 import org.apache.camel.support.service.ServiceHelper;
 import org.apache.camel.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Language("joor")
-public class JoorLanguage extends LanguageSupport implements ScriptingLanguage, StaticService {
+public class JoorLanguage extends TypedLanguageSupport implements ScriptingLanguage, StaticService {
 
     private static final Logger LOG = LoggerFactory.getLogger(JoorLanguage.class);
 
     private static Boolean java8;
-    private final JoorCompiler compiler = new JoorCompiler();
-    private final JoorScriptingCompiler scriptingCompiler = new JoorScriptingCompiler();
+    private final JoorCompiler compiler;
+    private final JoorScriptingCompiler scriptingCompiler;
     private final Set<String> imports = new TreeSet<>();
     private final Map<String, String> aliases = new HashMap<>();
 
     private String configResource = "classpath:camel-joor.properties?optional=true";
     private boolean preCompile = true;
-    private Class<?> resultType;
     private boolean singleQuotes = true;
+
+    public JoorLanguage() {
+        this(new JoorCompiler(), new JoorScriptingCompiler());
+    }
+
+    public JoorLanguage(JoorCompiler compiler, JoorScriptingCompiler scriptingCompiler) {
+        this.compiler = compiler;
+        this.scriptingCompiler = scriptingCompiler;
+    }
+
+    public JoorCompiler getCompiler() {
+        return compiler;
+    }
+
+    public JoorScriptingCompiler getScriptingCompiler() {
+        return scriptingCompiler;
+    }
 
     public String getConfigResource() {
         return configResource;
@@ -69,14 +85,6 @@ public class JoorLanguage extends LanguageSupport implements ScriptingLanguage, 
         this.preCompile = preCompile;
     }
 
-    public Class<?> getResultType() {
-        return resultType;
-    }
-
-    public void setResultType(Class<?> resultType) {
-        this.resultType = resultType;
-    }
-
     public boolean isSingleQuotes() {
         return singleQuotes;
     }
@@ -89,7 +97,7 @@ public class JoorLanguage extends LanguageSupport implements ScriptingLanguage, 
     @SuppressWarnings("unchecked")
     public <T> T evaluate(String script, Map<String, Object> bindings, Class<T> resultType) {
         Object out;
-        JoorScriptingMethod target = scriptingCompiler.compile(getCamelContext(), script, bindings, resultType, singleQuotes);
+        JoorScriptingMethod target = scriptingCompiler.compile(getCamelContext(), script, bindings, singleQuotes);
         try {
             out = target.evaluate(bindings);
         } catch (Exception e) {
@@ -111,7 +119,7 @@ public class JoorLanguage extends LanguageSupport implements ScriptingLanguage, 
     public Expression createExpression(String expression) {
         JoorExpression exp = new JoorExpression(expression);
         exp.setCompiler(compiler);
-        exp.setResultType(resultType);
+        exp.setResultType(getResultType());
         exp.setSingleQuotes(singleQuotes);
         exp.init(getCamelContext());
         return exp;
@@ -127,7 +135,7 @@ public class JoorLanguage extends LanguageSupport implements ScriptingLanguage, 
         JoorExpression exp = new JoorExpression(expression);
         exp.setCompiler(compiler);
         exp.setPreCompile(property(boolean.class, properties, 0, preCompile));
-        exp.setResultType(property(Class.class, properties, 1, resultType));
+        exp.setResultType(property(Class.class, properties, 1, getResultType()));
         exp.setSingleQuotes(property(boolean.class, properties, 2, singleQuotes));
         exp.init(getCamelContext());
         return exp;

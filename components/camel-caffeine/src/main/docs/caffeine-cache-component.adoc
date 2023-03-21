@@ -49,6 +49,9 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Examples
 
@@ -56,6 +59,10 @@ You can use your cache with the following code:
 
 [source,java]
 ------------------------------------------------------------
+
+@BindToRegistry("cache")
+Cache cache = Caffeine.newBuilder().recordStats().build();
+
 @Override
 protected RouteBuilder createRouteBuilder() throws Exception {
     return new RouteBuilder() {

@@ -161,7 +161,10 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
         // only if there is components we should update the documentation files
         if (!componentNames.isEmpty()) {
-            getLog().debug("Found " + componentNames.size() + " components");
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Found " + componentNames.size() + " components");
+            }
+
             for (String componentName : componentNames) {
                 String json = loadJsonFrom(jsonFiles, kind, componentName);
                 if (json != null) {
@@ -175,10 +178,10 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     String title = asComponentTitle(model.getScheme(), model.getTitle());
                     model.setTitle(title);
 
-                    boolean updated = updateHeader(componentName, file, model, " Component", kind);
+                    boolean updated = updateHeader(componentName, file, model, " Component");
 
-                    checkComponentHeader(file, model);
-                    checkSince(file, model);
+                    checkComponentHeader(file);
+                    checkSince(file);
 
                     updated |= updateOptionsIn(file, "component-configure", "");
                     String options = evaluateTemplate("component-options.mvel", model);
@@ -189,7 +192,9 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     if (updated) {
                         getLog().info("Updated doc file: " + file);
                     } else if (exists) {
-                        getLog().debug("No changes to doc file: " + file);
+                        if (getLog().isDebugEnabled()) {
+                            getLog().debug("No changes to doc file: " + file);
+                        }
                     } else {
                         getLog().warn("No component doc file: " + file);
                         if (isFailFast()) {
@@ -204,11 +209,17 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
     private void executeOther() throws MojoExecutionException {
         final Set<File> jsonFiles = new TreeSet<>();
         PackageHelper.findJsonFiles(buildDir, jsonFiles);
-        getLog().debug("UpdateReadmeMojo jsonFiles: " + jsonFiles);
+
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("UpdateReadmeMojo jsonFiles: " + jsonFiles);
+        }
 
         // only if there is components we should update the documentation files
         if (!jsonFiles.isEmpty()) {
-            getLog().debug("Found " + jsonFiles.size() + " miscellaneous components");
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Found " + jsonFiles.size() + " miscellaneous components");
+            }
+
             for (File jsonFile : jsonFiles) {
                 final String kind = "other";
                 String json = loadJsonFrom(jsonFile, kind);
@@ -223,13 +234,15 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     File file = new File(componentDocDir, componentName + ".adoc");
                     boolean exists = file.exists();
 
-                    boolean updated = updateHeader(componentName, file, model, " Component", kind);
-                    checkSince(file, model);
+                    boolean updated = updateHeader(componentName, file, model, " Component");
+                    checkSince(file);
 
                     if (updated) {
                         getLog().info("Updated doc file: " + file);
                     } else if (exists) {
-                        getLog().debug("No changes to doc file: " + file);
+                        if (getLog().isDebugEnabled()) {
+                            getLog().debug("No changes to doc file: " + file);
+                        }
                     } else {
                         getLog().warn("No component doc file: " + file);
                         if (isFailFast()) {
@@ -251,7 +264,10 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
         // only if there is dataformat we should update the documentation files
         if (!dataFormatNames.isEmpty()) {
-            getLog().debug("Found " + dataFormatNames.size() + " dataformats");
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Found " + dataFormatNames.size() + " dataformats");
+            }
+
             for (String dataFormatName : dataFormatNames) {
                 String json = loadJsonFrom(jsonFiles, kind, dataFormatName);
                 if (json != null) {
@@ -273,8 +289,8 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     model.setTitle(title);
 
                     boolean exists = file.exists();
-                    boolean updated = updateHeader(dataFormatName, file, model, " DataFormat", kind);
-                    checkSince(file, model);
+                    boolean updated = updateHeader(dataFormatName, file, model, " DataFormat");
+                    checkSince(file);
 
                     String options = evaluateTemplate("dataformat-options.mvel", model);
                     updated |= updateOptionsIn(file, kind, options);
@@ -288,7 +304,9 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     if (updated) {
                         getLog().info("Updated doc file: " + file);
                     } else if (exists) {
-                        getLog().debug("No changes to doc file: " + file);
+                        if (getLog().isDebugEnabled()) {
+                            getLog().debug("No changes to doc file: " + file);
+                        }
                     } else {
                         getLog().warn("No dataformat doc file: " + file);
                         if (isFailFast()) {
@@ -303,8 +321,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
     private static String asComponentName(String name) {
         // special for some components which share the same readme file
-        if (name.equals("imap") || name.equals("imaps") || name.equals("pop3") || name.equals("pop3s") || name.equals("smtp")
-                || name.equals("smtps")) {
+        if (isMailComponent(name)) {
             return "mail";
         }
 
@@ -321,7 +338,10 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
         // only if there is language we should update the documentation files
         if (!languageNames.isEmpty()) {
-            getLog().debug("Found " + languageNames.size() + " languages");
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Found " + languageNames.size() + " languages");
+            }
+
             for (String languageName : languageNames) {
                 String json = loadJsonFrom(jsonFiles, kind, languageName);
                 if (json != null) {
@@ -334,8 +354,8 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
                     LanguageModel model = JsonMapper.generateLanguageModel(json);
 
-                    boolean updated = updateHeader(languageName, file, model, " Language", kind);
-                    checkSince(file, model);
+                    boolean updated = updateHeader(languageName, file, model, " Language");
+                    checkSince(file);
 
                     String options = evaluateTemplate("language-options.mvel", model);
                     updated |= updateOptionsIn(file, kind, options);
@@ -343,7 +363,9 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     if (updated) {
                         getLog().info("Updated doc file: " + file);
                     } else if (exists) {
-                        getLog().debug("No changes to doc file: " + file);
+                        if (getLog().isDebugEnabled()) {
+                            getLog().debug("No changes to doc file: " + file);
+                        }
                     } else {
                         getLog().warn("No language doc file: " + file);
                         if (isFailFast()) {
@@ -374,7 +396,10 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
         // only if there is EIP we should update the documentation files
         if (!jsonFiles.isEmpty()) {
-            getLog().debug("Found " + jsonFiles.size() + " eips");
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Found " + jsonFiles.size() + " eips");
+            }
+
             for (File jsonFile : jsonFiles) {
                 String json = loadEipJson(jsonFile);
                 if (json != null) {
@@ -391,7 +416,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     File file = new File(eipDocDir, eipName + "-" + kind + ".adoc");
                     boolean exists = file.exists();
 
-                    boolean updated = updateHeader(eipName, file, model, " EIP", kind);
+                    boolean updated = updateHeader(eipName, file, model, " EIP");
 
                     String options = evaluateTemplate("eip-options.mvel", model);
                     updated |= updateOptionsIn(file, kind, options);
@@ -399,7 +424,9 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
                     if (updated) {
                         getLog().info("Updated doc file: " + file);
                     } else if (exists) {
-                        getLog().debug("No changes to doc file: " + file);
+                        if (getLog().isDebugEnabled()) {
+                            getLog().debug("No changes to doc file: " + file);
+                        }
                     } else {
                         getLog().warn("No eip doc file: " + file);
                         if (isFailFast()) {
@@ -413,12 +440,16 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
     private static String asComponentTitle(String name, String title) {
         // special for some components which share the same readme file
-        if (name.equals("imap") || name.equals("imaps") || name.equals("pop3") || name.equals("pop3s") || name.equals("smtp")
-                || name.equals("smtps")) {
+        if (isMailComponent(name)) {
             return "Mail";
         }
 
         return title;
+    }
+
+    private static boolean isMailComponent(String name) {
+        return name.equals("imap") || name.equals("imaps") || name.equals("pop3") || name.equals("pop3s") || name.equals("smtp")
+                || name.equals("smtps");
     }
 
     private static String asDataFormatName(String name) {
@@ -440,11 +471,12 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
     }
 
     private boolean updateHeader(
-            String name, final File file, final BaseModel<? extends BaseOptionModel> model, String titleSuffix,
-            String kind)
+            String name, final File file, final BaseModel<? extends BaseOptionModel> model, String titleSuffix)
             throws MojoExecutionException {
-        getLog().debug("updateHeader " + file);
-        final String linkSuffix = "-" + kind;
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("updateHeader " + file);
+        }
+
         if (model == null || !file.exists()) {
             return false;
         }
@@ -527,7 +559,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
             boolean copy = false;
             if (updated || RELOCATE_MANUAL_ATTRIBUTES) {
                 outer: for (String line : lines) {
-                    if (!copy && line.isEmpty()) {
+                    if (!copy && line.trim().isEmpty()) {
                         copy = true;
                     } else if (copy) {
 
@@ -564,7 +596,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
         return updated;
     }
 
-    private void checkComponentHeader(final File file, final ComponentModel model) throws MojoExecutionException {
+    private void checkComponentHeader(final File file) throws MojoExecutionException {
         if (!file.exists()) {
             return;
         }
@@ -583,7 +615,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
         }
     }
 
-    private void checkSince(final File file, final ArtifactModel<?> model) throws MojoExecutionException {
+    private void checkSince(final File file) throws MojoExecutionException {
         if (!file.exists()) {
             return;
         }
@@ -682,7 +714,11 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
         if (!annotation.isAnnotation()) {
             throw new MojoExecutionException("Interface " + annotationInterface + " is not an annotation");
         }
-        getLog().debug("Processing annotation " + annotationInterface);
+
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("Processing annotation " + annotationInterface);
+        }
+
         AnnotationModel model = generateAnnotationModel(annotation);
         String options = evaluateTemplate("annotation-options.mvel", model);
         String updated = options.trim();
@@ -709,13 +745,9 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
     private static String loadJsonFrom(Set<File> jsonFiles, String kind, String name) {
         for (File file : jsonFiles) {
             if (file.getName().equals(name + PackageHelper.JSON_SUFIX)) {
-                try {
-                    String json = PackageHelper.loadText(file);
-                    if (Objects.equals(kind, PackageHelper.getSchemaKind(json))) {
-                        return json;
-                    }
-                } catch (IOException ignored) {
-                    // ignored
+                String json = doLoad(file, kind);
+                if (json != null) {
+                    return json;
                 }
             }
         }
@@ -725,16 +757,24 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
 
     private static String loadJsonFrom(File file, String kind) {
         if (file.getName().endsWith(PackageHelper.JSON_SUFIX)) {
-            try {
-                String json = PackageHelper.loadText(file);
-                if (Objects.equals(kind, PackageHelper.getSchemaKind(json))) {
-                    return json;
-                }
-            } catch (IOException ignored) {
-                // ignored
+            String json = doLoad(file, kind);
+            if (json != null) {
+                return json;
             }
         }
 
+        return null;
+    }
+
+    private static String doLoad(File file, String kind) {
+        try {
+            String json = PackageHelper.loadText(file);
+            if (Objects.equals(kind, PackageHelper.getSchemaKind(json))) {
+                return json;
+            }
+        } catch (IOException ignored) {
+            // ignored
+        }
         return null;
     }
 
@@ -751,8 +791,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
     }
 
     private ComponentModel generateComponentModel(String json) {
-        ComponentModel component = JsonMapper.generateComponentModel(json);
-        return component;
+        return JsonMapper.generateComponentModel(json);
     }
 
     private OtherModel generateOtherModel(String json) {
@@ -761,8 +800,7 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
     }
 
     private DataFormatModel generateDataFormatModel(String json) {
-        DataFormatModel model = JsonMapper.generateDataFormatModel(json);
-        return model;
+        return JsonMapper.generateDataFormatModel(json);
     }
 
     private AnnotationModel generateAnnotationModel(Class<?> annotation) {
@@ -888,10 +926,4 @@ public class UpdateReadmeMojo extends AbstractGeneratorMojo {
     private boolean isFailFast() {
         return failFast != null && failFast;
     }
-
-    private String wrapEnumValues(List<String> enumValues) {
-        // comma to space so we can wrap words (which uses space)
-        return String.join(", ", enumValues);
-    }
-
 }

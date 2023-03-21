@@ -31,7 +31,7 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpConsumerWithCharsetIT extends SftpServerTestSupport {
 
     private static final String SAMPLE_FILE_NAME
@@ -58,7 +58,7 @@ public class SftpConsumerWithCharsetIT extends SftpServerTestSupport {
         context.getRouteController().startRoute("foo");
 
         // Check that expectations are satisfied
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // Check that the proper charset was set in the internal object
         Exchange exchange = mock.getExchanges().get(0);
@@ -68,14 +68,14 @@ public class SftpConsumerWithCharsetIT extends SftpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}"
                      + "?username=admin&password=admin&charset="
                      + SAMPLE_FILE_CHARSET).routeId("foo").noAutoStartup()
-                             .to("mock:result");
+                        .to("mock:result");
             }
         };
     }

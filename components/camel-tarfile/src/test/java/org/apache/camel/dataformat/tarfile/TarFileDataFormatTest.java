@@ -68,12 +68,12 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBody("direct:tar", TEXT);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
         assertEquals(exchange.getIn().getMessageId() + ".tar", exchange.getIn().getHeader(FILE_NAME));
         assertTrue(ObjectHelper.equalByteArray(getTaredText(exchange.getIn().getMessageId()),
-                (byte[]) exchange.getIn().getBody()));
+                exchange.getIn().getBody(byte[].class)));
     }
 
     @Test
@@ -84,10 +84,10 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:tar", TEXT, FILE_NAME, "poem.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
-        assertTrue(ObjectHelper.equalByteArray(getTaredText("poem.txt"), (byte[]) exchange.getIn().getBody()));
+        assertTrue(ObjectHelper.equalByteArray(getTaredText("poem.txt"), exchange.getIn().getBody(byte[].class)));
     }
 
     @Test
@@ -98,10 +98,10 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:tar", TEXT, FILE_NAME, "poems/poem.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
-        assertTrue(ObjectHelper.equalByteArray(getTaredText("poem.txt"), (byte[]) exchange.getIn().getBody()));
+        assertTrue(ObjectHelper.equalByteArray(getTaredText("poem.txt"), exchange.getIn().getBody(byte[].class)));
     }
 
     @Test
@@ -114,11 +114,11 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:tar", TEXT, FILE_NAME, "poems/poem.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
         assertTrue(ObjectHelper.equalByteArray(getTaredTextInFolder("poems/", "poems/poem.txt"),
-                (byte[]) exchange.getIn().getBody()));
+                exchange.getIn().getBody(byte[].class)));
     }
 
     @Test
@@ -128,11 +128,11 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBody("direct:untar", getTaredText("file"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
-    public void testUntarWithCorruptedTarFile() throws Exception {
+    public void testUntarWithCorruptedTarFile() {
         final File body = new File("src/test/resources/data/corrupt.tar");
 
         assertThrows(CamelExecutionException.class,
@@ -146,11 +146,11 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBody("direct:tarAndUntar", TEXT);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
         assertEquals(exchange.getIn().getMessageId(), exchange.getIn().getHeader(FILE_NAME));
-        assertEquals(TEXT, new String((byte[]) exchange.getIn().getBody(), StandardCharsets.UTF_8));
+        assertEquals(TEXT, new String(exchange.getIn().getBody(byte[].class), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -165,7 +165,7 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBody("direct:tarToFile", TEXT);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // use builder to ensure the exchange is fully done before we check for file exists
         assertTrue(notify.matches(5, TimeUnit.SECONDS));
@@ -205,7 +205,7 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:dslTar", TEXT, FILE_NAME, "poem.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -215,11 +215,11 @@ public class TarFileDataFormatTest extends CamelTestSupport {
 
         template.sendBody("direct:dslUntar", getTaredText("test.txt"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
-    public void testUntarWithEmptyDirectorySupported() throws Exception {
+    public void testUntarWithEmptyDirectorySupported() {
         deleteDirectory(new File("hello_out"));
         tar.setUsingIterator(true);
         tar.setAllowEmptyDirectory(true);
@@ -229,7 +229,7 @@ public class TarFileDataFormatTest extends CamelTestSupport {
     }
 
     @Test
-    public void testUntarWithEmptyDirectoryUnsupported() throws Exception {
+    public void testUntarWithEmptyDirectoryUnsupported() {
         deleteDirectory(new File("hello_out"));
         tar.setUsingIterator(true);
         tar.setAllowEmptyDirectory(false);
@@ -284,10 +284,10 @@ public class TarFileDataFormatTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 interceptSendToEndpoint("file:*").to("mock:intercepted");
 
                 tar = new TarFileDataFormat();

@@ -68,195 +68,9 @@ You have the possibility of avoiding the usage of explicit static credentials, b
 
 For more information about this you can look at https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html[AWS credentials documentation]
 
-=== Message headers evaluated by the DDB producer
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbBatchItems` |`Map<String, KeysAndAttributes>` |A map of the table name and corresponding items to get by primary key.
-
-|`CamelAwsDdbTableName` |`String` |Table Name for this operation.
-
-|`CamelAwsDdbKey` |`Key` |The primary key that uniquely identifies each item in a table.
-
-|`CamelAwsDdbReturnValues` |`String` |Use this parameter if you want to get the attribute name-value pairs
-before or after they are modified(NONE, ALL_OLD, UPDATED_OLD, ALL_NEW,
-UPDATED_NEW).
-
-|`CamelAwsDdbUpdateCondition` |`Map<String, ExpectedAttributeValue>` |Designates an attribute for a conditional modification.
-
-|`CamelAwsDdbAttributeNames` |`Collection<String>` |If attribute names are not specified then all attributes will be
-returned.
-
-|`CamelAwsDdbConsistentRead` |`Boolean` |If set to true, then a consistent read is issued, otherwise eventually
-consistent is used.
-
-|`CamelAwsDdbIndexName` |`String` |If set will be used as Secondary Index for Query operation.
-
-|`CamelAwsDdbItem` |`Map<String, AttributeValue>` |A map of the attributes for the item, and must include the primary key
-values that define the item.
-
-|`CamelAwsDdbExactCount` |`Boolean` |If set to true, Amazon DynamoDB returns a total number of items that
-match the query parameters, instead of a list of the matching items and
-their attributes.
-
-|`CamelAwsDdbKeyConditions` |`Map<String, Condition>` |This header specify the selection criteria for the
-query, and merge together the two old headers *CamelAwsDdbHashKeyValue*
-and *CamelAwsDdbScanRangeKeyCondition*
-
-|`CamelAwsDdbStartKey` |`Key` |Primary key of the item from which to continue an earlier query.
-
-|`CamelAwsDdbHashKeyValue` |`AttributeValue` |Value of the hash component of the composite primary key.
-
-|`CamelAwsDdbLimit` |`Integer` |The maximum number of items to return.
-
-|`CamelAwsDdbScanRangeKeyCondition` |`Condition` |A container for the attribute values and comparison operators to use for
-the query.
-
-|`CamelAwsDdbScanIndexForward` |`Boolean` |Specifies forward or backward traversal of the index.
-
-|`CamelAwsDdbScanFilter` |`Map<String, Condition>` |Evaluates the scan results and returns only the desired values.
-
-|`CamelAwsDdbUpdateValues` |`Map<String, AttributeValueUpdate>` |Map of attribute name to the new value and action for the update.
-|=======================================================================
-
-=== Message headers set during BatchGetItems operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbBatchResponse` |`Map<String,BatchResponse>` |Table names and the respective item attributes from the tables.
-
-|`CamelAwsDdbUnprocessedKeys` |`Map<String,KeysAndAttributes>` |Contains a map of tables and their respective keys that were not
-processed with the current response.
-|=======================================================================
-
-=== Message headers set during DeleteItem operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbAttributes` |`Map<String, AttributeValue>` |The list of attributes returned by the operation.
-|=======================================================================
-
-=== Message headers set during DeleteTable operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbProvisionedThroughput`| | 
-
-|`ProvisionedThroughputDescription` | |The value of the ProvisionedThroughput property for this table
-
-|`CamelAwsDdbCreationDate` |`Date` |Creation DateTime of this table.
-
-|`CamelAwsDdbTableItemCount` |`Long` |Item count for this table.
-
-|`CamelAwsDdbKeySchema` |`KeySchema` |The KeySchema that identifies the primary key for this table. 
-*From Camel 2.16.0 the type of this header is List<KeySchemaElement> and not KeySchema*
-
-|`CamelAwsDdbTableName` |`String` |The table name. 
-
-|`CamelAwsDdbTableSize` |`Long` |The table size in bytes. 
-
-|`CamelAwsDdbTableStatus` |`String` |The status of the table: CREATING, UPDATING, DELETING, ACTIVE
-|=======================================================================
-
-=== Message headers set during DescribeTable operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbProvisionedThroughput` |{\{ProvisionedThroughputDescription}} |The value of the ProvisionedThroughput property for this table
-
-|`CamelAwsDdbCreationDate` |`Date` |Creation DateTime of this table.
-
-|`CamelAwsDdbTableItemCount` |`Long` |Item count for this table.
-
-|`CamelAwsDdbKeySchema` |{\{KeySchema}} |The KeySchema that identifies the primary key for this table.
-
-
-|`CamelAwsDdbTableName` |`String` |The table name.
-
-|`CamelAwsDdbTableSize` |`Long` |The table size in bytes.
-
-|`CamelAwsDdbTableStatus` |`String` |The status of the table: CREATING, UPDATING, DELETING, ACTIVE
-
-|`CamelAwsDdbReadCapacity` |`Long` |ReadCapacityUnits property of this table.
-
-|`CamelAwsDdbWriteCapacity` |`Long` |WriteCapacityUnits property of this table.
-|=======================================================================
-
-=== Message headers set during GetItem operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbAttributes` |`Map<String, AttributeValue>` |The list of attributes returned by the operation.
-
-|=======================================================================
-
-=== Message headers set during PutItem operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbAttributes` |`Map<String, AttributeValue>` |The list of attributes returned by the operation.
-
-|=======================================================================
-
-=== Message headers set during Query operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbItems` |`List<java.util.Map<String,AttributeValue>>` |The list of attributes returned by the operation.
-
-|`CamelAwsDdbLastEvaluatedKey` |`Key` |Primary key of the item where the query operation stopped, inclusive of
-the previous result set.
-
-|`CamelAwsDdbConsumedCapacity` |`Double` |The number of Capacity Units of the provisioned throughput of the table
-consumed during the operation.
-
-|`CamelAwsDdbCount` |`Integer` |Number of items in the response.
-|=======================================================================
-
-=== Message headers set during Scan operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbItems` |`List<java.util.Map<String,AttributeValue>>` |The list of attributes returned by the operation.
-
-|`CamelAwsDdbLastEvaluatedKey` |`Key` |Primary key of the item where the query operation stopped, inclusive of
-the previous result set.
-
-|`CamelAwsDdbConsumedCapacity` |`Double` |The number of Capacity Units of the provisioned throughput of the table
-consumed during the operation.
-
-|`CamelAwsDdbCount` |`Integer` |Number of items in the response.
-
-|`CamelAwsDdbScannedCount` |`Integer` |Number of items in the complete scan before any filters are applied.
-|=======================================================================
-
-=== Message headers set during UpdateItem operation
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsDdbAttributes` |`Map<String, AttributeValue>` |The list of attributes returned by the operation.
-
-|=======================================================================
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 === Advanced AmazonDynamoDB configuration
 
@@ -266,8 +80,25 @@ URI:
 
 [source,java]
 ----------------------------------------------------
-from("direct:start")
-.to("aws2-ddb://domainName?amazonDDBClient=#client");
+public class MyRouteBuilder extends RouteBuilder {
+
+    private String accessKey = "myaccessKey";
+    private String secretKey = "secretKey";
+
+    @Override
+    public void configure() throws Exception {
+
+        DynamoDbClient client = DynamoDbClient.builder()
+        .region(Region.AP_SOUTHEAST_2)
+        .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+        .build();
+
+        getCamelContext().getRegistry().bind("client", client);
+
+    	from("direct:start")
+        .to("aws2-ddb://domainName?amazonDDBClient=#client");
+    }
+}
 ----------------------------------------------------
 
 The `#client` refers to a `DynamoDbClient` in the
@@ -288,25 +119,6 @@ Registry.
 
 == Dependencies
 
-== Examples
-
-=== Producer Examples
-
-- PutItem: this operation will create an entry into DynamoDB
-
-[source,java]
---------------------------------------------------------------------------------
-from("direct:start")
-  .setHeader(Ddb2Constants.OPERATION, Ddb2Operations.PutItem)
-  .setHeader(Ddb2Constants.CONSISTENT_READ, "true")
-  .setHeader(Ddb2Constants.RETURN_VALUES, "ALL_OLD")
-  .setHeader(Ddb2Constants.ITEM, attributeMap)
-  .setHeader(Ddb2Constants.ATTRIBUTE_NAMES, attributeMap.keySet());
-  .to("aws2-ddb://" + tableName + "?keyAttributeName=" + attributeName + "&keyAttributeType=" + KeyType.HASH
-  + "&keyScalarType=" + ScalarAttributeType.S
-  + "&readCapacity=1&writeCapacity=1");
---------------------------------------------------------------------------------
-
 Maven users will need to add the following dependency to their pom.xml.
 
 *pom.xml*
@@ -321,6 +133,79 @@ Maven users will need to add the following dependency to their pom.xml.
 ---------------------------------------
 
 where `$\{camel-version}` must be replaced by the actual version of Camel.
+
+== Examples
+
+=== Producer Examples
+
+- PutItem: this operation will create an entry into DynamoDB
+
+[source,java]
+--------------------------------------------------------------------------------
+Map<String, AttributeValue> attributeMap = new HashMap<>();
+attributeMap.put("partitionKey", AttributeValue.builder().s("3000").build());
+attributeMap.put("id", AttributeValue.builder().s("1001").build());
+attributeMap.put("barcode", AttributeValue.builder().s("9002811220001").build());
+
+from("direct:start")
+  .setHeader(Ddb2Constants.OPERATION,  constant(Ddb2Operations.PutItem))
+  .setHeader(Ddb2Constants.CONSISTENT_READ, constant("true"))
+  .setHeader(Ddb2Constants.RETURN_VALUES, constant("ALL_OLD"))
+  .setHeader(Ddb2Constants.ITEM, constant(attributeMap))
+  .setHeader(Ddb2Constants.ATTRIBUTE_NAMES, constant(attributeMap.keySet()))
+  .to("aws2-ddb://" + tableName + "?amazonDDBClient=#client");
+--------------------------------------------------------------------------------
+
+- UpdateItem: this operation will update an entry into DynamoDB
+
+[source,java]
+--------------------------------------------------------------------------------
+Map<String, AttributeValueUpdate> attributeMap = new HashMap<>();
+attributeMap.put("partitionKey", AttributeValueUpdate.builder().value(AttributeValue.builder().s("3000").build()).build());
+attributeMap.put("sortKey",  AttributeValueUpdate.builder().value(AttributeValue.builder().s("1001").build()).build());
+attributeMap.put("borcode",  AttributeValueUpdate.builder().value(AttributeValue.builder().s("900281122").build()).build());
+
+Map<String, AttributeValue> keyMap = new HashMap<>();
+keyMap.put("partitionKey", AttributeValue.builder().s("3000").build());
+keyMap.put("sortKey", AttributeValue.builder().s("1001").build());
+
+from("direct:start")
+  .setHeader(Ddb2Constants.OPERATION,  constant(Ddb2Operations.UpdateItem))
+  .setHeader(Ddb2Constants.ITEM,  constant(attributeMap))
+  .setHeader(Ddb2Constants.KEY,  constant(keyMap))
+  .to("aws2-ddb://" + tableName + "?amazonDDBClient=#client");
+--------------------------------------------------------------------------------
+
+- GetItem: this operation will retrieve an entry from DynamoDB
+
+[source,java]
+--------------------------------------------------------------------------------
+from("direct:get")
+  .process(exchange -> {
+      final Map<String, AttributeValue> keyMap = new HashMap<>();
+      keyMap.put("table-key", AttributeValue.builder().s("1").build());
+
+      exchange.getIn().setHeader(Ddb2Constants.OPERATION, Ddb2Operations.GetItem);
+      exchange.getIn().setHeader(Ddb2Constants.ATTRIBUTE_NAMES, constant(List.of("table-key", "message")));
+      exchange.getIn().setHeader(Ddb2Constants.KEY, keyMap);
+  })
+  .toF("aws2-ddb://%s?amazonDDBClient=#client&consistentRead=true", tableName);
+--------------------------------------------------------------------------------
+
+- DeleteItem: this operation will delete an entry from DynamoDB
+
+[source,java]
+--------------------------------------------------------------------------------
+from("direct:delete")
+  .process(exchange -> {
+      final Map<String, AttributeValue> keyMap = new HashMap<>();
+      keyMap.put("table-key", AttributeValue.builder().s("1").build());
+
+      exchange.getIn().setHeader(Ddb2Constants.OPERATION, Ddb2Operations.DeleteItem);
+      exchange.getIn().setHeader(Ddb2Constants.KEY, keyMap);
+  })
+  .toF("aws2-ddb://%s?amazonDDBClient=#client&consistentRead=true", tableName);
+--------------------------------------------------------------------------------
 
 
 include::spring-boot:partial$starter.adoc[]

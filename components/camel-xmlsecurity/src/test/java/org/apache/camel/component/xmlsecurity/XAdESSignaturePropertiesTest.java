@@ -35,7 +35,6 @@ import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -50,8 +49,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import org.xml.sax.SAXException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -86,8 +83,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
 
     static {
         boolean includeNewLine = true;
-        if (TestSupport.getJavaMajorVersion() >= 9
-                || TestSupport.isJava18_261_later() && !TestSupport.isJavaVendor("Azul")) {
+        if (!TestSupport.isJavaVendor("Azul")) {
             includeNewLine = false;
         }
         payload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -117,23 +113,23 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder[] createRouteBuilders() throws Exception {
+    protected RouteBuilder[] createRouteBuilders() {
         return new RouteBuilder[] { new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 onException(XmlSignatureException.class).handled(true).to("mock:exception");
                 from("direct:enveloped")
                         .to("xmlsecurity-sign:xades?keyAccessor=#keyAccessorDefault&properties=#xmlSignatureProperties&parentLocalName=root&parentNamespace=http://test/test")
                         .to("mock:result");
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 onException(XmlSignatureException.class).handled(true).to("mock:exception");
                 from("direct:enveloping")
                         .to("xmlsecurity-sign:xades?keyAccessor=#keyAccessorDefault&properties=#xmlSignatureProperties")
                         .to("mock:result");
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 onException(XmlSignatureException.class).handled(true).to("mock:exception");
                 from("direct:emptySignatureId").to(
                         "xmlsecurity-sign:xades?keyAccessor=#keyAccessorDefault&properties=#xmlSignatureProperties&signatureId=")
@@ -141,7 +137,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
                                 "mock:result");
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 onException(Exception.class).handled(false).to("mock:exception");
                 from("direct:detached").to(
                         "xmlsecurity-sign:detached?keyAccessor=#keyAccessorDefault&xpathsToIdAttributes=#xpathsToIdAttributes&"//
@@ -516,7 +512,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     public void enveloped() throws Exception {
         setupMock();
         sendBody("direct:enveloped", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -525,7 +521,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
                                  "<ns:root xmlns:ns=\"http://test\"><a ID=\"myID\"><b>bValue</b></a></ns:root>";
         setupMock();
         sendBody("direct:detached", detachedPayload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -545,7 +541,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         XAdESSignatureProperties props = (XAdESSignatureProperties) endpoint.getConfiguration().getProperties();
         props.setSigPolicyId(value);
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(mock, XmlSignatureException.class,
                 "The XAdES-EPES configuration is invalid. The signature policy identifier is missing.", null);
     }
@@ -567,7 +563,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         XAdESSignatureProperties props = (XAdESSignatureProperties) endpoint.getConfiguration().getProperties();
         props.setSignaturePolicyDigestValue(value);
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(mock, XmlSignatureException.class,
                 "The XAdES-EPES configuration is invalid. The digest value for the signature policy is missing.", null);
     }
@@ -589,7 +585,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         XAdESSignatureProperties props = (XAdESSignatureProperties) endpoint.getConfiguration().getProperties();
         props.setSignaturePolicyDigestAlgorithm(value);
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(mock, XmlSignatureException.class,
                 "The XAdES-EPES configuration is invalid. The digest algorithm for the signature policy is missing.", null);
     }
@@ -602,7 +598,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         XAdESSignatureProperties props = (XAdESSignatureProperties) endpoint.getConfiguration().getProperties();
         props.setSignerClaimedRoles(Collections.singletonList("<ClaimedRole>wrong XML fragment<ClaimedRole>")); // Element 'ClaimedRole' is not closed correctly
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(
                 mock,
                 XmlSignatureException.class,
@@ -620,7 +616,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         props.setCommitmentTypeQualifiers(
                 Collections.singletonList("<CommitmentTypeQualifier>wrong XML fragment<CommitmentTypeQualifier>")); // end tag is not correct
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(
                 mock,
                 XmlSignatureException.class,
@@ -637,7 +633,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         XAdESSignatureProperties props = (XAdESSignatureProperties) endpoint.getConfiguration().getProperties();
         props.setSigPolicyQualifiers(Collections.singletonList("<SigPolicyQualifier>wrong XML fragment<SigPolicyQualifier>")); // end tag is not correct
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(
                 mock,
                 XmlSignatureException.class,
@@ -656,7 +652,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
                 .singletonList(
                         "<SigPolicyQualifier xmlns=\"http://invalid.com\">XML fragment with wrong namespace for root element</SigPolicyQualifier>"));
         sendBody("direct:enveloping", payload, Collections.emptyMap());
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         checkThrownException(
                 mock,
                 XmlSignatureException.class,
@@ -667,28 +663,28 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void namespaceNull() throws Exception {
+    public void namespaceNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class, () -> xAdESSignatureProperties.setNamespace(null));
     }
 
     @Test
-    public void signingCertificateURIsNull() throws Exception {
+    public void signingCertificateURIsNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class, () -> xAdESSignatureProperties.setSigningCertificateURIs(null));
     }
 
     @Test
-    public void sigPolicyInvalid() throws Exception {
+    public void sigPolicyInvalid() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class, () -> xAdESSignatureProperties.setSignaturePolicy("invalid"));
     }
 
     @Test
-    public void sigPolicyIdDocumentationReferencesNull() throws Exception {
+    public void sigPolicyIdDocumentationReferencesNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class,
@@ -696,7 +692,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void sigPolicyIdDocumentationReferencesNullEntry() throws Exception {
+    public void sigPolicyIdDocumentationReferencesNullEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> sigPolicyIdDocumentationReferences = Collections.<String> singletonList(null);
 
@@ -705,7 +701,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void sigPolicyIdDocumentationReferencesEmptyEntry() throws Exception {
+    public void sigPolicyIdDocumentationReferencesEmptyEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> sigPolicyIdDocumentationReferences = Collections.singletonList("");
 
@@ -714,7 +710,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void dataObjectFormatIdentifierDocumentationReferencesNull() throws Exception {
+    public void dataObjectFormatIdentifierDocumentationReferencesNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class,
@@ -722,7 +718,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void dataObjectFormatIdentifierDocumentationReferencesNullEntry() throws Exception {
+    public void dataObjectFormatIdentifierDocumentationReferencesNullEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> dataObjectFormatIdentifierDocumentationReferences = Collections.singletonList(null);
 
@@ -732,7 +728,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void dataObjectFormatIdentifierDocumentationReferencesEmptyEntry() throws Exception {
+    public void dataObjectFormatIdentifierDocumentationReferencesEmptyEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> dataObjectFormatIdentifierDocumentationReferences = Collections.singletonList("");
 
@@ -742,14 +738,14 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void signerClaimedRolesNull() throws Exception {
+    public void signerClaimedRolesNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class, () -> xAdESSignatureProperties.setSignerClaimedRoles(null));
     }
 
     @Test
-    public void signerClaimedRolesNullEntry() throws Exception {
+    public void signerClaimedRolesNullEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> signerClaimedRoles = Collections.singletonList(null);
 
@@ -758,7 +754,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void signerClaimedRolesEmptyEntry() throws Exception {
+    public void signerClaimedRolesEmptyEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> signerClaimedRoles = Collections.singletonList("");
 
@@ -767,14 +763,14 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void signerCertifiedRolesNull() throws Exception {
+    public void signerCertifiedRolesNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class, () -> xAdESSignatureProperties.setSignerCertifiedRoles(null));
     }
 
     @Test
-    public void signerCertifiedRolesNullEntry() throws Exception {
+    public void signerCertifiedRolesNullEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<XAdESEncapsulatedPKIData> signerCertifiedRoles = Collections.singletonList(null);
 
@@ -783,7 +779,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void commitmentTypeIdDocumentationReferencesNull() throws Exception {
+    public void commitmentTypeIdDocumentationReferencesNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class,
@@ -791,7 +787,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void commitmentTypeIdDocumentationReferencesNullEntry() throws Exception {
+    public void commitmentTypeIdDocumentationReferencesNullEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> commitmentTypeIdDocumentationReferences = Collections.singletonList(null);
 
@@ -800,7 +796,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void commitmentTypeIdDocumentationReferencesEmptyEntry() throws Exception {
+    public void commitmentTypeIdDocumentationReferencesEmptyEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> commitmentTypeIdDocumentationReferences = Collections.singletonList("");
 
@@ -809,14 +805,14 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void commitmentTypeQualifiersNull() throws Exception {
+    public void commitmentTypeQualifiersNull() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
 
         assertThrows(IllegalArgumentException.class, () -> xAdESSignatureProperties.setCommitmentTypeQualifiers(null));
     }
 
     @Test
-    public void commitmentTypeQualifiersNullEntry() throws Exception {
+    public void commitmentTypeQualifiersNullEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> commitmentTypeQualifiers = Collections.singletonList(null);
 
@@ -825,7 +821,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     @Test
-    public void commitmentTypeQualifiersEmptyEntry() throws Exception {
+    public void commitmentTypeQualifiersEmptyEntry() {
         final XAdESSignatureProperties xAdESSignatureProperties = new XAdESSignatureProperties();
         final List<String> commitmentTypeQualifiers = Collections.singletonList("");
 
@@ -852,22 +848,20 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
     }
 
     private Document testEnveloping()
-            throws InterruptedException, SAXException, IOException, ParserConfigurationException, Exception {
+            throws Exception {
         return testEnveloping("direct:enveloping");
     }
 
     protected Document testEnveloping(String fromUri)
-            throws InterruptedException, SAXException, IOException, ParserConfigurationException,
-            Exception {
+            throws Exception {
         return testEnveloping(fromUri, Collections.<String, Object> emptyMap());
     }
 
     protected Document testEnveloping(String fromUri, Map<String, Object> headers)
-            throws InterruptedException, SAXException, IOException,
-            ParserConfigurationException, Exception {
+            throws Exception {
         MockEndpoint mock = setupMock();
         sendBody(fromUri, payload, headers);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         Message message = getMessage(mock);
         byte[] body = message.getBody(byte[].class);
         Document doc = XmlSignatureHelper.newDocumentBuilder(true).parse(new ByteArrayInputStream(body));
@@ -1039,7 +1033,7 @@ public class XAdESSignaturePropertiesTest extends CamelTestSupport {
         }
 
         @Override
-        protected X509Certificate getSigningCertificate() throws Exception {
+        protected X509Certificate getSigningCertificate() {
             return null;
         }
 

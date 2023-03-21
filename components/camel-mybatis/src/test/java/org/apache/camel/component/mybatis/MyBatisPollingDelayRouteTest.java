@@ -30,16 +30,16 @@ public class MyBatisPollingDelayRouteTest extends MyBatisTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(2);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         long delta = System.currentTimeMillis() - start;
 
         assertTrue(delta < 7000, "Should not take that long: " + delta);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: e1
                 // run this timer every 2nd second, that will select data from the database and send it to the mock endpoint
                 from("timer://pollTheDatabase?delay=2000").to("mybatis:selectAllAccounts?statementType=SelectList")

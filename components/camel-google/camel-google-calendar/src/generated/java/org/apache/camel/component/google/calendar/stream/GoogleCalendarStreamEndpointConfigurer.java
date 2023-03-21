@@ -44,6 +44,7 @@ public class GoogleCalendarStreamEndpointConfigurer extends PropertyConfigurerSu
         case "consumefromnow":
         case "consumeFromNow": target.getConfiguration().setConsumeFromNow(property(camelContext, boolean.class, value)); return true;
         case "delay": target.setDelay(property(camelContext, long.class, value)); return true;
+        case "delegate": target.getConfiguration().setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "emailaddress":
         case "emailAddress": target.getConfiguration().setEmailAddress(property(camelContext, java.lang.String.class, value)); return true;
         case "exceptionhandler":
@@ -74,6 +75,8 @@ public class GoogleCalendarStreamEndpointConfigurer extends PropertyConfigurerSu
         case "scopes": target.getConfiguration().setScopes(property(camelContext, java.util.List.class, value)); return true;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": target.setSendEmptyMessageWhenIdle(property(camelContext, boolean.class, value)); return true;
+        case "serviceaccountkey":
+        case "serviceAccountKey": target.getConfiguration().setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         case "startscheduler":
         case "startScheduler": target.setStartScheduler(property(camelContext, boolean.class, value)); return true;
         case "syncflow":
@@ -113,6 +116,7 @@ public class GoogleCalendarStreamEndpointConfigurer extends PropertyConfigurerSu
         case "consumefromnow":
         case "consumeFromNow": return boolean.class;
         case "delay": return long.class;
+        case "delegate": return java.lang.String.class;
         case "emailaddress":
         case "emailAddress": return java.lang.String.class;
         case "exceptionhandler":
@@ -143,6 +147,8 @@ public class GoogleCalendarStreamEndpointConfigurer extends PropertyConfigurerSu
         case "scopes": return java.util.List.class;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return boolean.class;
+        case "serviceaccountkey":
+        case "serviceAccountKey": return java.lang.String.class;
         case "startscheduler":
         case "startScheduler": return boolean.class;
         case "syncflow":
@@ -183,6 +189,7 @@ public class GoogleCalendarStreamEndpointConfigurer extends PropertyConfigurerSu
         case "consumefromnow":
         case "consumeFromNow": return target.getConfiguration().isConsumeFromNow();
         case "delay": return target.getDelay();
+        case "delegate": return target.getConfiguration().getDelegate();
         case "emailaddress":
         case "emailAddress": return target.getConfiguration().getEmailAddress();
         case "exceptionhandler":
@@ -213,6 +220,8 @@ public class GoogleCalendarStreamEndpointConfigurer extends PropertyConfigurerSu
         case "scopes": return target.getConfiguration().getScopes();
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return target.isSendEmptyMessageWhenIdle();
+        case "serviceaccountkey":
+        case "serviceAccountKey": return target.getConfiguration().getServiceAccountKey();
         case "startscheduler":
         case "startScheduler": return target.isStartScheduler();
         case "syncflow":

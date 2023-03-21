@@ -32,6 +32,7 @@ import org.apache.camel.support.builder.ExpressionBuilder;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.OgnlHelper;
 import org.apache.camel.util.StringHelper;
+import org.apache.camel.util.StringQuoteHelper;
 import org.apache.camel.util.URISupport;
 
 /**
@@ -244,6 +245,21 @@ public class SimpleFunctionExpression extends LiteralExpression {
             return bean.createExpression(null, properties);
         }
 
+        // properties-exist: prefix
+        remainder = ifStartsWithReturnRemainder("propertiesExist:", function);
+        if (remainder != null) {
+            String[] parts = remainder.split(":", 2);
+            if (parts.length > 2) {
+                throw new SimpleParserException("Valid syntax: ${propertiesExist:key was: " + function, token.getIndex());
+            }
+            String key = parts[0];
+            boolean negate = key != null && key.startsWith("!");
+            if (negate) {
+                key = key.substring(1);
+            }
+            return ExpressionBuilder.propertiesComponentExist(key, negate);
+        }
+
         // properties: prefix
         remainder = ifStartsWithReturnRemainder("properties:", function);
         if (remainder != null) {
@@ -414,6 +430,8 @@ public class SimpleFunctionExpression extends LiteralExpression {
             return ExpressionBuilder.bodyExpression();
         } else if (ObjectHelper.equal(expression, "bodyOneLine")) {
             return ExpressionBuilder.bodyOneLine();
+        } else if (ObjectHelper.equal(expression, "originalBody")) {
+            return ExpressionBuilder.originalBodyExpression();
         } else if (ObjectHelper.equal(expression, "id")) {
             return ExpressionBuilder.messageIdExpression();
         } else if (ObjectHelper.equal(expression, "messageTimestamp")) {
@@ -528,6 +546,33 @@ public class SimpleFunctionExpression extends LiteralExpression {
             return SimpleExpressionBuilder.collateExpression(exp, num);
         }
 
+        // join function
+        remainder = ifStartsWithReturnRemainder("join(", function);
+        if (remainder != null) {
+            String values = StringHelper.before(remainder, ")");
+            String separator = ",";
+            String prefix = null;
+            String exp = "${body}";
+            if (ObjectHelper.isNotEmpty(values)) {
+                String[] tokens = StringQuoteHelper.splitSafeQuote(values, ',', false);
+                if (tokens.length > 3) {
+                    throw new SimpleParserException(
+                            "Valid syntax: ${join(separator,prefix,expression)} was: " + function, token.getIndex());
+                }
+                if (tokens.length == 3) {
+                    separator = tokens[0];
+                    prefix = tokens[1];
+                    exp = tokens[2];
+                } else if (tokens.length == 2) {
+                    separator = tokens[0];
+                    prefix = tokens[1];
+                } else {
+                    separator = tokens[0];
+                }
+            }
+            return SimpleExpressionBuilder.joinExpression(exp, separator, prefix);
+        }
+
         // messageHistory function
         remainder = ifStartsWithReturnRemainder("messageHistory", function);
         if (remainder != null) {
@@ -542,6 +587,16 @@ public class SimpleFunctionExpression extends LiteralExpression {
         } else if (ObjectHelper.equal(function, "messageHistory")) {
             return SimpleExpressionBuilder.messageHistoryExpression(true);
         }
+
+        // uuid function
+        remainder = ifStartsWithReturnRemainder("uuid", function);
+        if (remainder != null) {
+            String values = StringHelper.between(remainder, "(", ")");
+            return SimpleExpressionBuilder.uuidExpression(values);
+        } else if (ObjectHelper.equal(function, "uuid")) {
+            return SimpleExpressionBuilder.uuidExpression(null);
+        }
+
         return null;
     }
 

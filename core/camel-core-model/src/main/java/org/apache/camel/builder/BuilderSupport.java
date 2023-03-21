@@ -16,13 +16,10 @@
  */
 package org.apache.camel.builder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.Endpoint;
+import org.apache.camel.ErrorHandlerFactory;
 import org.apache.camel.Expression;
 import org.apache.camel.NoSuchEndpointException;
 import org.apache.camel.RuntimeCamelException;
@@ -31,6 +28,7 @@ import org.apache.camel.model.language.ExchangePropertyExpression;
 import org.apache.camel.model.language.HeaderExpression;
 import org.apache.camel.model.language.SimpleExpression;
 import org.apache.camel.model.language.XPathExpression;
+import org.apache.camel.spi.TransactedPolicy;
 import org.apache.camel.support.builder.Namespaces;
 import org.apache.camel.util.ObjectHelper;
 
@@ -40,7 +38,7 @@ import org.apache.camel.util.ObjectHelper;
  */
 public abstract class BuilderSupport implements CamelContextAware {
     private CamelContext camelContext;
-    private ErrorHandlerBuilder errorHandlerBuilder;
+    private ErrorHandlerFactory errorHandlerFactory;
 
     protected BuilderSupport() {
     }
@@ -51,6 +49,13 @@ public abstract class BuilderSupport implements CamelContextAware {
 
     // Builder methods
     // -------------------------------------------------------------------------
+
+    /**
+     * Returns a value builder for the given expression
+     */
+    public ValueBuilder expression(Expression exp) {
+        return new ValueBuilder(exp);
+    }
 
     /**
      * Returns a value builder for the given header
@@ -318,7 +323,7 @@ public abstract class BuilderSupport implements CamelContextAware {
      * @return          the builder
      */
     public ValueBuilder method(Class<?> beanType, String method) {
-        return Builder.bean(beanType, method);
+        return Builder.method(beanType, method);
     }
 
     /**
@@ -378,33 +383,6 @@ public abstract class BuilderSupport implements CamelContextAware {
     }
 
     /**
-     * Resolves the list of URIs into a list of {@link Endpoint} instances
-     *
-     * @param  uris                    list of endpoints to resolve
-     * @throws NoSuchEndpointException if an endpoint URI could not be resolved
-     * @return                         list of endpoints
-     */
-    public List<Endpoint> endpoints(String... uris) throws NoSuchEndpointException {
-        List<Endpoint> endpoints = new ArrayList<>();
-        for (String uri : uris) {
-            endpoints.add(endpoint(uri));
-        }
-        return endpoints;
-    }
-
-    /**
-     * Helper method to create a list of {@link Endpoint} instances
-     *
-     * @param  endpoints endpoints
-     * @return           list of the given endpoints
-     */
-    public List<Endpoint> endpoints(Endpoint... endpoints) {
-        List<Endpoint> answer = new ArrayList<>();
-        answer.addAll(Arrays.asList(endpoints));
-        return answer;
-    }
-
-    /**
      * Creates a default <a href="http://camel.apache.org/error-handler.html">error handler</a>.
      *
      * @return the builder
@@ -431,7 +409,9 @@ public abstract class BuilderSupport implements CamelContextAware {
      * @return               the builder
      */
     public DeadLetterChannelBuilder deadLetterChannel(String deadLetterUri) {
-        return deadLetterChannel(endpoint(deadLetterUri));
+        DeadLetterChannelBuilder answer = new DeadLetterChannelBuilder();
+        answer.setDeadLetterUri(deadLetterUri);
+        return answer;
     }
 
     /**
@@ -442,7 +422,73 @@ public abstract class BuilderSupport implements CamelContextAware {
      * @return                    the builder
      */
     public DeadLetterChannelBuilder deadLetterChannel(Endpoint deadLetterEndpoint) {
-        return new DeadLetterChannelBuilder(deadLetterEndpoint);
+        return deadLetterChannel(deadLetterEndpoint.getEndpointUri());
+    }
+
+    /**
+     * Error handler using JTA transactions (requires camel-jta).
+     *
+     * @return the builder
+     */
+    public JtaTransactionErrorHandlerBuilder jtaTransactionErrorHandler() {
+        return new JtaTransactionErrorHandlerBuilder();
+    }
+
+    /**
+     * Error handler using JTA transactions (requires camel-jta).
+     *
+     * @param  policy the transaction policy
+     * @return        the builder
+     */
+    public JtaTransactionErrorHandlerBuilder jtaTransactionErrorHandler(TransactedPolicy policy) {
+        JtaTransactionErrorHandlerBuilder answer = new JtaTransactionErrorHandlerBuilder();
+        answer.setTransactedPolicy(policy);
+        return answer;
+    }
+
+    /**
+     * Error handler using JTA transactions (requires camel-jta).
+     *
+     * @param  policyRef references to the transaction policy
+     * @return           the builder
+     */
+    public JtaTransactionErrorHandlerBuilder jtaTransactionErrorHandler(String policyRef) {
+        JtaTransactionErrorHandlerBuilder answer = new JtaTransactionErrorHandlerBuilder();
+        answer.setTransactedPolicyRef(policyRef);
+        return answer;
+    }
+
+    /**
+     * Error handler using Spring transactions (requires camel-spring).
+     *
+     * @return the builder
+     */
+    public SpringTransactionErrorHandlerBuilder springTransactionErrorHandler() {
+        return new SpringTransactionErrorHandlerBuilder();
+    }
+
+    /**
+     * Error handler using Spring transactions (requires camel-spring).
+     *
+     * @param  policy the transaction policy
+     * @return        the builder
+     */
+    public SpringTransactionErrorHandlerBuilder springTransactionErrorHandler(TransactedPolicy policy) {
+        SpringTransactionErrorHandlerBuilder answer = new SpringTransactionErrorHandlerBuilder();
+        answer.setTransactedPolicy(policy);
+        return answer;
+    }
+
+    /**
+     * Error handler using Spring transactions (requires camel-spring).
+     *
+     * @param  policyRef references to the transaction policy
+     * @return           the builder
+     */
+    public SpringTransactionErrorHandlerBuilder springTransactionErrorHandler(String policyRef) {
+        SpringTransactionErrorHandlerBuilder answer = new SpringTransactionErrorHandlerBuilder();
+        answer.setTransactedPolicyRef(policyRef);
+        return answer;
     }
 
     // Properties
@@ -469,34 +515,30 @@ public abstract class BuilderSupport implements CamelContextAware {
         return getCamelContext();
     }
 
-    /**
-     * @deprecated use {@link #setCamelContext(CamelContext)}
-     */
-    @Deprecated
-    public void setContext(CamelContext context) {
-        setCamelContext(context);
-    }
-
-    public boolean hasErrorHandlerBuilder() {
-        return this.errorHandlerBuilder != null;
-    }
-
-    public ErrorHandlerBuilder getErrorHandlerBuilder() {
-        if (errorHandlerBuilder == null) {
-            errorHandlerBuilder = createErrorHandlerBuilder();
+    public ErrorHandlerFactory getErrorHandlerFactory() {
+        if (!hasErrorHandlerFactory()) {
+            errorHandlerFactory = createErrorHandlerBuilder();
         }
-        return errorHandlerBuilder;
+        return errorHandlerFactory;
     }
 
-    protected ErrorHandlerBuilder createErrorHandlerBuilder() {
+    protected ErrorHandlerFactory createErrorHandlerBuilder() {
         return new DefaultErrorHandlerBuilder();
     }
 
     /**
      * Sets the error handler to use with processors created by this builder
      */
-    public void setErrorHandlerBuilder(ErrorHandlerBuilder errorHandlerBuilder) {
-        this.errorHandlerBuilder = errorHandlerBuilder;
+    public void setErrorHandlerFactory(ErrorHandlerFactory errorHandlerFactory) {
+        this.errorHandlerFactory = errorHandlerFactory;
+    }
+
+    /**
+     *
+     * @return true if an error handler factory was initialized
+     */
+    public boolean hasErrorHandlerFactory() {
+        return this.errorHandlerFactory != null;
     }
 
 }

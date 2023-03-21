@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -147,9 +147,25 @@ public interface PulsarComponentBuilderFactory {
             return this;
         }
         /**
-         * Whether to allow manual message acknowledgements. &lt;p/&gt; If this
-         * option is enabled, then messages are not acknowledged automatically
-         * after successful route completion. Instead, an instance of
+         * RedeliveryBackoff to use for ack timeout redelivery backoff.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.pulsar.client.api.RedeliveryBackoff&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param ackTimeoutRedeliveryBackoff the value to set
+         * @return the dsl builder
+         */
+        default PulsarComponentBuilder ackTimeoutRedeliveryBackoff(
+                org.apache.pulsar.client.api.RedeliveryBackoff ackTimeoutRedeliveryBackoff) {
+            doSetProperty("ackTimeoutRedeliveryBackoff", ackTimeoutRedeliveryBackoff);
+            return this;
+        }
+        /**
+         * Whether to allow manual message acknowledgements. If this option is
+         * enabled, then messages are not acknowledged automatically after
+         * successful route completion. Instead, an instance of
          * PulsarMessageReceipt is stored as a header on the
          * org.apache.camel.Exchange. Messages can then be acknowledged using
          * PulsarMessageReceipt at any time before the ackTimeout occurs.
@@ -285,6 +301,22 @@ public interface PulsarComponentBuilderFactory {
          */
         default PulsarComponentBuilder messageListener(boolean messageListener) {
             doSetProperty("messageListener", messageListener);
+            return this;
+        }
+        /**
+         * RedeliveryBackoff to use for negative ack redelivery backoff.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.pulsar.client.api.RedeliveryBackoff&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param negativeAckRedeliveryBackoff the value to set
+         * @return the dsl builder
+         */
+        default PulsarComponentBuilder negativeAckRedeliveryBackoff(
+                org.apache.pulsar.client.api.RedeliveryBackoff negativeAckRedeliveryBackoff) {
+            doSetProperty("negativeAckRedeliveryBackoff", negativeAckRedeliveryBackoff);
             return this;
         }
         /**
@@ -538,6 +570,21 @@ public interface PulsarComponentBuilderFactory {
             return this;
         }
         /**
+         * Control whether chunking of messages is enabled for the producer.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer
+         * 
+         * @param chunkingEnabled the value to set
+         * @return the dsl builder
+         */
+        default PulsarComponentBuilder chunkingEnabled(boolean chunkingEnabled) {
+            doSetProperty("chunkingEnabled", chunkingEnabled);
+            return this;
+        }
+        /**
          * Compression type to use.
          * 
          * The option is a:
@@ -625,6 +672,7 @@ public interface PulsarComponentBuilderFactory {
          * @param maxPendingMessagesAcrossPartitions the value to set
          * @return the dsl builder
          */
+        @Deprecated
         default PulsarComponentBuilder maxPendingMessagesAcrossPartitions(
                 int maxPendingMessagesAcrossPartitions) {
             doSetProperty("maxPendingMessagesAcrossPartitions", maxPendingMessagesAcrossPartitions);
@@ -778,6 +826,7 @@ public interface PulsarComponentBuilderFactory {
             case "serviceUrl": getOrCreateConfiguration((PulsarComponent) component).setServiceUrl((java.lang.String) value); return true;
             case "ackGroupTimeMillis": getOrCreateConfiguration((PulsarComponent) component).setAckGroupTimeMillis((long) value); return true;
             case "ackTimeoutMillis": getOrCreateConfiguration((PulsarComponent) component).setAckTimeoutMillis((long) value); return true;
+            case "ackTimeoutRedeliveryBackoff": getOrCreateConfiguration((PulsarComponent) component).setAckTimeoutRedeliveryBackoff((org.apache.pulsar.client.api.RedeliveryBackoff) value); return true;
             case "allowManualAcknowledgement": getOrCreateConfiguration((PulsarComponent) component).setAllowManualAcknowledgement((boolean) value); return true;
             case "bridgeErrorHandler": ((PulsarComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "consumerName": getOrCreateConfiguration((PulsarComponent) component).setConsumerName((java.lang.String) value); return true;
@@ -786,6 +835,7 @@ public interface PulsarComponentBuilderFactory {
             case "deadLetterTopic": getOrCreateConfiguration((PulsarComponent) component).setDeadLetterTopic((java.lang.String) value); return true;
             case "maxRedeliverCount": getOrCreateConfiguration((PulsarComponent) component).setMaxRedeliverCount((java.lang.Integer) value); return true;
             case "messageListener": getOrCreateConfiguration((PulsarComponent) component).setMessageListener((boolean) value); return true;
+            case "negativeAckRedeliveryBackoff": getOrCreateConfiguration((PulsarComponent) component).setNegativeAckRedeliveryBackoff((org.apache.pulsar.client.api.RedeliveryBackoff) value); return true;
             case "negativeAckRedeliveryDelayMicros": getOrCreateConfiguration((PulsarComponent) component).setNegativeAckRedeliveryDelayMicros((long) value); return true;
             case "numberOfConsumers": getOrCreateConfiguration((PulsarComponent) component).setNumberOfConsumers((int) value); return true;
             case "numberOfConsumerThreads": getOrCreateConfiguration((PulsarComponent) component).setNumberOfConsumerThreads((int) value); return true;
@@ -801,6 +851,7 @@ public interface PulsarComponentBuilderFactory {
             case "batchingMaxMessages": getOrCreateConfiguration((PulsarComponent) component).setBatchingMaxMessages((int) value); return true;
             case "batchingMaxPublishDelayMicros": getOrCreateConfiguration((PulsarComponent) component).setBatchingMaxPublishDelayMicros((long) value); return true;
             case "blockIfQueueFull": getOrCreateConfiguration((PulsarComponent) component).setBlockIfQueueFull((boolean) value); return true;
+            case "chunkingEnabled": getOrCreateConfiguration((PulsarComponent) component).setChunkingEnabled((boolean) value); return true;
             case "compressionType": getOrCreateConfiguration((PulsarComponent) component).setCompressionType((org.apache.pulsar.client.api.CompressionType) value); return true;
             case "initialSequenceId": getOrCreateConfiguration((PulsarComponent) component).setInitialSequenceId((long) value); return true;
             case "lazyStartProducer": ((PulsarComponent) component).setLazyStartProducer((boolean) value); return true;

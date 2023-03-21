@@ -34,9 +34,9 @@ decimal or grouping separators.
 |===
 |Type |Format Type |Pattern example |Link
 
-|Date |DateFormat |dd-MM-yyyy |https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
+|Date |DateFormat |dd-MM-yyyy |https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/SimpleDateFormat.html
 
-|Decimal* |DecimalFormat |+##.###.###+ |https://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html
+|Decimal* |DecimalFormat |+##.###.###+ |https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/DecimalFormat.html
 |===
 
 *Decimal = Double, Integer, Float, Short, Long
@@ -58,7 +58,7 @@ you can put multiple models in the same package.
 
 == Options
 
-:shortName: bindy-csv
+:shortName: bindyCsv
 include::partial$dataformat-options.adoc[]
 
 == Annotations
@@ -127,6 +127,9 @@ one time.
 | quoting | boolean |  | false | Indicate if the values (and headers) must be quoted when marshaling (optional)
 
 | quotingEscaped | boolean |  | false | Indicate if the values must be escaped when quoting (optional)
+
+| quotingOnlyWhenNeeded | boolean |  | false a| Indicate if the values should be quoted only when needed (optional) - if enabled then the value is only quoted
+when it contains the configured separator, quote, or crlf characters. The quoting option must also be enabled.
 
 | removeQuotes | boolean |  | true | The remove quotes parameter flags if unmarshalling should try to remove quotes for each field
 
@@ -1234,7 +1237,7 @@ and how to use the annotation:
 
 [source,java]
 ----
-@Message(keyValuePairSeparator = "=", pairSeparator = "\u0001", type="FIX", version="4.1")
+@Message(keyValuePairSeparator = "=", pairSeparator = "\\u0001", type="FIX", version="4.1")
 public class Order {
 
 }
@@ -1296,7 +1299,7 @@ This parameter represents the key of the field in the message:
 
 [source,java]
 ----
-@Message(keyValuePairSeparator = "=", pairSeparator = "\u0001", type="FIX", version="4.1")
+@Message(keyValuePairSeparator = "=", pairSeparator = "\\u0001", type="FIX", version="4.1")
 public class Order {
 
     @Link Header header;
@@ -1677,7 +1680,7 @@ FormattingOptions:
 * String
 
 The DefaultFormatFactory can be overridden by providing an instance of
-FactoryRegistry in the registry in use (e.g. spring or JNDI).
+FactoryRegistry in the registry in use (e.g. Spring or JNDI).
 
 == Using the Java DSL
 

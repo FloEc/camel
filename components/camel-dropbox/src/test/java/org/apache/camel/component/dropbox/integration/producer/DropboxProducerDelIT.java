@@ -52,20 +52,25 @@ public class DropboxProducerDelIT extends DropboxTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);
         mock.expectedHeaderReceived(DropboxResultHeader.DELETED_PATH.name(), workdir + "/" + FILE_NAME);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:start")
-                        .to("dropbox://del?accessToken={{accessToken}}&remotePath=" + workdir + "/" + FILE_NAME)
+                        .to("dropbox://del?accessToken={{accessToken}}&expireIn={{expireIn}}" +
+                            "&refreshToken={{refreshToken}}" +
+                            "&apiKey={{apiKey}}&apiSecret={{apiSecret}}" +
+                            "&remotePath=" + workdir + "/" + FILE_NAME)
                         .to("mock:result");
 
                 from("direct:start2")
                         .setHeader(DropboxConstants.HEADER_REMOTE_PATH, constant(workdir + "/" + FILE_NAME))
-                        .to("dropbox://del?accessToken={{accessToken}}")
+                        .to("dropbox://del?accessToken={{accessToken}}&expireIn={{expireIn}}" +
+                            "&refreshToken={{refreshToken}}" +
+                            "&apiKey={{apiKey}}&apiSecret={{apiSecret}}")
                         .to("mock:result");
             }
         };

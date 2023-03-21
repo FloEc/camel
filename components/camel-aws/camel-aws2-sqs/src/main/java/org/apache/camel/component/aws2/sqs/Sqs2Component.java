@@ -23,8 +23,6 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 
 /**
@@ -32,9 +30,6 @@ import software.amazon.awssdk.regions.Region;
  */
 @Component("aws2-sqs")
 public class Sqs2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Sqs2Component.class);
-
     @Metadata
     private Sqs2Configuration configuration = new Sqs2Configuration();
 
@@ -44,8 +39,6 @@ public class Sqs2Component extends DefaultComponent {
 
     public Sqs2Component(CamelContext context) {
         super(context);
-
-        registerExtension(new Sqs2ComponentVerifierExtension());
     }
 
     @Override
@@ -69,6 +62,14 @@ public class Sqs2Component extends DefaultComponent {
         Sqs2Endpoint sqsEndpoint = new Sqs2Endpoint(uri, this, configuration);
         setProperties(sqsEndpoint, parameters);
 
+        //validation of client has to be done after endpoint initialization (in case that sqs client is autowired)
+        // - covered by SqsDeadletterWithClientRegistryLocalstackIT
+        if (!configuration.isUseDefaultCredentialsProvider() && !configuration.isUseProfileCredentialsProvider()
+                && configuration.getAmazonSQSClient() == null
+                && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
+            throw new IllegalArgumentException(
+                    "useDefaultCredentialsProvider is set to false, useProfileCredentialsProvider is set to false, AmazonSQSClient or accessKey and secretKey must be specified");
+        }
         // Verify that visibilityTimeout is set if extendMessageVisibility is
         // set to true.
         if (configuration.isExtendMessageVisibility() && configuration.getVisibilityTimeout() == null) {

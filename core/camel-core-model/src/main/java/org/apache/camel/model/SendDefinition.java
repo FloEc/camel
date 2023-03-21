@@ -16,10 +16,10 @@
  */
 package org.apache.camel.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.builder.EndpointProducerBuilder;
@@ -31,13 +31,15 @@ import org.apache.camel.spi.Metadata;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class SendDefinition<Type extends ProcessorDefinition<Type>> extends NoOutputDefinition<Type>
         implements EndpointRequiredDefinition {
-    @XmlAttribute
-    @Metadata(required = true)
-    protected String uri;
+
     @XmlTransient
     protected Endpoint endpoint;
     @XmlTransient
     protected EndpointProducerBuilder endpointProducerBuilder;
+
+    @XmlAttribute
+    @Metadata(required = true)
+    protected String uri;
 
     public SendDefinition() {
     }

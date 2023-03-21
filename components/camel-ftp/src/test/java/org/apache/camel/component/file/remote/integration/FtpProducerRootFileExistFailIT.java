@@ -42,7 +42,7 @@ public class FtpProducerRootFileExistFailIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testFail() throws Exception {
+    public void testFail() {
         String uri = getFtpUrl();
         Exception ex = assertThrows(CamelExecutionException.class,
                 () -> template.sendBodyAndHeader(uri, "Bye World", Exchange.FILE_NAME, "hello.txt"));
@@ -52,6 +52,6 @@ public class FtpProducerRootFileExistFailIT extends FtpServerTestSupport {
         assertEquals("File already exist: hello.txt. Cannot write new file.", cause.getMessage());
 
         // root file should still exist
-        assertFileExists(ftpFile("hello.txt"));
+        assertFileExists(service.ftpFile("hello.txt"));
     }
 }

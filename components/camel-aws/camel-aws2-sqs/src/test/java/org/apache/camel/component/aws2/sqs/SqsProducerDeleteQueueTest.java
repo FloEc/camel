@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SqsProducerDeleteQueueTest extends CamelTestSupport {
     @BindToRegistry("client")
-    AmazonSQSClientMock mock = new AmazonSQSClientMock();
+    AmazonSQSClientMock mock = new AmazonSQSClientMock("camel-1");
 
     @EndpointInject("direct:start")
     private ProducerTemplate template;
@@ -46,20 +46,19 @@ public class SqsProducerDeleteQueueTest extends CamelTestSupport {
         template.send("direct:start", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
-                exchange.getIn().setHeader(Sqs2Constants.SQS_QUEUE_PREFIX, "camel-1");
+            public void process(Exchange exchange) {
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         DeleteQueueResponse res = result.getExchanges().get(0).getIn().getBody(DeleteQueueResponse.class);
         assertNotNull(res);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to("aws2-sqs://camel-1?amazonSQSClient=#client&operation=deleteQueue").to("mock:result");
             }
         };

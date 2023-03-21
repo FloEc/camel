@@ -19,7 +19,7 @@ package org.apache.camel.component.olingo2;
 import java.io.InputStream;
 import java.util.Map;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.Dispatcher;
@@ -109,7 +109,7 @@ public class Olingo2AppAPIETagEnabledTest extends AbstractOlingo2AppAPITestSuppo
 
             @SuppressWarnings("resource")
             @Override
-            public MockResponse dispatch(RecordedRequest recordedRequest) throws InterruptedException {
+            public MockResponse dispatch(RecordedRequest recordedRequest) {
                 MockResponse mockResponse = new MockResponse();
 
                 switch (recordedRequest.getMethod()) {

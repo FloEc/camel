@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.camel.CamelExchangeException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.NoSuchHeaderException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.zookeeper.NaturalSortComparator;
@@ -38,9 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 public class ConsumeChildrenIT extends ZooKeeperITSupport {
 
     @Override
-    protected RouteBuilder[] createRouteBuilders() throws Exception {
+    protected RouteBuilder[] createRouteBuilders() {
         return new RouteBuilder[] { new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("zookeeper://{{zookeeper.connection.string}}/grimm?repeat=true&listChildren=true")
                         .sort(body(), new NaturalSortComparator(Order.Descending))
                         .to("mock:zookeeper-data");
@@ -59,7 +58,7 @@ public class ConsumeChildrenIT extends ZooKeeperITSupport {
         client.delete("/grimm/hansel");
         client.delete("/grimm/gretel");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         validateExchangesContainListings(mock, createChildListing(), createChildListing("hansel"),
                 createChildListing("hansel", "gretel"), createChildListing("gretel"),
@@ -67,7 +66,7 @@ public class ConsumeChildrenIT extends ZooKeeperITSupport {
     }
 
     private void validateExchangesContainListings(MockEndpoint mock, List<?>... expected)
-            throws CamelExchangeException, NoSuchHeaderException {
+            throws CamelExchangeException {
         int index = 0;
         for (Exchange received : mock.getReceivedExchanges()) {
             Watcher.Event.EventType expectedEvent;

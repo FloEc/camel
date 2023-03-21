@@ -27,14 +27,14 @@ import org.junit.jupiter.api.condition.EnabledIf;
 /**
  * Test the ftps component over SSL (explicit) and without client authentication
  */
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.FtpsEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.FtpsUtil#hasRequiredAlgorithms")
 public class FileToFtpsWithFtpClientConfigRefIT extends FtpsServerExplicitSSLWithoutClientAuthTestSupport {
 
     @BindToRegistry("ftpsClient")
-    private FTPSClient client = new FTPSClient("SSLv3");
+    private final FTPSClient client = new FTPSClient("SSLv3");
 
     @BindToRegistry("ftpsClientIn")
-    private FTPSClient client1 = new FTPSClient("SSLv3");
+    private final FTPSClient client1 = new FTPSClient("SSLv3");
 
     private String getFtpUrl(boolean in) {
         return "ftps://admin@localhost:{{ftp.server.port}}/tmp2/camel?password=admin&initialDelay=2000&ftpClient=#ftpsClient"
@@ -49,13 +49,13 @@ public class FileToFtpsWithFtpClientConfigRefIT extends FtpsServerExplicitSSLWit
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(2);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("file:src/test/data?noop=true").log("Putting ${file:name}").to(getFtpUrl(false));
 
                 from(getFtpUrl(true)).to("mock:result");

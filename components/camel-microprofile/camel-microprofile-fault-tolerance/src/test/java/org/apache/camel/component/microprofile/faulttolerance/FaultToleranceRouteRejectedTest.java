@@ -17,6 +17,7 @@
 package org.apache.camel.component.microprofile.faulttolerance;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.CircuitBreakerConstants;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
@@ -49,14 +50,14 @@ public class FaultToleranceRouteRejectedTest extends CamelTestSupport {
         // should be okay 2nd time, where the CB is open, so we skip and continue routing
         template.sendBody("direct:start", "Hello Again");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start")
                         .circuitBreaker().id("myFaultTolerance")
                         .faultToleranceConfiguration().failureRatio(100).successThreshold(1).requestVolumeThreshold(1).end()

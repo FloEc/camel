@@ -48,7 +48,7 @@ public class FacebookComponentConsumerIT extends CamelFacebookTestSupport {
     private final Set<String> searchNames = new HashSet<>();
     private List<String> excludedNames;
 
-    public FacebookComponentConsumerIT() throws Exception {
+    public FacebookComponentConsumerIT() {
         // find search methods for consumer tests
         for (Method method : SearchMethods.class.getDeclaredMethods()) {
             String name = getShortName(method.getName());
@@ -73,7 +73,7 @@ public class FacebookComponentConsumerIT extends CamelFacebookTestSupport {
             mock.expectedMinimumMessageCount(1);
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class FacebookComponentConsumerIT extends CamelFacebookTestSupport {
     }
 
     @Override
-    protected void doPostSetup() throws Exception {
+    protected void doPostSetup() {
         ignoreDeprecatedApiError();
     }
 
@@ -124,9 +124,9 @@ public class FacebookComponentConsumerIT extends CamelFacebookTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // start with a 30 day window for the first delayed poll
                 String since = "RAW(" + new SimpleDateFormat(FacebookConstants.FACEBOOK_DATE_FORMAT).format(
                         new Date(System.currentTimeMillis() - TimeUnit.MILLISECONDS.convert(30, TimeUnit.DAYS))) + ")";
@@ -137,12 +137,12 @@ public class FacebookComponentConsumerIT extends CamelFacebookTestSupport {
                         from("facebook://" + name + "?reading.limit=10&reading.locale=en.US&reading.since="
                              + since + "&initialDelay=1000&sendEmptyMessageWhenIdle=true&"
                              + getOauthParams())
-                                     .to("mock:consumeResult" + name);
+                                .to("mock:consumeResult" + name);
                     }
 
                     from("facebook://" + name + "?query=cheese&reading.limit=10&reading.locale=en.US&reading.since="
                          + since + "&initialDelay=1000&" + getOauthParams())
-                                 .to("mock:consumeQueryResult" + name);
+                            .to("mock:consumeQueryResult" + name);
                 }
 
                 from("facebook://me?jsonStoreEnabled=true&" + getOauthParams())
@@ -153,7 +153,7 @@ public class FacebookComponentConsumerIT extends CamelFacebookTestSupport {
                                  - TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
                 from("facebook://page?pageId=" + APACHE_FOUNDATION_PAGE_ID + "&reading.limit=10&reading.since=" + unixSince
                      + "&" + getOauthParams())
-                             .to("mock:testPage");
+                        .to("mock:testPage");
 
                 // TODO add tests for the rest of the supported methods
             }

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +87,6 @@ public class DefaultHttpRegistry implements HttpRegistry {
         CamelServlet camelServlet = provider;
         camelServlet.setServletName((String) properties.get("servlet-name"));
         register(camelServlet);
-    }
-
-    public void unregister(HttpRegistryProvider provider, Map<String, Object> properties) {
-        unregister(provider);
     }
 
     @Override

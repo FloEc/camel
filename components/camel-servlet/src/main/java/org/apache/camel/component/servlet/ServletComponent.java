@@ -80,12 +80,13 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
         Boolean bridgeEndpoint = getAndRemoveParameter(parameters, "bridgeEndpoint", Boolean.class);
         HttpBinding binding = resolveAndRemoveReferenceParameter(parameters, "httpBinding", HttpBinding.class);
         Boolean matchOnUriPrefix = getAndRemoveParameter(parameters, "matchOnUriPrefix", Boolean.class);
-        String servletName = getAndRemoveParameter(parameters, "servletName", String.class, getServletName());
+        String filteredServletName = getAndRemoveParameter(parameters, "servletName", String.class, getServletName());
         String httpMethodRestrict = getAndRemoveParameter(parameters, "httpMethodRestrict", String.class);
         HeaderFilterStrategy headerFilterStrategy
                 = resolveAndRemoveReferenceParameter(parameters, "headerFilterStrategy", HeaderFilterStrategy.class);
         Boolean async = getAndRemoveParameter(parameters, "async", Boolean.class);
-        Boolean attachmentMultipartBinding = getAndRemoveParameter(parameters, "attachmentMultipartBinding", Boolean.class);
+        Boolean filteredAttachmentMultipartBinding
+                = getAndRemoveParameter(parameters, "attachmentMultipartBinding", Boolean.class);
         Boolean disableStreamCache = getAndRemoveParameter(parameters, "disableStreamCache", Boolean.class);
 
         if (lenientContextPath()) {
@@ -105,7 +106,7 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
         URI httpUri = URISupport.createRemainingURI(new URI(UnsafeUriCharactersEncoder.encodeHttpURI(uri)), parameters);
 
         ServletEndpoint endpoint = createServletEndpoint(uri, this, httpUri);
-        endpoint.setServletName(servletName);
+        endpoint.setServletName(filteredServletName);
         endpoint.setFileNameExtWhitelist(fileNameExtWhitelist);
         if (async != null) {
             endpoint.setAsync(async);
@@ -122,7 +123,7 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
             binding = getHttpBinding();
         }
         if (binding != null) {
-            endpoint.setBinding(binding);
+            endpoint.setHttpBinding(binding);
         }
         // should we use an exception for failed error codes?
         if (throwExceptionOnFailure != null) {
@@ -142,8 +143,8 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
         if (httpMethodRestrict != null) {
             endpoint.setHttpMethodRestrict(httpMethodRestrict);
         }
-        if (attachmentMultipartBinding != null) {
-            endpoint.setAttachmentMultipartBinding(attachmentMultipartBinding);
+        if (filteredAttachmentMultipartBinding != null) {
+            endpoint.setAttachmentMultipartBinding(filteredAttachmentMultipartBinding);
         } else {
             endpoint.setAttachmentMultipartBinding(isAttachmentMultipartBinding());
         }
@@ -262,7 +263,7 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
             CamelContext camelContext, Processor processor, String verb, String basePath, String uriTemplate,
             String consumes, String produces, RestConfiguration configuration, Map<String, Object> parameters)
             throws Exception {
-        return doCreateConsumer(camelContext, processor, verb, basePath, uriTemplate, consumes, produces, configuration,
+        return doCreateConsumer(camelContext, processor, verb, basePath, uriTemplate, configuration,
                 parameters, false);
     }
 
@@ -272,12 +273,12 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
             RestConfiguration configuration, Map<String, Object> parameters)
             throws Exception {
         // reuse the createConsumer method we already have. The api need to use GET and match on uri prefix
-        return doCreateConsumer(camelContext, processor, "GET", contextPath, null, null, null, configuration, parameters, true);
+        return doCreateConsumer(camelContext, processor, "GET", contextPath, null, configuration, parameters, true);
     }
 
     Consumer doCreateConsumer(
             CamelContext camelContext, Processor processor, String verb, String basePath, String uriTemplate,
-            String consumes, String produces, RestConfiguration configuration, Map<String, Object> parameters, boolean api)
+            RestConfiguration configuration, Map<String, Object> parameters, boolean api)
             throws Exception {
 
         String path = basePath;
@@ -321,6 +322,8 @@ public class ServletComponent extends HttpCommonComponent implements RestConsume
             binding.setTransferException(endpoint.isTransferException());
             binding.setMuteException(endpoint.isMuteException());
             binding.setEagerCheckContentAvailable(endpoint.isEagerCheckContentAvailable());
+            binding.setMapHttpMessageHeaders(endpoint.isMapHttpMessageHeaders());
+            binding.setMapHttpMessageFormUrlEncodedBody(endpoint.isMapHttpMessageFormUrlEncodedBody());
             endpoint.setHttpBinding(binding);
         }
 

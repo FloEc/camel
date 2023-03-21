@@ -16,13 +16,13 @@
  */
 package org.apache.camel.dsl.yaml
 
-import org.apache.camel.builder.DeadLetterChannelBuilder
-import org.apache.camel.builder.DefaultErrorHandlerBuilder
-import org.apache.camel.builder.ErrorHandlerBuilderRef
-import org.apache.camel.builder.NoErrorHandlerBuilder
 import org.apache.camel.dsl.yaml.support.YamlTestSupport
 import org.apache.camel.component.mock.MockEndpoint
 import org.apache.camel.dsl.yaml.support.model.MyFailingProcessor
+import org.apache.camel.model.errorhandler.DeadLetterChannelDefinition
+import org.apache.camel.model.errorhandler.DefaultErrorHandlerDefinition
+import org.apache.camel.model.errorhandler.NoErrorHandlerDefinition
+import org.apache.camel.model.errorhandler.RefErrorHandlerDefinition
 
 class ErrorHandlerTest extends YamlTestSupport {
 
@@ -33,12 +33,13 @@ class ErrorHandlerTest extends YamlTestSupport {
                   - name: myFailingProcessor
                     type: ${MyFailingProcessor.name}
                   - name: myErrorHandler
-                    type: org.apache.camel.builder.DeadLetterChannelBuilder
+                    type: org.apache.camel.model.errorhandler.DeadLetterChannelDefinition
                     properties:
                       dead-letter-uri: "mock:on-error"
                       redelivery-delay: 0
                 - error-handler:
-                    ref: "myErrorHandler"
+                    ref-error-handler: 
+                      ref: "myErrorHandler"
                 - from:
                     uri: "direct:start"
                     steps:
@@ -57,7 +58,7 @@ class ErrorHandlerTest extends YamlTestSupport {
                 to('direct:start').withBody('hello').send()
             }
         then:
-            context.errorHandlerFactory instanceof ErrorHandlerBuilderRef
+            context.getCamelContextExtension().getErrorHandlerFactory() instanceof RefErrorHandlerDefinition
             MockEndpoint.assertIsSatisfied(context)
     }
 
@@ -65,29 +66,29 @@ class ErrorHandlerTest extends YamlTestSupport {
         setup:
             loadRoutes """
                 - error-handler:
-                    ref: "myErrorHandler"
+                    ref-error-handler:
+                      ref: "myErrorHandler"
             """
         when:
             context.start()
         then:
-            with(context.errorHandlerFactory, ErrorHandlerBuilderRef) {
+            with(context.getCamelContextExtension().getErrorHandlerFactory(), RefErrorHandlerDefinition) {
                 ref == 'myErrorHandler'
             }
     }
 
-    def "error-handler (log)"() {
+    def "error-handler (ref inlined)"() {
         setup:
-            loadRoutes """
+        loadRoutes """
                 - error-handler:
-                    log: 
-                      use-original-message: true
+                    ref-error-handler: "myErrorHandler"
             """
         when:
-            context.start()
+        context.start()
         then:
-            with(context.errorHandlerFactory, DefaultErrorHandlerBuilder) {
-                useOriginalMessage
-            }
+        with(context.getCamelContextExtension().getErrorHandlerFactory(), RefErrorHandlerDefinition) {
+            ref == 'myErrorHandler'
+        }
     }
 
     def "error-handler (dead-letter-channel)"() {
@@ -96,25 +97,46 @@ class ErrorHandlerTest extends YamlTestSupport {
                 - error-handler:
                     dead-letter-channel: 
                       dead-letter-uri: "mock:on-error"
+                      redelivery-policy:
+                        maximum-redeliveries: 3
             """
         when:
             context.start()
         then:
-            with(context.errorHandlerFactory, DeadLetterChannelBuilder) {
+            with(context.getCamelContextExtension().getErrorHandlerFactory(), DeadLetterChannelDefinition) {
                 deadLetterUri == 'mock:on-error'
+                redeliveryPolicy.maximumRedeliveries == "3"
             }
     }
 
-    def "error-handler (none)"() {
+    def "error-handler (default-error-handler)"() {
+        setup:
+        loadRoutes """
+                - error-handler:
+                    default-error-handler:
+                      useOriginalMessage: true 
+                      redelivery-policy:
+                        maximum-redeliveries: 2
+            """
+        when:
+        context.start()
+        then:
+        with(context.getCamelContextExtension().getErrorHandlerFactory(), DefaultErrorHandlerDefinition) {
+            useOriginalMessage == "true"
+            redeliveryPolicy.maximumRedeliveries == "2"
+        }
+    }
+
+    def "error-handler (no)"() {
         setup:
             loadRoutes """
                 - error-handler:
-                    none: {}
+                    no-error-handler: {}
             """
         when:
             context.start()
         then:
-            context.errorHandlerFactory instanceof NoErrorHandlerBuilder
+            context.getCamelContextExtension().getErrorHandlerFactory() instanceof NoErrorHandlerDefinition
     }
 
 }

@@ -53,20 +53,20 @@ public class S3ComponentManualIT extends CamelTestSupport {
         result.expectedMessageCount(2);
 
         Exchange exchange1 = template.send("direct:start", ExchangePattern.InOnly, new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.KEY, "CamelUnitTest1");
                 exchange.getIn().setBody("This is my bucket content.");
             }
         });
 
         Exchange exchange2 = template.send("direct:start", ExchangePattern.InOnly, new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.KEY, "CamelUnitTest2");
                 exchange.getIn().setBody("This is my bucket content.");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         assertResultExchange(result.getExchanges().get(0));
         assertResultExchange(result.getExchanges().get(1));
@@ -80,13 +80,13 @@ public class S3ComponentManualIT extends CamelTestSupport {
         result.expectedMessageCount(1);
 
         Exchange exchange = template.send("direct:start", ExchangePattern.InOut, new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.KEY, "CamelUnitTest");
                 exchange.getIn().setBody("This is my bucket content.");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         assertResultExchange(result.getExchanges().get(0));
 
@@ -116,10 +116,10 @@ public class S3ComponentManualIT extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String s3EndpointUri
                         = "aws2-s3://mycamelbucket?accessKey={{aws.access.key}}&secretKey={{aws.secret.key}}&region=us-west-1&autoCreateBucket=false";
 

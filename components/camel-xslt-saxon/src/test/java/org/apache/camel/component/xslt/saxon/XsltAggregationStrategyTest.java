@@ -37,7 +37,7 @@ public class XsltAggregationStrategyTest extends CamelTestSupport {
 
         context.getRouteController().startRoute("route1");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -48,20 +48,19 @@ public class XsltAggregationStrategyTest extends CamelTestSupport {
 
         context.getRouteController().startRoute("route2");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("file:src/test/resources/org/apache/camel/util/toolbox?noop=true&sortBy=file:name&antInclude=*.xml")
                         .routeId("route1").noAutoStartup()
                         .aggregate(new XsltSaxonAggregationStrategy("org/apache/camel/util/toolbox/aggregate.xsl"))
                         .constant(true)
                         .completionFromBatchConsumer()
-                        .log("after aggregate body: ${body}")
                         .to("mock:transformed");
 
                 from("file:src/test/resources/org/apache/camel/util/toolbox?noop=true&sortBy=file:name&antInclude=*.xml")

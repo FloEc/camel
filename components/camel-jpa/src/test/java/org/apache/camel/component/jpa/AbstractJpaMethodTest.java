@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
@@ -51,7 +51,7 @@ public abstract class AbstractJpaMethodTest extends CamelTestSupport {
 
     @Override
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (entityManager != null) {
             entityManager.close();
         }

@@ -17,8 +17,6 @@
 package org.apache.camel.processor.aggregate;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,8 +41,6 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Navigate;
 import org.apache.camel.NoSuchEndpointException;
 import org.apache.camel.Predicate;
@@ -101,7 +97,6 @@ public class AggregateProcessor extends AsyncProcessorSupport
     public static final String COMPLETED_BY_FORCE = "force";
 
     private static final Logger LOG = LoggerFactory.getLogger(AggregateProcessor.class);
-
     private volatile Lock lock;
     private final AtomicBoolean aggregateRepositoryWarned = new AtomicBoolean();
     private final CamelContext camelContext;
@@ -127,7 +122,9 @@ public class AggregateProcessor extends AsyncProcessorSupport
     private AggregationRepository aggregationRepository;
     private Map<String, String> closedCorrelationKeys;
     private final Set<String> batchConsumerCorrelationKeys = new ConcurrentSkipListSet<>();
-    private final Set<String> inProgressCompleteExchanges = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<String> inProgressCompleteExchanges = ConcurrentHashMap.newKeySet();
+    private final Set<String> unconfirmedCompleteExchanges = ConcurrentHashMap.newKeySet();
+    private final Set<String> inProgressCompleteExchangesForRecoveryTask = ConcurrentHashMap.newKeySet();
     private final Map<String, RedeliveryData> redeliveryState = new ConcurrentHashMap<>();
 
     private final AggregateProcessorStatistics statistics = new Statistics();
@@ -141,6 +138,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
     private final AtomicLong completedByBatchConsumer = new AtomicLong();
     private final AtomicLong completedByForce = new AtomicLong();
     private final AtomicLong discarded = new AtomicLong();
+    private final AtomicBoolean recoveryInProgress = new AtomicBoolean(false);
 
     // keep booking about redelivery
     private static class RedeliveryData {
@@ -249,6 +247,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
     private long completionTimeoutCheckerInterval = 1000;
 
     private ProducerTemplate deadLetterProducerTemplate;
+    private boolean isRecoverableRepository;
 
     public AggregateProcessor(CamelContext camelContext, AsyncProcessor processor,
                               Expression correlationExpression, AggregationStrategy aggregationStrategy,
@@ -259,7 +258,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
         ObjectHelper.notNull(aggregationStrategy, "aggregationStrategy");
         ObjectHelper.notNull(executorService, "executorService");
         this.camelContext = camelContext;
-        this.reactiveExecutor = camelContext.adapt(ExtendedCamelContext.class).getReactiveExecutor();
+        this.reactiveExecutor = camelContext.getCamelContextExtension().getReactiveExecutor();
         this.processor = processor;
         this.correlationExpression = correlationExpression;
         this.aggregationStrategy = aggregationStrategy;
@@ -327,7 +326,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
             totalIn.incrementAndGet();
         }
 
-        //check for the special header to force completion of all groups (and ignore the exchange otherwise)
+        // check for the special header to force completion of all groups (and ignore the exchange otherwise)
         if (isCompleteAllGroups(exchange)) {
             removeFlagCompleteAllGroups(exchange);
             forceCompletionOfAllGroups();
@@ -581,7 +580,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
         }
 
         // special for some repository implementations
-        if (aggregationRepository instanceof RecoverableAggregationRepository) {
+        if (isRecoverableRepository()) {
             boolean valid = oldExchange == null || answer.getExchangeId().equals(oldExchange.getExchangeId());
             if (!valid && aggregateRepositoryWarned.compareAndSet(false, true)) {
                 LOG.warn(
@@ -834,7 +833,9 @@ public class AggregateProcessor extends AsyncProcessorSupport
 
         // add this as in progress before we submit the task
         inProgressCompleteExchanges.add(exchange.getExchangeId());
-
+        if (recoveryInProgress.get()) {
+            inProgressCompleteExchangesForRecoveryTask.add(exchange.getExchangeId());
+        }
         // invoke the on completion callback
         aggregationStrategy.onCompletion(exchange);
 
@@ -873,10 +874,12 @@ public class AggregateProcessor extends AsyncProcessorSupport
         LOG.debug("Processing aggregated exchange: {}", exchange);
 
         // add on completion task so we remember to update the inProgressCompleteExchanges
-        exchange.adapt(ExtendedExchange.class).addOnCompletion(new AggregateOnCompletion(exchange.getExchangeId()));
+        exchange.getExchangeExtension().addOnCompletion(new AggregateOnCompletion(exchange.getExchangeId()));
 
         // send this exchange
         executorService.execute(() -> {
+            ExchangeHelper.prepareOutToIn(exchange);
+
             Runnable task = () -> processor.process(exchange, done -> {
                 // log exception if there was a problem
                 if (exchange.getException() != null) {
@@ -911,20 +914,22 @@ public class AggregateProcessor extends AsyncProcessorSupport
 
         for (String key : keys) {
             Exchange exchange = aggregationRepository.get(camelContext, key);
-            // grab the timeout value
-            long timeout = exchange.getProperty(ExchangePropertyKey.AGGREGATED_TIMEOUT, 0L, long.class);
-            if (timeout > 0) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Restoring CompletionTimeout for exchangeId: {} with timeout: {} millis.",
-                            exchange.getExchangeId(), timeout);
+            if (exchange != null) {
+                // grab the timeout value
+                long timeout = exchange.getProperty(ExchangePropertyKey.AGGREGATED_TIMEOUT, 0L, long.class);
+                if (timeout > 0) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Restoring CompletionTimeout for exchangeId: {} with timeout: {} millis.",
+                                exchange.getExchangeId(), timeout);
+                    }
+                    addExchangeToTimeoutMap(key, exchange, timeout);
                 }
-                addExchangeToTimeoutMap(key, exchange, timeout);
             }
         }
 
         // log duration of this task so end user can see how long it takes to pre-check this upon starting
         LOG.info("Restored {} CompletionTimeout conditions in the AggregationTimeoutChecker in {}",
-                timeoutMap.size(), TimeUtils.printDuration(watch.taken()));
+                timeoutMap.size(), TimeUtils.printDuration(watch.taken(), true));
     }
 
     /**
@@ -1098,6 +1103,11 @@ public class AggregateProcessor extends AsyncProcessorSupport
 
     public void setAggregationRepository(AggregationRepository aggregationRepository) {
         this.aggregationRepository = aggregationRepository;
+        this.isRecoverableRepository = aggregationRepository instanceof RecoverableAggregationRepository;
+    }
+
+    private boolean isRecoverableRepository() {
+        return isRecoverableRepository;
     }
 
     public boolean isDiscardOnCompletionTimeout() {
@@ -1214,9 +1224,19 @@ public class AggregateProcessor extends AsyncProcessorSupport
 
             // only confirm if we processed without a problem
             try {
-                aggregationRepository.confirm(exchange.getContext(), exchangeId);
+                boolean confirmed;
+                if (isRecoverableRepository()) {
+                    confirmed = ((RecoverableAggregationRepository) aggregationRepository)
+                            .confirmWithResult(exchange.getContext(), exchangeId);
+                } else {
+                    aggregationRepository.confirm(exchange.getContext(), exchangeId);
+                    confirmed = true;
+                }
                 // and remove redelivery state as well
                 redeliveryState.remove(exchangeId);
+                if (!confirmed) {
+                    unconfirmedCompleteExchanges.add(exchangeId);
+                }
             } finally {
                 // must remember to remove in progress when we are complete
                 inProgressCompleteExchanges.remove(exchangeId);
@@ -1365,99 +1385,116 @@ public class AggregateProcessor extends AsyncProcessorSupport
                 LOG.trace("Recover check cannot start due CamelContext({}) has not been started yet", camelContext.getName());
                 return;
             }
-
             LOG.trace("Starting recover check");
+            try {
+                // copy the current in progress before doing scan
+                recoveryInProgress.set(true);
+                inProgressCompleteExchangesForRecoveryTask.clear();
+                inProgressCompleteExchangesForRecoveryTask.addAll(inProgressCompleteExchanges);
+                // These are delivered but still in complete repository!
+                inProgressCompleteExchangesForRecoveryTask.addAll(unconfirmedCompleteExchanges);
+                final Set<String> exchangeIds = recoverable.scan(camelContext);
+                for (String exchangeId : exchangeIds) {
 
-            // copy the current in progress before doing scan
-            final Set<String> copyOfInProgress = new LinkedHashSet<>(inProgressCompleteExchanges);
+                    // we may shutdown while doing recovery
+                    if (!isRunAllowed()) {
+                        LOG.info("We are shutting down so stop recovering");
+                        return;
+                    }
+                    lock.lock();
+                    try {
+                        // consider in progress if it was in progress before we did the scan, or currently after we did the scan
+                        // its safer to consider it in progress than risk duplicates due both in progress + recovered
+                        final boolean inProgress = inProgressCompleteExchangesForRecoveryTask.contains(exchangeId);
+                        if (inProgress) {
+                            LOG.trace("Aggregated exchange with id: {} is already in progress.", exchangeId);
+                            if (unconfirmedCompleteExchanges.contains(exchangeId)) {
+                                retryConfirm(exchangeId);
+                            }
+                        } else {
+                            LOG.debug("Loading aggregated exchange with id: {} to be recovered.", exchangeId);
+                            Exchange exchange = recoverable.recover(camelContext, exchangeId);
+                            if (exchange != null) {
+                                // get the correlation key
+                                String key = exchange.getProperty(ExchangePropertyKey.AGGREGATED_CORRELATION_KEY, String.class);
+                                // and mark it as redelivered
+                                exchange.getIn().setHeader(Exchange.REDELIVERED, Boolean.TRUE);
 
-            Set<String> exchangeIds = recoverable.scan(camelContext);
-            for (String exchangeId : exchangeIds) {
+                                // get the current redelivery data
+                                RedeliveryData data = redeliveryState.get(exchange.getExchangeId());
 
-                // we may shutdown while doing recovery
-                if (!isRunAllowed()) {
-                    LOG.info("We are shutting down so stop recovering");
-                    return;
-                }
-                lock.lock();
-                try {
-                    // consider in progress if it was in progress before we did the scan, or currently after we did the scan
-                    // its safer to consider it in progress than risk duplicates due both in progress + recovered
-                    boolean inProgress
-                            = copyOfInProgress.contains(exchangeId) || inProgressCompleteExchanges.contains(exchangeId);
-                    if (inProgress) {
-                        LOG.trace("Aggregated exchange with id: {} is already in progress.", exchangeId);
-                    } else {
-                        LOG.debug("Loading aggregated exchange with id: {} to be recovered.", exchangeId);
-                        Exchange exchange = recoverable.recover(camelContext, exchangeId);
-                        if (exchange != null) {
-                            // get the correlation key
-                            String key = exchange.getProperty(ExchangePropertyKey.AGGREGATED_CORRELATION_KEY, String.class);
-                            // and mark it as redelivered
-                            exchange.getIn().setHeader(Exchange.REDELIVERED, Boolean.TRUE);
+                                // if we are exhausted, then move to dead letter channel
+                                if (data != null && recoverable.getMaximumRedeliveries() > 0
+                                        && data.redeliveryCounter >= recoverable.getMaximumRedeliveries()) {
+                                    LOG.warn("The recovered exchange is exhausted after {} attempts, will now be moved to "
+                                             + "dead letter channel: {}",
+                                            recoverable.getMaximumRedeliveries(), recoverable.getDeadLetterUri());
 
-                            // get the current redelivery data
-                            RedeliveryData data = redeliveryState.get(exchange.getExchangeId());
+                                    // send to DLC
+                                    try {
+                                        // set redelivery counter
+                                        exchange.getIn().setHeader(Exchange.REDELIVERY_COUNTER, data.redeliveryCounter);
+                                        // and prepare for sending to DLC
+                                        exchange.getExchangeExtension().setRedeliveryExhausted(false);
+                                        exchange.setRollbackOnly(false);
+                                        deadLetterProducerTemplate.send(recoverable.getDeadLetterUri(), exchange);
+                                    } catch (Throwable e) {
+                                        exchange.setException(e);
+                                    }
 
-                            // if we are exhausted, then move to dead letter channel
-                            if (data != null && recoverable.getMaximumRedeliveries() > 0
-                                    && data.redeliveryCounter >= recoverable.getMaximumRedeliveries()) {
-                                LOG.warn("The recovered exchange is exhausted after {} attempts, will now be moved to "
-                                         + "dead letter channel: {}",
-                                        recoverable.getMaximumRedeliveries(), recoverable.getDeadLetterUri());
+                                    // handle if failed
+                                    if (exchange.getException() != null) {
+                                        getExceptionHandler()
+                                                .handleException("Failed to move recovered Exchange to dead letter channel: "
+                                                                 + recoverable.getDeadLetterUri(),
+                                                        exchange.getException());
+                                    } else {
+                                        // it was ok, so confirm after it has been moved to dead letter channel, so we wont recover it again
+                                        recoverable.confirm(camelContext, exchangeId);
+                                    }
+                                } else {
+                                    // update current redelivery state
+                                    if (data == null) {
+                                        // create new data
+                                        data = new RedeliveryData();
+                                        redeliveryState.put(exchange.getExchangeId(), data);
+                                    }
+                                    data.redeliveryCounter++;
 
-                                // send to DLC
-                                try {
                                     // set redelivery counter
                                     exchange.getIn().setHeader(Exchange.REDELIVERY_COUNTER, data.redeliveryCounter);
-                                    // and prepare for sending to DLC
-                                    exchange.adapt(ExtendedExchange.class).setRedeliveryExhausted(false);
-                                    exchange.adapt(ExtendedExchange.class).setRollbackOnly(false);
-                                    deadLetterProducerTemplate.send(recoverable.getDeadLetterUri(), exchange);
-                                } catch (Throwable e) {
-                                    exchange.setException(e);
-                                }
+                                    if (recoverable.getMaximumRedeliveries() > 0) {
+                                        exchange.getIn().setHeader(Exchange.REDELIVERY_MAX_COUNTER,
+                                                recoverable.getMaximumRedeliveries());
+                                    }
 
-                                // handle if failed
-                                if (exchange.getException() != null) {
-                                    getExceptionHandler()
-                                            .handleException("Failed to move recovered Exchange to dead letter channel: "
-                                                             + recoverable.getDeadLetterUri(),
-                                                    exchange.getException());
-                                } else {
-                                    // it was ok, so confirm after it has been moved to dead letter channel, so we wont recover it again
-                                    recoverable.confirm(camelContext, exchangeId);
-                                }
-                            } else {
-                                // update current redelivery state
-                                if (data == null) {
-                                    // create new data
-                                    data = new RedeliveryData();
-                                    redeliveryState.put(exchange.getExchangeId(), data);
-                                }
-                                data.redeliveryCounter++;
+                                    LOG.debug("Delivery attempt: {} to recover aggregated exchange with id: {}",
+                                            data.redeliveryCounter, exchangeId);
 
-                                // set redelivery counter
-                                exchange.getIn().setHeader(Exchange.REDELIVERY_COUNTER, data.redeliveryCounter);
-                                if (recoverable.getMaximumRedeliveries() > 0) {
-                                    exchange.getIn().setHeader(Exchange.REDELIVERY_MAX_COUNTER,
-                                            recoverable.getMaximumRedeliveries());
+                                    // not exhaust so resubmit the recovered exchange
+                                    onSubmitCompletion(key, exchange);
                                 }
-
-                                LOG.debug("Delivery attempt: {} to recover aggregated exchange with id: {}",
-                                        data.redeliveryCounter, exchangeId);
-
-                                // not exhaust so resubmit the recovered exchange
-                                onSubmitCompletion(key, exchange);
                             }
                         }
+                    } finally {
+                        lock.unlock();
                     }
-                } finally {
-                    lock.unlock();
                 }
+            } finally {
+                recoveryInProgress.set(false);
+                inProgressCompleteExchangesForRecoveryTask.clear();
             }
-
             LOG.trace("Recover check complete");
+        }
+
+        private void retryConfirm(String exchangeId) {
+            // Confirm that the exchange was processed
+            if (recoverable.confirmWithResult(camelContext, exchangeId)) {
+                unconfirmedCompleteExchanges.remove(exchangeId);
+                LOG.debug("Removal of exchange {} confirmed.", exchangeId);
+            } else {
+                LOG.warn("Still unable to confirm removal of exchange {}.", exchangeId);
+            }
         }
     }
 
@@ -1509,7 +1546,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
         ServiceHelper.startService(aggregationStrategy, processor, aggregationRepository);
 
         // should we use recover checker
-        if (aggregationRepository instanceof RecoverableAggregationRepository) {
+        if (isRecoverableRepository()) {
             RecoverableAggregationRepository recoverable = (RecoverableAggregationRepository) aggregationRepository;
             if (recoverable.isUseRecovery()) {
                 long interval = recoverable.getRecoveryIntervalInMillis();
@@ -1670,7 +1707,7 @@ public class AggregateProcessor extends AsyncProcessorSupport
 
         if (expected > 0) {
             LOG.info("Forcing completion of all groups with {} exchanges completed in {}", expected,
-                    TimeUtils.printDuration(watch.taken()));
+                    TimeUtils.printDuration(watch.taken(), true));
         }
     }
 

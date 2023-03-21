@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import io.smallrye.faulttolerance.core.circuit.breaker.CircuitBreaker;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
 import org.apache.camel.model.CircuitBreakerDefinition;
@@ -64,8 +63,8 @@ public class FaultToleranceReifier extends ProcessorReifier<CircuitBreakerDefini
 
         FaultToleranceProcessor answer = new FaultToleranceProcessor(configuration, processor, fallback);
         // using any existing circuit breakers?
-        if (config.getCircuitBreakerRef() != null) {
-            CircuitBreaker cb = mandatoryLookup(parseString(config.getCircuitBreakerRef()), CircuitBreaker.class);
+        if (config.getCircuitBreaker() != null) {
+            CircuitBreaker cb = mandatoryLookup(parseString(config.getCircuitBreaker()), CircuitBreaker.class);
             answer.setCircuitBreaker(cb);
         }
         configureBulkheadExecutorService(answer, config);
@@ -113,10 +112,10 @@ public class FaultToleranceReifier extends ProcessorReifier<CircuitBreakerDefini
             return;
         }
 
-        if (config.getBulkheadExecutorServiceRef() != null) {
-            String ref = config.getBulkheadExecutorServiceRef();
+        if (config.getBulkheadExecutorService() != null) {
+            String ref = config.getBulkheadExecutorService();
             boolean shutdownThreadPool = false;
-            ExecutorService executorService = lookup(ref, ExecutorService.class);
+            ExecutorService executorService = lookupByNameAndType(ref, ExecutorService.class);
             if (executorService == null) {
                 executorService = lookupExecutorServiceRef("CircuitBreaker", definition, ref);
                 shutdownThreadPool = true;
@@ -133,7 +132,7 @@ public class FaultToleranceReifier extends ProcessorReifier<CircuitBreakerDefini
     FaultToleranceConfigurationDefinition buildFaultToleranceConfiguration() throws Exception {
         Map<String, Object> properties = new HashMap<>();
 
-        final PropertyConfigurer configurer = camelContext.adapt(ExtendedCamelContext.class)
+        final PropertyConfigurer configurer = camelContext.getCamelContextExtension()
                 .getConfigurerResolver()
                 .resolvePropertyConfigurer(FaultToleranceConfigurationDefinition.class.getName(), camelContext);
 
@@ -141,14 +140,14 @@ public class FaultToleranceReifier extends ProcessorReifier<CircuitBreakerDefini
         // camel context takes the precedence over those in the registry
         loadProperties(properties, Suppliers.firstNotNull(
                 () -> camelContext.getExtension(Model.class).getFaultToleranceConfiguration(null),
-                () -> lookup(FaultToleranceConstants.DEFAULT_FAULT_TOLERANCE_CONFIGURATION_ID,
+                () -> lookupByNameAndType(FaultToleranceConstants.DEFAULT_FAULT_TOLERANCE_CONFIGURATION_ID,
                         FaultToleranceConfigurationDefinition.class)),
                 configurer);
 
         // Extract properties from referenced configuration, the one configured
         // on camel context takes the precedence over those in the registry
-        if (definition.getConfigurationRef() != null) {
-            final String ref = parseString(definition.getConfigurationRef());
+        if (definition.getConfiguration() != null) {
+            final String ref = parseString(definition.getConfiguration());
 
             loadProperties(properties, Suppliers.firstNotNull(
                     () -> camelContext.getExtension(Model.class).getFaultToleranceConfiguration(ref),
@@ -172,7 +171,7 @@ public class FaultToleranceReifier extends ProcessorReifier<CircuitBreakerDefini
     }
 
     private void loadProperties(Map<String, Object> properties, Optional<?> optional, PropertyConfigurer configurer) {
-        BeanIntrospection beanIntrospection = camelContext.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        BeanIntrospection beanIntrospection = camelContext.getCamelContextExtension().getBeanIntrospection();
         optional.ifPresent(bean -> {
             if (configurer instanceof ExtendedPropertyConfigurerGetter) {
                 ExtendedPropertyConfigurerGetter getter = (ExtendedPropertyConfigurerGetter) configurer;

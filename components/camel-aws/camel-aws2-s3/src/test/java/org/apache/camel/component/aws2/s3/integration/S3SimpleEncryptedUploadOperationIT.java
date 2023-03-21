@@ -50,7 +50,7 @@ public class S3SimpleEncryptedUploadOperationIT extends Aws2S3Base {
         template.send("direct:putObject", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.KEY, "camel.txt");
                 exchange.getIn().setBody("Camel rocks!");
             }
@@ -59,7 +59,7 @@ public class S3SimpleEncryptedUploadOperationIT extends Aws2S3Base {
         template.request("direct:listObjects", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.BUCKET_NAME, "mycamel");
                 exchange.getIn().setHeader(AWS2S3Constants.S3_OPERATION, AWS2S3Operations.listObjects);
             }
@@ -68,7 +68,7 @@ public class S3SimpleEncryptedUploadOperationIT extends Aws2S3Base {
         Exchange c = template.request("direct:getObject", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.KEY, "camel.txt");
                 exchange.getIn().setHeader(AWS2S3Constants.S3_OPERATION, AWS2S3Operations.getObject);
             }
@@ -80,15 +80,15 @@ public class S3SimpleEncryptedUploadOperationIT extends Aws2S3Base {
 
         assertEquals("Camel rocks!", c.getIn().getBody(String.class));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         String key = createKmsKey();
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint = "aws2-s3://mycamel?autoCreateBucket=true&useAwsKMS=true&awsKMSKeyId=" + key;
 
                 from("direct:putObject").to(awsEndpoint);

@@ -38,6 +38,7 @@ public class GoogleSheetsStreamEndpointConfigurer extends PropertyConfigurerSupp
         case "clientsecret":
         case "clientSecret": target.getConfiguration().setClientSecret(property(camelContext, java.lang.String.class, value)); return true;
         case "delay": target.setDelay(property(camelContext, long.class, value)); return true;
+        case "delegate": target.getConfiguration().setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "exceptionhandler":
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
@@ -68,6 +69,8 @@ public class GoogleSheetsStreamEndpointConfigurer extends PropertyConfigurerSupp
         case "scopes": target.getConfiguration().setScopes(property(camelContext, java.util.List.class, value)); return true;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": target.setSendEmptyMessageWhenIdle(property(camelContext, boolean.class, value)); return true;
+        case "serviceaccountkey":
+        case "serviceAccountKey": target.getConfiguration().setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         case "splitresults":
         case "splitResults": target.getConfiguration().setSplitResults(property(camelContext, boolean.class, value)); return true;
         case "startscheduler":
@@ -102,6 +105,7 @@ public class GoogleSheetsStreamEndpointConfigurer extends PropertyConfigurerSupp
         case "clientsecret":
         case "clientSecret": return java.lang.String.class;
         case "delay": return long.class;
+        case "delegate": return java.lang.String.class;
         case "exceptionhandler":
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
@@ -132,6 +136,8 @@ public class GoogleSheetsStreamEndpointConfigurer extends PropertyConfigurerSupp
         case "scopes": return java.util.List.class;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return boolean.class;
+        case "serviceaccountkey":
+        case "serviceAccountKey": return java.lang.String.class;
         case "splitresults":
         case "splitResults": return boolean.class;
         case "startscheduler":
@@ -167,6 +173,7 @@ public class GoogleSheetsStreamEndpointConfigurer extends PropertyConfigurerSupp
         case "clientsecret":
         case "clientSecret": return target.getConfiguration().getClientSecret();
         case "delay": return target.getDelay();
+        case "delegate": return target.getConfiguration().getDelegate();
         case "exceptionhandler":
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
@@ -197,6 +204,8 @@ public class GoogleSheetsStreamEndpointConfigurer extends PropertyConfigurerSupp
         case "scopes": return target.getConfiguration().getScopes();
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return target.isSendEmptyMessageWhenIdle();
+        case "serviceaccountkey":
+        case "serviceAccountKey": return target.getConfiguration().getServiceAccountKey();
         case "splitresults":
         case "splitResults": return target.getConfiguration().isSplitResults();
         case "startscheduler":

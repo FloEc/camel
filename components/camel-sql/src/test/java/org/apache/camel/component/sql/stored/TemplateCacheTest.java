@@ -46,11 +46,13 @@ public class TemplateCacheTest extends CamelTestSupport {
     @AfterEach
     public void tearDown() throws Exception {
         super.tearDown();
-        db.shutdown();
+        if (db != null) {
+            db.shutdown();
+        }
     }
 
     @Test
-    public void shouldCacheTemplateFunctions() throws InterruptedException {
+    public void shouldCacheTemplateFunctions() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
         CallableStatementWrapperFactory fac
                 = new CallableStatementWrapperFactory(jdbcTemplate, new TemplateParser(context.getClassResolver()), false);

@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -217,51 +217,6 @@ public interface WeatherEndpointBuilderFactory {
          */
         default WeatherEndpointConsumerBuilder weatherApi(String weatherApi) {
             doSetProperty("weatherApi", weatherApi);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default WeatherEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default WeatherEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -809,8 +764,8 @@ public interface WeatherEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -831,8 +786,8 @@ public interface WeatherEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -991,6 +946,51 @@ public interface WeatherEndpointBuilderFactory {
             return (WeatherEndpointConsumerBuilder) this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedWeatherEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedWeatherEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -1141,7 +1141,7 @@ public interface WeatherEndpointBuilderFactory {
          * proxy).
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.http.impl.client.CloseableHttpClient&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.hc.client5.http.impl.classic.CloseableHttpClient&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1149,7 +1149,7 @@ public interface WeatherEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedWeatherEndpointConsumerBuilder httpClient(
-                org.apache.http.impl.client.CloseableHttpClient httpClient) {
+                org.apache.hc.client5.http.impl.classic.CloseableHttpClient httpClient) {
             doSetProperty("httpClient", httpClient);
             return this;
         }
@@ -1158,7 +1158,7 @@ public interface WeatherEndpointBuilderFactory {
          * proxy).
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.http.impl.client.CloseableHttpClient&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.hc.client5.http.impl.classic.CloseableHttpClient&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1354,55 +1354,6 @@ public interface WeatherEndpointBuilderFactory {
          */
         default WeatherEndpointProducerBuilder weatherApi(String weatherApi) {
             doSetProperty("weatherApi", weatherApi);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default WeatherEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default WeatherEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -1620,6 +1571,55 @@ public interface WeatherEndpointBuilderFactory {
             return (WeatherEndpointProducerBuilder) this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedWeatherEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedWeatherEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * A custum geolocation provider to determine the longitude and latitude
          * to use when no location information is set. The default implementaion
          * uses the ipstack API and requires geolocationAccessKey and
@@ -1662,7 +1662,7 @@ public interface WeatherEndpointBuilderFactory {
          * proxy).
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.http.impl.client.CloseableHttpClient&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.hc.client5.http.impl.classic.CloseableHttpClient&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1670,7 +1670,7 @@ public interface WeatherEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedWeatherEndpointProducerBuilder httpClient(
-                org.apache.http.impl.client.CloseableHttpClient httpClient) {
+                org.apache.hc.client5.http.impl.classic.CloseableHttpClient httpClient) {
             doSetProperty("httpClient", httpClient);
             return this;
         }
@@ -1679,7 +1679,7 @@ public interface WeatherEndpointBuilderFactory {
          * proxy).
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.http.impl.client.CloseableHttpClient&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.hc.client5.http.impl.classic.CloseableHttpClient&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2136,7 +2136,7 @@ public interface WeatherEndpointBuilderFactory {
          * proxy).
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.http.impl.client.CloseableHttpClient&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.hc.client5.http.impl.classic.CloseableHttpClient&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2144,7 +2144,7 @@ public interface WeatherEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedWeatherEndpointBuilder httpClient(
-                org.apache.http.impl.client.CloseableHttpClient httpClient) {
+                org.apache.hc.client5.http.impl.classic.CloseableHttpClient httpClient) {
             doSetProperty("httpClient", httpClient);
             return this;
         }
@@ -2153,7 +2153,7 @@ public interface WeatherEndpointBuilderFactory {
          * proxy).
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.http.impl.client.CloseableHttpClient&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.hc.client5.http.impl.classic.CloseableHttpClient&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2167,6 +2167,19 @@ public interface WeatherEndpointBuilderFactory {
     }
 
     public interface WeatherBuilders {
+        /**
+         * Weather (camel-weather)
+         * Poll the weather information from Open Weather Map.
+         * 
+         * Category: api
+         * Since: 2.12
+         * Maven coordinates: org.apache.camel:camel-weather
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default WeatherHeaderNameBuilder weather() {
+            return WeatherHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Weather (camel-weather)
          * Poll the weather information from Open Weather Map.
@@ -2206,6 +2219,44 @@ public interface WeatherEndpointBuilderFactory {
          */
         default WeatherEndpointBuilder weather(String componentName, String path) {
             return WeatherEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Weather component.
+     */
+    public static class WeatherHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final WeatherHeaderNameBuilder INSTANCE = new WeatherHeaderNameBuilder();
+
+        /**
+         * Used by the producer to override the endpoint location and use the
+         * location from this header instead.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code WeatherLocation}.
+         */
+        public String weatherLocation() {
+            return "WeatherLocation";
+        }
+
+        /**
+         * The original query URL sent to the Open Weather Map site.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code WeatherQuery}.
+         */
+        public String weatherQuery() {
+            return "WeatherQuery";
         }
     }
     static WeatherEndpointBuilder endpointBuilder(

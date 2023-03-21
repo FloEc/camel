@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.camel.AggregationStrategy;
@@ -31,7 +33,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.NoTypeConversionAvailableException;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
@@ -68,6 +69,7 @@ public class RecipientListProcessor extends MulticastProcessor {
     private final String delimiter;
     private final ProducerCache producerCache;
     private int cacheSize;
+    private Map<String, Object> txData;
 
     /**
      * Class that represent each step in the recipient list to do
@@ -287,6 +289,16 @@ public class RecipientListProcessor extends MulticastProcessor {
             Exchange exchange, ExchangePattern pattern, boolean prototypeEndpoint) {
         // copy exchange, and do not share the unit of work
         Exchange copy = processorExchangeFactory.createCorrelatedCopy(exchange, false);
+        copy.getExchangeExtension().setTransacted(exchange.isTransacted());
+
+        // If we are in a transaction, set TRANSACTION_CONTEXT_DATA property for new exchanges to share txData
+        // during the transaction.
+        if (exchange.isTransacted() && copy.getProperty(Exchange.TRANSACTION_CONTEXT_DATA) == null) {
+            if (txData == null) {
+                txData = new ConcurrentHashMap<>();
+            }
+            copy.setProperty(Exchange.TRANSACTION_CONTEXT_DATA, txData);
+        }
 
         // if we share unit of work, we need to prepare the child exchange
         if (isShareUnitOfWork()) {
@@ -322,7 +334,7 @@ public class RecipientListProcessor extends MulticastProcessor {
             recipient = ((String) recipient).trim();
         }
         if (recipient != null) {
-            ExtendedCamelContext ecc = (ExtendedCamelContext) exchange.getContext();
+            CamelContext ecc = exchange.getContext();
             String uri;
             if (recipient instanceof String) {
                 uri = (String) recipient;
@@ -331,7 +343,7 @@ public class RecipientListProcessor extends MulticastProcessor {
                 uri = ecc.getTypeConverter().mandatoryConvertTo(String.class, exchange, recipient);
             }
             // optimize and normalize endpoint
-            return ecc.normalizeUri(uri);
+            return ecc.getCamelContextExtension().normalizeUri(uri);
         }
         return null;
     }
@@ -343,8 +355,8 @@ public class RecipientListProcessor extends MulticastProcessor {
         if (recipient != null) {
             if (recipient instanceof NormalizedEndpointUri) {
                 NormalizedEndpointUri nu = (NormalizedEndpointUri) recipient;
-                ExtendedCamelContext ecc = (ExtendedCamelContext) exchange.getContext();
-                return ecc.hasEndpoint(nu);
+                CamelContext ecc = exchange.getContext();
+                return ecc.getCamelContextExtension().hasEndpoint(nu);
             } else {
                 String uri = recipient.toString().trim();
                 return exchange.getContext().hasEndpoint(uri);

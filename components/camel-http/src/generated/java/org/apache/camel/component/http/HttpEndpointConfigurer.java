@@ -37,13 +37,12 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "authenticationPreemptive": target.setAuthenticationPreemptive(property(camelContext, boolean.class, value)); return true;
         case "bridgeendpoint":
         case "bridgeEndpoint": target.setBridgeEndpoint(property(camelContext, boolean.class, value)); return true;
-        case "chunked": target.setChunked(property(camelContext, boolean.class, value)); return true;
         case "clearexpiredcookies":
         case "clearExpiredCookies": target.setClearExpiredCookies(property(camelContext, boolean.class, value)); return true;
         case "clientbuilder":
-        case "clientBuilder": target.setClientBuilder(property(camelContext, org.apache.http.impl.client.HttpClientBuilder.class, value)); return true;
+        case "clientBuilder": target.setClientBuilder(property(camelContext, org.apache.hc.client5.http.impl.classic.HttpClientBuilder.class, value)); return true;
         case "clientconnectionmanager":
-        case "clientConnectionManager": target.setClientConnectionManager(property(camelContext, org.apache.http.conn.HttpClientConnectionManager.class, value)); return true;
+        case "clientConnectionManager": target.setClientConnectionManager(property(camelContext, org.apache.hc.client5.http.io.HttpClientConnectionManager.class, value)); return true;
         case "connectionclose":
         case "connectionClose": target.setConnectionClose(property(camelContext, boolean.class, value)); return true;
         case "connectionsperroute":
@@ -51,7 +50,7 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "cookiehandler":
         case "cookieHandler": target.setCookieHandler(property(camelContext, org.apache.camel.http.base.cookie.CookieHandler.class, value)); return true;
         case "cookiestore":
-        case "cookieStore": target.setCookieStore(property(camelContext, org.apache.http.client.CookieStore.class, value)); return true;
+        case "cookieStore": target.setCookieStore(property(camelContext, org.apache.hc.client5.http.cookie.CookieStore.class, value)); return true;
         case "copyheaders":
         case "copyHeaders": target.setCopyHeaders(property(camelContext, boolean.class, value)); return true;
         case "customhostheader":
@@ -60,20 +59,22 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "deleteWithBody": target.setDeleteWithBody(property(camelContext, boolean.class, value)); return true;
         case "disablestreamcache":
         case "disableStreamCache": target.setDisableStreamCache(property(camelContext, boolean.class, value)); return true;
+        case "followredirects":
+        case "followRedirects": target.setFollowRedirects(property(camelContext, boolean.class, value)); return true;
         case "getwithbody":
         case "getWithBody": target.setGetWithBody(property(camelContext, boolean.class, value)); return true;
         case "headerfilterstrategy":
         case "headerFilterStrategy": target.setHeaderFilterStrategy(property(camelContext, org.apache.camel.spi.HeaderFilterStrategy.class, value)); return true;
-        case "httpbinding":
-        case "httpBinding": target.setHttpBinding(property(camelContext, org.apache.camel.http.common.HttpBinding.class, value)); return true;
         case "httpclient":
-        case "httpClient": target.setHttpClient(property(camelContext, org.apache.http.client.HttpClient.class, value)); return true;
+        case "httpClient": target.setHttpClient(property(camelContext, org.apache.hc.client5.http.classic.HttpClient.class, value)); return true;
         case "httpclientconfigurer":
         case "httpClientConfigurer": target.setHttpClientConfigurer(property(camelContext, org.apache.camel.component.http.HttpClientConfigurer.class, value)); return true;
         case "httpclientoptions":
         case "httpClientOptions": target.setHttpClientOptions(property(camelContext, java.util.Map.class, value)); return true;
+        case "httpconnectionoptions":
+        case "httpConnectionOptions": target.setHttpConnectionOptions(property(camelContext, java.util.Map.class, value)); return true;
         case "httpcontext":
-        case "httpContext": target.setHttpContext(property(camelContext, org.apache.http.protocol.HttpContext.class, value)); return true;
+        case "httpContext": target.setHttpContext(property(camelContext, org.apache.hc.core5.http.protocol.HttpContext.class, value)); return true;
         case "httpmethod":
         case "httpMethod": target.setHttpMethod(property(camelContext, org.apache.camel.http.common.HttpMethods.class, value)); return true;
         case "ignoreresponsebody":
@@ -114,8 +115,6 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "sslContextParameters": target.setSslContextParameters(property(camelContext, org.apache.camel.support.jsse.SSLContextParameters.class, value)); return true;
         case "throwexceptiononfailure":
         case "throwExceptionOnFailure": target.setThrowExceptionOnFailure(property(camelContext, boolean.class, value)); return true;
-        case "transferexception":
-        case "transferException": target.setTransferException(property(camelContext, boolean.class, value)); return true;
         case "usesystemproperties":
         case "useSystemProperties": target.setUseSystemProperties(property(camelContext, boolean.class, value)); return true;
         case "useragent":
@@ -145,13 +144,12 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "authenticationPreemptive": return boolean.class;
         case "bridgeendpoint":
         case "bridgeEndpoint": return boolean.class;
-        case "chunked": return boolean.class;
         case "clearexpiredcookies":
         case "clearExpiredCookies": return boolean.class;
         case "clientbuilder":
-        case "clientBuilder": return org.apache.http.impl.client.HttpClientBuilder.class;
+        case "clientBuilder": return org.apache.hc.client5.http.impl.classic.HttpClientBuilder.class;
         case "clientconnectionmanager":
-        case "clientConnectionManager": return org.apache.http.conn.HttpClientConnectionManager.class;
+        case "clientConnectionManager": return org.apache.hc.client5.http.io.HttpClientConnectionManager.class;
         case "connectionclose":
         case "connectionClose": return boolean.class;
         case "connectionsperroute":
@@ -159,7 +157,7 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "cookiehandler":
         case "cookieHandler": return org.apache.camel.http.base.cookie.CookieHandler.class;
         case "cookiestore":
-        case "cookieStore": return org.apache.http.client.CookieStore.class;
+        case "cookieStore": return org.apache.hc.client5.http.cookie.CookieStore.class;
         case "copyheaders":
         case "copyHeaders": return boolean.class;
         case "customhostheader":
@@ -168,20 +166,22 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "deleteWithBody": return boolean.class;
         case "disablestreamcache":
         case "disableStreamCache": return boolean.class;
+        case "followredirects":
+        case "followRedirects": return boolean.class;
         case "getwithbody":
         case "getWithBody": return boolean.class;
         case "headerfilterstrategy":
         case "headerFilterStrategy": return org.apache.camel.spi.HeaderFilterStrategy.class;
-        case "httpbinding":
-        case "httpBinding": return org.apache.camel.http.common.HttpBinding.class;
         case "httpclient":
-        case "httpClient": return org.apache.http.client.HttpClient.class;
+        case "httpClient": return org.apache.hc.client5.http.classic.HttpClient.class;
         case "httpclientconfigurer":
         case "httpClientConfigurer": return org.apache.camel.component.http.HttpClientConfigurer.class;
         case "httpclientoptions":
         case "httpClientOptions": return java.util.Map.class;
+        case "httpconnectionoptions":
+        case "httpConnectionOptions": return java.util.Map.class;
         case "httpcontext":
-        case "httpContext": return org.apache.http.protocol.HttpContext.class;
+        case "httpContext": return org.apache.hc.core5.http.protocol.HttpContext.class;
         case "httpmethod":
         case "httpMethod": return org.apache.camel.http.common.HttpMethods.class;
         case "ignoreresponsebody":
@@ -222,8 +222,6 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "sslContextParameters": return org.apache.camel.support.jsse.SSLContextParameters.class;
         case "throwexceptiononfailure":
         case "throwExceptionOnFailure": return boolean.class;
-        case "transferexception":
-        case "transferException": return boolean.class;
         case "usesystemproperties":
         case "useSystemProperties": return boolean.class;
         case "useragent":
@@ -254,7 +252,6 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "authenticationPreemptive": return target.isAuthenticationPreemptive();
         case "bridgeendpoint":
         case "bridgeEndpoint": return target.isBridgeEndpoint();
-        case "chunked": return target.isChunked();
         case "clearexpiredcookies":
         case "clearExpiredCookies": return target.isClearExpiredCookies();
         case "clientbuilder":
@@ -277,18 +274,20 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "deleteWithBody": return target.isDeleteWithBody();
         case "disablestreamcache":
         case "disableStreamCache": return target.isDisableStreamCache();
+        case "followredirects":
+        case "followRedirects": return target.isFollowRedirects();
         case "getwithbody":
         case "getWithBody": return target.isGetWithBody();
         case "headerfilterstrategy":
         case "headerFilterStrategy": return target.getHeaderFilterStrategy();
-        case "httpbinding":
-        case "httpBinding": return target.getHttpBinding();
         case "httpclient":
         case "httpClient": return target.getHttpClient();
         case "httpclientconfigurer":
         case "httpClientConfigurer": return target.getHttpClientConfigurer();
         case "httpclientoptions":
         case "httpClientOptions": return target.getHttpClientOptions();
+        case "httpconnectionoptions":
+        case "httpConnectionOptions": return target.getHttpConnectionOptions();
         case "httpcontext":
         case "httpContext": return target.getHttpContext();
         case "httpmethod":
@@ -331,8 +330,6 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         case "sslContextParameters": return target.getSslContextParameters();
         case "throwexceptiononfailure":
         case "throwExceptionOnFailure": return target.isThrowExceptionOnFailure();
-        case "transferexception":
-        case "transferException": return target.isTransferException();
         case "usesystemproperties":
         case "useSystemProperties": return target.isUseSystemProperties();
         case "useragent":
@@ -348,6 +345,8 @@ public class HttpEndpointConfigurer extends PropertyConfigurerSupport implements
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "httpclientoptions":
         case "httpClientOptions": return java.lang.Object.class;
+        case "httpconnectionoptions":
+        case "httpConnectionOptions": return java.lang.Object.class;
         default: return null;
         }
     }

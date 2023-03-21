@@ -18,6 +18,7 @@ package org.apache.camel.component.kamelet;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,7 @@ public class KameletToDTest extends CamelTestSupport {
         template.sendBody("direct:foo", "A");
         template.sendBody("direct:bar", "B");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // **********************************************
@@ -41,10 +42,10 @@ public class KameletToDTest extends CamelTestSupport {
     // **********************************************
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 routeTemplate("broker")
                         .templateParameter("queue")
                         .from("kamelet:source")

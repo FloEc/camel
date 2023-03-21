@@ -58,7 +58,7 @@ public class FromQueueThenConsumeFtpToMockIT extends FtpServerTestSupport {
 
         template.sendBodyAndHeader("seda:start", "Hello World", "myfile", "hello.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     private void prepareFtpServer() throws Exception {
@@ -76,9 +76,9 @@ public class FromQueueThenConsumeFtpToMockIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: e2
                 from("seda:start").process(new Processor() {
                     public void process(final Exchange exchange) throws Exception {

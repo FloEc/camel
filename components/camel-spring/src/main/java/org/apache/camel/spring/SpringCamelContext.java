@@ -19,7 +19,6 @@ package org.apache.camel.spring;
 import java.util.Optional;
 
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.event.EventComponent;
@@ -238,7 +237,7 @@ public class SpringCamelContext extends DefaultCamelContext
             return endpoint;
         }
 
-        BeanProcessorFactory bpf = adapt(ExtendedCamelContext.class).getBeanProcessorFactory();
+        BeanProcessorFactory bpf = getCamelContextExtension().getBeanProcessorFactory();
         try {
             Processor bp = bpf.createBeanProcessor(this, bean, null);
             return new ProcessorEndpoint(uri, this, bp);
@@ -258,7 +257,7 @@ public class SpringCamelContext extends DefaultCamelContext
     protected ModelJAXBContextFactory createModelJAXBContextFactory() {
         Optional<ModelJAXBContextFactory> result = ResolverHelper.resolveService(
                 getCamelContextReference(),
-                getBootstrapFactoryFinder(),
+                getCamelContextExtension().getBootstrapFactoryFinder(),
                 ModelJAXBContextFactory.FACTORY + "-spring",
                 ModelJAXBContextFactory.class);
 

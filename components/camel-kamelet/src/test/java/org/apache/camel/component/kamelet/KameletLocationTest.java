@@ -19,6 +19,7 @@ package org.apache.camel.component.kamelet;
 import org.apache.camel.CamelContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.Resource;
 import org.apache.camel.spi.RoutesBuilderLoader;
 import org.apache.camel.test.junit5.CamelTestSupport;
@@ -39,7 +40,7 @@ public class KameletLocationTest extends CamelTestSupport {
 
         template.sendBody("direct:start", "Hello");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -49,7 +50,7 @@ public class KameletLocationTest extends CamelTestSupport {
         template.sendBody("direct:start", "Hello");
         template.sendBody("direct:start", "World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // we cannot use camel-xml-io-dsl to load the XML route so we fool Camel
@@ -74,10 +75,10 @@ public class KameletLocationTest extends CamelTestSupport {
         }
 
         @Override
-        public RoutesBuilder loadRoutesBuilder(Resource resource) throws Exception {
+        public RoutesBuilder loadRoutesBuilder(Resource resource) {
             return new RouteBuilder() {
                 @Override
-                public void configure() throws Exception {
+                public void configure() {
                     routeTemplate("upper")
                             .from("kamelet:source")
                             .transform().simple("${body.toUpperCase()}");
@@ -103,10 +104,10 @@ public class KameletLocationTest extends CamelTestSupport {
     // **********************************************
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start")
                         .kamelet("upper?location=file:src/test/resources/upper-kamelet.xml")
                         .to("mock:result");

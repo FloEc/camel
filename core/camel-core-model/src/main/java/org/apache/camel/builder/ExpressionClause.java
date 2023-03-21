@@ -379,6 +379,89 @@ public class ExpressionClause<T> implements Expression, Predicate {
     }
 
     /**
+     * Evaluates a <a href="http://camel.apache.org/jq.html">JQ expression</a>
+     *
+     * @param  value the expression to be evaluated
+     * @return       the builder to continue processing the DSL
+     */
+    public T jq(String value) {
+        return delegate.jq(value);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jq.html">JQ expression</a>
+     *
+     * @param  value      the expression to be evaluated
+     * @param  resultType the return type expected by the expression
+     * @return            the builder to continue processing the DSL
+     */
+    public T jq(String value, Class<?> resultType) {
+        return delegate.jq(value, resultType);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jq.html">JQ expression</a>
+     *
+     * @param  value                the expression to be evaluated
+     * @param  headerOrPropertyName the name of the header or property to apply the expression to
+     * @return                      the builder to continue processing the DSL
+     */
+    public T jq(String value, String headerOrPropertyName) {
+        return delegate.jq(value, headerOrPropertyName);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jq.html">JQ expression</a>
+     *
+     * @param  value        the expression to be evaluated
+     * @param  headerName   the name of the header to apply the expression to
+     * @param  propertyName the name of the property to apply the expression to
+     * @return              the builder to continue processing the DSL
+     */
+    public T jq(String value, String headerName, String propertyName) {
+        return delegate.jq(value, headerName, propertyName);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jq.html">JQ expression</a>
+     *
+     * @param  value                the expression to be evaluated
+     * @param  resultType           the return type expected by the expression
+     * @param  headerOrPropertyName the name of the header or property to apply the expression to
+     * @return                      the builder to continue processing the DSL
+     */
+    public T jq(String value, Class<?> resultType, String headerOrPropertyName) {
+        return delegate.jq(value, resultType, headerOrPropertyName);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jq.html">JQ expression</a>
+     *
+     * @param  value        the expression to be evaluated
+     * @param  resultType   the return type expected by the expression
+     * @param  headerName   the name of the header to apply the expression to
+     * @param  propertyName the name of the property to apply the expression to
+     * @return              the builder to continue processing the DSL
+     */
+    public T jq(String value, Class<?> resultType, String headerName, String propertyName) {
+        return delegate.jq(value, resultType, headerName, propertyName);
+    }
+
+    /**
+     * Returns a JavaScript expression value builder
+     */
+    public T js(String value) {
+        return delegate.js(value);
+    }
+
+    /**
+     * Returns a JavaScript expression value builder
+     */
+    public T js(String value, Class<?> resultType) {
+        return delegate.js(value, resultType);
+    }
+
+    /**
      * Evaluates a <a href="http://camel.apache.org/datasonnet.html">Datasonnet expression</a>
      *
      * @param  text the expression to be evaluated
@@ -458,12 +541,35 @@ public class ExpressionClause<T> implements Expression, Predicate {
     /**
      * Evaluates a <a href="http://camel.apache.org/jsonpath.html">Json Path expression</a> with writeAsString enabled.
      *
+     * @param  text       the expression to be evaluated
+     * @param  resultType the return type expected by the expression
+     * @return            the builder to continue processing the DSL
+     */
+    public T jsonpathWriteAsString(String text, Class<?> resultType) {
+        return delegate.jsonpathWriteAsString(text, resultType);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jsonpath.html">Json Path expression</a> with writeAsString enabled.
+     *
      * @param  text               the expression to be evaluated
      * @param  suppressExceptions whether to suppress exceptions such as PathNotFoundException
      * @return                    the builder to continue processing the DSL
      */
     public T jsonpathWriteAsString(String text, boolean suppressExceptions) {
         return delegate.jsonpathWriteAsString(text, suppressExceptions);
+    }
+
+    /**
+     * Evaluates a <a href="http://camel.apache.org/jsonpath.html">Json Path expression</a> with writeAsString enabled.
+     *
+     * @param  text               the expression to be evaluated
+     * @param  suppressExceptions whether to suppress exceptions such as PathNotFoundException
+     * @param  resultType         the return type expected by the expression
+     * @return                    the builder to continue processing the DSL
+     */
+    public T jsonpathWriteAsString(String text, boolean suppressExceptions, Class<?> resultType) {
+        return delegate.jsonpathWriteAsString(text, suppressExceptions, resultType);
     }
 
     /**
@@ -479,6 +585,18 @@ public class ExpressionClause<T> implements Expression, Predicate {
     }
 
     /**
+     * Evaluates a <a href="http://camel.apache.org/jsonpath.html">Json Path expression</a> with unpacking a
+     * single-element array into an object enabled.
+     *
+     * @param  text       the expression to be evaluated
+     * @param  resultType the return type expected by the expression
+     * @return            the builder to continue processing the DSL
+     */
+    public T jsonpathUnpack(String text, Class<?> resultType) {
+        return delegate.jsonpathUnpack(text, resultType);
+    }
+
+    /**
      * Evaluates an <a href="http://camel.apache.org/ognl.html">OGNL expression</a>
      *
      * @param  text the expression to be evaluated
@@ -486,6 +604,27 @@ public class ExpressionClause<T> implements Expression, Predicate {
      */
     public T ognl(String text) {
         return delegate.ognl(text);
+    }
+
+    /**
+     * Evaluates a Python expression.
+     *
+     * @param  text the expression to be evaluated
+     * @return      the builder to continue processing the DSL
+     */
+    public T python(String text) {
+        return delegate.python(text);
+    }
+
+    /**
+     * Evaluates a Python expression.
+     *
+     * @param  text       the expression to be evaluated
+     * @param  resultType the return type expected by the expression
+     * @return            the builder to continue processing the DSL
+     */
+    public T python(String text, Class<?> resultType) {
+        return delegate.python(text, resultType);
     }
 
     /**

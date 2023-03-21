@@ -16,18 +16,23 @@
  */
 package org.apache.camel.component.file.remote.integration;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  *
  */
 public class RemoteFileProduceOverruleOnlyOnceIT extends FtpServerTestSupport {
+    @TempDir
+    Path testDirectory;
 
     @Test
     public void testFileToFtp() throws Exception {
@@ -38,18 +43,19 @@ public class RemoteFileProduceOverruleOnlyOnceIT extends FtpServerTestSupport {
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedHeaderReceived(Exchange.FILE_NAME, "/sub/hello.txt");
-        mock.expectedFileExists(ftpFile("out/sub/ruled.txt"), "Hello World");
-        mock.expectedFileExists(testFile("out/sub/hello.txt"), "Hello World");
+        mock.expectedFileExists(service.ftpFile("out/sub/ruled.txt"), "Hello World");
+        mock.expectedFileExists(testDirectory.resolve("out/sub/hello.txt"), "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from("direct:input").to("ftp://admin:admin@localhost:{{ftp.server.port}}/out/").to(fileUri("out"),
+            public void configure() {
+                from("direct:input").to("ftp://admin:admin@localhost:{{ftp.server.port}}/out/").to(
+                        TestSupport.fileUri(testDirectory, "out"),
                         "mock:result");
             }
         };

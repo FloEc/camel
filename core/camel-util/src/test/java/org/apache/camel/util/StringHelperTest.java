@@ -214,4 +214,23 @@ public class StringHelperTest {
         }
         assertFalse(it.hasNext());
     }
+
+    @Test
+    public void testPad() {
+        assertEquals("  ", StringHelper.padString(1));
+        assertEquals("    ", StringHelper.padString(2));
+        assertEquals("      ", StringHelper.padString(3));
+        assertEquals("   ", StringHelper.padString(3, 1));
+        assertEquals(" ", StringHelper.padString(1, 1));
+        assertEquals("", StringHelper.padString(0));
+        assertEquals("", StringHelper.padString(0, 2));
+    }
+
+    @Test
+    public void testFillChars() {
+        assertEquals("", StringHelper.fillChars('-', 0));
+        assertEquals("==", StringHelper.fillChars('=', 2));
+        assertEquals("----", StringHelper.fillChars('-', 4));
+        assertEquals("..........", StringHelper.fillChars('.', 10));
+    }
 }

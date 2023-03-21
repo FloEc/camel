@@ -40,20 +40,23 @@ public abstract class AbstractMicrometerRoutePolicyTest extends CamelTestSupport
     }
 
     @BindToRegistry(MicrometerConstants.METRICS_REGISTRY_NAME)
-    public CompositeMeterRegistry addRegistry() throws Exception {
+    public CompositeMeterRegistry addRegistry() {
         meterRegistry = new CompositeMeterRegistry();
         meterRegistry.add(new SimpleMeterRegistry());
         meterRegistry.add(new JmxMeterRegistry(CamelJmxConfig.DEFAULT, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT));
         return meterRegistry;
     }
 
+    protected MicrometerRoutePolicyFactory createMicrometerRoutePolicyFactory() {
+        return new MicrometerRoutePolicyFactory();
+    }
+
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
-        MicrometerRoutePolicyFactory factory = new MicrometerRoutePolicyFactory();
+        MicrometerRoutePolicyFactory factory = createMicrometerRoutePolicyFactory();
         factory.setMeterRegistry(meterRegistry);
         context.addRoutePolicyFactory(factory);
-
         return context;
     }
 

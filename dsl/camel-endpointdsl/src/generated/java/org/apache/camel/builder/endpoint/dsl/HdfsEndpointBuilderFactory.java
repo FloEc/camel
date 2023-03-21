@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -255,51 +255,6 @@ public interface HdfsEndpointBuilderFactory {
          */
         default HdfsEndpointConsumerBuilder valueType(String valueType) {
             doSetProperty("valueType", valueType);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default HdfsEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default HdfsEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -774,8 +729,8 @@ public interface HdfsEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -796,8 +751,8 @@ public interface HdfsEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -966,6 +921,51 @@ public interface HdfsEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default HdfsEndpointConsumerBuilder basic() {
             return (HdfsEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedHdfsEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedHdfsEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1239,7 +1239,7 @@ public interface HdfsEndpointBuilderFactory {
          * The compression type to use (is default not in use).
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.hadoop.io.SequenceFile.CompressionType&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.hdfs.HdfsCompressionType&lt;/code&gt; type.
          * 
          * Default: NONE
          * Group: advanced
@@ -1248,7 +1248,7 @@ public interface HdfsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedHdfsEndpointConsumerBuilder compressionType(
-                org.apache.hadoop.io.SequenceFile.CompressionType compressionType) {
+                org.apache.camel.component.hdfs.HdfsCompressionType compressionType) {
             doSetProperty("compressionType", compressionType);
             return this;
         }
@@ -1256,7 +1256,7 @@ public interface HdfsEndpointBuilderFactory {
          * The compression type to use (is default not in use).
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.hadoop.io.SequenceFile.CompressionType&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.hdfs.HdfsCompressionType&lt;/code&gt; type.
          * 
          * Default: NONE
          * Group: advanced
@@ -1339,19 +1339,17 @@ public interface HdfsEndpointBuilderFactory {
          * In the current version of Hadoop opening a file in append mode is
          * disabled since it's not very reliable. So, for the moment, it's only
          * possible to create new files. The Camel HDFS endpoint tries to solve
-         * this problem in this way: &lt;ul&gt; &lt;li&gt;If the split strategy
-         * option has been defined, the hdfs path will be used as a directory
-         * and files will be created using the configured UuidGenerator.
-         * &lt;li&gt;Every time a splitting condition is met, a new file is
-         * created. The splitStrategy option is defined as a string with the
-         * following syntax: &lt;br/&gt;
-         * &lt;tt&gt;splitStrategy=ST:value,ST:value,... &lt;br/&gt; where ST
-         * can be: &lt;ul&gt; &lt;li&gt;BYTES a new file is created, and the old
-         * is closed when the number of written bytes is more than value
-         * &lt;li&gt;MESSAGES a new file is created, and the old is closed when
-         * the number of written messages is more than value &lt;li&gt;IDLE a
-         * new file is created, and the old is closed when no writing happened
-         * in the last value milliseconds.
+         * this problem in this way: If the split strategy option has been
+         * defined, the hdfs path will be used as a directory and files will be
+         * created using the configured UuidGenerator. Every time a splitting
+         * condition is met, a new file is created. The splitStrategy option is
+         * defined as a string with the following syntax:
+         * splitStrategy=ST:value,ST:value,... where ST can be: BYTES a new file
+         * is created, and the old is closed when the number of written bytes is
+         * more than value MESSAGES a new file is created, and the old is closed
+         * when the number of written messages is more than value IDLE a new
+         * file is created, and the old is closed when no writing happened in
+         * the last value milliseconds.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1623,55 +1621,6 @@ public interface HdfsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default HdfsEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default HdfsEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * Whether to overwrite existing files with the same name.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -1760,6 +1709,55 @@ public interface HdfsEndpointBuilderFactory {
                 EndpointProducerBuilder {
         default HdfsEndpointProducerBuilder basic() {
             return (HdfsEndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedHdfsEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedHdfsEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
         /**
          * The size of the HDFS blocks.
@@ -1925,7 +1923,7 @@ public interface HdfsEndpointBuilderFactory {
          * The compression type to use (is default not in use).
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.hadoop.io.SequenceFile.CompressionType&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.hdfs.HdfsCompressionType&lt;/code&gt; type.
          * 
          * Default: NONE
          * Group: advanced
@@ -1934,7 +1932,7 @@ public interface HdfsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedHdfsEndpointProducerBuilder compressionType(
-                org.apache.hadoop.io.SequenceFile.CompressionType compressionType) {
+                org.apache.camel.component.hdfs.HdfsCompressionType compressionType) {
             doSetProperty("compressionType", compressionType);
             return this;
         }
@@ -1942,7 +1940,7 @@ public interface HdfsEndpointBuilderFactory {
          * The compression type to use (is default not in use).
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.hadoop.io.SequenceFile.CompressionType&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.hdfs.HdfsCompressionType&lt;/code&gt; type.
          * 
          * Default: NONE
          * Group: advanced
@@ -2025,19 +2023,17 @@ public interface HdfsEndpointBuilderFactory {
          * In the current version of Hadoop opening a file in append mode is
          * disabled since it's not very reliable. So, for the moment, it's only
          * possible to create new files. The Camel HDFS endpoint tries to solve
-         * this problem in this way: &lt;ul&gt; &lt;li&gt;If the split strategy
-         * option has been defined, the hdfs path will be used as a directory
-         * and files will be created using the configured UuidGenerator.
-         * &lt;li&gt;Every time a splitting condition is met, a new file is
-         * created. The splitStrategy option is defined as a string with the
-         * following syntax: &lt;br/&gt;
-         * &lt;tt&gt;splitStrategy=ST:value,ST:value,... &lt;br/&gt; where ST
-         * can be: &lt;ul&gt; &lt;li&gt;BYTES a new file is created, and the old
-         * is closed when the number of written bytes is more than value
-         * &lt;li&gt;MESSAGES a new file is created, and the old is closed when
-         * the number of written messages is more than value &lt;li&gt;IDLE a
-         * new file is created, and the old is closed when no writing happened
-         * in the last value milliseconds.
+         * this problem in this way: If the split strategy option has been
+         * defined, the hdfs path will be used as a directory and files will be
+         * created using the configured UuidGenerator. Every time a splitting
+         * condition is met, a new file is created. The splitStrategy option is
+         * defined as a string with the following syntax:
+         * splitStrategy=ST:value,ST:value,... where ST can be: BYTES a new file
+         * is created, and the old is closed when the number of written bytes is
+         * more than value MESSAGES a new file is created, and the old is closed
+         * when the number of written messages is more than value IDLE a new
+         * file is created, and the old is closed when no writing happened in
+         * the last value milliseconds.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2497,7 +2493,7 @@ public interface HdfsEndpointBuilderFactory {
          * The compression type to use (is default not in use).
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.hadoop.io.SequenceFile.CompressionType&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.hdfs.HdfsCompressionType&lt;/code&gt; type.
          * 
          * Default: NONE
          * Group: advanced
@@ -2506,7 +2502,7 @@ public interface HdfsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedHdfsEndpointBuilder compressionType(
-                org.apache.hadoop.io.SequenceFile.CompressionType compressionType) {
+                org.apache.camel.component.hdfs.HdfsCompressionType compressionType) {
             doSetProperty("compressionType", compressionType);
             return this;
         }
@@ -2514,7 +2510,7 @@ public interface HdfsEndpointBuilderFactory {
          * The compression type to use (is default not in use).
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.hadoop.io.SequenceFile.CompressionType&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.hdfs.HdfsCompressionType&lt;/code&gt; type.
          * 
          * Default: NONE
          * Group: advanced
@@ -2594,19 +2590,17 @@ public interface HdfsEndpointBuilderFactory {
          * In the current version of Hadoop opening a file in append mode is
          * disabled since it's not very reliable. So, for the moment, it's only
          * possible to create new files. The Camel HDFS endpoint tries to solve
-         * this problem in this way: &lt;ul&gt; &lt;li&gt;If the split strategy
-         * option has been defined, the hdfs path will be used as a directory
-         * and files will be created using the configured UuidGenerator.
-         * &lt;li&gt;Every time a splitting condition is met, a new file is
-         * created. The splitStrategy option is defined as a string with the
-         * following syntax: &lt;br/&gt;
-         * &lt;tt&gt;splitStrategy=ST:value,ST:value,... &lt;br/&gt; where ST
-         * can be: &lt;ul&gt; &lt;li&gt;BYTES a new file is created, and the old
-         * is closed when the number of written bytes is more than value
-         * &lt;li&gt;MESSAGES a new file is created, and the old is closed when
-         * the number of written messages is more than value &lt;li&gt;IDLE a
-         * new file is created, and the old is closed when no writing happened
-         * in the last value milliseconds.
+         * this problem in this way: If the split strategy option has been
+         * defined, the hdfs path will be used as a directory and files will be
+         * created using the configured UuidGenerator. Every time a splitting
+         * condition is met, a new file is created. The splitStrategy option is
+         * defined as a string with the following syntax:
+         * splitStrategy=ST:value,ST:value,... where ST can be: BYTES a new file
+         * is created, and the old is closed when the number of written bytes is
+         * more than value MESSAGES a new file is created, and the old is closed
+         * when the number of written messages is more than value IDLE a new
+         * file is created, and the old is closed when no writing happened in
+         * the last value milliseconds.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2622,6 +2616,19 @@ public interface HdfsEndpointBuilderFactory {
     }
 
     public interface HdfsBuilders {
+        /**
+         * HDFS (camel-hdfs)
+         * Read and write from/to an HDFS filesystem using Hadoop 2.x.
+         * 
+         * Category: bigdata,hadoop,file
+         * Since: 2.14
+         * Maven coordinates: org.apache.camel:camel-hdfs
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default HdfsHeaderNameBuilder hdfs() {
+            return HdfsHeaderNameBuilder.INSTANCE;
+        }
         /**
          * HDFS (camel-hdfs)
          * Read and write from/to an HDFS filesystem using Hadoop 2.x.
@@ -2675,6 +2682,98 @@ public interface HdfsEndpointBuilderFactory {
          */
         default HdfsEndpointBuilder hdfs(String componentName, String path) {
             return HdfsEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the HDFS component.
+     */
+    public static class HdfsHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final HdfsHeaderNameBuilder INSTANCE = new HdfsHeaderNameBuilder();
+
+        /**
+         * Indicates to close the stream.
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code HdfsClose}.
+         */
+        public String hdfsClose() {
+            return "HdfsClose";
+        }
+
+        /**
+         * (producer) Specifies the name of the file to write (relative to the
+         * endpoint path). The name can be a String or an Expression object.
+         * Only relevant when not using a split strategy. (consumer) Specifies
+         * the name of the file to read.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FileName}.
+         */
+        public String fileName() {
+            return "FileName";
+        }
+
+        /**
+         * The name of the file consumed.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileNameConsumed}.
+         */
+        public String fileNameConsumed() {
+            return "FileNameConsumed";
+        }
+
+        /**
+         * The absolute path of the file.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileAbsolutePath}.
+         */
+        public String fileAbsolutePath() {
+            return "FileAbsolutePath";
+        }
+
+        /**
+         * The HDFS key.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code KEY}.
+         */
+        public String kEY() {
+            return "KEY";
+        }
+
+        /**
+         * The size of the file.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileLength}.
+         */
+        public String fileLength() {
+            return "FileLength";
         }
     }
     static HdfsEndpointBuilder endpointBuilder(String componentName, String path) {

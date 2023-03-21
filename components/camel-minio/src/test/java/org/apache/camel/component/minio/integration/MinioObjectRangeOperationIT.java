@@ -51,7 +51,7 @@ class MinioObjectRangeOperationIT extends MinioIntegrationTestSupport {
     @EndpointInject("mock:result")
     private MockEndpoint result;
 
-    MinioObjectRangeOperationIT() throws IOException {
+    MinioObjectRangeOperationIT() {
     }
 
     @Test
@@ -71,7 +71,7 @@ class MinioObjectRangeOperationIT extends MinioIntegrationTestSupport {
             exchange.getIn().setHeader(MinioConstants.OFFSET, 0);
             exchange.getIn().setHeader(MinioConstants.LENGTH, 9);
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
     }
 

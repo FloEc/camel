@@ -25,7 +25,7 @@ import org.apache.camel.util.FileUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpSimpleConsumeNoStartingDirIT extends SftpServerTestSupport {
 
     @Test
@@ -41,19 +41,19 @@ public class SftpSimpleConsumeNoStartingDirIT extends SftpServerTestSupport {
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         FileUtil.deleteFile(file);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("sftp://localhost:{{ftp.server.port}}/"
                      + "?fileName=a.txt&username=admin&password=admin&delay=10000&disconnect=true").routeId("foo")
-                             .noAutoStartup().to("log:result", "mock:result");
+                        .noAutoStartup().to("log:result", "mock:result");
             }
         };
     }

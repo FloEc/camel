@@ -16,6 +16,8 @@
  */
 package org.apache.camel.support;
 
+import java.io.File;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.spi.Resource;
@@ -52,14 +54,19 @@ public final class RouteTemplateHelper {
             throw new IllegalArgumentException("Location is empty");
         }
 
-        ExtendedCamelContext ecc = camelContext.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = camelContext.getCamelContextExtension();
         boolean found = false;
         for (String path : location.split(",")) {
+            // using dot as current dir must be expanded into absolute path
+            if (".".equals(path) || "file:.".equals(path)) {
+                path = new File(".").getAbsolutePath();
+                path = "file:" + FileUtil.onlyPath(path);
+            }
             String name = path;
             Resource res = null;
             // first try resource as-is if the path has an extension
             String ext = FileUtil.onlyExt(path);
-            if (ext != null) {
+            if (ext != null && !ext.isEmpty()) {
                 res = ecc.getResourceLoader().resolveResource(name);
             }
             if (res == null || !res.exists()) {
@@ -87,6 +94,11 @@ public final class RouteTemplateHelper {
         if (!found) {
             // fallback to old behaviour
             String path = location;
+            // using dot as current dir must be expanded into absolute path
+            if (".".equals(path) || "file:.".equals(path)) {
+                path = new File(".").getAbsolutePath();
+                path = "file:" + FileUtil.onlyPath(path);
+            }
             if (!path.endsWith("/")) {
                 path += "/";
             }

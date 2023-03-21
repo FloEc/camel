@@ -144,7 +144,9 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
     }
 
     private boolean tryConnect(TaskPayload payload) {
-        LOG.trace("Reconnect attempt to {}", payload.configuration.remoteServerInformation());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Reconnect attempt to {}", payload.configuration.remoteServerInformation());
+        }
 
         try {
             if (channel == null || !channel.isConnected()) {
@@ -172,7 +174,10 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
                     LOG.trace("Connecting ...");
                     channel.connect();
                 }
-                LOG.debug("Connected to {}", payload.configuration.remoteServerInformation());
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Connected to {}", payload.configuration.remoteServerInformation());
+                }
             }
         } catch (JSchException e) {
             payload.exception = e;
@@ -324,6 +329,18 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
         if (sftpConfig.getPreferredAuthentications() != null) {
             LOG.debug("Using PreferredAuthentications: {}", sftpConfig.getPreferredAuthentications());
             session.setConfig("PreferredAuthentications", sftpConfig.getPreferredAuthentications());
+        }
+
+        // set the ServerHostKeys
+        if (sftpConfig.getServerHostKeys() != null) {
+            LOG.debug("Using ServerHostKeys: {}", sftpConfig.getServerHostKeys());
+            session.setConfig("server_host_key", sftpConfig.getServerHostKeys());
+        }
+
+        // set the PublicKeyAcceptedAlgorithms
+        if (sftpConfig.getPublicKeyAcceptedAlgorithms() != null) {
+            LOG.debug("Using PublicKeyAcceptedAlgorithms: {}", sftpConfig.getPublicKeyAcceptedAlgorithms());
+            session.setConfig("PubkeyAcceptedAlgorithms", sftpConfig.getPublicKeyAcceptedAlgorithms());
         }
 
         // set user information
@@ -755,7 +772,7 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
 
     @Override
     public synchronized void releaseRetrievedFileResources(Exchange exchange) throws GenericFileOperationFailedException {
-        InputStream is = exchange.getIn().getHeader(RemoteFileComponent.REMOTE_FILE_INPUT_STREAM, InputStream.class);
+        InputStream is = exchange.getIn().getHeader(FtpConstants.REMOTE_FILE_INPUT_STREAM, InputStream.class);
 
         if (is != null) {
             try {
@@ -796,7 +813,7 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
 
             if (endpoint.getConfiguration().isStreamDownload()) {
                 target.setBody(is);
-                exchange.getIn().setHeader(RemoteFileComponent.REMOTE_FILE_INPUT_STREAM, is);
+                exchange.getIn().setHeader(FtpConstants.REMOTE_FILE_INPUT_STREAM, is);
             } else {
                 // read the entire file into memory in the byte array
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -863,9 +880,9 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
             os = new FileOutputStream(temp);
 
             // set header with the path to the local work file
-            exchange.getIn().setHeader(Exchange.FILE_LOCAL_WORK_PATH, local.getPath());
+            exchange.getIn().setHeader(FtpConstants.FILE_LOCAL_WORK_PATH, local.getPath());
         } catch (Exception e) {
-            throw new GenericFileOperationFailedException("Cannot create new local work file: " + local);
+            throw new GenericFileOperationFailedException("Cannot create new local work file: " + local, e);
         }
         String currentDir = null;
         try {
@@ -1025,7 +1042,7 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
             if (LOG.isDebugEnabled()) {
                 long time = watch.taken();
                 LOG.debug("Took {} ({} millis) to store file: {} and FTP client returned: true",
-                        TimeUtils.printDuration(time), time, targetName);
+                        TimeUtils.printDuration(time, true), time, targetName);
             }
 
             // after storing file, we may set chmod on the file
@@ -1102,7 +1119,7 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
             if (files == null) {
                 return false;
             }
-            return files.size() >= 1;
+            return !files.isEmpty();
         } catch (SftpException e) {
             // or an exception can be thrown with id 2 which means file does not
             // exists
@@ -1154,18 +1171,16 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
         final Socket[] sockp = new Socket[1];
         final Exception[] ee = new Exception[1];
         String message = "";
-        Thread tmp = new Thread(new Runnable() {
-            public void run() {
-                sockp[0] = null;
-                try {
-                    sockp[0] = new Socket(InetAddress.getByName(host), port, InetAddress.getByName(bindAddress), 0);
-                } catch (Exception e) {
-                    ee[0] = e;
-                    if (sockp[0] != null && sockp[0].isConnected()) {
-                        IOHelper.close(sockp[0]);
-                    }
-                    sockp[0] = null;
+        Thread tmp = new Thread(() -> {
+            sockp[0] = null;
+            try {
+                sockp[0] = new Socket(InetAddress.getByName(host), port, InetAddress.getByName(bindAddress), 0);
+            } catch (Exception e) {
+                ee[0] = e;
+                if (sockp[0] != null && sockp[0].isConnected()) {
+                    IOHelper.close(sockp[0]);
                 }
+                sockp[0] = null;
             }
         });
         tmp.setName("Opening Socket " + host);
@@ -1183,7 +1198,6 @@ public class SftpOperations implements RemoteFileOperations<SftpRemoteFile> {
                 message = ee[0].toString();
             }
             tmp.interrupt();
-            tmp = null;
             throw new RuntimeCamelException(message, ee[0]);
         }
         return socket;

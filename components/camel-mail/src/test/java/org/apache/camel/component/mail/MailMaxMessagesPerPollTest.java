@@ -16,10 +16,10 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Store;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.Store;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -51,7 +51,7 @@ public class MailMaxMessagesPerPollTest extends CamelTestSupport {
         mock.message(2).body().isEqualTo("Message 2");
         mock.expectedPropertyReceived(Exchange.BATCH_SIZE, 3);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         mock.reset();
         mock.expectedMessageCount(2);
@@ -59,7 +59,7 @@ public class MailMaxMessagesPerPollTest extends CamelTestSupport {
         mock.message(0).body().isEqualTo("Message 3");
         mock.message(1).body().isEqualTo("Message 4");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     private void prepareMailbox() throws Exception {
@@ -84,9 +84,9 @@ public class MailMaxMessagesPerPollTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://jones@localhost?password=secret&initialDelay=100&delay=100&maxMessagesPerPoll=3"
                      + "&delete=true").to("mock:result");
             }

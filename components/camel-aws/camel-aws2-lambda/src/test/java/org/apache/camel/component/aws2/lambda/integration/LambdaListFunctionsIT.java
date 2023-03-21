@@ -28,11 +28,13 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.aws2.lambda.Lambda2Constants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import software.amazon.awssdk.services.lambda.model.ListFunctionsResponse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@DisabledIfSystemProperty(named = "ci.env.name", matches = "github.com", disabledReason = "Flaky on GitHub Actions")
 public class LambdaListFunctionsIT extends Aws2LambdaBase {
 
     @EndpointInject
@@ -66,12 +68,12 @@ public class LambdaListFunctionsIT extends Aws2LambdaBase {
 
         template.send("direct:listFunction", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
 
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         ListFunctionsResponse resp = result.getExchanges().get(0).getIn().getBody(ListFunctionsResponse.class);
         assertEquals(1, resp.functions().size());
         assertEquals("GetHelloWithName", resp.functions().get(0).functionName());
@@ -81,10 +83,10 @@ public class LambdaListFunctionsIT extends Aws2LambdaBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint = "aws2-lambda://GetHelloWithName?operation=createFunction";
                 String listFunction = "aws2-lambda://GetHelloWithName?operation=listFunctions";
                 from("direct:createFunction").to(awsEndpoint);

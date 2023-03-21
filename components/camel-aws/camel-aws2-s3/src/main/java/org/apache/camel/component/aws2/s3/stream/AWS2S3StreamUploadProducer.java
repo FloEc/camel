@@ -50,7 +50,6 @@ import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.utils.IoUtils;
@@ -62,7 +61,7 @@ import software.amazon.awssdk.utils.IoUtils;
 public class AWS2S3StreamUploadProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWS2S3StreamUploadProducer.class);
-
+    private static final String TIMEOUT_CHECKER_EXECUTOR_NAME = "S3_Streaming_Upload_Timeout_Checker";
     ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     CreateMultipartUploadResponse initResponse;
     AtomicInteger index = new AtomicInteger(1);
@@ -84,7 +83,7 @@ public class AWS2S3StreamUploadProducer extends DefaultProducer {
         if (getConfiguration().getStreamingUploadTimeout() > 0) {
             timeoutCheckerExecutorService
                     = getEndpoint().getCamelContext().getExecutorServiceManager().newSingleThreadScheduledExecutor(this,
-                            "timeout_checker");
+                            TIMEOUT_CHECKER_EXECUTOR_NAME);
             timeoutCheckerExecutorService.scheduleAtFixedRate(new StreamingUploadTimeoutTask(),
                     getConfiguration().getStreamingUploadTimeout(), getConfiguration().getStreamingUploadTimeout(),
                     TimeUnit.MILLISECONDS);
@@ -165,22 +164,7 @@ public class AWS2S3StreamUploadProducer extends DefaultProducer {
             createMultipartUploadRequest.acl(acl.toString());
         }
 
-        if (getConfiguration().isUseAwsKMS()) {
-            createMultipartUploadRequest.ssekmsKeyId(getConfiguration().getAwsKMSKeyId());
-            createMultipartUploadRequest.serverSideEncryption(ServerSideEncryption.AWS_KMS);
-        }
-
-        if (getConfiguration().isUseCustomerKey()) {
-            if (ObjectHelper.isNotEmpty(getConfiguration().getCustomerKeyId())) {
-                createMultipartUploadRequest.sseCustomerKey(getConfiguration().getCustomerKeyId());
-            }
-            if (ObjectHelper.isNotEmpty(getConfiguration().getCustomerKeyMD5())) {
-                createMultipartUploadRequest.sseCustomerKeyMD5(getConfiguration().getCustomerKeyMD5());
-            }
-            if (ObjectHelper.isNotEmpty(getConfiguration().getCustomerAlgorithm())) {
-                createMultipartUploadRequest.sseCustomerAlgorithm(getConfiguration().getCustomerAlgorithm());
-            }
-        }
+        AWS2S3Utils.setEncryption(createMultipartUploadRequest, getConfiguration());
 
         LOG.trace("Initiating multipart upload [{}] from exchange [{}]...", createMultipartUploadRequest, exchange);
         if (index.get() == 1) {
@@ -223,8 +207,12 @@ public class AWS2S3StreamUploadProducer extends DefaultProducer {
                         .build();
 
         uploadResult = getEndpoint().getS3Client().completeMultipartUpload(compRequest);
-        LOG.info("Completed upload for the part {} with etag {} at index {}", part, uploadResult.eTag(),
-                index);
+
+        // Converting the index to String can cause extra overhead
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Completed upload for the part {} with etag {} at index {}", part, uploadResult.eTag(),
+                    index);
+        }
 
         index.getAndSet(0);
         initResponse = null;

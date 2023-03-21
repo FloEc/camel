@@ -33,10 +33,10 @@ public class FtpProducerAllowNullBodyIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testAllowNullBodyTrue() throws Exception {
+    public void testAllowNullBodyTrue() {
         template.sendBody(getFtpUrl() + "&allowNullBody=true", null);
 
-        assertFileExists(ftpFile("allownull/allowNullBody.txt"));
+        assertFileExists(service.ftpFile("allownull/allowNullBody.txt"));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class FtpProducerAllowNullBodyIT extends FtpServerTestSupport {
                 = assertIsInstanceOf(GenericFileOperationFailedException.class, ex.getCause());
         assertTrue(cause.getMessage().endsWith("allowNullBody.txt"));
 
-        assertFalse(ftpFile("allownull/allowNullBody.txt").toFile().exists(),
+        assertFalse(service.ftpFile("allownull/allowNullBody.txt").toFile().exists(),
                 "allowNullBody set to false with null body should not create a new file");
     }
 

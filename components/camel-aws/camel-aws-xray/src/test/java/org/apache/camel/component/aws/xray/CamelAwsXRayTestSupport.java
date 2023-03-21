@@ -21,13 +21,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.aws.xray.TestDataBuilder.TestTrace;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.InterceptStrategy;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+
+import static org.awaitility.Awaitility.await;
 
 public class CamelAwsXRayTestSupport extends CamelTestSupport {
 
@@ -57,9 +61,8 @@ public class CamelAwsXRayTestSupport extends CamelTestSupport {
         socketListener.getReceivedData().clear();
     }
 
-    @Override
     protected void resetMocks() {
-        super.resetMocks();
+        MockEndpoint.resetMocks(context);
     }
 
     @Override
@@ -87,13 +90,9 @@ public class CamelAwsXRayTestSupport extends CamelTestSupport {
     }
 
     protected void verify() {
-        try {
-            // give the socket listener a bit time to receive the data and transform it to Java objects
-            Thread.sleep(500);
-        } catch (InterruptedException iEx) {
-            // ignore
-        }
-        Map<String, TestTrace> receivedData = socketListener.getReceivedData();
+        Map<String, TestTrace> receivedData = await().atMost(500, TimeUnit.MILLISECONDS)
+                .until(socketListener::getReceivedData, v -> v.size() == testData.size());
+
         TestUtils.checkData(receivedData, testData);
     }
 }

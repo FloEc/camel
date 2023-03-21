@@ -56,22 +56,29 @@ public class DropboxProducerMoveIT extends DropboxTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);
         mock.expectedHeaderReceived(DropboxResultHeader.MOVED_PATH.name(), workdir + "/" + FILE);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:start")
-                        .to(String.format("dropbox://move?accessToken={{accessToken}}&remotePath=%s&newRemotePath=%s",
+                        .to(String.format("dropbox://move?accessToken={{accessToken}}" +
+                                          "&expireIn={{expireIn}}" +
+                                          "&refreshToken={{refreshToken}}" +
+                                          "&apiKey={{apiKey}}&apiSecret={{apiSecret}}" +
+                                          "&remotePath=%s&newRemotePath=%s",
                                 workdir + "/" + FILE, COPY_WORKDIR + "/" + FILE))
                         .to("mock:result");
 
                 from("direct:start2")
                         .setHeader(DropboxConstants.HEADER_REMOTE_PATH, constant(workdir + "/" + FILE))
                         .setHeader(DropboxConstants.HEADER_NEW_REMOTE_PATH, constant(COPY_WORKDIR + "/" + FILE))
-                        .to("dropbox://move?accessToken={{accessToken}}")
+                        .to("dropbox://move?accessToken={{accessToken}}" +
+                            "&expireIn={{expireIn}}" +
+                            "&refreshToken={{refreshToken}}" +
+                            "&apiKey={{apiKey}}&apiSecret={{apiSecret}}")
                         .to("mock:result");
             }
         };

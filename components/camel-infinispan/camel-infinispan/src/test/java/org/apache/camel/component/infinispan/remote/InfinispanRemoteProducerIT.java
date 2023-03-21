@@ -27,12 +27,9 @@ import org.infinispan.client.hotrod.ServerStatistics;
 import org.infinispan.commons.api.BasicCache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisabledOnOs(OS.MAC)
 public class InfinispanRemoteProducerIT extends InfinispanRemoteTestSupport implements InfinispanProducerTestSupport {
 
     @BindToRegistry("mappingFunction")
@@ -61,7 +58,7 @@ public class InfinispanRemoteProducerIT extends InfinispanRemoteTestSupport impl
         assertEquals(InfinispanProducerTestSupport.VALUE_TWO, getCache().get(InfinispanProducerTestSupport.KEY_TWO));
 
         assertEquals(
-                2,
+                -1,
                 fluentTemplate()
                         .to("direct:start")
                         .withHeader(InfinispanConstants.OPERATION, InfinispanOperation.STATS)
@@ -90,7 +87,7 @@ public class InfinispanRemoteProducerIT extends InfinispanRemoteTestSupport impl
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

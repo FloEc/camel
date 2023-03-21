@@ -16,16 +16,13 @@
  */
 package org.apache.camel.component.file.remote.sftp.integration;
 
-import java.security.interfaces.RSAPublicKey;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpKeyFileConsumeIT extends SftpServerTestSupport {
 
     @Test
@@ -42,22 +39,18 @@ public class SftpKeyFileConsumeIT extends SftpServerTestSupport {
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
-    }
-
-    protected PublickeyAuthenticator getPublickeyAuthenticator() {
-        return (username, key, session) -> key instanceof RSAPublicKey;
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}?username=admin&knownHostsFile="
                      + service.getKnownHostsFile()
                      + "&privateKeyFile=./src/test/resources/id_rsa&privateKeyPassphrase=secret&delay=10000&disconnect=true")
-                             .routeId("foo").noAutoStartup().to("mock:result");
+                        .routeId("foo").noAutoStartup().to("mock:result");
             }
         };
     }

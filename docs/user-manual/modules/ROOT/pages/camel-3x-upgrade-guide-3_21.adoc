@@ -1,0 +1,128 @@
+= Apache Camel 3.x Upgrade Guide
+
+This document is for helping you upgrade your Apache Camel application
+from Camel 3.x to 3.y. For example if you are upgrading Camel 3.0 to 3.2, then you should follow the guides
+from both 3.0 to 3.1 and 3.1 to 3.2.
+
+== Upgrading Camel 3.20 to 3.21
+
+=== camel-core
+
+XML parsers & XML transformers has been made more secure by disabling DOCTYPE and/or access to external DTD/Schema.
+
+=== camel-console
+
+The class `org.apache.camel.impl.console.AbstractDevConsole` has moved from `camel-console` to `camel-support`
+and moved to package `org.apache.camel.support.console.AbstractDevConsole`.
+
+Component developers that has plugins for Camel Developer Console, should just use
+`camel-support` and `camel-util-json` as dependencies,
+and then extend `AbstractDevConsole` for custom console implementations.
+
+=== camel-health
+
+The `org.apache.camel.health.HealthCheck` method `isLiveness` is now default `false` instead of `true`.
+
+Camel provides the `CamelContextCheck` as both readiness and liveness checks, so there is at least
+one of each out of the box.
+
+=== camel-main
+
+The option `camel.main.routesReloadRestartDuration` has changed its default value from `true` to `false`.
+
+=== camel-jaxb
+
+When using schema validation, then access to external DTD/Schema is disabled by default.
+To enable access, then set `accessExternalSchemaProtocols=all` or specify allowed protocols, such as
+`accessExternalSchemaProtocols=file`.
+
+=== camel-stax
+
+XML parser in `StAXJAXBIteratorExpression` has been made more secure by disabling DOCTYPE and/or access to external DTD/Schema.
+
+=== camel-cm-sms
+
+XML parsers has been made more secure by disabling DOCTYPE and/or access to external DTD/Schema.
+
+=== camel-schematron
+
+XML parsers has been made more secure by disabling DOCTYPE and/or access to external DTD/Schema.
+
+=== camel-xmlsecurity
+
+XML parsers has been made more secure by disabling DOCTYPE and/or access to external DTD/Schema.
+
+=== camel-jbang
+
+The command `camel dependencies` has been renamed to `camel dependency`.
+
+=== camel-spring-boot
+
+The health-check has aligned to be more similar to microprofile-health in the JSon output.
+Spring Boot now also includes additional data per check, when using full exposure level.
+
+For example as shown below for the context health check:
+
+[source,json]
+----
+{
+  "status": "UP",
+  "components": {
+    "camelHealth": {
+      "status": "UP",
+      "details": {
+        "name": "camel-health-check",
+        "context": "UP",
+        "context.data": {
+          "invocation.count": "1",
+          "context.phase": "5",
+          "invocation.time": "2022-12-21T09:12:03.307871+01:00[Europe/Oslo]",
+          "check.group": "camel",
+          "context.name": "MyCamel",
+          "success.time": "2022-12-21T09:12:03.307871+01:00[Europe/Oslo]",
+          "success.count": "1",
+          "check.id": "context",
+          "context.version": "3.21.0",
+          "context.status": "Started",
+          "success.start.time": "2022-12-21T09:12:03.307871+01:00[Europe/Oslo]",
+          "check.kind": "READINESS",
+          "failure.count": "0"
+        }
+      }
+    }
+  }
+}
+----
+
+=== camel-java-joor-dsl
+
+The `camel-java-joor-dsl` cannot anymore load routes defined in class files as we consider it no more needed, consequently the ability to configure the compile directory and the compile load first flag using the corresponding `camel-main` properties is no longer possible.
+
+=== camel-elasticsearch
+
+The `certificatePath` parameter can now be specified as resource: for user pointing to a local certificate, the file should be now prefixed with `file:`. It's also possible to use the classic resource helper prefixes, like `classpath`, `https` etc.
+
+=== camel-rest
+
+The deprecated option `componentName` was removed. Please use either `producerComponentName` or `consumerComponentName`.
+
+=== camel-micrometer-starter
+
+The `uri` tags are now static instead of dynamic (by default), as potential too many tags generated due to URI with dynamic values.
+This can be enabled again by setting `camel.metrics.uriTagDynamic=true`.
+
+=== Deprecated Components
+
+The following components that had been marked as deprecated, were removed in this release:
+
+* camel-dozer
+* camel-cmis
+
+== Backlog Tracing
+
+The option `backlogTracing=true` now automatic enabled the tracer on startup. The previous behavior
+was _surprisingly_ that the tracer was only made available, and had to be manually enabled afterwards.
+The old behavior can be archived by setting `backlogTracingStandby=true`.
+
+Move the following class from `org.apache.camel.api.management.mbean.BacklogTracerEventMessage` in `camel-management-api` JAR
+to `org.apache.camel.spi.BacklogTracerEventMessage` in `camel-api` JAR.

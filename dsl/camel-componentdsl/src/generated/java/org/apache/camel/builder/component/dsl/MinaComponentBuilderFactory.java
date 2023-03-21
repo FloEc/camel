@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -435,7 +435,7 @@ public interface MinaComponentBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -480,21 +480,6 @@ public interface MinaComponentBuilderFactory {
         default MinaComponentBuilder textlineDelimiter(
                 org.apache.camel.component.mina.MinaTextLineDelimiter textlineDelimiter) {
             doSetProperty("textlineDelimiter", textlineDelimiter);
-            return this;
-        }
-        /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaComponentBuilder autoStartTls(boolean autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
             return this;
         }
         /**
@@ -578,7 +563,6 @@ public interface MinaComponentBuilderFactory {
             case "filters": getOrCreateConfiguration((MinaComponent) component).setFilters((java.util.List) value); return true;
             case "textline": getOrCreateConfiguration((MinaComponent) component).setTextline((boolean) value); return true;
             case "textlineDelimiter": getOrCreateConfiguration((MinaComponent) component).setTextlineDelimiter((org.apache.camel.component.mina.MinaTextLineDelimiter) value); return true;
-            case "autoStartTls": getOrCreateConfiguration((MinaComponent) component).setAutoStartTls((boolean) value); return true;
             case "sslContextParameters": getOrCreateConfiguration((MinaComponent) component).setSslContextParameters((org.apache.camel.support.jsse.SSLContextParameters) value); return true;
             case "useGlobalSslContextParameters": ((MinaComponent) component).setUseGlobalSslContextParameters((boolean) value); return true;
             default: return false;

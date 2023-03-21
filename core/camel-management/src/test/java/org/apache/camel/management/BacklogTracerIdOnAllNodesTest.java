@@ -23,7 +23,6 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.api.management.mbean.BacklogTracerEventMessage;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ChoiceDefinition;
 import org.apache.camel.model.LogDefinition;
@@ -31,6 +30,7 @@ import org.apache.camel.model.OtherwiseDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.ToDefinition;
 import org.apache.camel.model.WhenDefinition;
+import org.apache.camel.spi.BacklogTracerEventMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -112,7 +112,8 @@ public class BacklogTracerIdOnAllNodesTest extends ManagementTestSupport {
 
         BacklogTracerEventMessage event1 = events.get(0);
         assertEquals(to2.getId(), event1.getToNode());
-        assertEquals("    <message exchangeId=\"" + fooExchanges.get(0).getExchangeId() + "\">\n"
+        assertEquals("    <message exchangeId=\"" + fooExchanges.get(0).getExchangeId()
+                     + "\" exchangePattern=\"InOnly\" exchangeType=\"org.apache.camel.support.DefaultExchange\" messageType=\"org.apache.camel.support.DefaultMessage\">\n"
                      + "      <body type=\"java.lang.String\">Hello World</body>\n"
                      + "    </message>",
                 event1.getMessageAsXml());
@@ -125,7 +126,8 @@ public class BacklogTracerIdOnAllNodesTest extends ManagementTestSupport {
 
         event1 = events.get(0);
         assertEquals("camel", event1.getToNode());
-        assertEquals("    <message exchangeId=\"" + camelExchanges.get(0).getExchangeId() + "\">\n"
+        assertEquals("    <message exchangeId=\"" + camelExchanges.get(0).getExchangeId()
+                     + "\" exchangePattern=\"InOnly\" exchangeType=\"org.apache.camel.support.DefaultExchange\" messageType=\"org.apache.camel.support.DefaultMessage\">\n"
                      + "      <body type=\"java.lang.String\">Hello Camel</body>\n"
                      + "    </message>",
                 event1.getMessageAsXml());
@@ -137,7 +139,7 @@ public class BacklogTracerIdOnAllNodesTest extends ManagementTestSupport {
             @Override
             public void configure() throws Exception {
                 context.setUseBreadcrumb(false);
-                context.setBacklogTracing(true);
+                context.setBacklogTracingStandby(true);
 
                 from("direct:start")
                         .choice()

@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.params.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -76,14 +77,14 @@ public class LevelDBAggregateRecoverWithRedeliveryPolicyTest extends LevelDBTest
         template.sendBodyAndHeader("direct:start", "D", "id", 123);
         template.sendBodyAndHeader("direct:start", "E", "id", 123);
 
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // CHECKSTYLE:OFF
                 from("direct:start")
                         .aggregate(header("id"), new StringAggregationStrategy())
@@ -93,7 +94,7 @@ public class LevelDBAggregateRecoverWithRedeliveryPolicyTest extends LevelDBTest
                             .to("mock:aggregated")
                             // simulate errors the first three times
                             .process(new Processor() {
-                                public void process(Exchange exchange) throws Exception {
+                                public void process(Exchange exchange) {
                                     int count = getCounter(getSerializerType()).incrementAndGet();
                                     if (count <= 3) {
                                         throw new IllegalArgumentException("Damn");

@@ -22,15 +22,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.google.api.services.gmail.model.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.google.mail.internal.GmailUsersThreadsApiMethod;
 import org.apache.camel.component.google.mail.internal.GoogleMailApiCollection;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class GmailUsersThreadsIT extends AbstractGoogleMailTestSupport {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
         MimeMessage mm = new MimeMessage(session);
-        mm.addRecipients(javax.mail.Message.RecipientType.TO, profile.getEmailAddress());
+        mm.addRecipients(jakarta.mail.Message.RecipientType.TO, profile.getEmailAddress());
         mm.setSubject("Hello from camel-google-mail");
         mm.setContent("Camel rocks!", "text/plain");
         Message createMessageWithEmail = createMessageWithEmail(mm);
@@ -108,7 +108,7 @@ public class GmailUsersThreadsIT extends AbstractGoogleMailTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

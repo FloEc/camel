@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.camel.PropertiesLookupListener;
 import org.apache.camel.StaticService;
 
 /**
@@ -101,14 +103,10 @@ public interface PropertiesComponent extends StaticService {
 
     /**
      * Loads the properties from the default locations and sources filtering them out according to a predicate.
-     * </p>
      *
      * <pre>
-     * {
-     *     &#64;code
-     *     PropertiesComponent pc = getPropertiesComponent();
-     *     Properties props = pc.loadProperties(key -> key.startsWith("camel.component.seda"));
-     * }
+     * PropertiesComponent pc = getPropertiesComponent();
+     * Properties props = pc.loadProperties(key -> key.startsWith("camel.component.seda"));
      * </pre>
      *
      * @param  filter the predicate used to filter out properties based on the key.
@@ -117,15 +115,26 @@ public interface PropertiesComponent extends StaticService {
     Properties loadProperties(Predicate<String> filter);
 
     /**
-     * Loads the properties from the default locations and sources filtering them out according to a predicate.
-     * </p>
+     * Loads the properties from the default locations and sources filtering them out according to a predicate, and maps
+     * the key using the key mapper.
      *
      * <pre>
-     * {
-     *     &#64;code
-     *     PropertiesComponent pc = getPropertiesComponent();
-     *     Map<String, Object> props = pc.loadPropertiesAsMap(key -> key.startsWith("camel.component.seda"));
-     * }
+     * PropertiesComponent pc = getPropertiesComponent();
+     * Properties props = pc.loadProperties(key -> key.startsWith("camel.component.seda"), StringHelper::dashToCamelCase);
+     * </pre>
+     *
+     * @param  filter    the predicate used to filter out properties based on the key.
+     * @param  keyMapper to map keys
+     * @return           the properties loaded.
+     */
+    Properties loadProperties(Predicate<String> filter, Function<String, String> keyMapper);
+
+    /**
+     * Loads the properties from the default locations and sources filtering them out according to a predicate.
+     *
+     * <pre>
+     * PropertiesComponent pc = getPropertiesComponent();
+     * Map props = pc.loadPropertiesAsMap(key -> key.startsWith("camel.component.seda"));
      * </pre>
      *
      * @param  filter the predicate used to filter out properties based on the key.
@@ -160,9 +169,35 @@ public interface PropertiesComponent extends StaticService {
     void addPropertiesSource(PropertiesSource propertiesSource);
 
     /**
+     * Gets the custom {@link PropertiesSource} by the name
+     *
+     * @param  name the name of the source
+     * @return      the source, or null if no source exists
+     */
+    PropertiesSource getPropertiesSource(String name);
+
+    /**
+     * Gets the properties sources
+     */
+    List<PropertiesSource> getPropertiesSources();
+
+    /**
      * Registers the {@link PropertiesFunction} as a function to this component.
      */
     void addPropertiesFunction(PropertiesFunction function);
+
+    /**
+     * Gets the {@link PropertiesFunction} by the given name
+     *
+     * @param  name the function name
+     * @return      the function or null if no function exists
+     */
+    PropertiesFunction getPropertiesFunction(String name);
+
+    /**
+     * Is there a {@link PropertiesFunction} with the given name?
+     */
+    boolean hasPropertiesFunction(String name);
 
     /**
      * Whether to silently ignore if a location cannot be located, such as a properties file not found.
@@ -170,14 +205,36 @@ public interface PropertiesComponent extends StaticService {
     void setIgnoreMissingLocation(boolean ignoreMissingLocation);
 
     /**
+     * Whether to support nested property placeholders. A nested placeholder, means that a placeholder, has also a
+     * placeholder, that should be resolved (recursively).
+     */
+    void setNestedPlaceholder(boolean nestedPlaceholder);
+
+    /**
      * Sets initial properties which will be added before any property locations are loaded.
      */
     void setInitialProperties(Properties initialProperties);
 
     /**
+     * Adds an initial property which will be added before any property locations are loaded.
+     *
+     * @param key   the key
+     * @param value the value
+     */
+    void addInitialProperty(String key, String value);
+
+    /**
      * Sets a special list of override properties that take precedence and will use first, if a property exist.
      */
     void setOverrideProperties(Properties overrideProperties);
+
+    /**
+     * Adds a special override property that take precedence and will use first, if a property exist.
+     *
+     * @param key   the key
+     * @param value the value
+     */
+    void addOverrideProperty(String key, String value);
 
     /**
      * Sets a special list of local properties (ie thread local) that take precedence and will use first, if a property
@@ -219,5 +276,19 @@ public interface PropertiesComponent extends StaticService {
      * @return         true if some properties was reloaded
      */
     boolean reloadProperties(String pattern);
+
+    /**
+     * Filters the given list of properties, by removing properties that are already loaded and have same key and value.
+     *
+     * If all properties are not changed then the properties will become empty.
+     *
+     * @param properties the given properties to filter.
+     */
+    void keepOnlyChangeProperties(Properties properties);
+
+    /**
+     * Adds the {@link PropertiesLookupListener}.
+     */
+    void addPropertiesLookupListener(PropertiesLookupListener propertiesLookupListener);
 
 }

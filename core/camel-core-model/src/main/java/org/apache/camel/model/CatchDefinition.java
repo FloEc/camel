@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.Predicate;
 import org.apache.camel.spi.AsPredicate;
@@ -38,13 +38,15 @@ import org.apache.camel.spi.Metadata;
 @XmlRootElement(name = "doCatch")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CatchDefinition extends OutputDefinition<CatchDefinition> {
+
+    @XmlTransient
+    private List<Class<? extends Throwable>> exceptionClasses;
+
     @XmlElement(name = "exception")
     private List<String> exceptions = new ArrayList<>();
     @XmlElement(name = "onWhen")
     @AsPredicate
     private WhenDefinition onWhen;
-    @XmlTransient
-    private List<Class<? extends Throwable>> exceptionClasses;
 
     public CatchDefinition() {
     }
@@ -94,18 +96,6 @@ public class CatchDefinition extends OutputDefinition<CatchDefinition> {
 
     // Fluent API
     // -------------------------------------------------------------------------
-    /**
-     * The exceptions to catch.
-     *
-     * @param      exceptionClasses a list of the exception classes
-     * @return                      the builder
-     * @deprecated                  use {@link #exception(Class[])}
-     */
-    @Deprecated
-    public CatchDefinition exceptionClasses(List<Class<? extends Throwable>> exceptionClasses) {
-        setExceptionClasses(exceptionClasses);
-        return this;
-    }
 
     /**
      * The exception(s) to catch.
@@ -134,20 +124,6 @@ public class CatchDefinition extends OutputDefinition<CatchDefinition> {
      */
     public CatchDefinition onWhen(@AsPredicate Predicate predicate) {
         setOnWhen(new WhenDefinition(predicate));
-        return this;
-    }
-
-    /**
-     * Sets the exception class that the CatchType want to catch
-     *
-     * @param      exception the exception of class
-     * @return               the builder
-     * @deprecated           use {@link #exception(Class[])}
-     */
-    @Deprecated
-    public CatchDefinition exceptionClasses(Class<? extends Throwable> exception) {
-        List<Class<? extends Throwable>> list = getExceptionClasses();
-        list.add(exception);
         return this;
     }
 

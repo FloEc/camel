@@ -43,23 +43,23 @@ public class FromFtpMoveFileRecursiveIT extends FtpServerTestSupport {
     public void testPollFileAndShouldBeMoved() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedBodiesReceivedInAnyOrder("Hello", "Bye", "Goodday");
-        mock.expectedFileExists(ftpFile("movefile/.done/hello.txt.old"));
-        mock.expectedFileExists(ftpFile("movefile/.done/bye/bye.txt.old"));
-        mock.expectedFileExists(ftpFile("movefile/.done/goodday/goodday.txt.old"));
+        mock.expectedFileExists(service.ftpFile("movefile/.done/hello.txt.old"));
+        mock.expectedFileExists(service.ftpFile("movefile/.done/bye/bye.txt.old"));
+        mock.expectedFileExists(service.ftpFile("movefile/.done/goodday/goodday.txt.old"));
 
         mock.assertIsSatisfied();
     }
 
-    private void prepareFtpServer() throws Exception {
+    private void prepareFtpServer() {
         template.sendBodyAndHeader(getFtpUrl(), "Hello", Exchange.FILE_NAME, "hello.txt");
         template.sendBodyAndHeader(getFtpUrl(), "Bye", Exchange.FILE_NAME, "bye/bye.txt");
         template.sendBodyAndHeader(getFtpUrl(), "Goodday", Exchange.FILE_NAME, "goodday/goodday.txt");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

@@ -60,7 +60,7 @@ public class ClaimCheckReifier extends ProcessorReifier<ClaimCheckDefinition> {
 
         // validate filter, we cannot have both +/- at the same time
         if (filter != null) {
-            Iterable it = ObjectHelper.createIterable(filter, ",");
+            Iterable<?> it = ObjectHelper.createIterable(filter, ",");
             boolean includeBody = false;
             boolean excludeBody = false;
             for (Object o : it) {
@@ -111,10 +111,10 @@ public class ClaimCheckReifier extends ProcessorReifier<ClaimCheckDefinition> {
     }
 
     private AggregationStrategy createAggregationStrategy() {
-        AggregationStrategy strategy = definition.getAggregationStrategy();
-        String ref = parseString(definition.getAggregationStrategyRef());
+        AggregationStrategy strategy = definition.getAggregationStrategyBean();
+        String ref = parseString(definition.getAggregationStrategy());
         if (strategy == null && ref != null) {
-            Object aggStrategy = lookup(ref, Object.class);
+            Object aggStrategy = lookupByName(ref);
             if (aggStrategy instanceof AggregationStrategy) {
                 strategy = (AggregationStrategy) aggStrategy;
             } else if (aggStrategy instanceof BiFunction) {
@@ -123,7 +123,7 @@ public class ClaimCheckReifier extends ProcessorReifier<ClaimCheckDefinition> {
                 strategy = new AggregationStrategyBeanAdapter(aggStrategy, definition.getAggregationStrategyMethodName());
             } else {
                 throw new IllegalArgumentException(
-                        "Cannot find AggregationStrategy in Registry with name: " + definition.getAggregationStrategyRef());
+                        "Cannot find AggregationStrategy in Registry with name: " + definition.getAggregationStrategy());
             }
         }
 

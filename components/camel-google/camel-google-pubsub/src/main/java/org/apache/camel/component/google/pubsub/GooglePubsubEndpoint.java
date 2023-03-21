@@ -41,7 +41,8 @@ import org.slf4j.LoggerFactory;
  * Built on top of the Google Cloud Pub/Sub libraries.
  */
 @UriEndpoint(firstVersion = "2.19.0", scheme = "google-pubsub", title = "Google Pubsub",
-             syntax = "google-pubsub:projectId:destinationName", category = { Category.CLOUD, Category.MESSAGING })
+             syntax = "google-pubsub:projectId:destinationName", category = { Category.CLOUD, Category.MESSAGING },
+             headersClass = GooglePubsubConstants.class)
 public class GooglePubsubEndpoint extends DefaultEndpoint {
 
     private Logger log;
@@ -85,6 +86,11 @@ public class GooglePubsubEndpoint extends DefaultEndpoint {
               description = "AUTO = exchange gets ack'ed/nack'ed on completion. NONE = downstream process has to ack/nack explicitly")
     private GooglePubsubConstants.AckMode ackMode = GooglePubsubConstants.AckMode.AUTO;
 
+    @UriParam(label = "consumer", name = "maxAckExtensionPeriod",
+              description = "Set the maximum period a message ack deadline will be extended. Value in seconds",
+              defaultValue = "3600")
+    private int maxAckExtensionPeriod = 3600;
+
     @UriParam(defaultValue = "false",
               description = "Should message ordering be enabled",
               label = "producer,advanced")
@@ -100,7 +106,7 @@ public class GooglePubsubEndpoint extends DefaultEndpoint {
     @Metadata(autowired = true)
     private GooglePubsubSerializer serializer;
 
-    public GooglePubsubEndpoint(String uri, Component component, String remaining) {
+    public GooglePubsubEndpoint(String uri, Component component) {
         super(uri, component);
 
         if (!(component instanceof GooglePubsubComponent)) {
@@ -222,6 +228,14 @@ public class GooglePubsubEndpoint extends DefaultEndpoint {
 
     public void setAckMode(GooglePubsubConstants.AckMode ackMode) {
         this.ackMode = ackMode;
+    }
+
+    public int getMaxAckExtensionPeriod() {
+        return maxAckExtensionPeriod;
+    }
+
+    public void setMaxAckExtensionPeriod(int maxAckExtensionPeriod) {
+        this.maxAckExtensionPeriod = maxAckExtensionPeriod;
     }
 
     public GooglePubsubSerializer getSerializer() {

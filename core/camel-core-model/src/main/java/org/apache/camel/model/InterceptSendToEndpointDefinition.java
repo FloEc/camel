@@ -18,11 +18,11 @@ package org.apache.camel.model;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.apache.camel.Predicate;
 import org.apache.camel.spi.AsPredicate;
@@ -41,6 +41,7 @@ public class InterceptSendToEndpointDefinition extends OutputDefinition<Intercep
     @XmlAttribute
     private String skipSendToOriginalEndpoint;
     @XmlAttribute
+    @Metadata(label = "advanced")
     private String afterUri;
 
     public InterceptSendToEndpointDefinition() {
@@ -105,18 +106,6 @@ public class InterceptSendToEndpointDefinition extends OutputDefinition<Intercep
      */
     public InterceptSendToEndpointDefinition skipSendToOriginalEndpoint() {
         setSkipSendToOriginalEndpoint(Boolean.toString(true));
-        return this;
-    }
-
-    /**
-     * After sending to the endpoint then send the message to this url which allows to process its result.
-     *
-     * @return     the builder
-     * @deprecated use {@link #afterUri(String)}
-     */
-    @Deprecated
-    public InterceptSendToEndpointDefinition afterUrl(String url) {
-        setAfterUri(url);
         return this;
     }
 

@@ -47,7 +47,7 @@ public class EventbridgeDeleteRuleIT extends Aws2EventbridgeBase {
         template.send("direct:evs", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
             }
         });
@@ -55,7 +55,7 @@ public class EventbridgeDeleteRuleIT extends Aws2EventbridgeBase {
         template.send("direct:evs-targets", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
                 Target target = Target.builder().id("sqs-queue").arn("arn:aws:sqs:eu-west-1:780410022472:camel-connector-test")
                         .build();
@@ -65,29 +65,44 @@ public class EventbridgeDeleteRuleIT extends Aws2EventbridgeBase {
             }
         });
 
+        // https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_DeleteRule.html before deleting the route, all targets must be removed
+        template.send("direct:evs-removeTarget", new Processor() {
+
+            @Override
+            public void process(Exchange exchange) {
+                exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
+                List<String> targets = new ArrayList<String>();
+                targets.add("sqs-queue");
+                exchange.getIn().setHeader(EventbridgeConstants.TARGETS_IDS, targets);
+            }
+        });
+
         Exchange ex = template.send("direct:evs-deleteRule", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
             }
         });
-        assertMockEndpointsSatisfied();
+
+        MockEndpoint.assertIsSatisfied(context);
         assertNotNull(ex.getIn().getBody(DeleteRuleResponse.class));
 
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint
                         = "aws2-eventbridge://default?operation=putRule&eventPatternFile=file:src/test/resources/eventpattern.json";
                 String target = "aws2-eventbridge://default?operation=putTargets";
+                String removeTarget = "aws2-eventbridge://default?operation=removeTargets";
                 String deleteRule = "aws2-eventbridge://default?operation=deleteRule";
                 from("direct:evs").to(awsEndpoint);
                 from("direct:evs-targets").to(target);
+                from("direct:evs-removeTarget").to(removeTarget);
                 from("direct:evs-deleteRule").to(deleteRule).to("mock:result");
             }
         };

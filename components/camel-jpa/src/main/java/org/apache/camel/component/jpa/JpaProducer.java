@@ -20,21 +20,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Expression;
 import org.apache.camel.Message;
-import org.apache.camel.language.simple.SimpleLanguage;
+import org.apache.camel.spi.Language;
 import org.apache.camel.support.DefaultProducer;
 import org.apache.camel.support.ExchangeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.apache.camel.component.jpa.JpaHelper.getTargetEntityManager;
 
@@ -42,8 +39,10 @@ public class JpaProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaProducer.class);
 
+    private Language simple;
+
     private final EntityManagerFactory entityManagerFactory;
-    private final TransactionTemplate transactionTemplate;
+    private final TransactionStrategy transactionStrategy;
     private final Expression expression;
     private String query;
     private String namedQuery;
@@ -58,7 +57,7 @@ public class JpaProducer extends DefaultProducer {
         super(endpoint);
         this.expression = expression;
         this.entityManagerFactory = endpoint.getEntityManagerFactory();
-        this.transactionTemplate = endpoint.createTransactionTemplate();
+        this.transactionStrategy = endpoint.getTransactionStrategy();
     }
 
     @Override
@@ -176,31 +175,27 @@ public class JpaProducer extends DefaultProducer {
     }
 
     protected void processQuery(Exchange exchange, EntityManager entityManager) {
-        Query query = getQueryFactory().createQuery(entityManager);
-        configureParameters(query, exchange);
+        Query innerQuery = getQueryFactory().createQuery(entityManager);
+        configureParameters(innerQuery, exchange);
 
-        transactionTemplate.execute(new TransactionCallback<Object>() {
-            public Object doInTransaction(TransactionStatus status) {
-                if (getEndpoint().isJoinTransaction()) {
-                    entityManager.joinTransaction();
-                }
+        transactionStrategy.executeInTransaction(() -> {
+            if (getEndpoint().isJoinTransaction()) {
+                entityManager.joinTransaction();
+            }
 
-                Message target;
-                if (ExchangeHelper.isOutCapable(exchange)) {
-                    target = exchange.getOut();
-                    // preserve headers
-                    target.getHeaders().putAll(exchange.getIn().getHeaders());
-                } else {
-                    target = exchange.getIn();
-                }
-                Object answer = isUseExecuteUpdate() ? query.executeUpdate() : query.getResultList();
-                target.setBody(answer);
+            Message target;
+            if (ExchangeHelper.isOutCapable(exchange)) {
+                target = exchange.getMessage();
+                // preserve headers
+                target.getHeaders().putAll(exchange.getIn().getHeaders());
+            } else {
+                target = exchange.getIn();
+            }
+            Object answer = isUseExecuteUpdate() ? innerQuery.executeUpdate() : innerQuery.getResultList();
+            target.setBody(answer);
 
-                if (getEndpoint().isFlushOnSend()) {
-                    entityManager.flush();
-                }
-
-                return null;
+            if (getEndpoint().isFlushOnSend()) {
+                entityManager.flush();
             }
         });
     }
@@ -222,7 +217,7 @@ public class JpaProducer extends DefaultProducer {
             params.forEach((key, value) -> {
                 Object resolvedValue = value;
                 if (value instanceof String) {
-                    resolvedValue = SimpleLanguage.expression((String) value).evaluate(exchange, Object.class);
+                    resolvedValue = simple.createExpression((String) value).evaluate(exchange, Object.class);
                 }
                 query.setParameter(key, resolvedValue);
             });
@@ -233,30 +228,26 @@ public class JpaProducer extends DefaultProducer {
         final Object key = exchange.getMessage().getBody();
 
         if (key != null) {
-            transactionTemplate.execute(new TransactionCallback<Object>() {
-                public Object doInTransaction(TransactionStatus status) {
-                    if (getEndpoint().isJoinTransaction()) {
-                        entityManager.joinTransaction();
-                    }
+            transactionStrategy.executeInTransaction(() -> {
+                if (getEndpoint().isJoinTransaction()) {
+                    entityManager.joinTransaction();
+                }
 
-                    Object answer = entityManager.find(getEndpoint().getEntityType(), key);
-                    LOG.debug("Find: {} -> {}", key, answer);
+                Object answer = entityManager.find(getEndpoint().getEntityType(), key);
+                LOG.debug("Find: {} -> {}", key, answer);
 
-                    Message target;
-                    if (ExchangeHelper.isOutCapable(exchange)) {
-                        target = exchange.getOut();
-                        // preserve headers
-                        target.getHeaders().putAll(exchange.getIn().getHeaders());
-                    } else {
-                        target = exchange.getIn();
-                    }
-                    target.setBody(answer);
+                Message target;
+                if (ExchangeHelper.isOutCapable(exchange)) {
+                    target = exchange.getMessage();
+                    // preserve headers
+                    target.getHeaders().putAll(exchange.getIn().getHeaders());
+                } else {
+                    target = exchange.getIn();
+                }
+                target.setBody(answer);
 
-                    if (getEndpoint().isFlushOnSend()) {
-                        entityManager.flush();
-                    }
-
-                    return null;
+                if (getEndpoint().isFlushOnSend()) {
+                    entityManager.flush();
                 }
             });
         }
@@ -266,8 +257,9 @@ public class JpaProducer extends DefaultProducer {
         final Object values = expression.evaluate(exchange, Object.class);
 
         if (values != null) {
-            transactionTemplate.execute(new TransactionCallback<Object>() {
-                public Object doInTransaction(TransactionStatus status) {
+            transactionStrategy.executeInTransaction(new Runnable() {
+                @Override
+                public void run() {
                     if (getEndpoint().isJoinTransaction()) {
                         entityManager.joinTransaction();
                     }
@@ -296,7 +288,7 @@ public class JpaProducer extends DefaultProducer {
                         Collection<?> collection = (Collection<?>) values;
                         // need to create a list to store returned values as they can be updated
                         // by JPA such as setting auto assigned ids
-                        Collection managedCollection = new ArrayList<>(collection.size());
+                        Collection<Object> managedCollection = new ArrayList<>(collection.size());
                         Object managedEntity;
                         for (Object entity : collection) {
                             if (!getEndpoint().isRemove()) {
@@ -324,8 +316,6 @@ public class JpaProducer extends DefaultProducer {
                     if (getEndpoint().isFlushOnSend()) {
                         entityManager.flush();
                     }
-
-                    return null;
                 }
 
                 /**
@@ -368,4 +358,8 @@ public class JpaProducer extends DefaultProducer {
         }
     }
 
+    @Override
+    protected void doBuild() throws Exception {
+        simple = getEndpoint().getCamelContext().resolveLanguage("simple");
+    }
 }

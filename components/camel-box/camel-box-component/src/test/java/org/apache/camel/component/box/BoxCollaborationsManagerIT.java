@@ -16,7 +16,6 @@
  */
 package org.apache.camel.component.box;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +58,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
     private BoxCollaboration testCollaboration;
 
     @Test
-    public void testAddFolderCollaborationByEmail() throws Exception {
+    public void testAddFolderCollaborationByEmail() {
         // delete collaborator created by setupTest
         deleteTestCollaborator();
 
@@ -80,7 +79,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
 
     @Disabled //creation of app users could be used only with JWT authentication, which is not possible in this time
     @Test
-    public void testAddFolderCollaboration() throws Exception {
+    public void testAddFolderCollaboration() {
         // delete collaborator created by setupTest
         deleteTestCollaborator();
         BoxUser user = null;
@@ -113,7 +112,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
     }
 
     @Test
-    public void testGetCollaborationInfo() throws Exception {
+    public void testGetCollaborationInfo() {
         // using String message body for single parameter "collaborationId"
         final com.box.sdk.BoxCollaboration.Info result = requestBody("direct://GETCOLLABORATIONINFO",
                 testCollaboration.getID());
@@ -123,7 +122,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
     }
 
     @Test
-    public void testGetFolderCollaborations() throws Exception {
+    public void testGetFolderCollaborations() {
         // using String message body for single parameter "folderId"
         @SuppressWarnings("rawtypes")
         final java.util.Collection result = requestBody("direct://GETFOLDERCOLLABORATIONS", testFolder.getID());
@@ -134,7 +133,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testGetPendingCollaborations() throws Exception {
+    public void testGetPendingCollaborations() {
         final java.util.Collection result = requestBody("direct://GETPENDINGCOLLABORATIONS", null);
 
         assertNotNull(result, "getPendingCollaborations result");
@@ -142,7 +141,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
     }
 
     @Test
-    public void testUpdateCollaborationInfo() throws Exception {
+    public void testUpdateCollaborationInfo() {
         final Map<String, Object> headers = new HashMap<>();
         // parameter type is String
         headers.put("CamelBox.collaborationId", testCollaboration.getID());
@@ -162,7 +161,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
 
@@ -213,7 +212,7 @@ public class BoxCollaborationsManagerIT extends AbstractBoxITSupport {
         return endpoint.getBoxConnection();
     }
 
-    private void createTestFolder() throws FileNotFoundException {
+    private void createTestFolder() {
         BoxFolder rootFolder = BoxFolder.getRootFolder(getConnection());
         testFolder = rootFolder.createFolder(CAMEL_TEST_FOLDER).getResource();
     }

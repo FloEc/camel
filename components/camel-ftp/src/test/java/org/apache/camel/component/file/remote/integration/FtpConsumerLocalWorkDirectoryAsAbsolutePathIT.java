@@ -26,9 +26,11 @@ import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.apache.camel.util.FileUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.apache.camel.test.junit5.TestSupport.assertFileExists;
 import static org.apache.camel.test.junit5.TestSupport.assertFileNotExists;
@@ -38,13 +40,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FtpConsumerLocalWorkDirectoryAsAbsolutePathIT extends FtpServerTestSupport {
-
-    private Path base;
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
-        base = testDirectory("lwd").toAbsolutePath();
         return "ftp://admin@localhost:{{ftp.server.port}}/lwd/?password=admin&delay=5000&noop=true&localWorkDirectory="
-               + base.toString();
+               + testDirectory.toAbsolutePath();
     }
 
     @Override
@@ -60,15 +61,15 @@ public class FtpConsumerLocalWorkDirectoryAsAbsolutePathIT extends FtpServerTest
         mock.expectedBodiesReceived("Hello World");
         mock.expectedMessageCount(1);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // give test some time to close file resources
         // now the lwd file should be deleted
         await().atMost(6, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertFileNotExists(base.resolve("hello.txt")));
+                .untilAsserted(() -> assertFileNotExists(testDirectory.resolve("hello.txt")));
 
         // and the out file should exists
-        assertFileExists(testFile("out/hello.txt"), "Hello World");
+        assertFileExists(testDirectory.resolve("out/hello.txt"), "Hello World");
     }
 
     private void prepareFtpServer() throws Exception {
@@ -86,18 +87,18 @@ public class FtpConsumerLocalWorkDirectoryAsAbsolutePathIT extends FtpServerTest
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         File body = exchange.getIn().getBody(File.class);
                         assertNotNull(body);
                         assertTrue(body.isAbsolute(), "Should be absolute path");
                         assertTrue(body.exists(), "Local work file should exists");
-                        assertEquals(FileUtil.normalizePath(base.resolve("hello.txt").toString()), body.getPath());
+                        assertEquals(FileUtil.normalizePath(testDirectory.resolve("hello.txt").toString()), body.getPath());
                     }
-                }).to("mock:result", fileUri("out"));
+                }).to("mock:result", TestSupport.fileUri(testDirectory, "out"));
             }
         };
     }

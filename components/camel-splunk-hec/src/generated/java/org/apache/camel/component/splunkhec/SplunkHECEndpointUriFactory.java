@@ -19,22 +19,25 @@ public class SplunkHECEndpointUriFactory extends org.apache.camel.support.compon
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(12);
-        props.add("lazyStartProducer");
+        Set<String> props = new HashSet<>(13);
         props.add("bodyOnly");
-        props.add("splunkURL");
-        props.add("sourceType");
-        props.add("skipTlsVerify");
-        props.add("host");
-        props.add("index");
-        props.add("source");
-        props.add("time");
-        props.add("https");
-        props.add("token");
         props.add("headersOnly");
+        props.add("host");
+        props.add("https");
+        props.add("index");
+        props.add("lazyStartProducer");
+        props.add("skipTlsVerify");
+        props.add("source");
+        props.add("sourceType");
+        props.add("splunkEndpoint");
+        props.add("splunkURL");
+        props.add("time");
+        props.add("token");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         SECRET_PROPERTY_NAMES = Collections.emptySet();
+        MULTI_VALUE_PREFIXES = Collections.emptySet();
     }
 
     @Override
@@ -63,6 +66,11 @@ public class SplunkHECEndpointUriFactory extends org.apache.camel.support.compon
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

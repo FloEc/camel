@@ -25,10 +25,7 @@ import org.apache.camel.spi.IdempotentRepository;
 import org.apache.camel.util.function.Suppliers;
 import org.infinispan.commons.api.BasicCache;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
-@DisabledOnOs(OS.MAC)
 public class InfinispanRemoteIdempotentRepositoryIT extends InfinispanRemoteTestSupport
         implements InfinispanIdempotentRepositoryTestSupport {
 
@@ -66,7 +63,7 @@ public class InfinispanRemoteIdempotentRepositoryIT extends InfinispanRemoteTest
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

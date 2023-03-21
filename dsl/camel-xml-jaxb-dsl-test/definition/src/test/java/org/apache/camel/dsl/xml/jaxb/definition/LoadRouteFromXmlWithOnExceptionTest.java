@@ -16,14 +16,12 @@
  */
 package org.apache.camel.dsl.xml.jaxb.definition;
 
-import java.io.InputStream;
-
 import org.apache.camel.ContextTestSupport;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
-import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.spi.Resource;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,10 +43,10 @@ public class LoadRouteFromXmlWithOnExceptionTest extends ContextTestSupport {
 
     @Test
     public void testLoadRouteFromXmlWitOnException() throws Exception {
-        InputStream is = getClass().getResourceAsStream("barOnExceptionRoute.xml");
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
-        RoutesDefinition routes = (RoutesDefinition) ecc.getXMLRoutesDefinitionLoader().loadRoutesDefinition(ecc, is);
-        context.addRouteDefinitions(routes.getRoutes());
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
+        Resource resource
+                = ecc.getResourceLoader().resolveResource("org/apache/camel/dsl/xml/jaxb/definition/barOnExceptionRoute.xml");
+        ecc.getRoutesLoader().loadRoutes(resource);
         context.start();
 
         assertNotNull(context.getRoute("bar"), "Loaded bar route should be there");
@@ -56,10 +54,10 @@ public class LoadRouteFromXmlWithOnExceptionTest extends ContextTestSupport {
 
         // test that loaded route works
         getMockEndpoint("mock:bar").expectedBodiesReceived("Bye World");
-        getMockEndpoint("mock:error").expectedBodiesReceived("Kabom");
+        getMockEndpoint("mock:error").expectedBodiesReceived("Kaboom");
 
         template.sendBody("direct:bar", "Bye World");
-        template.sendBody("direct:bar", "Kabom");
+        template.sendBody("direct:bar", "Kaboom");
 
         assertMockEndpointsSatisfied();
     }
@@ -69,7 +67,7 @@ public class LoadRouteFromXmlWithOnExceptionTest extends ContextTestSupport {
         @Override
         public void process(Exchange exchange) throws Exception {
             String body = exchange.getIn().getBody(String.class);
-            if ("Kabom".equals(body)) {
+            if ("Kaboom".equals(body)) {
                 throw new IllegalArgumentException("Damn");
             }
         }

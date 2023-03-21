@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -103,6 +103,21 @@ public interface GoogleMailStreamComponentBuilderFactory {
             return this;
         }
         /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamComponentBuilder delegate(
+                java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
          * Comma separated list of labels to take into account.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -159,6 +174,22 @@ public interface GoogleMailStreamComponentBuilderFactory {
          */
         default GoogleMailStreamComponentBuilder query(java.lang.String query) {
             doSetProperty("query", query);
+            return this;
+        }
+        /**
+         * GMail scopes.
+         * 
+         * The option is a:
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param scopes the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamComponentBuilder scopes(
+                java.util.List<java.lang.String> scopes) {
+            doSetProperty("scopes", scopes);
             return this;
         }
         /**
@@ -262,6 +293,21 @@ public interface GoogleMailStreamComponentBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Sets .json file with credentials for Service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     class GoogleMailStreamComponentBuilderImpl
@@ -289,16 +335,19 @@ public interface GoogleMailStreamComponentBuilderFactory {
             case "applicationName": getOrCreateConfiguration((GoogleMailStreamComponent) component).setApplicationName((java.lang.String) value); return true;
             case "bridgeErrorHandler": ((GoogleMailStreamComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "clientId": getOrCreateConfiguration((GoogleMailStreamComponent) component).setClientId((java.lang.String) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleMailStreamComponent) component).setDelegate((java.lang.String) value); return true;
             case "labels": getOrCreateConfiguration((GoogleMailStreamComponent) component).setLabels((java.lang.String) value); return true;
             case "markAsRead": getOrCreateConfiguration((GoogleMailStreamComponent) component).setMarkAsRead((boolean) value); return true;
             case "maxResults": getOrCreateConfiguration((GoogleMailStreamComponent) component).setMaxResults((long) value); return true;
             case "query": getOrCreateConfiguration((GoogleMailStreamComponent) component).setQuery((java.lang.String) value); return true;
+            case "scopes": getOrCreateConfiguration((GoogleMailStreamComponent) component).setScopes((java.util.List) value); return true;
             case "autowiredEnabled": ((GoogleMailStreamComponent) component).setAutowiredEnabled((boolean) value); return true;
             case "clientFactory": ((GoogleMailStreamComponent) component).setClientFactory((org.apache.camel.component.google.mail.GoogleMailClientFactory) value); return true;
             case "configuration": ((GoogleMailStreamComponent) component).setConfiguration((org.apache.camel.component.google.mail.stream.GoogleMailStreamConfiguration) value); return true;
             case "accessToken": getOrCreateConfiguration((GoogleMailStreamComponent) component).setAccessToken((java.lang.String) value); return true;
             case "clientSecret": getOrCreateConfiguration((GoogleMailStreamComponent) component).setClientSecret((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleMailStreamComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleMailStreamComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             default: return false;
             }
         }

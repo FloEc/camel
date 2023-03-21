@@ -20,7 +20,6 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.PooledExchange;
 import org.apache.camel.Processor;
 import org.apache.camel.spi.ProcessorExchangeFactory;
@@ -59,7 +58,7 @@ public class PooledProcessorExchangeFactory extends PrototypeProcessorExchangeFa
 
     @Override
     public Exchange createCopy(Exchange exchange) {
-        ExtendedExchange answer = (ExtendedExchange) pool.poll();
+        Exchange answer = pool.poll();
         if (answer == null) {
             if (statisticsEnabled) {
                 statistics.created.increment();
@@ -70,10 +69,11 @@ public class PooledProcessorExchangeFactory extends PrototypeProcessorExchangeFa
             if (statisticsEnabled) {
                 statistics.acquired.increment();
             }
-            // reset exchange for reuse
-            PooledExchange ee = (PooledExchange) answer;
-            ee.reset(System.currentTimeMillis());
         }
+
+        // reset exchange for reuse
+        PooledExchange ee = (PooledExchange) answer;
+        ee.reset(System.currentTimeMillis());
 
         ExchangeHelper.copyResults(answer, exchange);
         return answer;
@@ -81,7 +81,7 @@ public class PooledProcessorExchangeFactory extends PrototypeProcessorExchangeFa
 
     @Override
     public Exchange createCorrelatedCopy(Exchange exchange, boolean handover) {
-        ExtendedExchange answer = (ExtendedExchange) pool.poll();
+        Exchange answer = pool.poll();
         if (answer == null) {
             if (statisticsEnabled) {
                 statistics.created.increment();
@@ -90,22 +90,23 @@ public class PooledProcessorExchangeFactory extends PrototypeProcessorExchangeFa
             answer = new DefaultPooledExchange(exchange);
             // if creating a copy via constructor (as above) then the unit of work is also
             // copied over to answer, which we then must set to null as we do not want to share unit of work
-            answer.setUnitOfWork(null);
+            answer.getExchangeExtension().setUnitOfWork(null);
         } else {
             if (statisticsEnabled) {
                 statistics.acquired.increment();
             }
-            // reset exchange for reuse
-            PooledExchange ee = (PooledExchange) answer;
-            ee.reset(System.currentTimeMillis());
         }
+
+        // reset exchange for reuse
+        PooledExchange ee = (PooledExchange) answer;
+        ee.reset(System.currentTimeMillis());
 
         ExchangeHelper.copyResults(answer, exchange);
         // do not reuse message id on copy
         answer.getIn().setMessageId(null);
         if (handover) {
             // Need to hand over the completion for async invocation
-            answer.handoverCompletions(exchange);
+            answer.getExchangeExtension().handoverCompletions(exchange);
         }
         // set a correlation id so we can track back the original exchange
         answer.setProperty(ExchangePropertyKey.CORRELATION_ID, exchange.getExchangeId());
@@ -125,19 +126,21 @@ public class PooledProcessorExchangeFactory extends PrototypeProcessorExchangeFa
             if (statisticsEnabled) {
                 statistics.acquired.increment();
             }
-            // reset exchange for reuse
-            PooledExchange ee = (PooledExchange) answer;
-            ee.reset(System.currentTimeMillis());
         }
+
+        // reset exchange for reuse
+        PooledExchange ee = (PooledExchange) answer;
+        ee.reset(System.currentTimeMillis());
+
         return answer;
     }
 
     @Override
     public boolean release(Exchange exchange) {
         try {
-            // done exchange before returning back to pool
+            // done exchange before returning to pool
             PooledExchange ee = (PooledExchange) exchange;
-            ee.done(true);
+            ee.done();
 
             // only release back in pool if reset was success
             boolean inserted = pool.offer(exchange);

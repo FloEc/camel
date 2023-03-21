@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -60,51 +60,6 @@ public interface GoogleMailStreamEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default GoogleMailStreamEndpointBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default GoogleMailStreamEndpointBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
          * Client ID of the mail application.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -116,6 +71,20 @@ public interface GoogleMailStreamEndpointBuilderFactory {
          */
         default GoogleMailStreamEndpointBuilder clientId(String clientId) {
             doSetProperty("clientId", clientId);
+            return this;
+        }
+        /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamEndpointBuilder delegate(String delegate) {
+            doSetProperty("delegate", delegate);
             return this;
         }
         /**
@@ -206,6 +175,37 @@ public interface GoogleMailStreamEndpointBuilderFactory {
          */
         default GoogleMailStreamEndpointBuilder query(String query) {
             doSetProperty("query", query);
+            return this;
+        }
+        /**
+         * GMail scopes.
+         * 
+         * The option is a:
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param scopes the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamEndpointBuilder scopes(
+                List<java.lang.String> scopes) {
+            doSetProperty("scopes", scopes);
+            return this;
+        }
+        /**
+         * GMail scopes.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param scopes the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamEndpointBuilder scopes(String scopes) {
+            doSetProperty("scopes", scopes);
             return this;
         }
         /**
@@ -583,8 +583,8 @@ public interface GoogleMailStreamEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -605,8 +605,8 @@ public interface GoogleMailStreamEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -765,6 +765,21 @@ public interface GoogleMailStreamEndpointBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Sets .json file with credentials for Service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailStreamEndpointBuilder serviceAccountKey(
+                String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     /**
@@ -775,6 +790,51 @@ public interface GoogleMailStreamEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default GoogleMailStreamEndpointBuilder basic() {
             return (GoogleMailStreamEndpointBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGoogleMailStreamEndpointBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGoogleMailStreamEndpointBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -895,6 +955,19 @@ public interface GoogleMailStreamEndpointBuilderFactory {
          * Since: 2.22
          * Maven coordinates: org.apache.camel:camel-google-mail
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default GoogleMailStreamHeaderNameBuilder googleMailStream() {
+            return GoogleMailStreamHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Google Mail Stream (camel-google-mail)
+         * Poll for incoming messages in Google Mail.
+         * 
+         * Category: cloud,mail
+         * Since: 2.22
+         * Maven coordinates: org.apache.camel:camel-google-mail
+         * 
          * Syntax: <code>google-mail-stream:index</code>
          * 
          * Path parameter: index (required)
@@ -928,6 +1001,95 @@ public interface GoogleMailStreamEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return GoogleMailStreamEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Google Mail Stream component.
+     */
+    public static class GoogleMailStreamHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final GoogleMailStreamHeaderNameBuilder INSTANCE = new GoogleMailStreamHeaderNameBuilder();
+
+        /**
+         * The recipient of the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleMailStreamTo}.
+         */
+        public String googleMailStreamTo() {
+            return "GoogleMailStreamTo";
+        }
+
+        /**
+         * The emitter of the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleMailStreamFrom}.
+         */
+        public String googleMailStreamFrom() {
+            return "GoogleMailStreamFrom";
+        }
+
+        /**
+         * The carbon copy of the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleMailStreamCc}.
+         */
+        public String googleMailStreamCc() {
+            return "GoogleMailStreamCc";
+        }
+
+        /**
+         * The blind carbon cpoy of the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleMailStreamBcc}.
+         */
+        public String googleMailStreamBcc() {
+            return "GoogleMailStreamBcc";
+        }
+
+        /**
+         * The subject of the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleMailStreamSubject}.
+         */
+        public String googleMailStreamSubject() {
+            return "GoogleMailStreamSubject";
+        }
+
+        /**
+         * The ID of the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleMailId}.
+         */
+        public String googleMailId() {
+            return "GoogleMailId";
         }
     }
     static GoogleMailStreamEndpointBuilder endpointBuilder(

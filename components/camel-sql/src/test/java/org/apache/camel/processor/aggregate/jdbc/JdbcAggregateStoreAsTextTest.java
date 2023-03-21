@@ -93,7 +93,7 @@ public class JdbcAggregateStoreAsTextTest extends CamelSpringTestSupport {
 
         template.sendBodyAndHeaders("direct:start", "E", headers);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -131,18 +131,18 @@ public class JdbcAggregateStoreAsTextTest extends CamelSpringTestSupport {
 
         template.sendBodyAndHeaders("direct:start", "E", headers);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
-    public String getAggregationRepositoryBody(int id) throws Exception {
+    public String getAggregationRepositoryBody(int id) {
         return getAggregationRepositoryColumn(id, "body");
     }
 
-    public String getAggregationRepositoryCompanyName(int id) throws Exception {
+    public String getAggregationRepositoryCompanyName(int id) {
         return getAggregationRepositoryColumn(id, "companyName");
     }
 
-    public String getAggregationRepositoryAccountName(int id) throws Exception {
+    public String getAggregationRepositoryAccountName(int id) {
         return getAggregationRepositoryColumn(id, "accountName");
     }
 

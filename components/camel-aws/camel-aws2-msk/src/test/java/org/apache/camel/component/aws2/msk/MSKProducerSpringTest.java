@@ -44,11 +44,11 @@ public class MSKProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listClusters", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListClustersResponse resultGet = (ListClustersResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.clusterInfoList().size());
@@ -61,12 +61,12 @@ public class MSKProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listClustersPojo", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody(ListClustersRequest.builder().maxResults(10).build());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListClustersResponse resultGet = (ListClustersResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.clusterInfoList().size());
@@ -79,7 +79,7 @@ public class MSKProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createCluster", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MSK2Constants.CLUSTER_NAME, "test-kafka");
                 exchange.getIn().setHeader(MSK2Constants.CLUSTER_KAFKA_VERSION, "2.1.1");
                 exchange.getIn().setHeader(MSK2Constants.BROKER_NODES_NUMBER, 2);
@@ -88,7 +88,7 @@ public class MSKProducerSpringTest extends CamelSpringTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateClusterResponse resultGet = (CreateClusterResponse) exchange.getIn().getBody();
         assertEquals("test-kafka", resultGet.clusterName());
@@ -101,12 +101,12 @@ public class MSKProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:deleteCluster", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MSK2Constants.CLUSTER_ARN, "test-kafka");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteClusterResponse resultGet = (DeleteClusterResponse) exchange.getIn().getBody();
         assertEquals("test-kafka", resultGet.clusterArn());
@@ -119,12 +119,12 @@ public class MSKProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:describeCluster", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MSK2Constants.CLUSTER_ARN, "test-kafka");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DescribeClusterResponse resultGet = (DescribeClusterResponse) exchange.getIn().getBody();
         assertEquals("test-kafka", resultGet.clusterInfo().clusterArn());

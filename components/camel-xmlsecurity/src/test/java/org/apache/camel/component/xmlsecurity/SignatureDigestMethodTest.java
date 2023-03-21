@@ -88,8 +88,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
 
     static {
         boolean includeNewLine = true;
-        if (TestSupport.getJavaMajorVersion() >= 9
-                || TestSupport.isJava18_261_later() && !TestSupport.isJavaVendor("Azul")) {
+        if (!TestSupport.isJavaVendor("Azul")) {
             includeNewLine = false;
         }
         payload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -138,9 +137,9 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder[] createRouteBuilders() throws Exception {
+    protected RouteBuilder[] createRouteBuilders() {
         return new RouteBuilder[] { new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha1")
                         .to("xmlsecurity-sign:sha1?keyAccessor=#accessor"
@@ -149,7 +148,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha224")
                         .to("xmlsecurity-sign:sha224?keyAccessor=#accessor"
@@ -158,7 +157,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha256")
                         .to("xmlsecurity-sign:sha256?keyAccessor=#accessor"
@@ -167,7 +166,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha384")
                         .to("xmlsecurity-sign:sha384?keyAccessor=#accessor"
@@ -176,7 +175,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha512")
                         .to("xmlsecurity-sign:sha512?keyAccessor=#accessor"
@@ -185,7 +184,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:ripemd160")
                         .to("xmlsecurity-sign:ripemd160?keyAccessor=#accessor"
@@ -194,7 +193,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:whirlpool")
                         .to("xmlsecurity-sign:whirlpool?keyAccessor=#accessor"
@@ -203,7 +202,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha3_224")
                         .to("xmlsecurity-sign:sha3_224?keyAccessor=#accessor"
@@ -212,7 +211,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha3_256")
                         .to("xmlsecurity-sign:sha3_256?keyAccessor=#accessor"
@@ -221,7 +220,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha3_384")
                         .to("xmlsecurity-sign:sha3_384?keyAccessor=#accessor"
@@ -230,7 +229,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:sha3_512")
                         .to("xmlsecurity-sign:sha3_512?keyAccessor=#accessor"
@@ -245,77 +244,77 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
     public void testSHA1() throws Exception {
         setupMock();
         sendBody("direct:sha1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA224() throws Exception {
         setupMock();
         sendBody("direct:sha224", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA256() throws Exception {
         setupMock();
         sendBody("direct:sha256", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA384() throws Exception {
         setupMock();
         sendBody("direct:sha384", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA512() throws Exception {
         setupMock();
         sendBody("direct:sha512", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRIPEMD160() throws Exception {
         setupMock();
         sendBody("direct:ripemd160", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testWHIRLPOOL() throws Exception {
         setupMock();
         sendBody("direct:whirlpool", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA3224() throws Exception {
         setupMock();
         sendBody("direct:sha3_224", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA3256() throws Exception {
         setupMock();
         sendBody("direct:sha3_256", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA3384() throws Exception {
         setupMock();
         sendBody("direct:sha3_384", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSHA3512() throws Exception {
         setupMock();
         sendBody("direct:sha3_512", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     private MockEndpoint setupMock() {
@@ -355,7 +354,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
             } else {
                 template.sendBodyAndHeaders("direct:in", payload, headers);
             }
-            assertMockEndpointsSatisfied();
+            MockEndpoint.assertIsSatisfied(SignatureDigestMethodTest.this.context);
             return mock.getReceivedExchanges().get(0);
         } finally {
             context.stop();
@@ -370,7 +369,7 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
         super.setUp();
     }
 
-    public void setUpKeys(String algorithm, int keylength) throws Exception {
+    public void setUpKeys(String algorithm, int keylength) {
         keyPair = getKeyPair(algorithm, keylength);
     }
 
@@ -411,12 +410,12 @@ public class SignatureDigestMethodTest extends CamelTestSupport {
         KeyAccessor accessor = new KeyAccessor() {
 
             @Override
-            public KeySelector getKeySelector(Message message) throws Exception {
+            public KeySelector getKeySelector(Message message) {
                 return KeySelector.singletonKeySelector(privateKey);
             }
 
             @Override
-            public KeyInfo getKeyInfo(Message mess, Node messageBody, KeyInfoFactory keyInfoFactory) throws Exception {
+            public KeyInfo getKeyInfo(Message mess, Node messageBody, KeyInfoFactory keyInfoFactory) {
                 return null;
             }
         };

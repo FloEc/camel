@@ -19,11 +19,10 @@ package org.apache.camel.component.jpa;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
 /**
@@ -35,11 +34,11 @@ public final class JpaHelper {
     }
 
     /**
-     * Gets or creates an {@link javax.persistence.EntityManager} to use.
+     * Gets or creates an {@link jakarta.persistence.EntityManager} to use.
      *
      * @param  exchange                 the current exchange, or <tt>null</tt> if no exchange
      * @param  entityManagerFactory     the entity manager factory (mandatory)
-     * @param  usePassedInEntityManager whether to use an existing {@link javax.persistence.EntityManager} which has
+     * @param  usePassedInEntityManager whether to use an existing {@link jakarta.persistence.EntityManager} which has
      *                                  been stored on the exchange in the header with key
      *                                  {@link org.apache.camel.component.jpa.JpaConstants#ENTITY_MANAGER}
      * @param  useSharedEntityManager   whether to use SharedEntityManagerCreator if not already passed in
@@ -60,6 +59,14 @@ public final class JpaHelper {
             em = getEntityManagerMap(exchange).get(getKey(entityManagerFactory));
         }
 
+        // then try reuse any entity manager from the transaction context
+        if (em == null && exchange != null && exchange.isTransacted()) {
+            Map<String, Object> data = getTransactionContextData(exchange);
+            if (data != null) {
+                em = (EntityManager) data.get(getKey(entityManagerFactory));
+            }
+        }
+
         if (em == null && useSharedEntityManager) {
             em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
         }
@@ -75,6 +82,21 @@ public final class JpaHelper {
         return em;
     }
 
+    /**
+     * Copy JpaConstants.ENTITY_MANAGER property from source to target exchange.
+     *
+     * @param target The target exchange
+     * @param source The source exchange
+     */
+    public static void copyEntityManagers(Exchange target, Exchange source) {
+        if (target != null && source != null && target.getProperty(JpaConstants.ENTITY_MANAGER) == null) {
+            Map<String, EntityManager> entityManagers = source.getProperty(JpaConstants.ENTITY_MANAGER, Map.class);
+            if (entityManagers != null) {
+                target.setProperty(JpaConstants.ENTITY_MANAGER, entityManagers);
+            }
+        }
+    }
+
     private static EntityManager createEntityManager(Exchange exchange, EntityManagerFactory entityManagerFactory) {
         EntityManager em;
         em = entityManagerFactory.createEntityManager();
@@ -82,9 +104,25 @@ public final class JpaHelper {
             // we want to reuse the EM so store as property and make sure we close it when done with the exchange
             Map<String, EntityManager> entityManagers = getEntityManagerMap(exchange);
             entityManagers.put(getKey(entityManagerFactory), em);
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new JpaCloseEntityManagerOnCompletion(em));
+
+            // we want to reuse the EM in the same transaction
+            if (exchange.isTransacted()) {
+                Map<String, Object> data = getTransactionContextData(exchange);
+                if (data != null) {
+                    data.put(getKey(entityManagerFactory), em);
+                }
+            }
+            exchange.getExchangeExtension().addOnCompletion(new JpaCloseEntityManagerOnCompletion(em));
         }
         return em;
+    }
+
+    private static Map<String, Object> getTransactionContextData(Exchange exchange) {
+        Map<String, Object> data = null;
+        if (exchange.isTransacted()) {
+            data = exchange.getProperty(Exchange.TRANSACTION_CONTEXT_DATA, Map.class);
+        }
+        return data;
     }
 
     @SuppressWarnings("unchecked")

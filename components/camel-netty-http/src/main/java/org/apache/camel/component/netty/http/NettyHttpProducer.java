@@ -19,6 +19,7 @@ package org.apache.camel.component.netty.http;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
@@ -26,9 +27,7 @@ import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.component.netty.NettyConfiguration;
-import org.apache.camel.component.netty.NettyConstants;
 import org.apache.camel.component.netty.NettyProducer;
 import org.apache.camel.http.base.cookie.CookieHandler;
 import org.apache.camel.support.SynchronizationAdapter;
@@ -79,6 +78,10 @@ public class NettyHttpProducer extends NettyProducer {
 
     @Override
     public boolean process(Exchange exchange, AsyncCallback callback) {
+        if (getConfiguration().isDisableStreamCache() || getConfiguration().isHttpProxy()) {
+            exchange.getExchangeExtension().setStreamCacheDisabled(true);
+        }
+
         return super.process(exchange, new NettyHttpProducerCallback(exchange, callback, getConfiguration()));
     }
 
@@ -87,15 +90,15 @@ public class NettyHttpProducer extends NettyProducer {
         // creating the url to use takes 2-steps
         final NettyHttpEndpoint endpoint = getEndpoint();
         final String uri = NettyHttpHelper.createURL(exchange, endpoint);
-        final URI u = NettyHttpHelper.createURI(exchange, uri, endpoint);
+        final URI u = NettyHttpHelper.createURI(exchange, uri);
 
         final NettyHttpBinding nettyHttpBinding = endpoint.getNettyHttpBinding();
         final HttpRequest request = nettyHttpBinding.toNettyRequest(exchange.getIn(), u.toString(), getConfiguration());
-        exchange.getIn().setHeader(Exchange.HTTP_URL, uri);
+        exchange.getIn().setHeader(NettyHttpConstants.HTTP_URL, uri);
         // Need to check if we need to close the connection or not
         if (!HttpUtil.isKeepAlive(request)) {
             // just want to make sure we close the channel if the keepAlive is not true
-            exchange.setProperty(NettyConstants.NETTY_CLOSE_CHANNEL_WHEN_COMPLETE, true);
+            exchange.setProperty(NettyHttpConstants.NETTY_CLOSE_CHANNEL_WHEN_COMPLETE, true);
         }
         if (getConfiguration().isBridgeEndpoint()) {
             // Need to remove the Host key as it should be not used when bridging/proxying
@@ -144,7 +147,7 @@ public class NettyHttpProducer extends NettyProducer {
                             response.content().retain();
 
                             // need to release the response when we are done
-                            exchange.adapt(ExtendedExchange.class).addOnCompletion(new SynchronizationAdapter() {
+                            exchange.getExchangeExtension().addOnCompletion(new SynchronizationAdapter() {
                                 @Override
                                 public void onDone(Exchange exchange) {
                                     if (response.refCnt() > 0) {
@@ -155,7 +158,7 @@ public class NettyHttpProducer extends NettyProducer {
                             });
 
                             // the actual url is stored on the IN message in the getRequestBody method as its accessed on-demand
-                            String actualUrl = exchange.getIn().getHeader(Exchange.HTTP_URL, String.class);
+                            String actualUrl = exchange.getIn().getHeader(NettyHttpConstants.HTTP_URL, String.class);
                             int code = response.status() != null ? response.status().code() : -1;
                             LOG.debug("Http responseCode: {}", code);
 
@@ -166,7 +169,10 @@ public class NettyHttpProducer extends NettyProducer {
                             } else {
                                 ok = NettyHttpHelper.isStatusCodeOk(code, configuration.getOkStatusCodeRange());
                             }
-                            if (!ok && getConfiguration().isThrowExceptionOnFailure()) {
+
+                            if (ok) {
+                                removeCamelHeaders(exchange);
+                            } else if (getConfiguration().isThrowExceptionOnFailure()) {
                                 // operation failed so populate exception to throw
                                 Exception cause = NettyHttpHelper.populateNettyHttpOperationFailedException(exchange, actualUrl,
                                         response, code, getConfiguration().isTransferException());
@@ -180,5 +186,21 @@ public class NettyHttpProducer extends NettyProducer {
                 callback.done(doneSync);
             }
         }
+    }
+
+    /**
+     * Remove Camel headers from Out message
+     *
+     * @param exchange the exchange
+     */
+    protected void removeCamelHeaders(Exchange exchange) {
+        List<String> headersToRemove = exchange.getMessage().getHeaders().keySet()
+                .stream()
+                .filter(key -> !key.equalsIgnoreCase(Exchange.HTTP_RESPONSE_CODE)
+                        && !key.equalsIgnoreCase(Exchange.HTTP_RESPONSE_TEXT)
+                        && key.startsWith("Camel"))
+                .collect(Collectors.toList());
+
+        headersToRemove.stream().forEach(header -> exchange.getMessage().removeHeaders(header));
     }
 }

@@ -31,10 +31,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class JsonPathSplitTest extends CamelTestSupport {
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start")
                         .split().jsonpath("$.store.book[*]")
                         .to("mock:authors")
@@ -62,7 +62,7 @@ public class JsonPathSplitTest extends CamelTestSupport {
         String out = template.requestBody("direct:start", new File("src/test/resources/books.json"), String.class);
         assertNotNull(out);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Map row = getMockEndpoint("mock:authors").getReceivedExchanges().get(0).getIn().getBody(Map.class);
         assertEquals("Nigel Rees", row.get("author"));

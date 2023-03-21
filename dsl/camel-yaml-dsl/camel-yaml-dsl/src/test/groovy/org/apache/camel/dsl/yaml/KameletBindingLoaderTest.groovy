@@ -18,13 +18,13 @@ package org.apache.camel.dsl.yaml
 
 import org.apache.camel.Exchange
 import org.apache.camel.Processor
-import org.apache.camel.builder.DeadLetterChannelBuilder
-import org.apache.camel.builder.DefaultErrorHandlerBuilder
-import org.apache.camel.builder.NoErrorHandlerBuilder
 import org.apache.camel.component.mock.MockEndpoint
 import org.apache.camel.dsl.yaml.support.YamlTestSupport
 import org.apache.camel.model.KameletDefinition
 import org.apache.camel.model.ToDefinition
+import org.apache.camel.model.errorhandler.DeadLetterChannelDefinition
+import org.apache.camel.model.errorhandler.DefaultErrorHandlerDefinition
+import org.apache.camel.model.errorhandler.NoErrorHandlerDefinition
 
 class KameletBindingLoaderTest extends YamlTestSupport {
     @Override
@@ -59,9 +59,11 @@ class KameletBindingLoaderTest extends YamlTestSupport {
             with (context.routeDefinitions[0]) {
                 routeId == 'timer-event-source'
                 input.endpointUri == 'kamelet:timer-source?message=Hello+world%21'
+                input.lineNumber == 7
                 outputs.size() == 1
                 with (outputs[0], ToDefinition) {
                     endpointUri == 'kamelet:log-sink'
+                    lineNumber == 14
                 }
             }
     }
@@ -158,15 +160,19 @@ class KameletBindingLoaderTest extends YamlTestSupport {
         with (context.routeDefinitions[0]) {
             routeId == 'steps-binding'
             input.endpointUri == 'kamelet:timer-source?message=Camel'
+            input.lineNumber == 7
             outputs.size() == 3
             with (outputs[0], KameletDefinition) {
                 name == 'prefix-action?prefix=Apache'
+                lineNumber == 14
             }
             with (outputs[1], KameletDefinition) {
                 name == 'prefix-action?prefix=Hello'
+                lineNumber == 20
             }
             with (outputs[2], ToDefinition) {
                 endpointUri == 'log:info'
+                lineNumber == 27
             }
         }
     }
@@ -235,6 +241,8 @@ class KameletBindingLoaderTest extends YamlTestSupport {
               - uri: mock:dummy
               - uri: kamelet:prefix-action?prefix=Apache
               - uri: mock:dummy2
+                properties:
+                  reportGroup: 5
               sink:
                 uri: log:info
                 ''')
@@ -252,7 +260,7 @@ class KameletBindingLoaderTest extends YamlTestSupport {
                 name == 'prefix-action?prefix=Apache'
             }
             with (outputs[2], ToDefinition) {
-                endpointUri == 'mock:dummy2'
+                endpointUri == 'mock:dummy2?reportGroup=5'
             }
             with (outputs[3], ToDefinition) {
                 endpointUri == 'log:info'
@@ -324,7 +332,7 @@ class KameletBindingLoaderTest extends YamlTestSupport {
                       apiVersion: camel.apache.org/v1alpha1
                       name: log-sink
                   errorHandler:
-                    dead-letter-channel:
+                    sink:
                       endpoint:
                         ref:
                           kind: Kamelet
@@ -345,11 +353,11 @@ class KameletBindingLoaderTest extends YamlTestSupport {
 
         with (context.routeDefinitions[0]) {
             errorHandlerFactory != null
-            errorHandlerFactory instanceof DeadLetterChannelBuilder
-            var eh = errorHandlerFactory as DeadLetterChannelBuilder
+            errorHandlerFactory instanceof DeadLetterChannelDefinition
+            var eh = errorHandlerFactory as DeadLetterChannelDefinition
             eh.deadLetterUri == 'kamelet:error-handler?kafkaTopic=my-first-test&logMessage=ERROR%21&kafkaServiceAccountId=scott&kafkaBrokers=my-broker&kafkaServiceAccountSecret=tiger'
-            eh.redeliveryPolicy.maximumRedeliveries == 1
-            eh.redeliveryPolicy.redeliveryDelay == 2000
+            eh.redeliveryPolicy.maximumRedeliveries == "1"
+            eh.redeliveryPolicy.redeliveryDelay == "2000"
             routeId == 'timer-event-source'
             input.endpointUri == 'kamelet:timer-source?message=Hello+world%21'
             outputs.size() == 1
@@ -390,7 +398,7 @@ class KameletBindingLoaderTest extends YamlTestSupport {
                       apiVersion: camel.apache.org/v1alpha1
                       name: log-sink
                   errorHandler:
-                    dead-letter-channel:
+                    sink:
                       endpoint:
                         uri: mock:dead
                       parameters:
@@ -407,11 +415,11 @@ class KameletBindingLoaderTest extends YamlTestSupport {
 
         with (context.routeDefinitions[0]) {
             errorHandlerFactory != null
-            errorHandlerFactory instanceof DeadLetterChannelBuilder
-            var eh = errorHandlerFactory as DeadLetterChannelBuilder
+            errorHandlerFactory instanceof DeadLetterChannelDefinition
+            var eh = errorHandlerFactory as DeadLetterChannelDefinition
             eh.deadLetterUri == 'mock:dead'
-            eh.redeliveryPolicy.maximumRedeliveries == 3
-            eh.redeliveryPolicy.redeliveryDelay == 100
+            eh.redeliveryPolicy.maximumRedeliveries == "3"
+            eh.redeliveryPolicy.redeliveryDelay == "100"
         }
     }
 
@@ -451,11 +459,11 @@ class KameletBindingLoaderTest extends YamlTestSupport {
 
         with (context.routeDefinitions[0]) {
             errorHandlerFactory != null
-            errorHandlerFactory instanceof DefaultErrorHandlerBuilder
-            var eh = errorHandlerFactory as DefaultErrorHandlerBuilder
-            eh.redeliveryPolicy.maximumRedeliveries == 1
-            eh.redeliveryPolicy.redeliveryDelay == 2000
-            eh.isUseOriginalMessage() == true
+            errorHandlerFactory instanceof DefaultErrorHandlerDefinition
+            var eh = errorHandlerFactory as DefaultErrorHandlerDefinition
+            eh.redeliveryPolicy.maximumRedeliveries == "1"
+            eh.redeliveryPolicy.redeliveryDelay == "2000"
+            eh.getUseOriginalMessage() == "true"
             routeId == 'timer-event-source'
             input.endpointUri == 'kamelet:timer-source?message=Hello+world%21'
             outputs.size() == 1
@@ -497,13 +505,87 @@ class KameletBindingLoaderTest extends YamlTestSupport {
 
         with (context.routeDefinitions[0]) {
             errorHandlerFactory != null
-            errorHandlerFactory instanceof NoErrorHandlerBuilder
+            errorHandlerFactory instanceof NoErrorHandlerDefinition
             routeId == 'timer-event-source'
             input.endpointUri == 'kamelet:timer-source?message=Hello+world%21'
             outputs.size() == 1
             with (outputs[0], ToDefinition) {
                 endpointUri == 'kamelet:log-sink'
             }
+        }
+    }
+
+    def "kamelet binding from kamelet to knative"() {
+        when:
+
+        // stub knative for testing as it requires to setup connection to a real knative broker
+        context.removeComponent("knative")
+        context.addComponent("knative", context.getComponent("stub"))
+
+        loadBindings('''
+                apiVersion: camel.apache.org/v1alpha1
+                kind: KameletBinding
+                metadata:
+                  name: timer-event-source                  
+                spec:
+                  source:
+                    ref:
+                      kind: Kamelet
+                      apiVersion: camel.apache.org/v1
+                      name: timer-source
+                    properties:
+                      message: "Hello world!"
+                  sink:
+                    ref:
+                      kind: InMemoryChannel
+                      apiVersion: messaging.knative.dev/v1
+                      name: my-messages
+            ''')
+        then:
+        context.routeDefinitions.size() == 2
+
+        with (context.routeDefinitions[0]) {
+            routeId == 'timer-event-source'
+            input.endpointUri == 'kamelet:timer-source?message=Hello+world%21'
+            outputs.size() == 1
+            with (outputs[0], ToDefinition) {
+                endpointUri == 'knative:channel/my-messages'
+            }
+        }
+    }
+
+    def "kamelet start route"() {
+        when:
+        loadBindings('''
+                apiVersion: camel.apache.org/v1alpha1
+                kind: KameletBinding
+                metadata:
+                  name: timer-event-source                  
+                spec:
+                  source:
+                    ref:
+                      kind: Kamelet
+                      apiVersion: camel.apache.org/v1
+                      name: route-timer-source
+                    properties:
+                      message: "Hello world!"
+                  sink:
+                    ref:
+                      kind: Kamelet
+                      apiVersion: camel.apache.org/v1
+                      name: log-sink
+            ''')
+        then:
+        context.routeDefinitions.size() == 3
+
+        // global stream caching enabled
+        context.isStreamCaching() == true
+
+        with (context.routeDefinitions[1]) {
+            template == true
+            // stream-caching is disabled in the kamelet
+            streamCache == "false"
+            messageHistory == "true"
         }
     }
 

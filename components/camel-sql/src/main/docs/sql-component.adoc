@@ -120,7 +120,9 @@ include::partial$component-endpoint-options.adoc[]
 // endpoint options: START
 
 // endpoint options: END
-
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Treatment of the message body
 
@@ -157,11 +159,6 @@ For `select` operations, the result is an instance of
 http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/jdbc/core/JdbcTemplate.html#queryForList(java.lang.String,%20java.lang.Object%91%93)[JdbcTemplate.queryForList()]
 method. For `update` operations, a `NULL` body is returned as the `update` operation is only set as a header and never as a body.
 
-[NOTE]
-====
-See <<sql-component-header-values, Header values>> for more information on the `update` operation.
-====
-
 By default, the result is placed in the message body.  If the
 outputHeader parameter is set, the result is placed in the header.  This
 is an alternative to using a full message enrichment pattern to add
@@ -194,42 +191,6 @@ from("direct:withSplitModel")
             .to("mock:result")
         .end();
 ----
-
-[[sql-component-header-values]]
-== Header values
-
-When performing `update` operations, the SQL Component stores the update
-count in the following message headers:
-
-[cols="1,3"]
-|===
-|Header |Description
-
-|`CamelSqlUpdateCount` |The number of rows updated for `update` operations, returned as an
-`Integer` object. This header is not provided when using
-outputType=StreamList.
-
-|`CamelSqlRowCount` |The number of rows returned for `select` operations, returned as an
-`Integer` object. This header is not provided when using
-outputType=StreamList.
-
-|`CamelSqlQuery` |Query to execute. This query takes precedence over the
-query specified in the endpoint URI. Note that query parameters in the
-header _are_ represented by a `?` instead of a `pass:[#]` symbol
-|===
-
-When performing `insert` operations, the SQL Component stores the rows
-with the generated keys and number of these rows in the following
-message headers:
-
-[cols="1,3"]
-|===
-|Header |Description
-
-|CamelSqlGeneratedKeysRowCount |The number of rows in the header that contains generated keys.
-
-|CamelSqlGeneratedKeyRows |Rows that contains the generated keys (a list of maps of keys).
-|===
 
 == Generated keys
 
@@ -418,24 +379,22 @@ idempotent repository. We use the following schema:
 [source,sql]
 ----
 CREATE TABLE CAMEL_MESSAGEPROCESSED ( processorName VARCHAR(255),
-messageId VARCHAR(100) )
-----
-
-
-We added the createdAt column:
-
-[source,sql]
-----
-CREATE TABLE CAMEL_MESSAGEPROCESSED ( processorName VARCHAR(255),
-messageId VARCHAR(100), createdAt TIMESTAMP )
+messageId VARCHAR(100), createdAt TIMESTAMP, PRIMARY KEY (processorName, messageId) )
 ----
 
 WARNING: The SQL Server *TIMESTAMP* type is a fixed-length binary-string type. It
 does not map to any of the JDBC time types: *DATE*, *TIME*, or
 *TIMESTAMP*.
 
-When working with concurrent consumers it is crucial to create a unique constraint on the columns processorName and messageId.
-Because the syntax for this constraint differs from database to database, we do not show it here.
+The above SQL is consistent with most popular SQL vendors.
+
+When working with concurrent consumers it is crucial to create a unique constraint on the column combination of
+processorName and messageId. This constraint will be prevent multiple consumers adding the same key to the repository
+and allow only one consumer to handle the message.
+
+The SQL above includes the constraint by creating a primary key. If you prefer to use a different
+constraint, or your SQL server uses a different syntax for table creation, you can create the table yourself using
+the above schema as a starting point.
 
 === Customize the JDBC idempotency repository
 
@@ -681,7 +640,7 @@ multiple Camel applications shared the same database for the aggregation
 repository. If there is a race condition there JDBC driver will throw a
 vendor specific exception which the `JdbcAggregationRepository` can
 react upon. To know which caused exceptions from the JDBC driver is
-regarded as an optimistick locking error we need a mapper to do this.
+regarded as an optimistic locking error we need a mapper to do this.
 Therefore there is a
 `org.apache.camel.processor.aggregate.jdbc.JdbcOptimisticLockingExceptionMapper`
 allows you to implement your custom logic if needed. There is a default
@@ -701,7 +660,7 @@ configured.
 
 You can in addition add FQN classnames, and if any of the caused
 exception (or any nested) equals any of the FQN class names, then its an
-optimistick locking error.
+optimistic locking error.
 
 Here is an example, where we define 2 extra FQN class names from the
 JDBC vendor.
@@ -746,6 +705,17 @@ class="org.apache.camel.processor.aggregate.jdbc.JdbcAggregationRepository">
 
 Propagation is specified by constants of `org.springframework.transaction.TransactionDefinition` interface,
 so `propagationBehaviorName` is convenient setter that allows to use names of the constants.
+
+=== Clustering
+JdbcAggregationRepository does not provide recovery in a clustered environment.
+
+You may use ClusteredJdbcAggregationRepository that provides a limited support for recovery in a clustered environment : recovery mechanism is dealt separately by members of the cluster, i.e. a member may only recover exchanges that it completed itself.
+
+To enable this behaviour, property `recoverByInstance` must be set to true, and `instanceId` property must be defined using a unique identifier (a string) for each member of the cluster.
+
+Besides, completed table must have a `instance_id VARCHAR(255)` column.
+
+N.B. : since each member is the only responsible for the recovery of its completed exchanges, if a member is stopped, its completed exchanges will not be recovered until it is restarted, unless you update completed table to affect them to another member (by changing `instance_id` for those completed exchanges).
 
 === PostgreSQL case
 

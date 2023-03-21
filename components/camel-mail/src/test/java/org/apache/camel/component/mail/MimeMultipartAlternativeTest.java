@@ -19,9 +19,9 @@ package org.apache.camel.component.mail;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-import javax.mail.internet.MimeMultipart;
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.internet.MimeMultipart;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.attachment.AttachmentMessage;
@@ -43,7 +43,7 @@ public class MimeMultipartAlternativeTest extends CamelTestSupport {
     private String alternativeBody = "hello world! (plain text)";
     private String htmlBody = "<html><body><h1>Hello</h1>World<img src=\"cid:0001\"></body></html>";
 
-    private void sendMultipartEmail(boolean useInlineattachments) throws Exception {
+    private void sendMultipartEmail(boolean useInlineattachments) {
         Mailbox.clearAll();
 
         // create an exchange with a normal body and attachment to be produced as email
@@ -100,9 +100,9 @@ public class MimeMultipartAlternativeTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://ryan@mymailserver.com?password=secret&initialDelay=100&delay=100").to("mock:result");
             }
         };

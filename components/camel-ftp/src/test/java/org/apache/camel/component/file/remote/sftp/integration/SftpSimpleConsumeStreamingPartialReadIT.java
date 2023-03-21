@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests that a file move can occur on the server even if the remote stream was only partially read.
  */
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpSimpleConsumeStreamingPartialReadIT extends SftpServerTestSupport {
 
     @Test
@@ -51,9 +51,10 @@ public class SftpSimpleConsumeStreamingPartialReadIT extends SftpServerTestSuppo
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
-        GenericFile<?> remoteFile1 = (GenericFile<?>) mock.getExchanges().get(0).getIn().getBody();
-        assertTrue(remoteFile1.getBody() instanceof InputStream);
+        MockEndpoint.assertIsSatisfied(context);
+
+        InputStream is = mock.getExchanges().get(0).getIn().getBody(InputStream.class);
+        assertNotNull(is);
 
         // Wait a little bit for the move to finish.
         File resultFile = new File(service.getFtpRootDir() + File.separator + "failed", "hello.txt");
@@ -62,10 +63,10 @@ public class SftpSimpleConsumeStreamingPartialReadIT extends SftpServerTestSuppo
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}"
                      + "?username=admin&password=admin&delay=10000&disconnect=true&streamDownload=true"
                      + "&move=done&moveFailed=failed").routeId("foo").noAutoStartup().process(new Processor() {

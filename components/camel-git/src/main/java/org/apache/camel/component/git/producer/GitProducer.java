@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.component.RepositoryFactory;
 import org.apache.camel.component.git.GitConstants;
 import org.apache.camel.component.git.GitEndpoint;
 import org.apache.camel.support.DefaultProducer;
@@ -38,17 +39,19 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.util.SystemReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -500,7 +503,7 @@ public class GitProducer extends DefaultProducer {
         updateExchange(exchange, result);
     }
 
-    protected void doMerge(Exchange exchange, String operation) throws GitAPIException, IOException {
+    protected void doMerge(Exchange exchange, String operation) throws ConfigInvalidException, GitAPIException, IOException {
         MergeResult result = null;
         ObjectId mergeBase;
         try {
@@ -508,13 +511,24 @@ public class GitProducer extends DefaultProducer {
                 throw new IllegalArgumentException("Branch name must be specified to execute " + operation);
             }
             mergeBase = git.getRepository().resolve(endpoint.getBranchName());
-            git.checkout().setName("master").call();
+            git.checkout().setName(defineTargetBranchName()).call();
             result = git.merge().include(mergeBase).setFastForward(FastForwardMode.FF).setCommit(true).call();
-        } catch (GitAPIException | IOException e) {
+        } catch (ConfigInvalidException | GitAPIException | IOException e) {
             LOG.error("There was an error in Git {} operation", operation);
             throw e;
         }
         updateExchange(exchange, result);
+    }
+
+    private String defineTargetBranchName() throws ConfigInvalidException, IOException {
+        if (ObjectHelper.isNotEmpty(endpoint.getTargetBranchName())) {
+            return endpoint.getTargetBranchName();
+        }
+
+        String defaultBranch = SystemReader.getInstance().getUserConfig().getString(ConfigConstants.CONFIG_INIT_SECTION, null,
+                ConfigConstants.CONFIG_KEY_DEFAULT_BRANCH);
+
+        return ObjectHelper.isNotEmpty(defaultBranch) ? defaultBranch : "master";
     }
 
     protected void doCreateTag(String operation) throws GitAPIException {
@@ -644,21 +658,8 @@ public class GitProducer extends DefaultProducer {
         updateExchange(exchange, result);
     }
 
-    private Repository getLocalRepository() throws IOException {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repo = null;
-        try {
-            repo = builder.setGitDir(new File(endpoint.getLocalPath(), ".git")).readEnvironment() // scan
-                    // environment
-                    // GIT_*
-                    // variables
-                    .findGitDir() // scan up the file system tree
-                    .build();
-        } catch (IOException e) {
-            LOG.error("There was an error, cannot open {} repository", endpoint.getLocalPath());
-            throw e;
-        }
-        return repo;
+    private Repository getLocalRepository() {
+        return RepositoryFactory.of(endpoint);
     }
 
     private void updateExchange(Exchange exchange, Object body) {

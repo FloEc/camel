@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FtpProducerMultipleSiteCommandIT extends FtpServerTestSupport {
 
     @BindToRegistry("site")
-    private String site = "help site\nhelp site";
+    private final String site = "help site\nhelp site";
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/site?password=admin&siteCommand=#site";
@@ -38,7 +38,7 @@ public class FtpProducerMultipleSiteCommandIT extends FtpServerTestSupport {
     public void testSiteCommands() throws Exception {
         sendFile(getFtpUrl(), "Hello World", "hello.txt");
 
-        File file = ftpFile("site/hello.txt").toFile();
+        File file = service.ftpFile("site/hello.txt").toFile();
         assertTrue(file.exists(), "The uploaded file should exists");
         assertEquals("Hello World", IOConverter.toString(file, null));
     }

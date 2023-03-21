@@ -18,13 +18,12 @@ package org.apache.camel.model.cloud;
 
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.NoFactoryAvailableException;
 import org.apache.camel.cloud.ServiceLoadBalancer;
 import org.apache.camel.cloud.ServiceLoadBalancerFactory;
@@ -39,6 +38,7 @@ import org.apache.camel.util.ObjectHelper;
 @XmlRootElement(name = "loadBalancerConfiguration")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Configurer
+@Deprecated
 public class ServiceCallServiceLoadBalancerConfiguration extends ServiceCallConfiguration
         implements ServiceLoadBalancerFactory {
     @XmlTransient
@@ -70,8 +70,8 @@ public class ServiceCallServiceLoadBalancerConfiguration extends ServiceCallConf
     /**
      * Adds a custom property to use.
      * <p/>
-     * These properties are specific to what service call implementation are in use. For example if using ribbon, then
-     * the client properties are define in com.netflix.client.config.CommonClientConfigKey.
+     * These properties are specific to what service call implementation are in use. For example if using a different
+     * one, then the client properties are defined according to the specific service in use.
      */
     @Override
     public ServiceCallServiceLoadBalancerConfiguration property(String key, String value) {
@@ -99,7 +99,7 @@ public class ServiceCallServiceLoadBalancerConfiguration extends ServiceCallConf
             Class<?> type;
             try {
                 // Then use Service factory.
-                type = camelContext.adapt(ExtendedCamelContext.class)
+                type = camelContext.getCamelContextExtension()
                         .getFactoryFinder(ServiceCallDefinitionConstants.RESOURCE_PATH).findClass(factoryKey).orElse(null);
             } catch (Exception e) {
                 throw new NoFactoryAvailableException(ServiceCallDefinitionConstants.RESOURCE_PATH + factoryKey, e);

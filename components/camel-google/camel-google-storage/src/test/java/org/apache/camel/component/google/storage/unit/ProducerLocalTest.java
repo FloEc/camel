@@ -47,7 +47,7 @@ public class ProducerLocalTest extends GoogleCloudStorageBaseTest {
     private MockEndpoint result;
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 String endpoint = "google-storage://myCamelBucket?autoCreateBucket=true";
@@ -106,10 +106,10 @@ public class ProducerLocalTest extends GoogleCloudStorageBaseTest {
                     GoogleCloudStorageOperations.getObject);
             exchange.getIn().setHeader(GoogleCloudStorageConstants.OBJECT_NAME, fileName);
         });
-        Blob getObject = getObjectExchange.getMessage().getBody(Blob.class);
+        String getObject = getObjectExchange.getMessage().getBody(String.class);
         LOG.info("getObject: {}", getObject);
         assertNotNull(getObject);
-        assertEquals(fileName, getObject.getName());
+        assertEquals(fileName, getObjectExchange.getMessage().getHeader(GoogleCloudStorageConstants.OBJECT_NAME));
 
         /*
         //sign url
@@ -141,7 +141,7 @@ public class ProducerLocalTest extends GoogleCloudStorageBaseTest {
         LOG.info("deleteBucket {}", deleteBucket);
         assertTrue(deleteBucket);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
 }

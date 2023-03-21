@@ -16,23 +16,29 @@
  */
 package org.apache.camel.component.file.remote.integration;
 
+import java.nio.file.Path;
+
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Producer;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.apache.camel.test.junit5.TestSupport.assertFileExists;
 import static org.apache.camel.test.junit5.TestSupport.assertFileNotExists;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FtpConsumerLocalWorkDirectoryDirectIT extends FtpServerTestSupport {
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/lwd/?password=admin&delay=5000"
-               + "&localWorkDirectory=" + testDirectory("lwd")
+               + "&localWorkDirectory=" + testDirectory.resolve("lwd")
                + "&noop=true";
     }
 
@@ -63,17 +69,17 @@ public class FtpConsumerLocalWorkDirectoryDirectIT extends FtpServerTestSupport 
         assertTrue(notify.matchesWaitTime(), "Should process one file");
 
         // and the out file should exists
-        assertFileExists(testFile("out/hello.txt"), "Hello World");
+        assertFileExists(testDirectory.resolve("out/hello.txt"), "Hello World");
 
         // now the lwd file should be deleted
-        assertFileNotExists(testFile("lwd/hello.txt"));
+        assertFileNotExists(testDirectory.resolve("lwd/hello.txt"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
-                from(getFtpUrl()).to(fileUri("out"));
+            public void configure() {
+                from(getFtpUrl()).to(TestSupport.fileUri(testDirectory, "out"));
             }
         };
     }

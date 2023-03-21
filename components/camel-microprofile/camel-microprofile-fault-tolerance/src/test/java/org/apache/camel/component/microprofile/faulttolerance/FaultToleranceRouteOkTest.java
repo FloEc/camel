@@ -17,9 +17,9 @@
 package org.apache.camel.component.microprofile.faulttolerance;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.BeanIntrospection;
 import org.apache.camel.spi.CircuitBreakerConstants;
 import org.apache.camel.test.junit5.CamelTestSupport;
@@ -40,7 +40,7 @@ public class FaultToleranceRouteOkTest extends CamelTestSupport {
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
 
-        bi = context.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        bi = context.getCamelContextExtension().getBeanIntrospection();
         bi.setLoggingLevel(LoggingLevel.INFO);
         bi.resetCounters();
 
@@ -57,16 +57,16 @@ public class FaultToleranceRouteOkTest extends CamelTestSupport {
 
         template.sendBody("direct:start", "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         assertEquals(0, bi.getInvokedCounter());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").circuitBreaker().to("direct:foo").to("log:foo").onFallback().transform()
                         .constant("Fallback message").end().to("log:result").to("mock:result");
 

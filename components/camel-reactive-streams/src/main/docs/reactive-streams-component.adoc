@@ -62,7 +62,9 @@ include::partial$component-endpoint-options.adoc[]
 // endpoint options: START
 
 // endpoint options: END
-
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Usage
 
@@ -106,7 +108,7 @@ Here is an example of how to use it with https://github.com/ReactiveX/RxJava[RxJ
 
 [source,java]
 ---------------------------------------------------------
-Flowable.fromPublisher(integers)
+Flowable.fromPublisher(numbers)
     .doOnNext(System.out::println)
     .subscribe();
 ---------------------------------------------------------

@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.camel.NamedNode;
+import org.apache.camel.spi.Resource;
+import org.apache.camel.support.ResourceHelper;
+import org.apache.camel.util.FileUtil;
 
 /**
  * Helper class for ProcessorDefinition and the other model classes.
@@ -376,7 +379,17 @@ public final class ProcessorDefinitionHelper {
      *
      * @param node the node
      */
-    public static void prepareSourceLocation(NamedNode node) {
+    public static void prepareSourceLocation(Resource resource, NamedNode node) {
+        if (resource != null) {
+            node.setLocation(resource.getLocation());
+
+            String ext = FileUtil.onlyExt(resource.getLocation(), true);
+            if ("groovy".equals(ext) || "js".equals(ext) || "jsh".equals(ext)) {
+                // we cannot get line number for groovy/java-script/java-shell
+                return;
+            }
+        }
+
         // line number may already be set if parsed via XML, YAML etc.
         int number = node.getLineNumber();
         if (number < 0) {
@@ -385,16 +398,58 @@ public final class ProcessorDefinitionHelper {
             for (int i = 1; i < st.length; i++) {
                 StackTraceElement e = st[i];
                 if (!e.getClassName().startsWith("org.apache.camel.model") &&
-                        !e.getClassName().startsWith("org.apache.camel.builder.RouteBuilder")) {
+                        !e.getClassName().startsWith("org.apache.camel.builder.RouteBuilder") &&
+                        !e.getClassName().startsWith("org.apache.camel.dsl")) {
                     // when we are no longer in model/RouteBuilder, we have found the location:line-number
                     node.setLineNumber(e.getLineNumber());
                     if (node.getLocation() == null) {
-                        node.setLocation(e.getClassName());
+                        String name = e.getFileName();
+                        if (name == null) {
+                            name = e.getClassName();
+                        }
+                        // find out what scheme for location as it can be file, classpath etc
+                        if (!ResourceHelper.hasScheme(name)) {
+                            String scheme = findParentSourceLocationScheme(node);
+                            if (scheme != null) {
+                                name = scheme + name;
+                            }
+                        }
+                        node.setLocation(name);
                     }
                     return;
                 }
             }
         }
+    }
+
+    /**
+     * Returns the level of the node in the route tree. Level 1 is the root level, level 2 is a child of an EIP, and so
+     * forth
+     */
+    public static int getNodeLevel(NamedNode node) {
+        int level = 0;
+        while (node != null && node.getParent() != null) {
+            boolean shallow = node instanceof WhenDefinition || node instanceof OtherwiseDefinition;
+            node = node.getParent();
+            if (!shallow) {
+                level++;
+            }
+        }
+        return level;
+    }
+
+    /**
+     * Finds the source location scheme from the parent nodes.
+     */
+    public static String findParentSourceLocationScheme(NamedNode node) {
+        while (node != null && node.getParent() != null) {
+            String location = node.getLocation();
+            if (ResourceHelper.hasScheme(location)) {
+                return ResourceHelper.getScheme(location);
+            }
+            node = node.getParent();
+        }
+        return null;
     }
 
 }

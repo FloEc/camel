@@ -16,11 +16,11 @@
  */
 package org.apache.camel.component.jms;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Session;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Session;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
@@ -221,11 +221,7 @@ public class EndpointMessageListener implements SessionAwareMessageListener {
                 // process OK so get the reply body if we are InOut and has a body
                 // If the ppl don't want to send the message back, he should use the InOnly
                 if (sendReply && exchange.getPattern().isOutCapable()) {
-                    if (exchange.hasOut()) {
-                        body = exchange.getOut();
-                    } else {
-                        body = exchange.getIn();
-                    }
+                    body = exchange.getMessage();
                     cause = null;
                 }
             }
@@ -350,7 +346,7 @@ public class EndpointMessageListener implements SessionAwareMessageListener {
      * Provides an explicit reply to destination which overrides any incoming value of {@link Message#getJMSReplyTo()}
      *
      * @param replyToDestination the destination that should be used to send replies to as either a String or
-     *                           {@link javax.jms.Destination} type.
+     *                           {@link jakarta.jms.Destination} type.
      */
     public void setReplyToDestination(Object replyToDestination) {
         this.replyToDestination = replyToDestination;
@@ -401,16 +397,20 @@ public class EndpointMessageListener implements SessionAwareMessageListener {
             LOG.debug("Cannot send reply message as there is no replyDestination for: {}", out);
             return;
         }
-        getTemplate().send(replyDestination, session -> {
-            Message reply = endpoint.getBinding().makeJmsMessage(exchange, out, session, cause);
-            final String correlationID = determineCorrelationId(message);
-            reply.setJMSCorrelationID(correlationID);
+        getTemplate().send(replyDestination, session -> createMessage(message, exchange, out, cause, session));
+    }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("{} sending reply JMS message [correlationId:{}]: {}", endpoint, correlationID, reply);
-            }
-            return reply;
-        });
+    private Message createMessage(
+            Message message, Exchange exchange, org.apache.camel.Message out, Exception cause, Session session)
+            throws JMSException {
+        Message reply = endpoint.getBinding().makeJmsMessage(exchange, out, session, cause);
+        final String correlationID = determineCorrelationId(message);
+        reply.setJMSCorrelationID(correlationID);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("{} sending reply JMS message [correlationId:{}]: {}", endpoint, correlationID, reply);
+        }
+        return reply;
     }
 
     protected void sendReply(
@@ -420,16 +420,7 @@ public class EndpointMessageListener implements SessionAwareMessageListener {
             LOG.debug("Cannot send reply message as there is no replyDestination for: {}", out);
             return;
         }
-        getTemplate().send(replyDestination, session -> {
-            Message reply = endpoint.getBinding().makeJmsMessage(exchange, out, session, cause);
-            final String correlationID = determineCorrelationId(message);
-            reply.setJMSCorrelationID(correlationID);
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("{} sending reply JMS message [correlationId:{}]: {}", endpoint, correlationID, reply);
-            }
-            return reply;
-        });
+        getTemplate().send(replyDestination, session -> createMessage(message, exchange, out, cause, session));
     }
 
     protected Object getReplyToDestination(Message message) {

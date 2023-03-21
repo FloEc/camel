@@ -54,9 +54,9 @@ public class AdviceWithTransactionIssueTest extends CamelSpringTestSupport {
         mockLast.expectedBodiesReceived("bar");
         mockLast.setExpectedMessageCount(1);
 
-        template.sendBody("activemq:queue:start", "bar");
+        template.sendBody("jms:queue:start", "bar");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -73,9 +73,9 @@ public class AdviceWithTransactionIssueTest extends CamelSpringTestSupport {
         mockLast.expectedBodiesReceived("bar");
         mockLast.setExpectedMessageCount(1);
 
-        template.sendBody("activemq:queue:start", "bar");
+        template.sendBody("jms:queue:start", "bar");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
 }

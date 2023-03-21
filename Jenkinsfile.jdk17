@@ -20,7 +20,8 @@
 def AGENT_LABEL = env.AGENT_LABEL ?: 'ubuntu'
 def JDK_NAME = env.JDK_NAME ?: 'jdk_17_latest'
 
-def MAVEN_PARAMS = "-U -B -e -fae -V -Dnoassembly -Dmaven.compiler.fork=true -Dsurefire.rerunFailingTestsCount=2"
+def MAVEN_PARAMS = "-B -e -fae -V -Dnoassembly -Dmaven.compiler.fork=true -Dsurefire.rerunFailingTestsCount=2"
+def MAVEN_TEST_PARAMS = env.MAVEN_TEST_PARAMS ?: "-Dci.env.name=apache.org"
 
 pipeline {
 
@@ -58,12 +59,9 @@ pipeline {
            }
         }
 
-        stage('Build & Deploy') {
-            when {
-                branch 'main'
-            }
+        stage('Build & Install') {
             steps {
-                sh "./mvnw $MAVEN_PARAMS -Darchetype.test.skip -Dmaven.test.skip.exec=true clean install"
+                sh "./mvnw -U $MAVEN_PARAMS -Darchetype.test.skip -Dmaven.test.skip.exec=true clean install"
             }
         }
 
@@ -73,9 +71,19 @@ pipeline {
             }
         }
 
+        stage('Code Quality Review') {
+            steps {
+                withCredentials([string(credentialsId: 'apache-camel-core', variable: 'SONAR_TOKEN')]) {
+                    sh "./mvnw $MAVEN_PARAMS -Dsonar.host.url=https://sonarcloud.io -Dsonar.java.experimental.batchModeSizeInKB=2048 -Dsonar.organization=apache -Dsonar.projectKey=apache_camel -Dsonar.branch.name=$BRANCH_NAME org.sonarsource.scanner.maven:sonar-maven-plugin:sonar"
+                }
+            }
+        }
+
         stage('Test') {
             steps {
-                sh "./mvnw $MAVEN_PARAMS -Darchetype.test.skip -Dmaven.test.failure.ignore=true clean install"
+                timeout(unit: 'HOURS', time: 7) {
+                    sh "./mvnw $MAVEN_PARAMS $MAVEN_TEST_PARAMS -Darchetype.test.skip -Dmaven.test.failure.ignore=true -Dcheckstyle.skip=true verify"
+                }
             }
             post {
                 always {

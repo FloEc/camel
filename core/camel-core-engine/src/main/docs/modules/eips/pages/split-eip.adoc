@@ -68,7 +68,7 @@ The previous example can also be done as follows:
 [source,java]
 ----
 from("direct:a")
-    .split(body()).delimiter("\n"))
+    .split(body()).delimiter("\n")
         .to("direct:b");
 ----
 
@@ -160,7 +160,7 @@ The example below enabled parallel mode:
 [source,java]
 ----
 from("direct:a")
-  .split(body()).paralllelProcessing()
+  .split(body()).parallelProcessing()
     .to("direct:x")
     .to("direct:y")
     .to("direct:z");
@@ -177,7 +177,7 @@ And in XML:
         <to uri="direct:b"/>
         <to uri="direct:c"/>
         <to uri="direct:d"/>
-    </multicast>
+    </split>
 </route>
 ----
 
@@ -193,7 +193,7 @@ continues.
 [source,java]
 ----
 from("direct:a")
-  .split(body()).paralllelProcessing()
+  .split(body()).parallelProcessing()
     .to("direct:x")
     .to("direct:y")
     .to("direct:z")
@@ -247,7 +247,7 @@ And in XML we can refer to the FQN class name with `#class:` syntax as shown bel
 ----
 <route>
     <from uri="direct:a"/>
-    <split strategyRef="#class:com.foo.MyAggregationStrategy">
+    <split aggregationStrategy="#class:com.foo.MyAggregationStrategy">
         <simple>${body}</simple>
         <to uri="direct:b"/>
         <to uri="direct:c"/>

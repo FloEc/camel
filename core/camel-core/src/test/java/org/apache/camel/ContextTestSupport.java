@@ -54,7 +54,7 @@ public abstract class ContextTestSupport extends TestSupport {
 
     /**
      * Use the RouteBuilder or not
-     * 
+     *
      * @return If the return value is true, the camel context will be started in the setup method. If the return value
      *         is false, the camel context will not be started in the setup method.
      */
@@ -165,7 +165,7 @@ public abstract class ContextTestSupport extends TestSupport {
 
     /**
      * Whether or not JMX should be used during testing.
-     * 
+     *
      * @return <tt>false</tt> by default.
      */
     protected boolean useJmx() {
@@ -201,12 +201,11 @@ public abstract class ContextTestSupport extends TestSupport {
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context;
         if (useLightweightContext) {
-            LightweightCamelContext ctx = new LightweightCamelContext();
-            ctx.setRegistry(createRegistry());
+            LightweightCamelContext ctx = new LightweightCamelContext(createRegistry());
             context = ctx;
         } else {
             DefaultCamelContext ctx = new DefaultCamelContext(true);
-            ctx.setRegistry(createRegistry());
+            ctx.getCamelContextExtension().setRegistry(createRegistry());
             context = ctx;
         }
         if (!useJmx()) {

@@ -18,6 +18,7 @@ package org.apache.camel.component.kamelet;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ public class KameletEipAggregateJoorTest extends CamelTestSupport {
         template.sendBody("direct:start", "D");
         template.sendBody("direct:start", "E");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // **********************************************
@@ -42,10 +43,10 @@ public class KameletEipAggregateJoorTest extends CamelTestSupport {
     //
     // **********************************************
 
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 routeTemplate("my-aggregate")
                         .templateBean("myAgg", "joor",
                                 // for aggregation we can use a BiFunction that takes Exchange as input and return the aggregated response
@@ -59,7 +60,7 @@ public class KameletEipAggregateJoorTest extends CamelTestSupport {
                         .aggregate(constant(true))
                         .completionSize("{{count}}")
                         // use the groovy script bean for aggregation
-                        .aggregationStrategyRef("{{myAgg}}")
+                        .aggregationStrategy("{{myAgg}}")
                         .to("log:aggregate")
                         .to("kamelet:sink")
                         .end();

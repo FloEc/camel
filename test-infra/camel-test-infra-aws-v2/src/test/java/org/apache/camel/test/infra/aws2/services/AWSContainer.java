@@ -36,7 +36,8 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
  behave as in runtime.
  */
 public class AWSContainer extends GenericContainer<AWSContainer> {
-    public static final String LOCALSTACK_CONTAINER = "localstack/localstack:0.12.20";
+
+    public static final String LOCALSTACK_CONTAINER = "localstack/localstack:1.3.0";
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSLocalContainerService.class);
     private static final int SERVICE_PORT = 4566;
@@ -88,12 +89,12 @@ public class AWSContainer extends GenericContainer<AWSContainer> {
     }
 
     protected String getAmazonHost() {
-        return getContainerIpAddress() + ":" + getMappedPort(SERVICE_PORT);
+        return getHost() + ":" + getMappedPort(SERVICE_PORT);
     }
 
     public URI getServiceEndpoint() {
         try {
-            String address = String.format("http://%s:%d", getContainerIpAddress(), getMappedPort(SERVICE_PORT));
+            String address = String.format("http://%s:%d", getHost(), getMappedPort(SERVICE_PORT));
             LOG.debug("Running on service endpoint: {}", address);
 
             return new URI(address);

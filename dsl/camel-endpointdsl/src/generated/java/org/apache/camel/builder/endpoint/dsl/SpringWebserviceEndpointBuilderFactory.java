@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -109,51 +109,6 @@ public interface SpringWebserviceEndpointBuilderFactory {
         default SpringWebserviceEndpointConsumerBuilder messageIdStrategy(
                 String messageIdStrategy) {
             doSetProperty("messageIdStrategy", messageIdStrategy);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SpringWebserviceEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SpringWebserviceEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -281,6 +236,51 @@ public interface SpringWebserviceEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default SpringWebserviceEndpointConsumerBuilder basic() {
             return (SpringWebserviceEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSpringWebserviceEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSpringWebserviceEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -514,8 +514,8 @@ public interface SpringWebserviceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Signifies the value for the faultAction response WS-Addressing
-         * &lt;code&gt;Fault Action header that is provided by the method. See
+         * Signifies the value for the faultAction response WS-Addressing Fault
+         * Action header that is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -532,8 +532,8 @@ public interface SpringWebserviceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Signifies the value for the faultAction response WS-Addressing
-         * &lt;code&gt;Fault Action header that is provided by the method. See
+         * Signifies the value for the faultAction response WS-Addressing Fault
+         * Action header that is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -552,7 +552,7 @@ public interface SpringWebserviceEndpointBuilderFactory {
         }
         /**
          * Signifies the value for the faultAction response WS-Addressing
-         * &lt;code&gt;FaultTo header that is provided by the method. See
+         * FaultTo header that is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -570,7 +570,7 @@ public interface SpringWebserviceEndpointBuilderFactory {
         }
         /**
          * Signifies the value for the faultAction response WS-Addressing
-         * &lt;code&gt;FaultTo header that is provided by the method. See
+         * FaultTo header that is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -584,55 +584,6 @@ public interface SpringWebserviceEndpointBuilderFactory {
          */
         default SpringWebserviceEndpointProducerBuilder faultTo(String faultTo) {
             doSetProperty("faultTo", faultTo);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SpringWebserviceEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SpringWebserviceEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -704,8 +655,8 @@ public interface SpringWebserviceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Signifies the value for the response WS-Addressing &lt;code&gt;Action
-         * header that is provided by the method. See
+         * Signifies the value for the response WS-Addressing Action header that
+         * is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -722,8 +673,8 @@ public interface SpringWebserviceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Signifies the value for the response WS-Addressing &lt;code&gt;Action
-         * header that is provided by the method. See
+         * Signifies the value for the response WS-Addressing Action header that
+         * is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -741,8 +692,8 @@ public interface SpringWebserviceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Signifies the value for the replyTo response WS-Addressing
-         * &lt;code&gt;ReplyTo header that is provided by the method. See
+         * Signifies the value for the replyTo response WS-Addressing ReplyTo
+         * header that is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -759,8 +710,8 @@ public interface SpringWebserviceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Signifies the value for the replyTo response WS-Addressing
-         * &lt;code&gt;ReplyTo header that is provided by the method. See
+         * Signifies the value for the replyTo response WS-Addressing ReplyTo
+         * header that is provided by the method. See
          * org.springframework.ws.soap.addressing.server.annotation.Action
          * annotation for more details.
          * 
@@ -959,6 +910,55 @@ public interface SpringWebserviceEndpointBuilderFactory {
         default SpringWebserviceEndpointProducerBuilder basic() {
             return (SpringWebserviceEndpointProducerBuilder) this;
         }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSpringWebserviceEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSpringWebserviceEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
     }
 
     /**
@@ -1095,19 +1095,32 @@ public interface SpringWebserviceEndpointBuilderFactory {
          * Since: 2.6
          * Maven coordinates: org.apache.camel:camel-spring-ws
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default SpringWebserviceHeaderNameBuilder springWs() {
+            return SpringWebserviceHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Spring WebService (camel-spring-ws)
+         * Access external web services as a client or expose your own web
+         * services.
+         * 
+         * Category: spring,soap,webservice
+         * Since: 2.6
+         * Maven coordinates: org.apache.camel:camel-spring-ws
+         * 
          * Syntax: <code>spring-ws:type:lookupKey:webServiceEndpointUri</code>
          * 
          * Path parameter: type
-         * Endpoint mapping type if endpoint mapping is used. <ul> <li>rootqname
-         * - Offers the option to map web service requests based on the
-         * qualified name of the root element contained in the message.
-         * <li>soapaction - Used to map web service requests based on the SOAP
-         * action specified in the header of the message. <li>uri - In order to
-         * map web service requests that target a specific URI. <li>xpathresult
-         * - Used to map web service requests based on the evaluation of an
-         * XPath expression against the incoming message. The result of the
-         * evaluation should match the XPath result specified in the endpoint
-         * URI. <li>beanname - Allows you to reference an
+         * Endpoint mapping type if endpoint mapping is used. rootqname - Offers
+         * the option to map web service requests based on the qualified name of
+         * the root element contained in the message. soapaction - Used to map
+         * web service requests based on the SOAP action specified in the header
+         * of the message. uri - In order to map web service requests that
+         * target a specific URI. xpathresult - Used to map web service requests
+         * based on the evaluation of an XPath expression against the incoming
+         * message. The result of the evaluation should match the XPath result
+         * specified in the endpoint URI. beanname - Allows you to reference an
          * org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher
          * object in order to integrate with existing (legacy) endpoint mappings
          * like PayloadRootQNameEndpointMapping, SoapActionEndpointMapping, etc
@@ -1142,16 +1155,15 @@ public interface SpringWebserviceEndpointBuilderFactory {
          * Syntax: <code>spring-ws:type:lookupKey:webServiceEndpointUri</code>
          * 
          * Path parameter: type
-         * Endpoint mapping type if endpoint mapping is used. <ul> <li>rootqname
-         * - Offers the option to map web service requests based on the
-         * qualified name of the root element contained in the message.
-         * <li>soapaction - Used to map web service requests based on the SOAP
-         * action specified in the header of the message. <li>uri - In order to
-         * map web service requests that target a specific URI. <li>xpathresult
-         * - Used to map web service requests based on the evaluation of an
-         * XPath expression against the incoming message. The result of the
-         * evaluation should match the XPath result specified in the endpoint
-         * URI. <li>beanname - Allows you to reference an
+         * Endpoint mapping type if endpoint mapping is used. rootqname - Offers
+         * the option to map web service requests based on the qualified name of
+         * the root element contained in the message. soapaction - Used to map
+         * web service requests based on the SOAP action specified in the header
+         * of the message. uri - In order to map web service requests that
+         * target a specific URI. xpathresult - Used to map web service requests
+         * based on the evaluation of an XPath expression against the incoming
+         * message. The result of the evaluation should match the XPath result
+         * specified in the endpoint URI. beanname - Allows you to reference an
          * org.apache.camel.component.spring.ws.bean.CamelEndpointDispatcher
          * object in order to integrate with existing (legacy) endpoint mappings
          * like PayloadRootQNameEndpointMapping, SoapActionEndpointMapping, etc
@@ -1177,6 +1189,120 @@ public interface SpringWebserviceEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return SpringWebserviceEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Spring WebService component.
+     */
+    public static class SpringWebserviceHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final SpringWebserviceHeaderNameBuilder INSTANCE = new SpringWebserviceHeaderNameBuilder();
+
+        /**
+         * The endpoint URI.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SpringWebserviceEndpointUri}.
+         */
+        public String springWebserviceEndpointUri() {
+            return "SpringWebserviceEndpointUri";
+        }
+
+        /**
+         * SOAP action to include inside a SOAP request when accessing remote
+         * web services.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SpringWebserviceSoapAction}.
+         */
+        public String springWebserviceSoapAction() {
+            return "SpringWebserviceSoapAction";
+        }
+
+        /**
+         * The soap header source.
+         * 
+         * The option is a: {@code javax.xml.transform.Source} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SpringWebserviceSoapHeader}.
+         */
+        public String springWebserviceSoapHeader() {
+            return "SpringWebserviceSoapHeader";
+        }
+
+        /**
+         * WS-Addressing 1.0 action header to include when accessing web
+         * services. The To header is set to the address of the web service as
+         * specified in the endpoint URI (default Spring-WS behavior).
+         * 
+         * The option is a: {@code java.net.URI} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * SpringWebserviceAddressingAction}.
+         */
+        public String springWebserviceAddressingAction() {
+            return "SpringWebserviceAddressingAction";
+        }
+
+        /**
+         * Signifies the value for the faultAction response WS-Addressing
+         * FaultTo header that is provided by the method. See
+         * org.springframework.ws.soap.addressing.server.annotation.Action
+         * annotation for more details.
+         * 
+         * The option is a: {@code java.net.URI} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * SpringWebserviceAddressingFaultTo}.
+         */
+        public String springWebserviceAddressingFaultTo() {
+            return "SpringWebserviceAddressingFaultTo";
+        }
+
+        /**
+         * Signifies the value for the replyTo response WS-Addressing ReplyTo
+         * header that is provided by the method. See
+         * org.springframework.ws.soap.addressing.server.annotation.Action
+         * annotation for more details.
+         * 
+         * The option is a: {@code java.net.URI} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * SpringWebserviceAddressingReplyTo}.
+         */
+        public String springWebserviceAddressingReplyTo() {
+            return "SpringWebserviceAddressingReplyTo";
+        }
+
+        /**
+         * The breadcrumb id.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code breadcrumbId}.
+         */
+        public String breadcrumbId() {
+            return "breadcrumbId";
         }
     }
     static SpringWebserviceEndpointBuilder endpointBuilder(

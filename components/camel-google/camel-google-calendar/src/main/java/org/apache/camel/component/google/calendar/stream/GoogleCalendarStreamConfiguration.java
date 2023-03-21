@@ -66,6 +66,11 @@ public class GoogleCalendarStreamConfiguration implements Cloneable {
     private boolean considerLastUpdate;
     @UriParam
     private boolean syncFlow;
+    /* Service account */
+    @UriParam(label = "security")
+    private String serviceAccountKey;
+    @UriParam
+    private String delegate;
 
     public String getClientId() {
         return clientId;
@@ -245,6 +250,31 @@ public class GoogleCalendarStreamConfiguration implements Cloneable {
      */
     public void setConsiderLastUpdate(boolean considerLastUpdate) {
         this.considerLastUpdate = considerLastUpdate;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    /**
+     * Service account key in json format to authenticate an application as a service account. Accept base64 adding the
+     * prefix "base64:"
+     *
+     * @param serviceAccountKey String file, classpath, base64, or http url
+     */
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
+    }
+
+    public String getDelegate() {
+        return delegate;
+    }
+
+    /**
+     * Delegate for wide-domain service account
+     */
+    public void setDelegate(String delegate) {
+        this.delegate = delegate;
     }
 
     // *************************************************

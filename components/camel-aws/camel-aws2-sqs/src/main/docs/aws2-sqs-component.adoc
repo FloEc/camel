@@ -64,9 +64,11 @@ aggregate this number of messages.
 
 == Usage
 
-=== Static credentials vs Default Credential Provider
+=== Static credentials, Default Credential Provider and Profile Credentials Provider
 
 You have the possibility of avoiding the usage of explicit static credentials, by specifying the useDefaultCredentialsProvider option and set it to true.
+
+The order of evaluation for Default Credentials Provider is the following:
 
  - Java system properties - aws.accessKeyId and aws.secretKey
  - Environment variables - AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
@@ -74,64 +76,37 @@ You have the possibility of avoiding the usage of explicit static credentials, b
  - The shared credentials and config files.
  - Amazon ECS container credentials - loaded from the Amazon ECS if the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is set.
  - Amazon EC2 Instance profile credentials. 
+ 
+You have also the possibility of using Profile Credentials Provider, by specifying the useProfileCredentialsProvider option to true and profileCredentialsName to the profile name.
+
+Only one of static, default and profile credentials could be used at the same time.
 
 For more information about this you can look at https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html[AWS credentials documentation]
 
-=== Message headers set by the SQS producer
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsSqsMD5OfBody` |`String` |The MD5 checksum of the Amazon SQS message.
-
-|`CamelAwsSqsMessageId` |`String` |The Amazon SQS message ID.
-
-|`CamelAwsSqsDelaySeconds` |`Integer` |The delay seconds that the Amazon SQS message can be
-see by others.
-|=======================================================================
-
-=== Message headers set by the SQS consumer
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsSqsMD5OfBody` |`String` |The MD5 checksum of the Amazon SQS message.
-
-|`CamelAwsSqsMessageId` |`String` |The Amazon SQS message ID. 
-
-|`CamelAwsSqsReceiptHandle` |`String` |The Amazon SQS message receipt handle.
-
-|`CamelAwsSqsMessageAttributes` |`Map<String, String>` |The Amazon SQS message attributes.
-|=======================================================================
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 === Advanced AmazonSQS configuration
 
 If your Camel Application is running behind a firewall or if you need to
 have more control over the SqsClient instance configuration, you can
-create your own instance:
+create your own instance, and configure Camel to use your instance by the bean id.
+
+In the example below we use _myClient_ as the bean id:
 
 [source,java]
 ---------------------------------------------------------------------------------
-from("aws2-sqs://MyQueue?amazonSQSClient=#client&delay=5000&maxMessagesPerPoll=5")
+// crate my own instance of SqsClient
+SqsClient sqs = ...
+
+// register the client into Camel registry
+camelContext.getRegistry().bind("myClient", sqs);
+
+// refer to the custom client via myClient as the bean id
+from("aws2-sqs://MyQueue?amazonSQSClient=#m4yClient&delay=5000&maxMessagesPerPoll=5")
 .to("mock:result");
 ---------------------------------------------------------------------------------
-
-=== Creating or updating an SQS Queue
-
-In the SQS Component, when an endpoint is started, a check is executed to obtain information 
-about the existence of the queue or not. You're able to customize the creation through the QueueAttributeName 
-mapping with the SQSConfiguration option.
-
-[source,java]
----------------------------------------------------------------------------------
-from("aws2-sqs://MyQueue?amazonSQSClient=#client&delay=5000&maxMessagesPerPoll=5")
-.to("mock:result");
----------------------------------------------------------------------------------
-
-In this example if the MyQueue queue is not already created on AWS (and the autoCreateQueue option is set to true), it will be created with default parameters from the 
-SQS configuration. If it's already up on AWS, the SQS configuration options will be used to override the existent AWS configuration.
 
 === DelayQueue VS Delay for Single message
 
@@ -186,8 +161,7 @@ instruct Camel to send the DeleteMessage, if being filtered.
 
 == Send Message
 
-You can set a `SendMessageBatchRequest` or an `Iterable`
-
+[source,java]
 ------------------------------------------------------------------------------------------------------
 from("direct:start")
   .setBody(constant("Camel rocks!"))
@@ -198,13 +172,14 @@ from("direct:start")
 
 You can set a `SendMessageBatchRequest` or an `Iterable`
 
+[source,java]
 ------------------------------------------------------------------------------------------------------
 from("direct:start")
   .setHeader(SqsConstants.SQS_OPERATION, constant("sendBatchMessage"))
   .process(new Processor() {
       @Override
       public void process(Exchange exchange) throws Exception {
-          Collection c = new ArrayList<Integer>();
+          List c = new ArrayList();
           c.add("team1");
           c.add("team2");
           c.add("team3");
@@ -222,6 +197,7 @@ The id set on each message of the batch will be a Random UUID.
 
 Use deleteMessage operation to delete a single message. You'll need to set a receipt handle header for the message you want to delete.
 
+[source,java]
 ------------------------------------------------------------------------------------------------------
 from("direct:start")
   .setHeader(SqsConstants.SQS_OPERATION, constant("deleteMessage"))
@@ -235,6 +211,7 @@ As result you'll get an exchange containing a `DeleteMessageResponse` instance, 
 
 Use listQueues operation to list queues.
 
+[source,java]
 ------------------------------------------------------------------------------------------------------
 from("direct:start")
   .setHeader(SqsConstants.SQS_OPERATION, constant("listQueues"))
@@ -247,6 +224,7 @@ As result you'll get an exchange containing a `ListQueuesResponse` instance, tha
 
 Use purgeQueue operation to purge queue.
 
+[source,java]
 ------------------------------------------------------------------------------------------------------
 from("direct:start")
   .setHeader(SqsConstants.SQS_OPERATION, constant("purgeQueue"))
@@ -257,7 +235,7 @@ As result you'll get an exchange containing a `PurgeQueueResponse` instance.
 
 == Queue Autocreation
 
-With the option `autoCreateQueue` users are able to avoid the autocreation of an SQS Queue in case it doesn't exist. The default for this option is `true`.
+With the option `autoCreateQueue` users are able to avoid the autocreation of an SQS Queue in case it doesn't exist. The default for this option is `false`.
 If set to false any operation on a not-existent queue in AWS won't be successful and an error will be returned.
 
 == Send Batch Message and Message Deduplication Strategy

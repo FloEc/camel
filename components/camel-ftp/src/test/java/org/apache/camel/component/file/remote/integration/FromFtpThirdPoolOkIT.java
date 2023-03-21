@@ -18,10 +18,11 @@ package org.apache.camel.component.file.remote.integration;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 
 import static org.awaitility.Awaitility.await;
@@ -29,51 +30,49 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FromFtpThirdPoolOkIT extends FtpServerTestSupport {
+class FromFtpThirdPoolOkIT extends FtpServerTestSupport {
 
-    private static int counter;
-    private String body = "Hello World this file will be deleted";
+    private final AtomicInteger counter = new AtomicInteger();
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/thirdpool?password=admin&delete=true";
     }
 
     @Test
-    public void testPollFileAndShouldBeDeletedAtThirdPoll() throws Exception {
+    void testPollFileAndShouldBeDeletedAtThirdPoll() throws Exception {
+        String body = "Hello World this file will be deleted";
         template.sendBodyAndHeader(getFtpUrl(), body, Exchange.FILE_NAME, "hello.txt");
 
         getMockEndpoint("mock:result").expectedBodiesReceived(body);
         // 2 first attempt should fail
         getMockEndpoint("mock:error").expectedMessageCount(2);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // give time to delete file
         await().atMost(200, TimeUnit.MILLISECONDS)
-                .untilAsserted(() -> assertEquals(3, counter));
+                .untilAsserted(() -> assertEquals(3, counter.get()));
 
         // assert the file is deleted
-        File file = ftpFile("thirdpool/hello.txt").toFile();
-        assertFalse(file.exists(), "The file should have been deleted");
+        File file = service.ftpFile("thirdpool/hello.txt").toFile();
+        await().atMost(1, TimeUnit.MINUTES)
+                .untilAsserted(() -> assertFalse(file.exists(), "The file should have been deleted"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // no redeliveries as we want the ftp consumer to try again
                 // use no delay for fast unit testing
                 onException(IllegalArgumentException.class).logStackTrace(false).to("mock:error");
 
-                from(getFtpUrl()).process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        counter++;
-                        if (counter < 3) {
-                            // file should exists
-                            File file = ftpFile("thirdpool/hello.txt").toFile();
-                            assertTrue(file.exists(), "The file should NOT have been deleted");
-                            throw new IllegalArgumentException("Forced by unittest");
-                        }
+                from(getFtpUrl()).process(exchange -> {
+                    if (counter.incrementAndGet() < 3) {
+                        // file should exist
+                        File file = service.ftpFile("thirdpool/hello.txt").toFile();
+                        assertTrue(file.exists(), "The file should NOT have been deleted");
+                        throw new IllegalArgumentException("Forced by unit test");
                     }
                 }).to("mock:result");
             }

@@ -72,10 +72,10 @@ import quickfix.UnsupportedMessageType;
 /**
  * This is a wrapper class that provided QuickFIX/J initialization capabilities beyond those supported in the core
  * QuickFIX/J distribution.
- * 
+ *
  * Specifically, it infers dependencies on specific implementations of message stores and logs. It also supports
  * extended QuickFIX/J settings properties to specify threading models, custom store and log implementations, etc.
- * 
+ *
  * The wrapper will create an initiator or acceptor or both depending on the roles of sessions described in the settings
  * file.
  */
@@ -117,20 +117,20 @@ public class QuickfixjEngine extends ServiceSupport {
                            MessageStoreFactory messageStoreFactoryOverride,
                            LogFactory sessionLogFactoryOverride,
                            MessageFactory messageFactoryOverride) throws Exception {
-        this(camelContext, uri, loadSettings(camelContext, settingsResourceName), messageStoreFactoryOverride,
+        this(uri, loadSettings(camelContext, settingsResourceName), messageStoreFactoryOverride,
              sessionLogFactoryOverride,
              messageFactoryOverride);
     }
 
-    public QuickfixjEngine(CamelContext camelContext, String uri, SessionSettings settings,
+    public QuickfixjEngine(String uri, SessionSettings settings,
                            MessageStoreFactory messageStoreFactoryOverride,
                            LogFactory sessionLogFactoryOverride,
                            MessageFactory messageFactoryOverride) throws Exception {
-        this(camelContext, uri, settings, messageStoreFactoryOverride, sessionLogFactoryOverride, messageFactoryOverride,
+        this(uri, settings, messageStoreFactoryOverride, sessionLogFactoryOverride, messageFactoryOverride,
              false);
     }
 
-    public QuickfixjEngine(CamelContext camelContext, String uri, SessionSettings settings,
+    public QuickfixjEngine(String uri, SessionSettings settings,
                            MessageStoreFactory messageStoreFactoryOverride,
                            LogFactory sessionLogFactoryOverride,
                            MessageFactory messageFactoryOverride,
@@ -245,6 +245,11 @@ public class QuickfixjEngine extends ServiceSupport {
     protected static SessionSettings loadSettings(CamelContext camelContext, String settingsResourceName) throws Exception {
         InputStream inputStream = ResourceHelper.resolveMandatoryResourceAsInputStream(camelContext, settingsResourceName);
         return new SessionSettings(inputStream);
+    }
+
+    @Override
+    protected void doInit() throws Exception {
+        initializeEngine();
     }
 
     @Override

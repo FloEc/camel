@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon Lambda SDK v2.
  */
 @Component("aws2-lambda")
 public class Lambda2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Lambda2Component.class);
-
     @Metadata
     private Lambda2Configuration configuration = new Lambda2Configuration();
 
@@ -43,8 +38,6 @@ public class Lambda2Component extends DefaultComponent {
 
     public Lambda2Component(CamelContext context) {
         super(context);
-
-        registerExtension(new Lambda2ComponentVerifierExtension());
     }
 
     @Override
@@ -54,7 +47,7 @@ public class Lambda2Component extends DefaultComponent {
         Lambda2Endpoint endpoint = new Lambda2Endpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
         endpoint.setFunction(remaining);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getAwsLambdaClient() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider()) && configuration.getAwsLambdaClient() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, accessKey/secretKey or awsLambdaClient must be specified");

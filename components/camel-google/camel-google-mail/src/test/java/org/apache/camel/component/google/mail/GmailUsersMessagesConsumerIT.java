@@ -46,13 +46,13 @@ public class GmailUsersMessagesConsumerIT extends AbstractGoogleMailTestSupport 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         assertTrue(mock.getExchanges().get(0).getIn().getBody() instanceof ListMessagesResponse);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

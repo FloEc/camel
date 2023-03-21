@@ -74,7 +74,7 @@ import static org.apache.camel.component.jira.JiraConstants.JIRA_REST_CLIENT_FAC
  * publicly accessible where a webhook would fail
  */
 @UriEndpoint(firstVersion = "3.0", scheme = "jira", title = "Jira", syntax = "jira:type",
-             category = { Category.API, Category.REPORTING })
+             category = { Category.API, Category.REPORTING }, headersClass = JiraConstants.class)
 public class JiraEndpoint extends DefaultEndpoint {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(JiraEndpoint.class);
@@ -133,6 +133,13 @@ public class JiraEndpoint extends DefaultEndpoint {
                         LOG.debug("Connecting to JIRA with Basic authentication with username/password");
                         client = factory.createWithBasicHttpAuthentication(jiraServerUri, configuration.getUsername(),
                                 configuration.getPassword());
+                    } else if (configuration.getAccessToken() != null
+                            && configuration.getVerificationCode() == null
+                            && configuration.getPrivateKey() == null
+                            && configuration.getConsumerKey() == null) {
+                        client = factory.create(jiraServerUri, builder -> {
+                            builder.setHeader("Authorization", "Bearer " + configuration.getAccessToken());
+                        });
                     } else {
                         LOG.debug("Connecting to JIRA with OAuth authentication");
                         JiraOAuthAuthenticationHandler oAuthHandler = new JiraOAuthAuthenticationHandler(

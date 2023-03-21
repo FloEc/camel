@@ -20,24 +20,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaConstants;
+import org.apache.camel.component.kafka.integration.common.KafkaTestUtil;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class KafkaConsumerLastRecordHeaderIT extends BaseEmbeddedKafkaTestSupport {
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumerLastRecordHeaderIT.class);
     private static final String TOPIC = "last-record";
-
-    @EndpointInject("mock:result")
-    private MockEndpoint result;
 
     private org.apache.kafka.clients.producer.KafkaProducer<String, String> producer;
 
@@ -58,10 +58,11 @@ public class KafkaConsumerLastRecordHeaderIT extends BaseEmbeddedKafkaTestSuppor
 
     /**
      * When consuming data with autoCommitEnable=false Then the LAST_RECORD_BEFORE_COMMIT header must be always defined
-     * And it should be true only for the last one
+     * And it should be true only for the last one of batch of polled records
      */
     @Test
     public void shouldStartFromBeginningWithEmptyOffsetRepository() throws InterruptedException {
+        MockEndpoint result = contextExtension.getMockEndpoint(KafkaTestUtil.MOCK_RESULT);
         result.expectedMessageCount(5);
         result.expectedBodiesReceived("message-0", "message-1", "message-2", "message-3", "message-4");
 
@@ -69,26 +70,38 @@ public class KafkaConsumerLastRecordHeaderIT extends BaseEmbeddedKafkaTestSuppor
             producer.send(new ProducerRecord<>(TOPIC, "1", "message-" + i));
         }
 
-        result.assertIsSatisfied(3000);
+        result.assertIsSatisfied(5000);
 
         List<Exchange> exchanges = result.getExchanges();
+        LOG.debug("There are {} exchanges in the result", exchanges.size());
+
         for (int i = 0; i < exchanges.size(); i++) {
-            Boolean header = exchanges.get(i).getIn().getHeader(KafkaConstants.LAST_RECORD_BEFORE_COMMIT, Boolean.class);
-            assertNotNull(header, "Header not set for #" + i);
-            assertEquals(header, i == exchanges.size() - 1, "Header invalid for #" + i);
-            // as long as the partitions count is 1 on topic:
-            header = exchanges.get(i).getIn().getHeader(KafkaConstants.LAST_POLL_RECORD, Boolean.class);
-            assertNotNull(header, "Last record header not set for #" + i);
-            assertEquals(header, i == exchanges.size() - 1, "Last record header invalid for #" + i);
+            final Boolean lastRecordCommit
+                    = exchanges.get(i).getIn().getHeader(KafkaConstants.LAST_RECORD_BEFORE_COMMIT, Boolean.class);
+            final Boolean lastPollRecord = exchanges.get(i).getIn().getHeader(KafkaConstants.LAST_POLL_RECORD, Boolean.class);
+
+            LOG.debug("Processing LAST_RECORD_BEFORE_COMMIT header for {}: {} ", i, lastRecordCommit);
+            LOG.debug("Processing LAST_POLL_RECORD header for {}: {} ", i, lastPollRecord);
+
+            assertNotNull(lastRecordCommit, "Header not set for #" + i);
+            assertEquals(lastRecordCommit, i == exchanges.size() - 1 || lastPollRecord.booleanValue(),
+                    "Header invalid for #" + i);
+
+            assertNotNull(lastPollRecord, "Last record header not set for #" + i);
+
+            if (i == exchanges.size() - 1) {
+                assertEquals(lastPollRecord, i == exchanges.size() - 1, "Last record header invalid for #" + i);
+            }
         }
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from("kafka:" + TOPIC + "?groupId=A&autoOffsetReset=earliest&autoCommitEnable=false").to("mock:result");
+            public void configure() {
+                from("kafka:" + TOPIC + "?groupId=A&autoOffsetReset=earliest&autoCommitEnable=false")
+                        .to("mock:result");
             }
         };
     }

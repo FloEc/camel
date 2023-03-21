@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.NonManagedService;
 import org.apache.camel.Route;
@@ -40,7 +39,7 @@ public class DefaultRouteController extends ServiceSupport implements RouteContr
 
     // mark this as non managed service as its registered specially as a route controller
 
-    private ExtendedCamelContext camelContext;
+    private CamelContext camelContext;
 
     private LoggingLevel loggingLevel = LoggingLevel.DEBUG;
 
@@ -49,7 +48,7 @@ public class DefaultRouteController extends ServiceSupport implements RouteContr
     }
 
     public DefaultRouteController(CamelContext camelContext) {
-        this.camelContext = (ExtendedCamelContext) camelContext;
+        this.camelContext = camelContext;
     }
 
     // ***************************************************
@@ -58,7 +57,7 @@ public class DefaultRouteController extends ServiceSupport implements RouteContr
 
     @Override
     public void setCamelContext(CamelContext camelContext) {
-        this.camelContext = (ExtendedCamelContext) camelContext;
+        this.camelContext = camelContext;
     }
 
     @Override
@@ -86,7 +85,7 @@ public class DefaultRouteController extends ServiceSupport implements RouteContr
     // ***************************************************
 
     protected RouteController getInternalRouteController() {
-        return camelContext.getInternalRouteController();
+        return camelContext.getCamelContextExtension().getInternalRouteController();
     }
 
     @Override
@@ -110,6 +109,16 @@ public class DefaultRouteController extends ServiceSupport implements RouteContr
     }
 
     @Override
+    public void reloadAllRoutes() throws Exception {
+        getInternalRouteController().reloadAllRoutes();
+    }
+
+    @Override
+    public boolean isReloadingRoutes() {
+        return getInternalRouteController().isReloadingRoutes();
+    }
+
+    @Override
     public ServiceStatus getRouteStatus(String routeId) {
         return getInternalRouteController().getRouteStatus(routeId);
     }
@@ -122,6 +131,11 @@ public class DefaultRouteController extends ServiceSupport implements RouteContr
     @Override
     public void stopRoute(String routeId) throws Exception {
         getInternalRouteController().stopRoute(routeId);
+    }
+
+    @Override
+    public void stopRoute(String routeId, Throwable cause) throws Exception {
+        getInternalRouteController().stopRoute(routeId, cause);
     }
 
     @Override

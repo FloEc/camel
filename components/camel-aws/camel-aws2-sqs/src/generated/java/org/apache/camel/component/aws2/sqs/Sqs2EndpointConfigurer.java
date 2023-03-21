@@ -81,6 +81,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "messageDeduplicationIdStrategy": target.getConfiguration().setMessageDeduplicationIdStrategy(property(camelContext, java.lang.String.class, value)); return true;
         case "messagegroupidstrategy":
         case "messageGroupIdStrategy": target.getConfiguration().setMessageGroupIdStrategy(property(camelContext, java.lang.String.class, value)); return true;
+        case "messageheaderexceededlimit":
+        case "messageHeaderExceededLimit": target.getConfiguration().setMessageHeaderExceededLimit(property(camelContext, java.lang.String.class, value)); return true;
         case "messageretentionperiod":
         case "messageRetentionPeriod": target.getConfiguration().setMessageRetentionPeriod(property(camelContext, java.lang.Integer.class, value)); return true;
         case "operation": target.getConfiguration().setOperation(property(camelContext, org.apache.camel.component.aws2.sqs.Sqs2Operations.class, value)); return true;
@@ -89,6 +91,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "policy": target.getConfiguration().setPolicy(property(camelContext, java.lang.String.class, value)); return true;
         case "pollstrategy":
         case "pollStrategy": target.setPollStrategy(property(camelContext, org.apache.camel.spi.PollingConsumerPollStrategy.class, value)); return true;
+        case "profilecredentialsname":
+        case "profileCredentialsName": target.getConfiguration().setProfileCredentialsName(property(camelContext, java.lang.String.class, value)); return true;
         case "protocol": target.getConfiguration().setProtocol(property(camelContext, java.lang.String.class, value)); return true;
         case "proxyhost":
         case "proxyHost": target.getConfiguration().setProxyHost(property(camelContext, java.lang.String.class, value)); return true;
@@ -132,6 +136,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "useDefaultCredentialsProvider": target.getConfiguration().setUseDefaultCredentialsProvider(property(camelContext, boolean.class, value)); return true;
         case "usefixeddelay":
         case "useFixedDelay": target.setUseFixedDelay(property(camelContext, boolean.class, value)); return true;
+        case "useprofilecredentialsprovider":
+        case "useProfileCredentialsProvider": target.getConfiguration().setUseProfileCredentialsProvider(property(camelContext, boolean.class, value)); return true;
         case "visibilitytimeout":
         case "visibilityTimeout": target.getConfiguration().setVisibilityTimeout(property(camelContext, java.lang.Integer.class, value)); return true;
         case "waittimeseconds":
@@ -208,6 +214,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "messageDeduplicationIdStrategy": return java.lang.String.class;
         case "messagegroupidstrategy":
         case "messageGroupIdStrategy": return java.lang.String.class;
+        case "messageheaderexceededlimit":
+        case "messageHeaderExceededLimit": return java.lang.String.class;
         case "messageretentionperiod":
         case "messageRetentionPeriod": return java.lang.Integer.class;
         case "operation": return org.apache.camel.component.aws2.sqs.Sqs2Operations.class;
@@ -216,6 +224,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "policy": return java.lang.String.class;
         case "pollstrategy":
         case "pollStrategy": return org.apache.camel.spi.PollingConsumerPollStrategy.class;
+        case "profilecredentialsname":
+        case "profileCredentialsName": return java.lang.String.class;
         case "protocol": return java.lang.String.class;
         case "proxyhost":
         case "proxyHost": return java.lang.String.class;
@@ -259,6 +269,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "useDefaultCredentialsProvider": return boolean.class;
         case "usefixeddelay":
         case "useFixedDelay": return boolean.class;
+        case "useprofilecredentialsprovider":
+        case "useProfileCredentialsProvider": return boolean.class;
         case "visibilitytimeout":
         case "visibilityTimeout": return java.lang.Integer.class;
         case "waittimeseconds":
@@ -331,6 +343,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "messageDeduplicationIdStrategy": return target.getConfiguration().getMessageDeduplicationIdStrategy();
         case "messagegroupidstrategy":
         case "messageGroupIdStrategy": return target.getConfiguration().getMessageGroupIdStrategy();
+        case "messageheaderexceededlimit":
+        case "messageHeaderExceededLimit": return target.getConfiguration().getMessageHeaderExceededLimit();
         case "messageretentionperiod":
         case "messageRetentionPeriod": return target.getConfiguration().getMessageRetentionPeriod();
         case "operation": return target.getConfiguration().getOperation();
@@ -339,6 +353,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "policy": return target.getConfiguration().getPolicy();
         case "pollstrategy":
         case "pollStrategy": return target.getPollStrategy();
+        case "profilecredentialsname":
+        case "profileCredentialsName": return target.getConfiguration().getProfileCredentialsName();
         case "protocol": return target.getConfiguration().getProtocol();
         case "proxyhost":
         case "proxyHost": return target.getConfiguration().getProxyHost();
@@ -382,6 +398,8 @@ public class Sqs2EndpointConfigurer extends PropertyConfigurerSupport implements
         case "useDefaultCredentialsProvider": return target.getConfiguration().isUseDefaultCredentialsProvider();
         case "usefixeddelay":
         case "useFixedDelay": return target.isUseFixedDelay();
+        case "useprofilecredentialsprovider":
+        case "useProfileCredentialsProvider": return target.getConfiguration().isUseProfileCredentialsProvider();
         case "visibilitytimeout":
         case "visibilityTimeout": return target.getConfiguration().getVisibilityTimeout();
         case "waittimeseconds":

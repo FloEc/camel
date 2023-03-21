@@ -43,23 +43,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+
 @Parameterized
 public class CompositeApiIntegrationTest extends AbstractSalesforceTestBase {
 
-    public static class Accounts extends AbstractQueryRecordsBase {
-        private List<Account> records;
-
-        public List<Account> getRecords() {
-            return records;
-        }
-
-        public void setRecords(final List<Account> records) {
-            this.records = records;
-        }
-
+    public static class Accounts extends AbstractQueryRecordsBase<Account> {
     }
 
-    private static final Set<String> VERSIONS = new HashSet<>(Arrays.asList("38.0", "50.0"));
+    private static final Set<String> VERSIONS = new HashSet<>(Arrays.asList("38.0", SalesforceEndpointConfig.DEFAULT_VERSION));
 
     @Parameter
     private String format;
@@ -216,9 +208,8 @@ public class CompositeApiIntegrationTest extends AbstractSalesforceTestBase {
 
     @Test
     public void shouldSupportRelatedObjectRetrieval() {
-        if (Version.create(version).compareTo(Version.create("36.0")) < 0) {
-            return;
-        }
+        assumeFalse(Version.create(version).compareTo(Version.create("36.0")) < 0,
+                "Version must be greater than or equal to 36.0");
 
         final SObjectComposite composite = new SObjectComposite("36.0", true);
         composite.addGetRelated("Account", accountId, "CreatedBy", "GetRelatedAccountReferenceId");
@@ -260,11 +251,6 @@ public class CompositeApiIntegrationTest extends AbstractSalesforceTestBase {
                         .to("salesforce:deleteSObject?sObjectName=Account").end();
             }
         };
-    }
-
-    @Override
-    protected String salesforceApiVersionToUse() {
-        return version;
     }
 
     @Parameters(name = "format = {0}, version = {1}")

@@ -16,21 +16,28 @@
  */
 package org.apache.camel.dataformat.barcode;
 
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import com.google.zxing.BarcodeFormat;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.DataFormat;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * This class tests all Camel dependend cases for {@link BarcodeDataFormat}.
  */
 public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
+    @TempDir
+    Path testDirectory;
+
     /**
      * tests barcode (QR-Code) generation and reading.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -41,13 +48,13 @@ public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
         template.sendBody("direct:code1", MSG);
 
-        assertMockEndpointsSatisfied(5, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 5, TimeUnit.SECONDS);
         this.checkImage(image, 100, 100, BarcodeImageType.PNG.toString(), BarcodeFormat.QR_CODE);
     }
 
     /**
      * tests barcode (QR-Code) generation with modified size and reading.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -58,13 +65,13 @@ public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
         template.sendBody("direct:code2", MSG);
 
-        assertMockEndpointsSatisfied(5, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 5, TimeUnit.SECONDS);
         this.checkImage(image, 200, 200, BarcodeImageType.PNG.toString(), BarcodeFormat.QR_CODE);
     }
 
     /**
      * tests barcode (QR-Code) generation with modified image type and reading.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -75,13 +82,13 @@ public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
         template.sendBody("direct:code3", MSG);
 
-        assertMockEndpointsSatisfied(5, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 5, TimeUnit.SECONDS);
         this.checkImage(image, 100, 100, "JPEG", BarcodeFormat.QR_CODE);
     }
 
     /**
      * tests barcode (PDF-417) with modiefied size and image taype generation and reading.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -92,7 +99,7 @@ public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
         template.sendBody("direct:code4", MSG);
 
-        assertMockEndpointsSatisfied(60, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 60, TimeUnit.SECONDS);
         this.checkImage(image, "JPEG", BarcodeFormat.PDF_417);
     }
 
@@ -110,7 +117,7 @@ public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
         template.sendBody("direct:code5", MSG);
 
-        assertMockEndpointsSatisfied(60, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 60, TimeUnit.SECONDS);
         this.checkImage(image, 200, 200, "PNG", BarcodeFormat.AZTEC);
     }
 
@@ -125,40 +132,40 @@ public class BarcodeDataFormatCamelTest extends BarcodeTestBase {
 
                 from("direct:code1")
                         .marshal(code1)
-                        .to(fileUri());
+                        .to(TestSupport.fileUri(testDirectory));
 
                 // QR-Code with modified size
                 DataFormat code2 = new BarcodeDataFormat(200, 200);
 
                 from("direct:code2")
                         .marshal(code2)
-                        .to(fileUri());
+                        .to(TestSupport.fileUri(testDirectory));
 
                 // QR-Code with JPEG type
                 DataFormat code3 = new BarcodeDataFormat(BarcodeImageType.JPG);
 
                 from("direct:code3")
                         .marshal(code3)
-                        .to(fileUri());
+                        .to(TestSupport.fileUri(testDirectory));
 
                 // PDF-417 code with modified size and image type
                 DataFormat code4 = new BarcodeDataFormat(200, 200, BarcodeImageType.JPG, BarcodeFormat.PDF_417);
 
                 from("direct:code4")
                         .marshal(code4)
-                        .to(fileUri());
+                        .to(TestSupport.fileUri(testDirectory));
 
                 // AZTEC with modified size and PNG type
                 DataFormat code5 = new BarcodeDataFormat(200, 200, BarcodeImageType.PNG, BarcodeFormat.AZTEC);
 
                 from("direct:code5")
                         .marshal(code5)
-                        .to(fileUri());
+                        .to(TestSupport.fileUri(testDirectory));
 
                 // generic file read --->
-                // 
+                //
                 // read file and route it
-                from(fileUri("?noop=true&initialDelay=0&delay=10"))
+                from(TestSupport.fileUri(testDirectory, "?noop=true&initialDelay=0&delay=10"))
                         .multicast().to("direct:unmarshall", "mock:image");
 
                 // get the message from code

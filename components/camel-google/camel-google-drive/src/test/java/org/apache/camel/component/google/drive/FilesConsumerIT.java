@@ -48,7 +48,7 @@ public class FilesConsumerIT extends AbstractGoogleDriveTestSupport {
         File testFile = uploadTestFile();
         String fileId = testFile.getId();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         FileList fileList
                 = mock.getReceivedExchanges().get(0).getIn().getBody(com.google.api.services.drive.model.FileList.class);
@@ -66,7 +66,7 @@ public class FilesConsumerIT extends AbstractGoogleDriveTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("google-drive://drive-files/list").to("mock:result");

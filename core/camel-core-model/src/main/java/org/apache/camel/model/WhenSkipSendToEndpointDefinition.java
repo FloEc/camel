@@ -16,8 +16,8 @@
  */
 package org.apache.camel.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.spi.AsPredicate;
@@ -31,6 +31,7 @@ import org.apache.camel.spi.Metadata;
 @XmlRootElement(name = "whenSkipSendToEndpoint")
 @XmlTransient // do not output in XSD as this is only used in a special "hack" for intercept
 public class WhenSkipSendToEndpointDefinition extends WhenDefinition {
+
     @Override
     public String getShortName() {
         return "whenSkipSendToEndpoint";

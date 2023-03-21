@@ -17,18 +17,20 @@
 package org.apache.camel.component.file.remote.integration;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Producer;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.converter.IOConverter;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // README (informative only, to be removed in final version):
 // The filesize at which this test fails is arbitrary, I suppose it depends on the FTP we are using and Java
@@ -37,6 +39,8 @@ import static org.junit.Assert.assertTrue;
 // On plain local vsftpd the download failed for every > 1mb file, here I had to make it bigger to trigger the error.
 
 public class FtpSimpleConsumeStreamingStepwiseIT extends FtpServerTestSupport {
+    @TempDir
+    Path testDirectory;
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/tmp4/camel?password=admin&binary=true&delay=5000" +
@@ -54,10 +58,11 @@ public class FtpSimpleConsumeStreamingStepwiseIT extends FtpServerTestSupport {
     public void testFtpRoute() throws Exception {
         MockEndpoint resultEndpoint = getMockEndpoint("mock:result");
         resultEndpoint.expectedMessageCount(1);
+
         resultEndpoint.assertIsSatisfied();
 
-        GenericFile<?> remoteFile = (GenericFile<?>) resultEndpoint.getExchanges().get(0).getIn().getBody();
-        assertTrue(remoteFile.getBody() instanceof InputStream);
+        InputStream is = resultEndpoint.getExchanges().get(0).getIn().getBody(InputStream.class);
+        assertNotNull(is);
     }
 
     private void prepareFtpServer() throws Exception {
@@ -72,11 +77,11 @@ public class FtpSimpleConsumeStreamingStepwiseIT extends FtpServerTestSupport {
         producer.stop();
     }
 
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).setHeader(Exchange.FILE_NAME, constant("deleteme.jpg"))
-                        .to(fileUri(), "mock:result");
+                        .to(TestSupport.fileUri(testDirectory), "mock:result");
             }
         };
     }

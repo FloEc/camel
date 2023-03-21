@@ -77,7 +77,7 @@ public class AthenaComponentTest extends CamelTestSupport {
         GetQueryExecutionResponse result = message.getBody(GetQueryExecutionResponse.class);
         assertEquals("11111111-1111-1111-1111-111111111111", result.queryExecution().queryExecutionId());
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class AthenaComponentTest extends CamelTestSupport {
         result.forEach(responses::add);
         assertEquals(1, responses.size());
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class AthenaComponentTest extends CamelTestSupport {
         GetQueryResultsResponse result = message.getBody(GetQueryResultsResponse.class);
         assertEquals(1, result.resultSet().rows().size());
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -145,7 +145,7 @@ public class AthenaComponentTest extends CamelTestSupport {
         String result = message.getBody(String.class);
         assertEquals("s3://bucket/file.csv", result);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class AthenaComponentTest extends CamelTestSupport {
                 result.queryExecutionIds());
         assertEquals("next-token", result.nextToken());
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -191,11 +191,11 @@ public class AthenaComponentTest extends CamelTestSupport {
 
         assertNull(message.getBody());
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
-    public void startQueryExecutionAndWaitForQueryCompletion() throws Exception {
+    public void startQueryExecutionAndWaitForQueryCompletion() {
         result.expectedMessageCount(1);
 
         Message message = template.send("direct:startQueryExecution", ExchangePattern.InOut, new Processor() {
@@ -222,7 +222,7 @@ public class AthenaComponentTest extends CamelTestSupport {
     }
 
     @Test
-    public void startQueryExecutionAndWaitForQueryCompletionWithTransientErrors() throws Exception {
+    public void startQueryExecutionAndWaitForQueryCompletionWithTransientErrors() {
         result.expectedMessageCount(1);
 
         // 1111... will be returned on the first call to startQueryExecution, 2222... on the second call
@@ -273,7 +273,7 @@ public class AthenaComponentTest extends CamelTestSupport {
     }
 
     @Test
-    public void startQueryExecutionAndWaitForQueryCompletionWithUnrecoverableErrors() throws Exception {
+    public void startQueryExecutionAndWaitForQueryCompletionWithUnrecoverableErrors() {
         result.expectedMessageCount(1);
 
         // 1111... will be returned on the first call to startQueryExecution, 2222... on the second call
@@ -324,7 +324,7 @@ public class AthenaComponentTest extends CamelTestSupport {
     }
 
     @Test
-    public void startQueryExecutionAndWaitForQueryCompletionTimesOut() throws Exception {
+    public void startQueryExecutionAndWaitForQueryCompletionTimesOut() {
         result.expectedMessageCount(1);
 
         // 3333... will be returned on the first call to startQueryExecution

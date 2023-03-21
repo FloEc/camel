@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -97,12 +97,26 @@ public interface GoogleDriveComponentBuilderFactory {
             return this;
         }
         /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleDriveComponentBuilder delegate(java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
          * Specifies the level of permissions you want a drive application to
          * have to a user account. See
          * https://developers.google.com/drive/web/scopes for more info.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -246,6 +260,22 @@ public interface GoogleDriveComponentBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Service account key in json format to authenticate an application as
+         * a service account. Accept base64 adding the prefix base64:.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleDriveComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     class GoogleDriveComponentBuilderImpl
@@ -273,6 +303,7 @@ public interface GoogleDriveComponentBuilderFactory {
             case "applicationName": getOrCreateConfiguration((GoogleDriveComponent) component).setApplicationName((java.lang.String) value); return true;
             case "clientId": getOrCreateConfiguration((GoogleDriveComponent) component).setClientId((java.lang.String) value); return true;
             case "configuration": ((GoogleDriveComponent) component).setConfiguration((org.apache.camel.component.google.drive.GoogleDriveConfiguration) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleDriveComponent) component).setDelegate((java.lang.String) value); return true;
             case "scopes": getOrCreateConfiguration((GoogleDriveComponent) component).setScopes((java.util.List) value); return true;
             case "bridgeErrorHandler": ((GoogleDriveComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "lazyStartProducer": ((GoogleDriveComponent) component).setLazyStartProducer((boolean) value); return true;
@@ -281,6 +312,7 @@ public interface GoogleDriveComponentBuilderFactory {
             case "accessToken": getOrCreateConfiguration((GoogleDriveComponent) component).setAccessToken((java.lang.String) value); return true;
             case "clientSecret": getOrCreateConfiguration((GoogleDriveComponent) component).setClientSecret((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleDriveComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleDriveComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             default: return false;
             }
         }

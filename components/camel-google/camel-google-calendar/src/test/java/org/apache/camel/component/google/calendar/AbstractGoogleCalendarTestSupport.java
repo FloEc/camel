@@ -16,7 +16,6 @@
  */
 package org.apache.camel.component.google.calendar;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +66,8 @@ public class AbstractGoogleCalendarTestSupport extends CamelTestSupport {
 
         return !properties.getProperty("clientId", "").isEmpty()
                 && !properties.getProperty("clientSecret", "").isEmpty()
-                && !properties.getProperty("accessToken", "").isEmpty();
+                && !properties.getProperty("accessToken", "").isEmpty()
+                || !properties.getProperty("serviceAccountKey", "").isEmpty();
     }
 
     @BeforeEach
@@ -110,7 +110,7 @@ public class AbstractGoogleCalendarTestSupport extends CamelTestSupport {
         return context;
     }
 
-    private Map<String, Object> getTestOptions() throws IOException {
+    private Map<String, Object> getTestOptions() {
         Map<String, Object> options = new HashMap<>();
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             options.put(entry.getKey().toString(), entry.getValue());

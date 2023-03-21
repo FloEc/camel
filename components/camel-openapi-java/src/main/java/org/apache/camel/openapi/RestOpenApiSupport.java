@@ -40,7 +40,6 @@ import io.apicurio.datamodels.openapi.v3.models.Oas30Info;
 import io.apicurio.datamodels.openapi.v3.models.Oas30Server;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.spi.ClassResolver;
 import org.apache.camel.spi.RestConfiguration;
@@ -358,7 +357,7 @@ public class RestOpenApiSupport {
     protected RestDefinitionsResolver createJmxRestDefinitionsResolver(CamelContext camelContext) {
         return ResolverHelper.resolveService(
                 camelContext,
-                camelContext.adapt(ExtendedCamelContext.class).getBootstrapFactoryFinder(),
+                camelContext.getCamelContextExtension().getBootstrapFactoryFinder(),
                 JMX_REST_DEFINITION_RESOLVER,
                 RestDefinitionsResolver.class)
                 .orElseThrow(
@@ -368,7 +367,7 @@ public class RestOpenApiSupport {
     public void renderResourceListing(
             CamelContext camelContext, RestApiResponseAdapter response,
             BeanConfig openApiConfig, boolean json,
-            boolean yaml, Map<String, Object> headers, ClassResolver classResolver,
+            Map<String, Object> headers, ClassResolver classResolver,
             RestConfiguration configuration)
             throws Exception {
         LOG.trace("renderResourceListing");

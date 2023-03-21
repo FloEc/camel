@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.ManagementMBeansLevel;
 import org.apache.camel.ManagementStatisticsLevel;
 import org.apache.camel.StartupSummaryLevel;
 import org.apache.camel.spi.Metadata;
@@ -32,6 +33,7 @@ import org.apache.camel.support.PatternHelper;
 public abstract class DefaultConfigurationProperties<T> {
 
     private String name;
+    private String description;
     @Metadata(defaultValue = "Default")
     private StartupSummaryLevel startupSummaryLevel;
     private int durationMaxSeconds;
@@ -53,8 +55,11 @@ public abstract class DefaultConfigurationProperties<T> {
     private int consumerTemplateCacheSize = 1000;
     private boolean loadTypeConverters;
     private boolean loadHealthChecks;
+    private boolean devConsoleEnabled;
+    private boolean modeline;
     private int logDebugMaxChars;
-    private boolean streamCachingEnabled;
+    private boolean streamCachingEnabled = true;
+    private boolean streamCachingSpoolEnabled;
     private String streamCachingSpoolDirectory;
     private String streamCachingSpoolCipher;
     private long streamCachingSpoolThreshold;
@@ -66,9 +71,13 @@ public abstract class DefaultConfigurationProperties<T> {
     private boolean streamCachingStatisticsEnabled;
     private boolean debugging;
     private boolean backlogTracing;
+    private boolean backlogTracingStandby;
+    private boolean typeConverterStatisticsEnabled;
     private boolean tracing;
     private boolean tracingStandby;
     private String tracingPattern;
+    @Metadata(defaultValue = "%-4.4s [%-12.12s] [%-33.33s]")
+    private String tracingLoggingFormat;
     private boolean sourceLocationEnabled;
     private boolean messageHistory;
     private boolean logMask;
@@ -78,14 +87,18 @@ public abstract class DefaultConfigurationProperties<T> {
     private boolean caseInsensitiveHeaders = true;
     private boolean autowiredEnabled = true;
     private boolean endpointRuntimeStatisticsEnabled;
+    private boolean loadStatisticsEnabled;
     private boolean endpointLazyStartProducer;
     private boolean endpointBridgeErrorHandler;
     private boolean useDataType;
     private boolean useBreadcrumb;
     private boolean beanPostProcessorEnabled = true;
     @Metadata(defaultValue = "Default")
+    private ManagementMBeansLevel jmxManagementMBeansLevel = ManagementMBeansLevel.Default;
+    @Metadata(defaultValue = "Default")
     private ManagementStatisticsLevel jmxManagementStatisticsLevel = ManagementStatisticsLevel.Default;
     private String jmxManagementNamePattern = "#name#";
+    private boolean camelEventsTimestampEnabled;
     private boolean useMdcLogging;
     private String mdcLoggingKeysPattern;
     private String threadNamePattern;
@@ -93,6 +106,7 @@ public abstract class DefaultConfigurationProperties<T> {
     private String routeFilterExcludePattern;
     private boolean beanIntrospectionExtendedStatistics;
     private LoggingLevel beanIntrospectionLoggingLevel;
+    private boolean contextReloadEnabled;
     private boolean routesCollectorEnabled = true;
     private String javaRoutesIncludePattern;
     private String javaRoutesExcludePattern;
@@ -105,10 +119,8 @@ public abstract class DefaultConfigurationProperties<T> {
     private String routesReloadPattern;
     @Metadata(defaultValue = "true")
     private boolean routesReloadRemoveAllRoutes = true;
-    @Metadata(defaultValue = "true")
-    private boolean routesReloadRestartDuration = true;
+    private boolean routesReloadRestartDuration;
     private boolean lightweight;
-    private boolean eagerClassloading;
     @Metadata(defaultValue = "default", enums = "default,prototype,pooled")
     private String exchangeFactory = "default";
     private int exchangeFactoryCapacity = 100;
@@ -116,9 +128,6 @@ public abstract class DefaultConfigurationProperties<T> {
     private boolean dumpRoutes;
     private Map<String, String> globalOptions;
     // route controller
-    @Metadata(defaultValue = "DEBUG")
-    @Deprecated
-    private LoggingLevel routeControllerLoggingLevel;
     private boolean routeControllerSuperviseEnabled;
     private String routeControllerIncludeRoutes;
     private String routeControllerExcludeRoutes;
@@ -151,6 +160,17 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Sets the description (intended for humans) of the Camel application.
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public StartupSummaryLevel getStartupSummaryLevel() {
@@ -217,7 +237,7 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
-     * Timeout in seconds to graceful shutdown Camel.
+     * Timeout in seconds to graceful shutdown all the Camel routes.
      */
     public void setShutdownTimeout(int shutdownTimeout) {
         this.shutdownTimeout = shutdownTimeout;
@@ -377,6 +397,31 @@ public abstract class DefaultConfigurationProperties<T> {
         this.loadHealthChecks = loadHealthChecks;
     }
 
+    public boolean isDevConsoleEnabled() {
+        return devConsoleEnabled;
+    }
+
+    /**
+     * Whether to enable developer console (requires camel-console on classpath).
+     *
+     * The developer console is only for assisting during development. This is NOT for production usage.
+     */
+    public void setDevConsoleEnabled(boolean devConsoleEnabled) {
+        this.devConsoleEnabled = devConsoleEnabled;
+    }
+
+    public boolean isModeline() {
+        return modeline;
+    }
+
+    /**
+     * Whether camel-k style modeline is also enabled when not using camel-k. Enabling this allows to use a camel-k like
+     * experience by being able to configure various settings using modeline directly in your route source code.
+     */
+    public void setModeline(boolean modeline) {
+        this.modeline = modeline;
+    }
+
     public int getLogDebugMaxChars() {
         return logDebugMaxChars;
     }
@@ -397,10 +442,35 @@ public abstract class DefaultConfigurationProperties<T> {
     /**
      * Sets whether stream caching is enabled or not.
      *
-     * Default is false.
+     * While stream types (like StreamSource, InputStream and Reader) are commonly used in messaging for performance
+     * reasons, they also have an important drawback: they can only be read once. In order to be able to work with
+     * message content multiple times, the stream needs to be cached.
+     *
+     * Streams are cached in memory only (by default).
+     *
+     * If streamCachingSpoolEnabled=true, then, for large stream messages (over 128 KB by default) will be cached in a
+     * temporary file instead, and Camel will handle deleting the temporary file once the cached stream is no longer
+     * necessary.
+     *
+     * Default is true.
      */
     public void setStreamCachingEnabled(boolean streamCachingEnabled) {
         this.streamCachingEnabled = streamCachingEnabled;
+    }
+
+    public boolean isStreamCachingSpoolEnabled() {
+        return streamCachingSpoolEnabled;
+    }
+
+    /**
+     * To enable stream caching spooling to disk. This means, for large stream messages (over 128 KB by default) will be
+     * cached in a temporary file instead, and Camel will handle deleting the temporary file once the cached stream is
+     * no longer necessary.
+     *
+     * Default is false.
+     */
+    public void setStreamCachingSpoolEnabled(boolean streamCachingSpoolEnabled) {
+        this.streamCachingSpoolEnabled = streamCachingSpoolEnabled;
     }
 
     public String getStreamCachingSpoolDirectory() {
@@ -513,6 +583,20 @@ public abstract class DefaultConfigurationProperties<T> {
         this.streamCachingStatisticsEnabled = streamCachingStatisticsEnabled;
     }
 
+    public boolean isTypeConverterStatisticsEnabled() {
+        return typeConverterStatisticsEnabled;
+    }
+
+    /**
+     * Sets whether type converter statistics is enabled.
+     *
+     * By default the type converter utilization statistics is disabled. Notice: If enabled then there is a slight
+     * performance impact under very heavy load.
+     */
+    public void setTypeConverterStatisticsEnabled(boolean typeConverterStatisticsEnabled) {
+        this.typeConverterStatisticsEnabled = typeConverterStatisticsEnabled;
+    }
+
     public boolean isTracing() {
         return tracing;
     }
@@ -550,6 +634,19 @@ public abstract class DefaultConfigurationProperties<T> {
         this.tracingPattern = tracingPattern;
     }
 
+    public String getTracingLoggingFormat() {
+        return tracingLoggingFormat;
+    }
+
+    /**
+     * To use a custom tracing logging format.
+     *
+     * The default format (arrow, routeId, label) is: %-4.4s [%-12.12s] [%-33.33s]
+     */
+    public void setTracingLoggingFormat(String format) {
+        tracingLoggingFormat = format;
+    }
+
     public boolean isDebugging() {
         return debugging;
     }
@@ -574,6 +671,20 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setBacklogTracing(boolean backlogTracing) {
         this.backlogTracing = backlogTracing;
+    }
+
+    public boolean isBacklogTracingStandby() {
+        return backlogTracingStandby;
+    }
+
+    /**
+     * Whether to set backlog tracing on standby. If on standby then the backlog tracer is installed and made available.
+     * Then the backlog tracer can be enabled later at runtime via JMX or via Java API.
+     *
+     * Default is false.
+     */
+    public void setBacklogTracingStandby(boolean backlogTracingStandby) {
+        this.backlogTracingStandby = backlogTracingStandby;
     }
 
     public boolean isMessageHistory() {
@@ -710,6 +821,20 @@ public abstract class DefaultConfigurationProperties<T> {
         this.endpointRuntimeStatisticsEnabled = endpointRuntimeStatisticsEnabled;
     }
 
+    public boolean isLoadStatisticsEnabled() {
+        return loadStatisticsEnabled;
+    }
+
+    /**
+     * Sets whether context load statistics is enabled (something like the unix load average). The statistics requires
+     * to have camel-management on the classpath as JMX is required.
+     *
+     * The default value is false.
+     */
+    public void setLoadStatisticsEnabled(boolean loadStatisticsEnabled) {
+        this.loadStatisticsEnabled = loadStatisticsEnabled;
+    }
+
     public boolean isEndpointLazyStartProducer() {
         return endpointLazyStartProducer;
     }
@@ -792,6 +917,19 @@ public abstract class DefaultConfigurationProperties<T> {
         this.beanPostProcessorEnabled = beanPostProcessorEnabled;
     }
 
+    public ManagementMBeansLevel getJmxManagementMBeansLevel() {
+        return jmxManagementMBeansLevel;
+    }
+
+    /**
+     * Sets the mbeans registration level.
+     *
+     * The default value is Default.
+     */
+    public void setJmxManagementMBeansLevel(ManagementMBeansLevel jmxManagementMBeansLevel) {
+        this.jmxManagementMBeansLevel = jmxManagementMBeansLevel;
+    }
+
     public ManagementStatisticsLevel getJmxManagementStatisticsLevel() {
         return jmxManagementStatisticsLevel;
     }
@@ -816,6 +954,19 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public void setJmxManagementNamePattern(String jmxManagementNamePattern) {
         this.jmxManagementNamePattern = jmxManagementNamePattern;
+    }
+
+    public boolean isCamelEventsTimestampEnabled() {
+        return camelEventsTimestampEnabled;
+    }
+
+    /**
+     * Whether to include timestamps for all emitted Camel Events. Enabling this allows to know fine-grained at what
+     * time each event was emitted, which can be used for reporting to report exactly the time of the events. This is by
+     * default false to avoid the overhead of including this information.
+     */
+    public void setCamelEventsTimestampEnabled(boolean camelEventsTimestampEnabled) {
+        this.camelEventsTimestampEnabled = camelEventsTimestampEnabled;
     }
 
     public boolean isUseMdcLogging() {
@@ -1030,6 +1181,19 @@ public abstract class DefaultConfigurationProperties<T> {
         this.routesReloadEnabled = routesReloadEnabled;
     }
 
+    public boolean isContextReloadEnabled() {
+        return contextReloadEnabled;
+    }
+
+    /**
+     * Used for enabling context reloading. If enabled then Camel allow external systems such as security vaults (AWS
+     * secrets manager, etc.) to trigger refreshing Camel by updating property placeholders and reload all existing
+     * routes to take changes into effect.
+     */
+    public void setContextReloadEnabled(boolean contextReloadEnabled) {
+        this.contextReloadEnabled = contextReloadEnabled;
+    }
+
     public String getRoutesReloadDirectory() {
         return routesReloadDirectory;
     }
@@ -1110,19 +1274,6 @@ public abstract class DefaultConfigurationProperties<T> {
         this.lightweight = lightweight;
     }
 
-    public boolean isEagerClassloading() {
-        return eagerClassloading;
-    }
-
-    /**
-     * Whether to eager load a common set of Camel classes that would otherwise first be loaded on processing the first
-     * message. By eager loading these classes then the JVM has already loaded the classes during build phase, which
-     * allows Camel to process the first message faster.
-     */
-    public void setEagerClassloading(boolean eagerClassloading) {
-        this.eagerClassloading = eagerClassloading;
-    }
-
     public String getExchangeFactory() {
         return exchangeFactory;
     }
@@ -1170,7 +1321,7 @@ public abstract class DefaultConfigurationProperties<T> {
      * represented as XML DSL into the log. This is intended for trouble shooting or to assist during development.
      *
      * Sensitive information that may be configured in the route endpoints could potentially be included in the dump
-     * output and is therefore not recommended to be used for production usage.
+     * output and is therefore not recommended being used for production usage.
      *
      * This requires to have camel-xml-jaxb on the classpath to be able to dump the routes as XML.
      */
@@ -1192,18 +1343,17 @@ public abstract class DefaultConfigurationProperties<T> {
         this.globalOptions = globalOptions;
     }
 
-    @Deprecated
-    public LoggingLevel getRouteControllerLoggingLevel() {
-        return routeControllerLoggingLevel;
-    }
-
     /**
-     * Sets the logging level used for logging route activity (such as starting and stopping routes). The default
-     * logging level is DEBUG.
+     * Adds a global options that can be referenced in the camel context
+     * <p/>
+     * <b>Important:</b> This has nothing to do with property placeholders, and is just a plain set of key/value pairs
+     * which are used to configure global options on CamelContext, such as a maximum debug logging length etc.
      */
-    @Deprecated
-    public void setRouteControllerLoggingLevel(LoggingLevel routeControllerLoggingLevel) {
-        this.routeControllerLoggingLevel = routeControllerLoggingLevel;
+    public void addGlobalOption(String key, Object value) {
+        if (this.globalOptions == null) {
+            this.globalOptions = new HashMap<>();
+        }
+        this.globalOptions.put(key, value.toString());
     }
 
     public boolean isRouteControllerSuperviseEnabled() {
@@ -1450,6 +1600,14 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Sets the description (intended for humans) of the Camel application.
+     */
+    public T withDescription(String description) {
+        this.description = description;
+        return (T) this;
+    }
+
+    /**
      * To specify for how long time in seconds to keep running the JVM before automatic terminating the JVM. You can use
      * this to run Camel for a short while.
      */
@@ -1486,7 +1644,7 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
-     * Timeout in seconds to graceful shutdown Camel.
+     * Timeout in seconds to graceful shutdown all the Camel routes.
      */
     public T withShutdownTimeout(int shutdownTimeout) {
         this.shutdownTimeout = shutdownTimeout;
@@ -1601,6 +1759,25 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Whether camel-k style modeline is also enabled when not using camel-k. Enabling this allows to use a camel-k like
+     * experience by being able to configure various settings using modeline directly in your route source code.
+     */
+    public T withModeline(boolean modeline) {
+        this.modeline = modeline;
+        return (T) this;
+    }
+
+    /**
+     * Whether to enable developer console (requires camel-console on classpath).
+     *
+     * The developer console is only for assisting during development. This is NOT for production usage.
+     */
+    public T withDevConsoleEnabled(boolean devConsoleEnabled) {
+        this.devConsoleEnabled = devConsoleEnabled;
+        return (T) this;
+    }
+
+    /**
      * Is used to limit the maximum length of the logging Camel message bodies. If the message body is longer than the
      * limit, the log message is clipped. Use -1 to have unlimited length. Use for example 1000 to log at most 1000
      * characters.
@@ -1613,10 +1790,32 @@ public abstract class DefaultConfigurationProperties<T> {
     /**
      * Sets whether stream caching is enabled or not.
      *
-     * Default is false.
+     * While stream types (like StreamSource, InputStream and Reader) are commonly used in messaging for performance
+     * reasons, they also have an important drawback: they can only be read once. In order to be able to work with
+     * message content multiple times, the stream needs to be cached.
+     *
+     * Streams are cached in memory only (by default).
+     *
+     * If streamCachingSpoolEnabled=true, then, for large stream messages (over 128 KB by default) will be cached in a
+     * temporary file instead, and Camel will handle deleting the temporary file once the cached stream is no longer
+     * necessary.
+     *
+     * Default is true.
      */
     public T withStreamCachingEnabled(boolean streamCachingEnabled) {
         this.streamCachingEnabled = streamCachingEnabled;
+        return (T) this;
+    }
+
+    /**
+     * To enable stream caching spooling to disk. This means, for large stream messages (over 128 KB by default) will be
+     * cached in a temporary file instead, and Camel will handle deleting the temporary file once the cached stream is
+     * no longer necessary.
+     *
+     * Default is false.
+     */
+    public T withStreamCachingSpoolEnabled(boolean streamCachingSpoolEnabled) {
+        this.streamCachingSpoolEnabled = streamCachingSpoolEnabled;
         return (T) this;
     }
 
@@ -1704,6 +1903,17 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Sets whether type converter statistics is enabled.
+     *
+     * By default the type converter utilization statistics is disabled. Notice: If enabled then there is a slight
+     * performance impact under very heavy load.
+     */
+    public T withTypeConverterStatisticsEnabled(boolean typeConverterStatisticsEnabled) {
+        this.typeConverterStatisticsEnabled = typeConverterStatisticsEnabled;
+        return (T) this;
+    }
+
+    /**
      * Sets whether tracing is enabled or not.
      *
      * Default is false.
@@ -1731,6 +1941,17 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withBacklogTracing(boolean backlogTracing) {
         this.backlogTracing = backlogTracing;
+        return (T) this;
+    }
+
+    /**
+     * Whether to set backlog tracing on standby. If on standby then the backlog tracer is installed and made available.
+     * Then the backlog tracer can be enabled later at runtime via JMX or via Java API.
+     *
+     * Default is false.
+     */
+    public T withBacklogTracingStandby(boolean backlogTracingStandby) {
+        this.backlogTracingStandby = backlogTracingStandby;
         return (T) this;
     }
 
@@ -1829,6 +2050,16 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Sets whether context load statistics is enabled (something like the unix load average).
+     *
+     * The default value is false.
+     */
+    public T withLoadStatisticsEnabled(boolean loadStatisticsEnabled) {
+        this.loadStatisticsEnabled = loadStatisticsEnabled;
+        return (T) this;
+    }
+
+    /**
      * Whether the producer should be started lazy (on the first message). By starting lazy you can use this to allow
      * CamelContext and routes to startup in situations where a producer may otherwise fail during starting and cause
      * the route to fail being started. By deferring this startup to be lazy then the startup failure can be handled
@@ -1896,6 +2127,16 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Sets the mbeans registration level.
+     *
+     * The default value is Default.
+     */
+    public T withJmxManagementMBeansLevel(ManagementMBeansLevel jmxManagementMBeansLevel) {
+        this.jmxManagementMBeansLevel = jmxManagementMBeansLevel;
+        return (T) this;
+    }
+
+    /**
      * Sets the JMX statistics level The level can be set to Extended to gather additional information
      *
      * The default value is Default.
@@ -1912,6 +2153,16 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withJmxManagementNamePattern(String jmxManagementNamePattern) {
         this.jmxManagementNamePattern = jmxManagementNamePattern;
+        return (T) this;
+    }
+
+    /**
+     * Whether to include timestamps for all emitted Camel Events. Enabling this allows to know fine-grained at what
+     * time each event was emitted, which can be used for reporting to report exactly the time of the events. This is by
+     * default false to avoid the overhead of including this information.
+     */
+    public T withCamelEventsTimestampEnabled(boolean camelEventsTimestampEnabled) {
+        this.camelEventsTimestampEnabled = camelEventsTimestampEnabled;
         return (T) this;
     }
 
@@ -2002,6 +2253,16 @@ public abstract class DefaultConfigurationProperties<T> {
      */
     public T withTracingPattern(String tracingPattern) {
         this.tracingPattern = tracingPattern;
+        return (T) this;
+    }
+
+    /**
+     * To use a custom tracing logging format.
+     *
+     * The default format (arrow, routeId, label) is: %-4.4s [%-12.12s] [%-33.33s]
+     */
+    public T withTracingLoggingFormat(String format) {
+        this.tracingLoggingFormat = format;
         return (T) this;
     }
 
@@ -2098,6 +2359,16 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
+     * Used for enabling context reloading. If enabled then Camel allow external systems such as security vaults (AWS
+     * secrets manager, etc.) to trigger refreshing Camel by updating property placeholders and reload all existing
+     * routes to take changes into effect.
+     */
+    public T withContextReloadEnabled(boolean contextReloadEnabled) {
+        this.contextReloadEnabled = contextReloadEnabled;
+        return (T) this;
+    }
+
+    /**
      * Used for enabling automatic routes reloading. If enabled then Camel will watch for file changes in the given
      * reload directory, and trigger reloading routes if files are changed.
      */
@@ -2172,16 +2443,6 @@ public abstract class DefaultConfigurationProperties<T> {
     }
 
     /**
-     * Whether to eager load a common set of Camel classes that would otherwise first be loaded on processing the first
-     * message. By eager loading these classes then the JVM has already loaded the classes during build phase, which
-     * allows Camel to process the first message faster.
-     */
-    public T withEagerClassloading(boolean eagerClassloading) {
-        this.eagerClassloading = eagerClassloading;
-        return (T) this;
-    }
-
-    /**
      * Controls whether to pool (reuse) exchanges or create new fresh exchanges (default). Using pooled will reduce JVM
      * garbage collection overhead by avoiding to re-create Exchange instances per message each consumer receives.
      */
@@ -2245,15 +2506,6 @@ public abstract class DefaultConfigurationProperties<T> {
             this.globalOptions = new HashMap<>();
         }
         this.globalOptions.put(key, value);
-        return (T) this;
-    }
-
-    /**
-     * Sets the logging level used for logging route activity (such as starting and stopping routes). The default
-     * logging level is DEBUG.
-     */
-    public T withRouteControllerLoggingLevel(LoggingLevel routeControllerLoggingLevel) {
-        this.routeControllerLoggingLevel = routeControllerLoggingLevel;
         return (T) this;
     }
 

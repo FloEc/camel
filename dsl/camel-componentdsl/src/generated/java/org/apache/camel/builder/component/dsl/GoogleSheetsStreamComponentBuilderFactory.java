@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -120,6 +120,21 @@ public interface GoogleSheetsStreamComponentBuilderFactory {
             return this;
         }
         /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsStreamComponentBuilder delegate(
+                java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
          * True if grid data should be returned.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -188,7 +203,7 @@ public interface GoogleSheetsStreamComponentBuilderFactory {
          * more info.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -321,6 +336,21 @@ public interface GoogleSheetsStreamComponentBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Sets .json file with credentials for Service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsStreamComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     class GoogleSheetsStreamComponentBuilderImpl
@@ -349,6 +379,7 @@ public interface GoogleSheetsStreamComponentBuilderFactory {
             case "bridgeErrorHandler": ((GoogleSheetsStreamComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "clientId": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setClientId((java.lang.String) value); return true;
             case "configuration": ((GoogleSheetsStreamComponent) component).setConfiguration((org.apache.camel.component.google.sheets.stream.GoogleSheetsStreamConfiguration) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setDelegate((java.lang.String) value); return true;
             case "includeGridData": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setIncludeGridData((boolean) value); return true;
             case "majorDimension": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setMajorDimension((java.lang.String) value); return true;
             case "maxResults": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setMaxResults((int) value); return true;
@@ -361,6 +392,7 @@ public interface GoogleSheetsStreamComponentBuilderFactory {
             case "accessToken": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setAccessToken((java.lang.String) value); return true;
             case "clientSecret": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setClientSecret((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleSheetsStreamComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             default: return false;
             }
         }

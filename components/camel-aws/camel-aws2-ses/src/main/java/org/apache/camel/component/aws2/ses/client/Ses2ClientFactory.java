@@ -30,12 +30,12 @@ public final class Ses2ClientFactory {
 
     /**
      * Return the correct AWS SES client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               SesClient
      */
     public static Ses2InternalClient getSesClient(Ses2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new Ses2ClientOptimizedImpl(configuration) : new Ses2ClientStandardImpl(configuration);
     }
 }

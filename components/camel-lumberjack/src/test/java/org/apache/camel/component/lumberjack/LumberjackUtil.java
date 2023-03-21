@@ -58,7 +58,8 @@ final class LumberjackUtil {
                 protected void initChannel(Channel ch) throws Exception {
                     ChannelPipeline pipeline = ch.pipeline();
                     if (sslContextParameters != null) {
-                        SSLEngine sslEngine = sslContextParameters.createSSLContext(null).createSSLEngine();
+                        SSLEngine sslEngine = sslContextParameters.createSSLContext(sslContextParameters.getCamelContext())
+                                .createSSLEngine();
                         sslEngine.setUseClientMode(true);
                         pipeline.addLast(new SslHandler(sslEngine));
                     }
@@ -66,7 +67,7 @@ final class LumberjackUtil {
                     // Add the response recorder
                     pipeline.addLast(new SimpleChannelInboundHandler<ByteBuf>() {
                         @Override
-                        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+                        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
                             assertEquals(msg.readUnsignedByte(), (short) '2');
                             assertEquals(msg.readUnsignedByte(), (short) 'A');
                             synchronized (responses) {

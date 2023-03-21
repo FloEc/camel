@@ -21,9 +21,9 @@ import java.util.List;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
+import org.apache.camel.RollbackExchangeException;
 import org.apache.camel.Traceable;
 import org.apache.camel.spi.IdAware;
 import org.apache.camel.spi.RouteIdAware;
@@ -46,8 +46,7 @@ public class CatchProcessor extends DelegateAsyncProcessor implements Traceable,
     private final List<Class<? extends Throwable>> exceptions;
     private final Predicate onWhen;
 
-    public CatchProcessor(List<Class<? extends Throwable>> exceptions, Processor processor, Predicate onWhen,
-                          Predicate handled) {
+    public CatchProcessor(List<Class<? extends Throwable>> exceptions, Processor processor, Predicate onWhen) {
         super(processor);
         this.exceptions = exceptions;
         this.onWhen = onWhen;
@@ -85,7 +84,7 @@ public class CatchProcessor extends DelegateAsyncProcessor implements Traceable,
 
     @Override
     public boolean process(final Exchange exchange, final AsyncCallback callback) {
-        Exception e = exchange.getException();
+        final Exception e = exchange.getException();
         Throwable caught = catches(exchange, e);
         // If a previous catch clause handled the exception or if this clause does not match, exit
         if (exchange.getProperty(ExchangePropertyKey.EXCEPTION_HANDLED) != null || caught == null) {
@@ -97,6 +96,14 @@ public class CatchProcessor extends DelegateAsyncProcessor implements Traceable,
                     e.getMessage());
         }
 
+        // must remember some properties which we cannot use during doCatch processing
+        final boolean stop = exchange.isRouteStop();
+        exchange.setRouteStop(false);
+        final boolean rollbackOnly = exchange.isRollbackOnly();
+        exchange.setRollbackOnly(false);
+        final boolean rollbackOnlyLast = exchange.isRollbackOnlyLast();
+        exchange.setRollbackOnlyLast(false);
+
         // store the last to endpoint as the failure endpoint
         if (exchange.getProperty(ExchangePropertyKey.FAILURE_ENDPOINT) == null) {
             exchange.setProperty(ExchangePropertyKey.FAILURE_ENDPOINT, exchange.getProperty(ExchangePropertyKey.TO_ENDPOINT));
@@ -106,7 +113,7 @@ public class CatchProcessor extends DelegateAsyncProcessor implements Traceable,
         exchange.setProperty(ExchangePropertyKey.EXCEPTION_CAUGHT, e);
         exchange.setException(null);
         // and we should not be regarded as exhausted as we are in a try .. catch block
-        exchange.adapt(ExtendedExchange.class).setRedeliveryExhausted(false);
+        exchange.getExchangeExtension().setRedeliveryExhausted(false);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("The exception is handled for the exception: {} caused by: {}",
@@ -122,7 +129,17 @@ public class CatchProcessor extends DelegateAsyncProcessor implements Traceable,
                 EventHelper.notifyExchangeFailureHandled(exchange.getContext(), exchange, processor, false, null);
 
                 // always clear redelivery exhausted in a catch clause
-                exchange.adapt(ExtendedExchange.class).setRedeliveryExhausted(false);
+                exchange.getExchangeExtension().setRedeliveryExhausted(false);
+
+                if (rollbackOnly || rollbackOnlyLast || stop) {
+                    exchange.setRouteStop(stop);
+                    exchange.setRollbackOnly(rollbackOnly);
+                    exchange.setRollbackOnlyLast(rollbackOnlyLast);
+                    // special for rollback as we need to restore that a rollback was triggered
+                    if (e instanceof RollbackExchangeException) {
+                        exchange.setException(e);
+                    }
+                }
 
                 if (!doneSync) {
                     // signal callback to continue routing async

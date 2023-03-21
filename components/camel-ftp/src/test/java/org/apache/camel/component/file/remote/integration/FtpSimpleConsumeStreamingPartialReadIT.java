@@ -23,12 +23,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FtpSimpleConsumeStreamingPartialReadIT extends FtpServerTestSupport {
@@ -40,7 +40,7 @@ public class FtpSimpleConsumeStreamingPartialReadIT extends FtpServerTestSupport
         // create file using regular file
 
         // FTP Server does not support absolute path, so lets simulate it
-        String path = ftpFile("tmp/mytemp").toString();
+        String path = service.ftpFile("tmp/mytemp").toString();
         template.sendBodyAndHeader("file:" + path, expected, Exchange.FILE_NAME, "hello.txt");
 
         MockEndpoint mock = getMockEndpoint("mock:result");
@@ -49,9 +49,10 @@ public class FtpSimpleConsumeStreamingPartialReadIT extends FtpServerTestSupport
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
-        GenericFile<?> remoteFile1 = (GenericFile<?>) mock.getExchanges().get(0).getIn().getBody();
-        assertTrue(remoteFile1.getBody() instanceof InputStream);
+        MockEndpoint.assertIsSatisfied(context);
+
+        InputStream is = mock.getExchanges().get(0).getIn().getBody(InputStream.class);
+        assertNotNull(is);
 
         // Wait a little bit for the move to finish.
         File resultFile = new File(path + File.separator + "failed", "hello.txt");
@@ -60,26 +61,26 @@ public class FtpSimpleConsumeStreamingPartialReadIT extends FtpServerTestSupport
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("ftp://localhost:{{ftp.server.port}}"
                      + "/tmp/mytemp?username=admin&password=admin&delay=10000&disconnect=true&streamDownload=true"
                      + "&move=done&moveFailed=failed&stepwise=false")
-                             .routeId("foo").noAutoStartup().process(new Processor() {
+                        .routeId("foo").noAutoStartup().process(new Processor() {
 
-                                 @Override
-                                 public void process(Exchange exchange) throws Exception {
-                                     exchange.getIn().getBody(InputStream.class).read();
-                                 }
-                             }).to("mock:result").process(new Processor() {
+                            @Override
+                            public void process(Exchange exchange) throws Exception {
+                                exchange.getIn().getBody(InputStream.class).read();
+                            }
+                        }).to("mock:result").process(new Processor() {
 
-                                 @Override
-                                 public void process(Exchange exchange) throws Exception {
-                                     throw new Exception("INTENTIONAL ERROR");
-                                 }
-                             });
+                            @Override
+                            public void process(Exchange exchange) throws Exception {
+                                throw new Exception("INTENTIONAL ERROR");
+                            }
+                        });
             }
         };
     }

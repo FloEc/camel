@@ -16,7 +16,7 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.Message;
+import jakarta.mail.Message;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit5.CamelTestSupport;
@@ -57,10 +57,10 @@ public class MailToMultipleEndpointsTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:a").to("smtp://localhost?username=james2&password=secret&to=a@a.com&from=me@me.com");
 
                 from("direct:b").to("smtp://localhost?username=james&password=secret&to=b@b.com&from=you@you.com");

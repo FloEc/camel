@@ -24,6 +24,36 @@ to look at the https://github.com/apache/camel/tree/main/components/camel-salesf
 setup your environment for running integration tests.
 ====
 
+== Getting Started
+
+Follow these steps to get started with the Salesforce component.
+
+. *Create a salesforce org*. If you don't already have access to a salesforce org, you can create a https://developer.salesforce.com/signup[free developer org].
+. *Create a Connected App*. In salesforce, go to Setup > Apps > App Manager, then click on *New Connected App*. Make sure to check *Enable OAuth Settings* and include relevant OAuth Scopes, including the scope called *Perform requests at any time*. Click *Save*.
+. *Get the Consumer Key and Consumer Secret*. You'll need these to configure salesforce authentication. View your new connected app, then copy the key and secret and save in a safe place.
+. *Add Maven depdendency*.
++
+[source,xml]
+----
+<dependency>
+    <groupId>org.apache.camel</groupId>
+    <artifactId>camel-salesforce</artifactId>
+</dependency>
+----
+Spring Boot users should use the starter instead.
++
+[source,xml]
+----
+<dependency>
+    <groupId>org.apache.camel.springboot</groupId>
+    <artifactId>camel-salesforce-starter</artifactId>
+</dependency>
+----
+
+. *Generate DTOs*. Optionally, generate Java DTOs to represent your salesforce objects. This step isn't a hard requirement per se, but most use cases will benefit from the type safety and auto-completion. Use the <<MavenPlugin,maven plugin>> to generate DTOs for the salesforce objects you'll be working with.
+. *Configure authentication*. Using the OAuth key and secret you generated previously, configure salesforce <<AuthenticatingToSalesforce,authentication>>. 
+. *Create routes*. Starting creating routes that interact with salesforce!
+
 
 // component-configure options: START
 
@@ -37,9 +67,11 @@ include::partial$component-endpoint-options.adoc[]
 // endpoint options: START
 
 // endpoint options: END
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
-
-== Authenticating to Salesforce
+== Authenticating to Salesforce [[AuthenticatingToSalesforce]]
 
 The component supports three OAuth authentication flows:
 
@@ -83,7 +115,7 @@ must contain only single certificate-private key entry.
 When used as a consumer, receiving streaming events, the URI scheme is:
 
 ----
-salesforce:topic?options
+salesforce:subscribe:topic?options
 ----
 
 When used as a producer, invoking the Salesforce REST APIs, the URI
@@ -210,11 +242,11 @@ Type:  `List<Version>`
 
 `getResources`
 
-Lists available resources for the specified API version, including resource name and URI.
+Lists available resources for the current API version, including resource name and URI.
 
 *Output*
 
-Type: `RestResources`
+Type: `Map<String, String>`
 
 [[limits]]
 ==== Limits
@@ -490,31 +522,38 @@ Deletes a record in salesforce by External ID.
 
 `query`
 
-Runs a Salesforce SOQL query
+Runs a Salesforce SOQL query. If neither `sObjectClass` nor `sObjectName` are set, Camel will attempt to determine
+the correct `AbstractQueryRecordsBase` sublcass based on the response.
 
 |===
 | Parameter | Type | Description | Default | Required
 
 | Body or `sObjectQuery` | `String`  | SOQL query | | x
-| `sObjectClass` | `String` | Fully qualified name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `org.my.dto.QueryRecordsAccount`| |x
+| streamQueryResult | `Boolean` | If true, returns a streaming `Iterator` and transparently retrieves all pages as needed. The `sObjectClass` option must reference an `AbstractQueryRecordsBase` subclass. | false |
+| `sObjectClass` | `String` | Fully qualified name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `org.my.dto.QueryRecordsAccount`| |
+| `sObjectName` | `String` | Simple name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `QueryRecordsAccount`. Requires the `package` option be set.| |
 |===
 
 *Output*
 
-Type: Instance of class supplied in `sObjectClass`
+Type: Instance of class supplied in `sObjectClass`, or `Iterator<SomeSObject>` if `streamQueryResult` is true. If `streamQueryResult` is true, the header `CamelSalesforceQueryResultTotalSize` is set to the number of records that matched the query.
 
 [[queryMore]]
 ==== Query More
 
 `queryMore`
 
-Retrieves more results (in case of large number of results) using result link returned from the `query` and `queryAll` operations.
+Retrieves more results (in case of large number of results) using result link returned from the `query` and `queryAll`
+operations. If neither `sObjectClass` nor `sObjectName` are set, Camel will attempt to determine the correct
+`AbstractQueryRecordsBase` sublcass based on the response.
 
 |===
 | Parameter | Type | Description | Default | Required
 
 | Body or `sObjectQuery` | `String`  | `nextRecords` value. Can be found in a prior query result in the `AbstractQueryRecordsBase.nextRecordsUrl` property | | X
-| `sObjectClass` | `String` | Fully qualified name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `org.my.dto.QueryRecordsAccount`| |x
+| `sObjectClass` | `String` | Fully qualified name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `org.my.dto.QueryRecordsAccount`| |
+| `sObjectName` | `String` | Simple name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `QueryRecordsAccount`. Requires the `package` option be set. | |
+
 |===
 
 *Output*
@@ -526,18 +565,23 @@ Type: Instance of class supplied in `sObjectClass`
 
 `queryAll`
 
-Executes the specified SOQL query. Unlike the `query` operation , `queryAll` returns records that are deleted because of a merge or delete. It also returns information about archived task and event records.
+Executes the specified SOQL query. Unlike the `query` operation , `queryAll` returns records that are deleted because
+of a merge or delete. It also returns information about archived task and event records. If neither `sObjectClass` nor
+`sObjectName` are set, Camel will attempt to determine the correct `AbstractQueryRecordsBase` sublcass based on the
+response.
 
 |===
 | Parameter | Type | Description | Default | Required
 
 | Body or `sObjectQuery` | `String`  | SOQL query | | x
-| `sObjectClass` | `String` | Fully qualified name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `org.my.dto.QueryRecordsAccount`| |x
+| streamQueryResult | `Boolean` | If true, returns a streaming `Iterable` and transparently retrieves all pages as needed. The `sObjectClass` option must reference an `AbstractQueryRecordsBase` subclass. | false |
+| `sObjectClass` | `String` | Fully qualified name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `org.my.dto.QueryRecordsAccount`| |
+| `sObjectName` | `String` | Simple name of class to deserialize response to. Usually a subclass of `AbstractQueryRecordsBase`, e.g. `QueryRecordsAccount`. Requires the `package` option be set.| |
 |===
 
 *Output*
 
-Type: Instance of class supplied in `sObjectClass`
+Type: Instance of class supplied in `sObjectClass`, or `Iterator<SomeSObject>` if `streamQueryResult` is true.
 
 [[sosl_search]]
 ==== Search
@@ -868,8 +912,8 @@ Retrieve one or more records of the same object type.
 |===
 | Parameter | Type | Description | Default | Required
 
-| ids | List of String or comma-separated string | A list of one or more IDs of the objects to return. All IDs must belong to the same object type. | | x
-| fields | List of String or comma-separated string | A list of fields to include in the response. The field names you specify must be valid, and you must have read-level permissions to each field. | | x
+| sObjectIds | List of String or comma-separated string | A list of one or more IDs of the objects to return. All IDs must belong to the same object type. | | x
+| sObjectFields | List of String or comma-separated string | A list of fields to include in the response. The field names you specify must be valid, and you must have read-level permissions to each field. | | x
 | sObjectName | String | Type of SObject, e.g. `Account` | | x
 | sObjectClass | String | Fully-qualified class name of DTO class to use for deserializing the response. | | Required if `sObjectName` parameter does not resolve to a class that exists in the package specified by the `package` option.
 |===
@@ -970,7 +1014,9 @@ salesforce:apexCall[/yourApexRestUrl][?options]
 
 You can supply the apexUrl either in the endpoint (see above), or as the `apexUrl` option as listed in the table below.
 In either case the Apex URL can contain placeholders in the format of `\{headerName}`. E.g., for the Apex URL `MyApexClass/\{id}`,
-the value of the header named `id` will be used to replace the placeholder.
+the value of the header named `id` will be used to replace the placeholder. If `rawPayload` is false and neither
+`sObjectClass` nor `sObjectName` are set, Camel will attempt to determine the correct `AbstractQueryRecordsBase`
+sublcass based on the response.
 
 |===
 | Parameter | Type | Description| Default| Required
@@ -981,8 +1027,8 @@ is transformed into query parameters. For other HTTP methods, the body is used f
 | `apexMethod` | `String` | The HTTP method (e.g. `GET`, `POST`) to use. | `GET` |
 | `rawPayload` | `Boolean` | If true, Camel will not serialize the request or response bodies. | false |
 | Header: `apexQueryParam.[paramName]` | Object | Headers that override apex parameters passed in the endpoint. |  |
-| `sObjectName` | `String` | Name of sObject (e.g. `Merchandise__c`) used to deserialize the response |  | If `rawPayload` is false and `sObjectClass` not supplied
-| `sObjectClass` | `String` | Fully qualified class name used to deserialize the response |  | If `rawPayload` is false and `sObjectName` not supplied
+| `sObjectName` | `String` | Name of sObject (e.g. `Merchandise__c`) used to deserialize the response |  |
+| `sObjectClass` | `String` | Fully qualified class name used to deserialize the response |  |
 |===
 
 *Output*
@@ -1216,8 +1262,9 @@ Get bulk query job results. `jobId` parameter is required. Accepts
 | Parameter | Type | Description| Default| Required
 
 | `jobId` | `String` | Id of Job to get results for | | x
-| `maxRecords` | `Integer` | Id of Job to get results for | |
-| `locator` | `locator` | Value to use for subsequent calls | |
+| `maxRecords` | `Integer` | The maximum number of records to retrieve per set of results for the query. The request is still subject to the size limits. If you are working with a very large number of query results, you may experience a timeout before receiving all the data from Salesforce. To prevent a timeout, specify the maximum number of records your client is expecting to receive in the maxRecords parameter. This splits the results into smaller sets with this value as the maximum size. | |
+| `locator` | `locator` | A string that identifies a specific set of query results. Providing a value for this parameter returns only that set of results.
+Omitting this parameter returns the first set of results. | |
 |===
 
 *Output*
@@ -1580,21 +1627,21 @@ Data Capture events.
 
 The URI format for consuming Push Topics is:
 ----
-salesforce:<topic_name>[?options]
+salesforce:subscribe:<topic_name>[?options]
 ----
 
 To create and subscribe to a topic
 
 [source,java]
 ----
-from("salesforce:CamelTestTopic?notifyForFields=ALL&notifyForOperations=ALL&sObjectName=Merchandise__c&updateTopic=true&sObjectQuery=SELECT Id, Name FROM Merchandise__c")...
+from("salesforce:subscribe:CamelTestTopic?notifyForFields=ALL&notifyForOperations=ALL&sObjectName=Merchandise__c&updateTopic=true&sObjectQuery=SELECT Id, Name FROM Merchandise__c")...
 ----
 
 To subscribe to an existing topic
 
 [source,java]
 ----
-from("salesforce:CamelTestTopic&sObjectName=Merchandise__c")...
+from("salesforce:subscribe:CamelTestTopic&sObjectName=Merchandise__c")...
 ----
 
 |===
@@ -1625,14 +1672,14 @@ To emit a platform event use the <<createSObject,createSObject>> operation, pass
 
 The URI format for consuming platform events is:
 ----
-salesforce:event/<event_name>
+salesforce:subscribe:event/<event_name>
 ----
 
 For example, to receive platform events use for the event type `Order_Event__e`:
 
 [source,java]
 ----
-from("salesforce:event/Order_Event__e")
+from("salesforce:subscribe:event/Order_Event__e")
 ----
 
 |===
@@ -1656,25 +1703,25 @@ The URI format to consume CDC events is as follows:
 
 All Selected Entities
 ----
-salesforce:data/ChangeEvents
+salesforce:subscribe:data/ChangeEvents
 ----
 
 Standard Objects
 ----
-salesforce:data/<Standard_Object_Name>ChangeEvent
+salesforce:subscribe:data/<Standard_Object_Name>ChangeEvent
 ----
 
 Custom Objects
 ----
-salesforce:data/<Custom_Object_Name>__ChangeEvent
+salesforce:subscribe:data/<Custom_Object_Name>__ChangeEvent
 ----
 
 Here are a few examples
 [source,java]
 ----
-from("salesforce:data/ChangeEvents?replayId=-1").log("being notified of all change events")
-from("salesforce:data/AccountChangeEvent?replayId=-1").log("being notified of change events for Account records")
-from("salesforce:data/Employee__ChangeEvent?replayId=-1").log("being notified of change events for Employee__c custom object")
+from("salesforce:subscribe:data/ChangeEvents?replayId=-1").log("being notified of all change events")
+from("salesforce:subscribe:data/AccountChangeEvent?replayId=-1").log("being notified of change events for Account records")
+from("salesforce:subscribe:data/Employee__ChangeEvent?replayId=-1").log("being notified of change events for Employee__c custom object")
 ----
 
 More details about how to use the Camel Salesforce component change data capture capabilities could be found in the https://github.com/apache/camel/tree/main/components/camel-salesforce/camel-salesforce-component/src/test/java/org/apache/camel/component/salesforce/ChangeEventsConsumerIntegrationTest.java[ChangeEventsConsumerIntegrationTest].
@@ -1928,39 +1975,10 @@ String allCustomFieldsQuery = QueryHelper.queryToFetchFilteredFieldsOf(new Accou
 [[MavenPlugin]]
 == Camel Salesforce Maven Plugin
 
-This Maven plugin generates DTOs for the Camel.
-
-Maven users will need to add the following dependency to their `pom.xml`
-for this component:
-
-[source,xml]
-----
-<dependency>
-    <groupId>org.apache.camel</groupId>
-    <artifactId>camel-salesforce</artifactId>
-    <version>x.x.x</version>
-    <!-- use the same version as your Camel core version -->
-</dependency>
-----
-
-For obvious security reasons it is recommended that the clientId,
-clientSecret, userName and password fields be not set in the pom.xml.  
-The plugin should be configured for the rest of the properties, and can
-be executed using the following command:
-
-[source,java]
-----
-mvn camel-salesforce:generate -DcamelSalesforce.clientId=<clientid> -DcamelSalesforce.clientSecret=<clientsecret> \
-    -DcamelSalesforce.userName=<username> -DcamelSalesforce.password=<password>
-----
-
-The generated DTOs use Jackson annotations. All Salesforce
-field types are supported. Date and time fields are mapped to
-`java.time.ZonedDateTime` by default, and picklist fields are mapped to
-generated Java Enumerations.
+The Maven plugin generates Java DTOs to represent salesforce objects.
 
 Please refer to
 https://github.com/apache/camel/tree/main/components/camel-salesforce/camel-salesforce-maven-plugin[README.md]
-for details on how to generate the DTO.
+for details on how to use the plugin.
 
 include::spring-boot:partial$starter.adoc[]

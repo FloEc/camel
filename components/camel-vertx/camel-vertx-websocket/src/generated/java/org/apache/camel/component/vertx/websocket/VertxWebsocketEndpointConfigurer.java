@@ -29,12 +29,22 @@ public class VertxWebsocketEndpointConfigurer extends PropertyConfigurerSupport 
         case "clientOptions": target.getConfiguration().setClientOptions(property(camelContext, io.vertx.core.http.HttpClientOptions.class, value)); return true;
         case "clientsubprotocols":
         case "clientSubProtocols": target.getConfiguration().setClientSubProtocols(property(camelContext, java.lang.String.class, value)); return true;
+        case "consumeasclient":
+        case "consumeAsClient": target.getConfiguration().setConsumeAsClient(property(camelContext, boolean.class, value)); return true;
         case "exceptionhandler":
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
         case "exchangePattern": target.setExchangePattern(property(camelContext, org.apache.camel.ExchangePattern.class, value)); return true;
+        case "firewebsocketconnectionevents":
+        case "fireWebSocketConnectionEvents": target.getConfiguration().setFireWebSocketConnectionEvents(property(camelContext, boolean.class, value)); return true;
         case "lazystartproducer":
         case "lazyStartProducer": target.setLazyStartProducer(property(camelContext, boolean.class, value)); return true;
+        case "maxreconnectattempts":
+        case "maxReconnectAttempts": target.getConfiguration().setMaxReconnectAttempts(property(camelContext, int.class, value)); return true;
+        case "reconnectinitialdelay":
+        case "reconnectInitialDelay": target.getConfiguration().setReconnectInitialDelay(property(camelContext, int.class, value)); return true;
+        case "reconnectinterval":
+        case "reconnectInterval": target.getConfiguration().setReconnectInterval(property(camelContext, int.class, value)); return true;
         case "router": target.getConfiguration().setRouter(property(camelContext, io.vertx.ext.web.Router.class, value)); return true;
         case "sendtoall":
         case "sendToAll": target.getConfiguration().setSendToAll(property(camelContext, boolean.class, value)); return true;
@@ -57,12 +67,22 @@ public class VertxWebsocketEndpointConfigurer extends PropertyConfigurerSupport 
         case "clientOptions": return io.vertx.core.http.HttpClientOptions.class;
         case "clientsubprotocols":
         case "clientSubProtocols": return java.lang.String.class;
+        case "consumeasclient":
+        case "consumeAsClient": return boolean.class;
         case "exceptionhandler":
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
         case "exchangePattern": return org.apache.camel.ExchangePattern.class;
+        case "firewebsocketconnectionevents":
+        case "fireWebSocketConnectionEvents": return boolean.class;
         case "lazystartproducer":
         case "lazyStartProducer": return boolean.class;
+        case "maxreconnectattempts":
+        case "maxReconnectAttempts": return int.class;
+        case "reconnectinitialdelay":
+        case "reconnectInitialDelay": return int.class;
+        case "reconnectinterval":
+        case "reconnectInterval": return int.class;
         case "router": return io.vertx.ext.web.Router.class;
         case "sendtoall":
         case "sendToAll": return boolean.class;
@@ -86,12 +106,22 @@ public class VertxWebsocketEndpointConfigurer extends PropertyConfigurerSupport 
         case "clientOptions": return target.getConfiguration().getClientOptions();
         case "clientsubprotocols":
         case "clientSubProtocols": return target.getConfiguration().getClientSubProtocols();
+        case "consumeasclient":
+        case "consumeAsClient": return target.getConfiguration().isConsumeAsClient();
         case "exceptionhandler":
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
         case "exchangePattern": return target.getExchangePattern();
+        case "firewebsocketconnectionevents":
+        case "fireWebSocketConnectionEvents": return target.getConfiguration().isFireWebSocketConnectionEvents();
         case "lazystartproducer":
         case "lazyStartProducer": return target.isLazyStartProducer();
+        case "maxreconnectattempts":
+        case "maxReconnectAttempts": return target.getConfiguration().getMaxReconnectAttempts();
+        case "reconnectinitialdelay":
+        case "reconnectInitialDelay": return target.getConfiguration().getReconnectInitialDelay();
+        case "reconnectinterval":
+        case "reconnectInterval": return target.getConfiguration().getReconnectInterval();
         case "router": return target.getConfiguration().getRouter();
         case "sendtoall":
         case "sendToAll": return target.getConfiguration().isSendToAll();

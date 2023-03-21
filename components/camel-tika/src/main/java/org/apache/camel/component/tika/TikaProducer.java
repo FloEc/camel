@@ -44,9 +44,9 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.html.BoilerpipeContentHandler;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.ExpandedTitleContentHandler;
+import org.apache.tika.sax.boilerpipe.BoilerpipeContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +137,7 @@ public class TikaProducer extends DefaultProducer {
         }
     }
 
-    private ContentHandler getContentHandler(TikaConfiguration configuration, OutputStream outputStream)
+    protected ContentHandler getContentHandler(TikaConfiguration configuration, OutputStream outputStream)
             throws TransformerConfigurationException, UnsupportedEncodingException {
 
         ContentHandler result = null;

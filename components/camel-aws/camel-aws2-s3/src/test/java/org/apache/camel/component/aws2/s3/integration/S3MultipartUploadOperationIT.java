@@ -25,7 +25,14 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.aws2.s3.AWS2S3Constants;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.infra.aws2.clients.AWSSDKClientUtils;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class S3MultipartUploadOperationIT extends Aws2S3Base {
 
@@ -42,20 +49,40 @@ public class S3MultipartUploadOperationIT extends Aws2S3Base {
         template.send("direct:putObject", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
-                exchange.getIn().setHeader(AWS2S3Constants.KEY, "empty.txt");
-                exchange.getIn().setBody(new File("src/test/resources/empty.txt"));
+            public void process(Exchange exchange) {
+                exchange.getIn().setHeader(AWS2S3Constants.KEY, "empty.bin");
+                exchange.getIn().setBody(new File("src/test/resources/empty.bin"));
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
+    }
+
+    @Test
+    public void sendInWithContentType() {
+        result.expectedMessageCount(1);
+
+        template.send("direct:putObject", new Processor() {
+
+            @Override
+            public void process(Exchange exchange) {
+                exchange.getIn().setHeader(AWS2S3Constants.KEY, "camel-content-type.txt");
+                exchange.getIn().setBody(new File("src/test/resources/empty.bin"));
+                exchange.getIn().setHeader(AWS2S3Constants.CONTENT_TYPE, "application/text");
+            }
+        });
+
+        S3Client s = AWSSDKClientUtils.newS3Client();
+        ResponseInputStream<GetObjectResponse> response
+                = s.getObject(GetObjectRequest.builder().bucket("mycamel").key("camel-content-type.txt").build());
+        assertEquals("application/text", response.response().contentType());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint = "aws2-s3://mycamel?multiPartUpload=true&autoCreateBucket=true";
 
                 from("direct:putObject").to(awsEndpoint).to("mock:result");

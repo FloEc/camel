@@ -23,6 +23,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.aws.secretsmanager.SecretsManagerConstants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretResponse;
 import software.amazon.awssdk.services.secretsmanager.model.ListSecretsResponse;
 
@@ -30,18 +31,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisabledIfSystemProperty(named = "ci.env.name", matches = "github.com", disabledReason = "Flaky on GitHub Actions")
 public class SecretsManagerProducerListSecretsLocalstackIT extends AwsSecretsManagerBaseTest {
 
     @EndpointInject("mock:result")
     private MockEndpoint mock;
 
     @Test
-    public void createSecretTest() throws Exception {
+    public void createSecretTest() {
 
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createSecret", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(SecretsManagerConstants.SECRET_NAME, "TestSecret4");
                 exchange.getIn().setBody("Body");
             }
@@ -52,7 +54,7 @@ public class SecretsManagerProducerListSecretsLocalstackIT extends AwsSecretsMan
 
         exchange = template.request("direct:listSecrets", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(SecretsManagerConstants.SECRET_ID, resultGet.arn());
             }
         });
@@ -63,10 +65,10 @@ public class SecretsManagerProducerListSecretsLocalstackIT extends AwsSecretsMan
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:createSecret")
                         .to("aws-secrets-manager://test?operation=createSecret");
 

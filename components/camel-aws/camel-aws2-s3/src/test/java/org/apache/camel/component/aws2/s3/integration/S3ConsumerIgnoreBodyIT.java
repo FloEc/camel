@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component.aws2.s3.integration;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -23,6 +25,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.aws2.s3.AWS2S3Constants;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -41,22 +44,22 @@ public class S3ConsumerIgnoreBodyIT extends Aws2S3Base {
         template.send("direct:putObject", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(AWS2S3Constants.KEY, "test.txt");
                 exchange.getIn().setBody("Test");
             }
         });
 
-        Thread.sleep(10000);
-        assertMockEndpointsSatisfied();
+        Awaitility.await().atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(() -> MockEndpoint.assertIsSatisfied(context));
         Assert.assertNull(result.getExchanges().get(0).getMessage().getBody());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint = "aws2-s3://mycamel?autoCreateBucket=true";
 
                 from("direct:putObject").startupOrder(1).to(awsEndpoint);

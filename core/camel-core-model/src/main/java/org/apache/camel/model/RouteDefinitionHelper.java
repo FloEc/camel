@@ -25,13 +25,13 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.ErrorHandlerFactory;
 import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.RuntimeCamelException;
-import org.apache.camel.builder.ErrorHandlerBuilder;
 import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.model.rest.VerbDefinition;
 import org.apache.camel.support.CamelContextHelper;
@@ -129,7 +129,7 @@ public final class RouteDefinitionHelper {
      * @throws Exception is thrown if error force assign ids to the routes
      */
     public static void forceAssignIds(CamelContext context, List<RouteDefinition> routes) throws Exception {
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
 
         // handle custom assigned id's first, and then afterwards assign auto
         // generated ids
@@ -152,7 +152,7 @@ public final class RouteDefinitionHelper {
                 if (rest != null && route.isRest()) {
                     VerbDefinition verb = findVerbDefinition(rest, route.getInput().getEndpointUri());
                     if (verb != null) {
-                        String id = verb.getId();
+                        String id = context.resolvePropertyPlaceholders(verb.getId());
                         if (verb.hasCustomIdAssigned() && ObjectHelper.isNotEmpty(id) && !customIds.contains(id)) {
                             route.setId(id);
                             customIds.add(id);
@@ -163,7 +163,7 @@ public final class RouteDefinitionHelper {
         }
 
         // also include already existing on camel context
-        for (final RouteDefinition def : context.adapt(ModelCamelContext.class).getRouteDefinitions()) {
+        for (final RouteDefinition def : ((ModelCamelContext) context).getRouteDefinitions()) {
             if (def.getId() != null) {
                 customIds.add(def.getId());
             }
@@ -196,15 +196,6 @@ public final class RouteDefinitionHelper {
             }
             RestDefinition rest = route.getRestDefinition();
             if (rest != null && route.isRest()) {
-                VerbDefinition verb = findVerbDefinition(rest, route.getInput().getEndpointUri());
-                if (verb != null) {
-                    String id = verb.idOrCreate(ecc.getNodeIdFactory());
-                    if (!verb.getUsedForGeneratingNodeId()) {
-                        id = route.getId();
-                    }
-                    verb.setRouteId(id);
-                }
-
                 // if its the rest/rest-api endpoints then they should include
                 // the route id as well
                 if (ObjectHelper.isNotEmpty(route.getInput())) {
@@ -255,6 +246,18 @@ public final class RouteDefinitionHelper {
      * @return        <tt>null</tt> if no duplicate id's detected, otherwise the first found duplicate id is returned.
      */
     public static String validateUniqueIds(RouteDefinition target, List<RouteDefinition> routes) {
+        return validateUniqueIds(target, routes, null);
+    }
+
+    /**
+     * Validates that the target route has no duplicate id's from any of the existing routes.
+     *
+     * @param  target   the target route
+     * @param  routes   the existing routes
+     * @param  prefixId optional prefix to use in duplicate id detection
+     * @return          <tt>null</tt> if no duplicate id's detected, otherwise the first found duplicate id is returned.
+     */
+    public static String validateUniqueIds(RouteDefinition target, List<RouteDefinition> routes, String prefixId) {
         Set<String> routesIds = new LinkedHashSet<>();
         // gather all ids for the existing route, but only include custom ids,
         // and no abstract ids
@@ -277,6 +280,9 @@ public final class RouteDefinitionHelper {
 
         // now check for clash with the target route
         for (String id : targetIds) {
+            if (prefixId != null) {
+                id = prefixId + id;
+            }
             if (routesIds.contains(id)) {
                 return id;
             }
@@ -317,7 +323,7 @@ public final class RouteDefinitionHelper {
      * @param route   the route
      */
     public static void prepareRoute(CamelContext context, RouteDefinition route) {
-        prepareRoute(context, route, null, null, null, null, null);
+        prepareRoute(context, route, null, null, null, null, null, null);
     }
 
     /**
@@ -327,6 +333,7 @@ public final class RouteDefinitionHelper {
      *
      * @param context                            the camel context
      * @param route                              the route
+     * @param errorHandler                       optional error handler
      * @param onExceptions                       optional list of onExceptions
      * @param intercepts                         optional list of interceptors
      * @param interceptFromDefinitions           optional list of interceptFroms
@@ -334,13 +341,16 @@ public final class RouteDefinitionHelper {
      * @param onCompletions                      optional list onCompletions
      */
     public static void prepareRoute(
-            CamelContext context, RouteDefinition route, List<OnExceptionDefinition> onExceptions,
+            CamelContext context, RouteDefinition route,
+            ErrorHandlerDefinition errorHandler,
+            List<OnExceptionDefinition> onExceptions,
             List<InterceptDefinition> intercepts,
             List<InterceptFromDefinition> interceptFromDefinitions,
             List<InterceptSendToEndpointDefinition> interceptSendToEndpointDefinitions,
             List<OnCompletionDefinition> onCompletions) {
 
-        prepareRouteImp(context, route, onExceptions, intercepts, interceptFromDefinitions, interceptSendToEndpointDefinitions,
+        prepareRouteImp(context, route, errorHandler, onExceptions, intercepts, interceptFromDefinitions,
+                interceptSendToEndpointDefinitions,
                 onCompletions);
     }
 
@@ -351,6 +361,7 @@ public final class RouteDefinitionHelper {
      *
      * @param context                            the camel context
      * @param route                              the route
+     * @param errorHandler                       optional error handler
      * @param onExceptions                       optional list of onExceptions
      * @param intercepts                         optional list of interceptors
      * @param interceptFromDefinitions           optional list of interceptFroms
@@ -358,14 +369,16 @@ public final class RouteDefinitionHelper {
      * @param onCompletions                      optional list onCompletions
      */
     private static void prepareRouteImp(
-            CamelContext context, RouteDefinition route, List<OnExceptionDefinition> onExceptions,
+            CamelContext context, RouteDefinition route,
+            ErrorHandlerDefinition errorHandler,
+            List<OnExceptionDefinition> onExceptions,
             List<InterceptDefinition> intercepts,
             List<InterceptFromDefinition> interceptFromDefinitions,
             List<InterceptSendToEndpointDefinition> interceptSendToEndpointDefinitions,
             List<OnCompletionDefinition> onCompletions) {
 
         // init the route inputs
-        initRouteInput(context, route.getInput());
+        initRouteInput();
 
         // abstracts is the cross cutting concerns
         List<ProcessorDefinition<?>> abstracts = new ArrayList<>();
@@ -380,7 +393,7 @@ public final class RouteDefinitionHelper {
         RouteDefinitionHelper.prepareRouteForInit(route, abstracts, lower);
 
         // parent and error handler builder should be initialized first
-        initParentAndErrorHandlerBuilder(context, route, abstracts, onExceptions);
+        initParentAndErrorHandlerBuilder(context, route, errorHandler, onExceptions);
         // validate top-level violations
         validateTopLevel(route.getOutputs());
         // then interceptors
@@ -445,28 +458,26 @@ public final class RouteDefinitionHelper {
         }
     }
 
-    private static void initRouteInput(CamelContext camelContext, FromDefinition input) {
+    private static void initRouteInput() {
         // noop
     }
 
     private static void initParentAndErrorHandlerBuilder(
-            CamelContext context, RouteDefinition route, List<ProcessorDefinition<?>> abstracts,
+            CamelContext context, RouteDefinition route, ErrorHandlerDefinition errorHandler,
             List<OnExceptionDefinition> onExceptions) {
 
-        if (context != null) {
+        if (errorHandler != null) {
+            route.setErrorHandlerFactoryIfNull(errorHandler.getErrorHandlerType());
+        } else if (context != null) {
             // let the route inherit the error handler builder from camel
             // context if none already set
 
             // must clone to avoid side effects while building routes using
             // multiple RouteBuilders
-            ErrorHandlerFactory builder = context.adapt(ExtendedCamelContext.class).getErrorHandlerFactory();
+            ErrorHandlerFactory builder = context.getCamelContextExtension().getErrorHandlerFactory();
             if (builder != null) {
-                if (builder instanceof ErrorHandlerBuilder) {
-                    builder = ((ErrorHandlerBuilder) builder).cloneBuilder();
-                    route.setErrorHandlerFactoryIfNull(builder);
-                } else {
-                    throw new UnsupportedOperationException("The ErrorHandlerFactory must implement ErrorHandlerBuilder");
-                }
+                ErrorHandlerFactory clone = builder.cloneBuilder();
+                route.setErrorHandlerFactoryIfNull(clone);
             }
         }
 
@@ -599,8 +610,24 @@ public final class RouteDefinitionHelper {
                             uri = CamelContextHelper.getMandatoryEndpoint(context, ref).getEndpointUri();
                         }
                     }
-                    if (EndpointHelper.matchEndpoint(context, uri, pattern)) {
-                        match = true;
+
+                    // the route input uri can have property placeholders, so set them
+                    // as local properties on PropertiesComponent to have them resolved
+                    Properties properties = null;
+                    if (route.getTemplateParameters() != null && !route.getTemplateParameters().isEmpty()) {
+                        properties = context.getTypeConverter().tryConvertTo(Properties.class, route.getTemplateParameters());
+                    }
+                    try {
+                        if (properties != null) {
+                            context.getPropertiesComponent().setLocalProperties(properties);
+                        }
+                        if (EndpointHelper.matchEndpoint(context, uri, pattern)) {
+                            match = true;
+                        }
+                    } finally {
+                        if (properties != null) {
+                            context.getPropertiesComponent().setLocalProperties(null);
+                        }
                     }
                 }
 
@@ -718,7 +745,7 @@ public final class RouteDefinitionHelper {
      */
     public static void forceAssignIds(CamelContext context, final ProcessorDefinition processor) {
         // force id on the child
-        processor.idOrCreate(context.adapt(ExtendedCamelContext.class).getNodeIdFactory());
+        processor.idOrCreate(context.getCamelContextExtension().getNodeIdFactory());
 
         // if there was a custom id assigned, then make sure to support property
         // placeholders
@@ -745,16 +772,14 @@ public final class RouteDefinitionHelper {
     }
 
     public static String getRouteMessage(String route) {
-        // ensure to sanitize uri's in the route so we do not show sensitive
-        // information such as passwords
-        route = URISupport.sanitizeUri(route);
-        // cut the route after 60 chars so it won't be too big in the message
-        // users just need to be able to identify the route so they know where
-        // to look
+        // cut the route after 60 chars, so it won't be too big in the message
+        // users just need to be able to identify the route, so they know where to look
         if (route.length() > 60) {
-            return route.substring(0, 60) + "...";
-        } else {
-            return route;
+            route = route.substring(0, 60) + "...";
         }
+
+        // ensure to sanitize uri's in the route, so we do not show sensitive information such as passwords
+        route = URISupport.sanitizeUri(route);
+        return route;
     }
 }

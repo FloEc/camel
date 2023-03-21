@@ -41,6 +41,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
+import static org.apache.camel.maven.packaging.generics.PackagePluginUtils.joinHeaderAndSource;
 import static org.apache.camel.tooling.util.PackageHelper.findCamelDirectory;
 import static org.apache.camel.tooling.util.PackageHelper.loadText;
 
@@ -84,19 +85,20 @@ public class ComponentDslMojo extends AbstractGeneratorMojo {
     /**
      * The package where to the main DSL component package is
      */
-    @Parameter(defaultValue = "org.apache.camel.builder.component")
+    @Parameter(property = "camel.pmp.package-name", defaultValue = "org.apache.camel.builder.component")
     protected String componentsDslPackageName;
 
     /**
      * The package where to generate component DSL specific factories
      */
-    @Parameter(defaultValue = "org.apache.camel.builder.component.dsl")
+    @Parameter(property = "camel.pmp.factories-package-name", defaultValue = "org.apache.camel.builder.component.dsl")
     protected String componentsDslFactoriesPackageName;
 
     /**
      * The catalog directory where the component json files are
      */
-    @Parameter(defaultValue = "${project.build.directory}/../../../catalog/camel-catalog/src/generated/resources/org/apache/camel/catalog/components")
+    @Parameter(property = "camel.pmp.json-directory",
+               defaultValue = "${project.build.directory}/../../../catalog/camel-catalog/src/generated/resources/org/apache/camel/catalog/components")
     protected File jsonDir;
 
     private transient String licenseHeader;
@@ -118,6 +120,17 @@ public class ComponentDslMojo extends AbstractGeneratorMojo {
             getLog().debug("No dsl/camel-componentdsl folder found, skipping execution");
             return;
         }
+
+        if (jsonDir == null) {
+            jsonDir = findCamelDirectory(baseDir,
+                    "catalog/camel-catalog/src/generated/resources/org/apache/camel/catalog/components");
+
+            if (jsonDir == null) {
+                getLog().debug("No json directory folder found, skipping execution");
+                return;
+            }
+        }
+
         Path root = camelDir.toPath();
         if (sourcesOutputDir == null) {
             sourcesOutputDir = root.resolve("src/generated/java").toFile();
@@ -142,7 +155,9 @@ public class ComponentDslMojo extends AbstractGeneratorMojo {
 
     private void executeComponent(List<ComponentModel> allModels) throws MojoFailureException {
         if (!allModels.isEmpty()) {
-            getLog().debug("Found " + allModels.size() + " components");
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Found " + allModels.size() + " components");
+            }
 
             // load license header
             try (InputStream is = getClass().getClassLoader().getResourceAsStream("license-header-java.txt")) {
@@ -222,8 +237,11 @@ public class ComponentDslMojo extends AbstractGeneratorMojo {
         Path target = outputDir.toPath().resolve(filePath).resolve(fileName);
 
         try {
-            String code = licenseHeader + source;
-            getLog().debug("Source code generated:\n" + code);
+            final String code = joinHeaderAndSource(licenseHeader, source);
+
+            if (getLog().isDebugEnabled()) {
+                getLog().debug("Source code generated:\n" + code);
+            }
 
             return updateResource(buildContext, target, code);
         } catch (Exception e) {

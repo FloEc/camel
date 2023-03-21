@@ -142,9 +142,7 @@ public class BomGeneratorMojo extends AbstractMojo {
 
             writePom(pom);
 
-        } catch (MojoFailureException ex) {
-            throw ex;
-        } catch (MojoExecutionException ex) {
+        } catch (MojoFailureException | MojoExecutionException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new MojoExecutionException("Cannot generate the output BOM file", ex);
@@ -170,6 +168,8 @@ public class BomGeneratorMojo extends AbstractMojo {
 
         for (Dependency dep : dependencyList) {
             boolean accept = inclusions.matches(dep) && !exclusions.matches(dep);
+            // skip test-jar
+            accept &= !"test-jar".equals(dep.getType());
             getLog().debug(dep + (accept ? " included in the BOM" : " excluded from BOM"));
 
             if (accept) {
@@ -224,6 +224,16 @@ public class BomGeneratorMojo extends AbstractMojo {
 
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        try {
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        } catch (IllegalArgumentException e) {
+            // ignore
+        }
+        try {
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        } catch (IllegalArgumentException e) {
+            // ignore
+        }
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");

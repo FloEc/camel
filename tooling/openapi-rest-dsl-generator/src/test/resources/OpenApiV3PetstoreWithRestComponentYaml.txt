@@ -5,17 +5,16 @@
     path: "/api/v3"
     put:
     - id: "updatePet"
-      uri: "/pet"
+      path: "/pet"
       consumes: "application/json,application/xml"
       param:
       - description: "Pet object that needs to be added to the store"
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:updatePet"
+      to: "direct:updatePet"
     - id: "updateUser"
-      uri: "/user/{username}"
+      path: "/user/{username}"
       description: "This can only be done by the logged in user."
       consumes: "*/*"
       param:
@@ -28,11 +27,10 @@
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:updateUser"
+      to: "direct:updateUser"
     post:
     - id: "addPet"
-      uri: "/pet"
+      path: "/pet"
       consumes: "application/json,application/xml"
       param:
       - dataType: "boolean"
@@ -45,10 +43,9 @@
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:addPet"
+      to: "direct:addPet"
     - id: "updatePetWithForm"
-      uri: "/pet/{petId}"
+      path: "/pet/{petId}"
       consumes: "application/x-www-form-urlencoded"
       param:
       - dataType: "integer"
@@ -66,10 +63,9 @@
         name: "status"
         required: true
         type: "formData"
-      to:
-        uri: "direct:updatePetWithForm"
+      to: "direct:updatePetWithForm"
     - id: "uploadFile"
-      uri: "/pet/{petId}/uploadImage"
+      path: "/pet/{petId}/uploadImage"
       consumes: "multipart/form-data"
       produces: "application/json"
       param:
@@ -88,10 +84,9 @@
         name: "file"
         required: true
         type: "formData"
-      to:
-        uri: "direct:uploadFile"
+      to: "direct:uploadFile"
     - id: "placeOrder"
-      uri: "/store/order"
+      path: "/store/order"
       consumes: "*/*"
       produces: "application/xml,application/json"
       param:
@@ -99,10 +94,9 @@
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:placeOrder"
+      to: "direct:placeOrder"
     - id: "createUser"
-      uri: "/user"
+      path: "/user"
       description: "This can only be done by the logged in user."
       consumes: "*/*"
       param:
@@ -110,31 +104,28 @@
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:createUser"
+      to: "direct:createUser"
     - id: "createUsersWithArrayInput"
-      uri: "/user/createWithArray"
+      path: "/user/createWithArray"
       consumes: "*/*"
       param:
       - description: "List of user object"
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:createUsersWithArrayInput"
+      to: "direct:createUsersWithArrayInput"
     - id: "createUsersWithListInput"
-      uri: "/user/createWithList"
+      path: "/user/createWithList"
       consumes: "*/*"
       param:
       - description: "List of user object"
         name: "body"
         required: true
         type: "body"
-      to:
-        uri: "direct:createUsersWithListInput"
+      to: "direct:createUsersWithListInput"
     get:
     - id: "findPetsByStatus"
-      uri: "/pet/findByStatus"
+      path: "/pet/findByStatus"
       description: "Multiple status values can be provided with comma separated strings"
       produces: "application/xml,application/json"
       param:
@@ -145,10 +136,9 @@
         name: "status"
         required: true
         type: "query"
-      to:
-        uri: "direct:findPetsByStatus"
+      to: "direct:findPetsByStatus"
     - id: "findPetsByTags"
-      uri: "/pet/findByTags"
+      path: "/pet/findByTags"
       description: "Muliple tags can be provided with comma separated strings. Use\
         \ tag1, tag2, tag3 for testing."
       produces: "application/xml,application/json"
@@ -160,10 +150,9 @@
         name: "tags"
         required: true
         type: "query"
-      to:
-        uri: "direct:findPetsByTags"
+      to: "direct:findPetsByTags"
     - id: "getPetById"
-      uri: "/pet/{petId}"
+      path: "/pet/{petId}"
       description: "Returns a single pet"
       produces: "application/xml,application/json"
       param:
@@ -172,16 +161,14 @@
         name: "petId"
         required: true
         type: "path"
-      to:
-        uri: "direct:getPetById"
+      to: "direct:getPetById"
     - id: "getInventory"
-      uri: "/store/inventory"
+      path: "/store/inventory"
       description: "Returns a map of status codes to quantities"
       produces: "application/json"
-      to:
-        uri: "direct:getInventory"
+      to: "direct:getInventory"
     - id: "getOrderById"
-      uri: "/store/order/{orderId}"
+      path: "/store/order/{orderId}"
       description: "For valid response try integer IDs with value >= 1 and <= 10.\
         \ Other values will generated exceptions"
       produces: "application/xml,application/json"
@@ -191,10 +178,9 @@
         name: "orderId"
         required: true
         type: "path"
-      to:
-        uri: "direct:getOrderById"
+      to: "direct:getOrderById"
     - id: "loginUser"
-      uri: "/user/login"
+      path: "/user/login"
       produces: "application/xml,application/json"
       param:
       - dataType: "string"
@@ -207,14 +193,12 @@
         name: "password"
         required: true
         type: "query"
-      to:
-        uri: "direct:loginUser"
+      to: "direct:loginUser"
     - id: "logoutUser"
-      uri: "/user/logout"
-      to:
-        uri: "direct:logoutUser"
+      path: "/user/logout"
+      to: "direct:logoutUser"
     - id: "getUserByName"
-      uri: "/user/{username}"
+      path: "/user/{username}"
       produces: "application/xml,application/json"
       param:
       - dataType: "string"
@@ -222,11 +206,10 @@
         name: "username"
         required: true
         type: "path"
-      to:
-        uri: "direct:getUserByName"
+      to: "direct:getUserByName"
     delete:
     - id: "deletePet"
-      uri: "/pet/{petId}"
+      path: "/pet/{petId}"
       param:
       - dataType: "string"
         name: "api_key"
@@ -237,10 +220,9 @@
         name: "petId"
         required: true
         type: "path"
-      to:
-        uri: "direct:deletePet"
+      to: "direct:deletePet"
     - id: "deleteOrder"
-      uri: "/store/order/{orderId}"
+      path: "/store/order/{orderId}"
       description: "For valid response try integer IDs with positive integer value.\
         \ Negative or non-integer values will generate API errors"
       param:
@@ -249,10 +231,9 @@
         name: "orderId"
         required: true
         type: "path"
-      to:
-        uri: "direct:deleteOrder"
+      to: "direct:deleteOrder"
     - id: "deleteUser"
-      uri: "/user/{username}"
+      path: "/user/{username}"
       description: "This can only be done by the logged in user."
       param:
       - dataType: "string"
@@ -260,5 +241,4 @@
         name: "username"
         required: true
         type: "path"
-      to:
-        uri: "direct:deleteUser"
+      to: "direct:deleteUser"

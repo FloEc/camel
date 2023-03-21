@@ -19,18 +19,20 @@ public class GoogleCloudFunctionsEndpointUriFactory extends org.apache.camel.sup
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
         Set<String> props = new HashSet<>(8);
-        props.add("serviceAccountKey");
-        props.add("lazyStartProducer");
-        props.add("functionName");
-        props.add("project");
         props.add("client");
+        props.add("functionName");
+        props.add("lazyStartProducer");
         props.add("location");
         props.add("operation");
         props.add("pojoRequest");
+        props.add("project");
+        props.add("serviceAccountKey");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         SECRET_PROPERTY_NAMES = Collections.emptySet();
+        MULTI_VALUE_PREFIXES = Collections.emptySet();
     }
 
     @Override
@@ -58,6 +60,11 @@ public class GoogleCloudFunctionsEndpointUriFactory extends org.apache.camel.sup
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

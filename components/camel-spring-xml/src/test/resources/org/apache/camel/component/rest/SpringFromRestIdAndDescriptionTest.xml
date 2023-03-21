@@ -29,6 +29,9 @@
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">
 
+    <propertyPlaceholder id="properties" location="custom.properties" ignoreMissingLocation="true">
+    </propertyPlaceholder>
+
     <rest id="hello" path="/say/hello">
       <description>Hello Service</description>
       <get id="get-say">
@@ -37,8 +40,8 @@
       </get>
     </rest>
     <rest id="bye" path="/say/bye">
-      <description lang="en">Bye Service</description>
-      <get consumes="application/json">
+      <description>Bye Service</description>
+      <get consumes="application/json" id="{{mySpecialId}}">
         <description>Says bye to you</description>
           <param name="header_count" type="header" description="header param description1" dataType="integer" defaultValue="1" required="true">
               <allowableValues>

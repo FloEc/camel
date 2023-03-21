@@ -60,13 +60,12 @@ public class RestConfiguration {
     private String contextPath;
     private String apiContextPath;
     private String apiContextRouteId;
-    private String apiContextIdPattern;
-    private boolean apiContextListing;
     private boolean apiVendorExtension;
     private RestHostNameResolver hostNameResolver = RestHostNameResolver.allLocalIp;
     private RestBindingMode bindingMode = RestBindingMode.off;
     private boolean skipBindingOnErrorCode = true;
     private boolean clientRequestValidation;
+    private boolean inlineRoutes;
     private boolean enableCORS;
     private String jsonDataFormat;
     private String xmlDataFormat;
@@ -143,7 +142,7 @@ public class RestConfiguration {
 
     /**
      * Sets the location of the api document (swagger api) the REST producer will use to validate the REST uri and query
-     * parameters are valid accordingly to the api document. This requires adding camel-swagger-java to the classpath,
+     * parameters are valid accordingly to the api document. This requires adding camel-openapi-java to the classpath,
      * and any miss configuration will let Camel fail on startup and report the error(s).
      * <p/>
      * The location of the api document is loaded from classpath by default, but you can use <tt>file:</tt> or
@@ -291,40 +290,6 @@ public class RestConfiguration {
         this.apiContextRouteId = apiContextRouteId;
     }
 
-    @Deprecated
-    public String getApiContextIdPattern() {
-        return apiContextIdPattern;
-    }
-
-    /**
-     * Optional CamelContext id pattern to only allow Rest APIs from rest services within CamelContext's which name
-     * matches the pattern.
-     * <p/>
-     * The pattern <tt>#name#</tt> refers to the CamelContext name, to match on the current CamelContext only. For any
-     * other value, the pattern uses the rules from
-     * {@link org.apache.camel.support.EndpointHelper#matchPattern(String, String)}
-     *
-     * @param apiContextIdPattern the pattern
-     */
-    @Deprecated
-    public void setApiContextIdPattern(String apiContextIdPattern) {
-        this.apiContextIdPattern = apiContextIdPattern;
-    }
-
-    @Deprecated
-    public boolean isApiContextListing() {
-        return apiContextListing;
-    }
-
-    /**
-     * Sets whether listing of all available CamelContext's with REST services in the JVM is enabled. If enabled it
-     * allows to discover these contexts, if <tt>false</tt> then only the current CamelContext is in use.
-     */
-    @Deprecated
-    public void setApiContextListing(boolean apiContextListing) {
-        this.apiContextListing = apiContextListing;
-    }
-
     public boolean isApiVendorExtension() {
         return apiVendorExtension;
     }
@@ -452,6 +417,23 @@ public class RestConfiguration {
      */
     public void setEnableCORS(boolean enableCORS) {
         this.enableCORS = enableCORS;
+    }
+
+    public boolean isInlineRoutes() {
+        return inlineRoutes;
+    }
+
+    /**
+     * Inline routes in rest-dsl which are linked using direct endpoints.
+     *
+     * By default, each service in Rest DSL is an individual route, meaning that you would have at least two routes per
+     * service (rest-dsl, and the route linked from rest-dsl). Enabling this allows Camel to optimize and inline this as
+     * a single route, however this requires to use direct endpoints, which must be unique per service.
+     *
+     * This option is default <tt>false</tt>.
+     */
+    public void setInlineRoutes(boolean inlineRoutes) {
+        this.inlineRoutes = inlineRoutes;
     }
 
     /**

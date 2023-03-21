@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +31,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -47,15 +50,19 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 
 @Mojo(
-      name = "generate-yaml-schema",
-      inheritByDefault = false,
-      defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-      requiresDependencyResolution = ResolutionScope.COMPILE,
-      threadSafe = true,
-      requiresProject = false)
+        name = "generate-yaml-schema",
+        inheritByDefault = false,
+        defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+        requiresDependencyResolution = ResolutionScope.COMPILE,
+        threadSafe = true,
+        requiresProject = false)
 public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
-    @Parameter(defaultValue = "${project.basedir}/src/generated/resources/camel-yaml-dsl.json")
+    @Parameter(required = true)
     private File outputFile;
+    @Parameter(defaultValue = "true")
+    private boolean kebabCase = true;
+    @Parameter(defaultValue = "true")
+    private boolean additionalProperties = true;
 
     private ObjectNode items;
     private ObjectNode definitions;
@@ -74,8 +81,11 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
 
         definitions = items.putObject("definitions");
         step = definitions.with("org.apache.camel.model.ProcessorDefinition")
-            .put("type", "object")
-            .put("maxProperties", 1);
+                .put("type", "object")
+                .put("maxProperties", 1);
+        if (!additionalProperties) {
+            step.put("additionalProperties", false);
+        }
 
         Map<String, ClassInfo> types = new TreeMap<>();
 
@@ -97,26 +107,37 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
                     .map(values -> Stream.of(values).collect(Collectors.toCollection(TreeSet::new)))
                     .orElseGet(TreeSet::new);
 
+            final DotName name = DotName.createSimple(entry.getKey());
+            final ClassInfo info = view.getClassByName(name);
+            if (isBanned(info)) {
+                continue;
+            }
             if (hasAnnotation(entry.getValue(), YAML_IN_ANNOTATION)) {
                 nodes.forEach(node -> {
                     items.with("properties")
-                        .putObject(node)
-                        .put("$ref", "#/items/definitions/" + entry.getKey());
+                            .putObject(node)
+                            .put("$ref", "#/items/definitions/" + entry.getKey());
                 });
             } else {
-                final DotName name = DotName.createSimple(entry.getKey());
-                final ClassInfo info = view.getClassByName(name);
-
                 if (extendsType(info, PROCESSOR_DEFINITION_CLASS)) {
                     nodes.forEach(node -> {
                         step.with("properties")
-                            .putObject(node)
-                            .put("$ref", "#/items/definitions/" + entry.getKey());
+                                .putObject(node)
+                                .put("$ref", "#/items/definitions/" + entry.getKey());
                     });
                 }
             }
 
             generate(entry.getKey(), entry.getValue());
+        }
+
+        // filter out unwanted cases when in camelCase mode
+        if (!kebabCase) {
+            for (JsonNode definition : definitions) {
+                kebabToCamelCase(definition);
+            }
+            kebabToCamelCase(step);
+            kebabToCamelCase(root.with("items"));
         }
 
         try {
@@ -144,6 +165,9 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
         }
 
         objectDefinition.put("type", "object");
+        if (!additionalProperties) {
+            objectDefinition.put("additionalProperties", false);
+        }
 
         collectYamlProperties(properties, info);
 
@@ -171,9 +195,9 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
             if (propertyName.equals("__extends") && propertyType.startsWith("array:")) {
                 String objectRef = StringHelper.after(propertyType, ":");
                 definition
-                    .put("type", "array")
-                    .with("items")
-                    .put("$ref", "#/items/definitions/" + objectRef);
+                        .put("type", "array")
+                        .with("items")
+                        .put("$ref", "#/items/definitions/" + objectRef);
 
                 continue;
             }
@@ -185,56 +209,82 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
             setProperty(objectDefinition, propertyName, propertyType);
 
             if (propertyRequired) {
-                definition.withArray("required").add(propertyName);
+                String name = kebabCase ? propertyName : StringHelper.dashToCamelCase(propertyName);
+                definition.withArray("required").add(name);
+            }
+        }
+    }
+
+    private void kebabToCamelCase(JsonNode node) {
+        if (node instanceof ObjectNode) {
+            ObjectNode on = (ObjectNode) node;
+            JsonNode jn = on.get("properties");
+            if (jn == null || jn.isEmpty()) {
+                jn = on.findPath("properties");
+            }
+            if (jn != null && !jn.isEmpty() && jn instanceof ObjectNode) {
+                ObjectNode p = (ObjectNode) jn;
+                Map<String, JsonNode> rebuild = new LinkedHashMap<>();
+                // the properties are in mixed kebab-case and camelCase
+                for (Iterator<String> it = p.fieldNames(); it.hasNext(); ) {
+                    String n = it.next();
+                    String t = StringHelper.dashToCamelCase(n);
+                    JsonNode prop = p.get(n);
+                    rebuild.put(t, prop);
+                }
+                if (!rebuild.isEmpty()) {
+                    p.removeAll();
+                    rebuild.forEach(p::set);
+                }
             }
         }
     }
 
     private void setProperty(
-        ObjectNode objectDefinition,
-        String propertyName,
-        String propertyType) {
+            ObjectNode objectDefinition,
+            String propertyName,
+            String propertyType) {
 
         if (propertyType.startsWith("object:")) {
             String objectType = StringHelper.after(propertyType, ":");
             objectDefinition
-                .with("properties")
-                .with(propertyName)
-                .put("$ref", "#/items/definitions/" + objectType);
+                    .with("properties")
+                    .with(propertyName)
+                    .put("$ref", "#/items/definitions/" + objectType);
         } else if (propertyType.startsWith("array:")) {
             String arrayType = StringHelper.after(propertyType, ":");
             if (arrayType.contains(".")) {
                 objectDefinition
-                    .with("properties")
-                    .with(propertyName)
-                    .put("type", "array")
-                    .with("items").put("$ref", "#/items/definitions/" + arrayType);
+                        .with("properties")
+                        .with(propertyName)
+                        .put("type", "array")
+                        .with("items").put("$ref", "#/items/definitions/" + arrayType);
             } else {
                 objectDefinition
-                    .with("properties")
-                    .with(propertyName)
-                    .put("type", "array")
-                    .with("items").put("type", arrayType);
+                        .with("properties")
+                        .with(propertyName)
+                        .put("type", "array")
+                        .with("items").put("type", arrayType);
             }
         } else if (propertyType.startsWith("enum:")) {
             objectDefinition
-                .with("properties")
-                .with(propertyName)
-                .put("type", "string");
+                    .with("properties")
+                    .with(propertyName)
+                    .put("type", "string");
 
             String enumValues = StringHelper.after(propertyType, ":");
             for (String enumValue : enumValues.split(",")) {
                 objectDefinition
-                    .with("properties")
-                    .with(propertyName)
-                    .withArray("enum")
-                    .add(enumValue);
+                        .with("properties")
+                        .with(propertyName)
+                        .withArray("enum")
+                        .add(enumValue);
             }
         } else {
             objectDefinition
-                .with("properties")
-                .with(propertyName)
-                .put("type", propertyType);
+                    .with("properties")
+                    .with(propertyName)
+                    .put("type", propertyType);
         }
     }
 
@@ -254,6 +304,13 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
                             getLog().warn(
                                     "Missing name or type for property + " + property + " on type " + info.name().toString());
                             return;
+                        }
+
+                        if (propertyType.startsWith("object:")) {
+                            final DotName dn = DotName.createSimple(propertyType.substring(7));
+                            if (isBanned(view.getClassByName(dn))) {
+                                continue;
+                            }
                         }
 
                         if (propertyName.startsWith("__")) {
@@ -281,4 +338,5 @@ public class GenerateYamlSchemaMojo extends GenerateYamlSupportMojo {
                     }
                 });
     }
+
 }

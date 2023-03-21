@@ -24,13 +24,13 @@ import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.kubernetes.AbstractKubernetesEndpoint;
 import org.apache.camel.component.kubernetes.KubernetesConstants;
 import org.apache.camel.component.kubernetes.KubernetesHelper;
-import org.apache.camel.component.kubernetes.consumer.common.ConfigMapEvent;
 import org.apache.camel.support.DefaultConsumer;
 import org.apache.camel.util.ObjectHelper;
 import org.slf4j.Logger;
@@ -87,7 +87,7 @@ public class KubernetesConfigMapsConsumer extends DefaultConsumer {
         @Override
         public void run() {
 
-            FilterWatchListDeletable<ConfigMap, ConfigMapList> w = null;
+            FilterWatchListDeletable<ConfigMap, ConfigMapList, Resource<ConfigMap>> w = null;
             if (ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getLabelKey())
                     && ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getLabelValue())) {
                 w = getEndpoint().getKubernetesClient().configMaps().withLabel(
@@ -95,9 +95,10 @@ public class KubernetesConfigMapsConsumer extends DefaultConsumer {
                         getEndpoint().getKubernetesConfiguration().getLabelValue());
             }
             if (ObjectHelper.isNotEmpty(getEndpoint().getKubernetesConfiguration().getResourceName())) {
-                w = (FilterWatchListDeletable<ConfigMap, ConfigMapList>) getEndpoint()
+                Resource<ConfigMap> configMapResource = getEndpoint()
                         .getKubernetesClient().configMaps()
                         .withName(getEndpoint().getKubernetesConfiguration().getResourceName());
+                w = (FilterWatchListDeletable<ConfigMap, ConfigMapList, Resource<ConfigMap>>) configMapResource;
             }
             if (w == null) {
                 throw new RuntimeCamelException("Consumer label key or consumer resource name need to be set.");
@@ -106,10 +107,9 @@ public class KubernetesConfigMapsConsumer extends DefaultConsumer {
 
                 @Override
                 public void eventReceived(io.fabric8.kubernetes.client.Watcher.Action action, ConfigMap resource) {
-                    ConfigMapEvent de = new ConfigMapEvent(action, resource);
                     Exchange exchange = createExchange(false);
-                    exchange.getIn().setBody(de.getConfigMap());
-                    exchange.getIn().setHeader(KubernetesConstants.KUBERNETES_EVENT_ACTION, de.getAction());
+                    exchange.getIn().setBody(resource);
+                    exchange.getIn().setHeader(KubernetesConstants.KUBERNETES_EVENT_ACTION, action);
                     exchange.getIn().setHeader(KubernetesConstants.KUBERNETES_EVENT_TIMESTAMP, System.currentTimeMillis());
                     try {
                         processor.process(exchange);

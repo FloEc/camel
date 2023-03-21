@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -70,51 +70,6 @@ public interface ZendeskEndpointBuilderFactory {
          */
         default ZendeskEndpointConsumerBuilder serverUrl(String serverUrl) {
             doSetProperty("serverUrl", serverUrl);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default ZendeskEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default ZendeskEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -492,8 +447,8 @@ public interface ZendeskEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -514,8 +469,8 @@ public interface ZendeskEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -697,6 +652,51 @@ public interface ZendeskEndpointBuilderFactory {
             return (ZendeskEndpointConsumerBuilder) this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedZendeskEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedZendeskEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -844,55 +844,6 @@ public interface ZendeskEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default ZendeskEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default ZendeskEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * The OAuth token.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -958,6 +909,55 @@ public interface ZendeskEndpointBuilderFactory {
                 EndpointProducerBuilder {
         default ZendeskEndpointProducerBuilder basic() {
             return (ZendeskEndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedZendeskEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedZendeskEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
     }
 
@@ -1082,7 +1082,7 @@ public interface ZendeskEndpointBuilderFactory {
          * 
          * Path parameter: methodName (required)
          * What operation to use
-         * There are 342 enums and the value can be one of:
+         * There are 355 enums and the value can be one of:
          * ADD_TAG_TO_ORGANISATIONS, ADD_TAG_TO_TICKET, ADD_TAG_TO_TOPICS,
          * ASSOCIATE_ATTACHMENTS_TO_ARTICLE, CHANGE_USER_PASSWORD,
          * CREATE_ARTICLE, CREATE_ARTICLE_1, CREATE_ARTICLE_TRANSLATION,
@@ -1119,11 +1119,12 @@ public interface ZendeskEndpointBuilderFactory {
          * DELETE_PERMISSION_GROUP, DELETE_PERMISSION_GROUP_1, DELETE_SECTION,
          * DELETE_SUSPENDED_TICKET, DELETE_SUSPENDED_TICKET_1, DELETE_TARGET,
          * DELETE_TICKET, DELETE_TICKET_1, DELETE_TICKET_FIELD,
-         * DELETE_TICKET_FIELD_1, DELETE_TICKETS, DELETE_TOPIC,
-         * DELETE_TRANSLATION, DELETE_TRANSLATION_1, DELETE_TRIGGER,
-         * DELETE_UPLOAD, DELETE_UPLOAD_1, DELETE_USER, DELETE_USER_1,
-         * DELETE_USER_IDENTITY, DELETE_USER_IDENTITY_1, DELETE_USER_IDENTITY_2,
-         * DELETE_USER_SEGMENT, DELETE_USER_SEGMENT_1, GET_ARTICLE,
+         * DELETE_TICKET_FIELD_1, DELETE_TICKET_FORM, DELETE_TICKET_FORM_1,
+         * DELETE_TICKETS, DELETE_TOPIC, DELETE_TRANSLATION,
+         * DELETE_TRANSLATION_1, DELETE_TRIGGER, DELETE_UPLOAD, DELETE_UPLOAD_1,
+         * DELETE_USER, DELETE_USER_1, DELETE_USER_IDENTITY,
+         * DELETE_USER_IDENTITY_1, DELETE_USER_IDENTITY_2, DELETE_USER_SEGMENT,
+         * DELETE_USER_SEGMENT_1, GET_ACTIVE_TRIGGERS, GET_ARTICLE,
          * GET_ARTICLE_FROM_SEARCH, GET_ARTICLE_FROM_SEARCH_1,
          * GET_ARTICLE_SUBSCRIPTIONS, GET_ARTICLE_SUBSCRIPTIONS_1,
          * GET_ARTICLE_TRANSLATIONS, GET_ARTICLES, GET_ARTICLES_1,
@@ -1131,19 +1132,20 @@ public interface ZendeskEndpointBuilderFactory {
          * GET_ARTICLES_FROM_ANY_LABELS, GET_ARTICLES_FROM_PAGE,
          * GET_ARTICLES_INCREMENTALLY, GET_ASSIGNABLE_GROUP_MEMBERSHIPS,
          * GET_ASSIGNABLE_GROUP_MEMBERSHIPS_1, GET_ASSIGNABLE_GROUPS,
-         * GET_ATTACHMENT, GET_ATTACHMENT_1, GET_ATTACHMENTS_FROM_ARTICLE,
+         * GET_ASSIGNED_TICKETS_COUNT_FOR_USER, GET_ATTACHMENT,
+         * GET_ATTACHMENT_1, GET_ATTACHMENTS_FROM_ARTICLE,
          * GET_AUTHENTICATED_USER, GET_AUTO_COMPLETE_ORGANIZATIONS,
          * GET_AUTOMATION, GET_AUTOMATIONS, GET_BRANDS, GET_CC_REQUESTS,
          * GET_CATEGORIES, GET_CATEGORY, GET_CATEGORY_TRANSLATIONS,
-         * GET_COMPLIANCE_DELETION_STATUSES, GET_CURRENT_USER,
-         * GET_CUSTOM_AGENT_ROLES, GET_DELETED_TICKETS, GET_DELETED_TICKETS_1,
-         * GET_DYNAMIC_CONTENT_ITEM, GET_DYNAMIC_CONTENT_ITEM_VARIANT,
-         * GET_DYNAMIC_CONTENT_ITEM_VARIANTS, GET_DYNAMIC_CONTENT_ITEMS,
-         * GET_FORUM, GET_FORUMS, GET_FORUMS_1, GET_GROUP, GET_GROUP_MEMBERSHIP,
-         * GET_GROUP_MEMBERSHIP_1, GET_GROUP_MEMBERSHIP_BY_USER,
-         * GET_GROUP_MEMBERSHIPS, GET_GROUP_MEMBERSHIPS_1,
-         * GET_GROUP_ORGANIZATION, GET_GROUP_USERS, GET_GROUPS,
-         * GET_HELP_CENTER_LOCALES, GET_HOLIDAYS_FOR_SCHEDULE,
+         * GET_CCD_TICKETS_COUNT_FOR_USER, GET_COMPLIANCE_DELETION_STATUSES,
+         * GET_CURRENT_USER, GET_CUSTOM_AGENT_ROLES, GET_DELETED_TICKETS,
+         * GET_DELETED_TICKETS_1, GET_DYNAMIC_CONTENT_ITEM,
+         * GET_DYNAMIC_CONTENT_ITEM_VARIANT, GET_DYNAMIC_CONTENT_ITEM_VARIANTS,
+         * GET_DYNAMIC_CONTENT_ITEMS, GET_FORUM, GET_FORUMS, GET_FORUMS_1,
+         * GET_GROUP, GET_GROUP_MEMBERSHIP, GET_GROUP_MEMBERSHIP_1,
+         * GET_GROUP_MEMBERSHIP_BY_USER, GET_GROUP_MEMBERSHIPS,
+         * GET_GROUP_MEMBERSHIPS_1, GET_GROUP_ORGANIZATION, GET_GROUP_USERS,
+         * GET_GROUPS, GET_HELP_CENTER_LOCALES, GET_HOLIDAYS_FOR_SCHEDULE,
          * GET_HOLIDAYS_FOR_SCHEDULE_1, GET_INCREMENTAL_TICKETS_RESULT,
          * GET_JOB_STATUS, GET_JOB_STATUS_ASYNC, GET_JOB_STATUSES,
          * GET_JOB_STATUSES_ASYNC, GET_MACRO, GET_MACROS, GET_OPEN_REQUESTS,
@@ -1151,16 +1153,15 @@ public interface ZendeskEndpointBuilderFactory {
          * GET_ORGANIZATION_MEMBERSHIP, GET_ORGANIZATION_MEMBERSHIP_BY_USER,
          * GET_ORGANIZATION_MEMBERSHIP_FOR_USER, GET_ORGANIZATION_MEMBERSHIPS,
          * GET_ORGANIZATION_MEMBERSHIPS_FOR_ORG,
-         * GET_ORGANIZATION_MEMBERSHIPS_FOR_USER, GET_ORGANIZATION_TICKETS,
-         * GET_ORGANIZATION_USERS, GET_ORGANIZATIONS,
-         * GET_ORGANIZATIONS_INCREMENTALLY, GET_PERMISSION_GROUP,
-         * GET_PERMISSION_GROUPS, GET_RECENT_TICKETS, GET_REQUEST,
-         * GET_REQUEST_COMMENT, GET_REQUEST_COMMENT_1, GET_REQUEST_COMMENT_2,
-         * GET_REQUEST_COMMENTS, GET_REQUEST_COMMENTS_1, GET_REQUESTS,
-         * GET_SATISFACTION_RATING, GET_SATISFACTION_RATINGS, GET_SCHEDULE,
-         * GET_SCHEDULE_1, GET_SCHEDULES, GET_SEARCH_RESULTS,
-         * GET_SEARCH_RESULTS_1, GET_SEARCH_RESULTS_2, GET_SEARCH_RESULTS_3,
-         * GET_SEARCH_RESULTS_4, GET_SECTION, GET_SECTION_SUBSCRIPTIONS,
+         * GET_ORGANIZATION_MEMBERSHIPS_FOR_USER, GET_ORGANIZATION_REQUESTS,
+         * GET_ORGANIZATION_TICKETS, GET_ORGANIZATION_USERS, GET_ORGANIZATIONS,
+         * GET_ORGANIZATIONS_1, GET_ORGANIZATIONS_INCREMENTALLY,
+         * GET_PERMISSION_GROUP, GET_PERMISSION_GROUPS, GET_RECENT_TICKETS,
+         * GET_REQUEST, GET_REQUEST_COMMENT, GET_REQUEST_COMMENT_1,
+         * GET_REQUEST_COMMENT_2, GET_REQUEST_COMMENTS, GET_REQUEST_COMMENTS_1,
+         * GET_REQUESTS, GET_SATISFACTION_RATING, GET_SATISFACTION_RATINGS,
+         * GET_SCHEDULE, GET_SCHEDULE_1, GET_SCHEDULES,
+         * GET_SEARCH_TICKET_RESULTS, GET_SECTION, GET_SECTION_SUBSCRIPTIONS,
          * GET_SECTION_SUBSCRIPTIONS_1, GET_SECTION_TRANSLATIONS, GET_SECTIONS,
          * GET_SECTIONS_1, GET_SECTIONS_2, GET_SOLVED_REQUESTS,
          * GET_SUSPENDED_TICKETS, GET_TARGET, GET_TARGETS, GET_TICKET,
@@ -1171,17 +1172,20 @@ public interface ZendeskEndpointBuilderFactory {
          * GET_TICKET_INCIDENTS, GET_TICKET_METRIC, GET_TICKET_METRIC_BY_TICKET,
          * GET_TICKET_METRICS, GET_TICKETS, GET_TICKETS_1,
          * GET_TICKETS_BY_EXTERNAL_ID, GET_TICKETS_BY_EXTERNAL_ID_1,
+         * GET_TICKETS_COUNT, GET_TICKETS_COUNT_FOR_ORGANIZATION,
          * GET_TICKETS_FROM_SEARCH, GET_TICKETS_INCREMENTALLY,
          * GET_TICKETS_INCREMENTALLY_1, GET_TOPIC, GET_TOPICS, GET_TOPICS_1,
          * GET_TOPICS_2, GET_TOPICS_3, GET_TOPICS_BY_USER, GET_TRIGGER,
-         * GET_TRIGGERS, GET_TWITTER_MONITORS, GET_USER, GET_USER_CCD_TICKETS,
-         * GET_USER_FIELDS, GET_USER_IDENTITIES, GET_USER_IDENTITIES_1,
-         * GET_USER_IDENTITY, GET_USER_IDENTITY_1, GET_USER_IDENTITY_2,
-         * GET_USER_RELATED_INFO, GET_USER_REQUESTED_TICKETS, GET_USER_REQUESTS,
-         * GET_USER_REQUESTS_1, GET_USER_SEGMENT, GET_USER_SEGMENTS,
-         * GET_USER_SEGMENTS_1, GET_USER_SEGMENTS_APPLICABLE,
-         * GET_USER_SUBSCRIPTIONS, GET_USER_SUBSCRIPTIONS_1, GET_USERS,
-         * GET_USERS_BY_ROLE, GET_USERS_INCREMENTALLY, IMPORT_TICKET,
+         * GET_TRIGGERS, GET_TRIGGERS_1, GET_TWITTER_MONITORS, GET_USER,
+         * GET_USER_CCD_TICKETS, GET_USER_FIELDS, GET_USER_IDENTITIES,
+         * GET_USER_IDENTITIES_1, GET_USER_IDENTITY, GET_USER_IDENTITY_1,
+         * GET_USER_IDENTITY_2, GET_USER_RELATED_INFO,
+         * GET_USER_REQUESTED_TICKETS, GET_USER_REQUESTS, GET_USER_REQUESTS_1,
+         * GET_USER_SEGMENT, GET_USER_SEGMENTS, GET_USER_SEGMENTS_1,
+         * GET_USER_SEGMENTS_APPLICABLE, GET_USER_SUBSCRIPTIONS,
+         * GET_USER_SUBSCRIPTIONS_1, GET_USERS, GET_USERS_1,
+         * GET_USERS_BY_EXTERNAL_IDS, GET_USERS_BY_ROLE,
+         * GET_USERS_INCREMENTALLY, GET_VIEW, GET_VIEWS, IMPORT_TICKET,
          * IMPORT_TOPIC, LOOKUP_ORGANIZATIONS_BY_EXTERNAL_ID,
          * LOOKUP_USER_BY_EMAIL, LOOKUP_USER_BY_EXTERNAL_ID,
          * MACROS_SHOW_CHANGES_TO_TICKET, MACROS_SHOW_TICKET_AFTER_CHANGES,
@@ -1194,8 +1198,8 @@ public interface ZendeskEndpointBuilderFactory {
          * REMOVE_TAG_FROM_ORGANISATIONS, REMOVE_TAG_FROM_TICKET,
          * REMOVE_TAG_FROM_TOPICS, REQUEST_VERIFY_USER_IDENTITY,
          * REQUEST_VERIFY_USER_IDENTITY_1, REQUEST_VERIFY_USER_IDENTITY_2,
-         * RESET_USER_PASSWORD, RESET_USER_PASSWORD_1,
-         * SET_GROUP_MEMBERSHIP_AS_DEFAULT,
+         * RESET_USER_PASSWORD, RESET_USER_PASSWORD_1, SEARCH_TRIGGERS,
+         * SEARCH_TRIGGERS_1, SET_GROUP_MEMBERSHIP_AS_DEFAULT,
          * SET_ORGANIZATION_MEMBERSHIP_AS_DEFAULT, SET_TAG_ON_ORGANISATIONS,
          * SET_TAG_ON_TICKET, SET_TAG_ON_TOPICS, SET_USER_PRIMARY_IDENTITY,
          * SET_USER_PRIMARY_IDENTITY_1, SET_USER_PRIMARY_IDENTITY_2,
@@ -1208,11 +1212,12 @@ public interface ZendeskEndpointBuilderFactory {
          * UPDATE_ORGANIZATIONS, UPDATE_ORGANIZATIONS_1,
          * UPDATE_ORGANIZATIONS_ASYNC, UPDATE_PERMISSION_GROUP, UPDATE_REQUEST,
          * UPDATE_SECTION, UPDATE_SECTION_TRANSLATION, UPDATE_TICKET,
-         * UPDATE_TICKET_FIELD, UPDATE_TICKETS, UPDATE_TICKETS_1,
-         * UPDATE_TICKETS_ASYNC, UPDATE_TOPIC, UPDATE_TRIGGER, UPDATE_USER,
-         * UPDATE_USER_IDENTITY, UPDATE_USER_IDENTITY_1, UPDATE_USER_SEGMENT,
-         * UPDATE_USERS, UPDATE_USERS_1, UPDATE_USERS_ASYNC,
-         * VERIFY_USER_IDENTITY, VERIFY_USER_IDENTITY_1, VERIFY_USER_IDENTITY_2
+         * UPDATE_TICKET_FIELD, UPDATE_TICKET_FORM, UPDATE_TICKETS,
+         * UPDATE_TICKETS_1, UPDATE_TICKETS_ASYNC, UPDATE_TOPIC, UPDATE_TRIGGER,
+         * UPDATE_USER, UPDATE_USER_IDENTITY, UPDATE_USER_IDENTITY_1,
+         * UPDATE_USER_SEGMENT, UPDATE_USERS, UPDATE_USERS_1,
+         * UPDATE_USERS_ASYNC, VERIFY_USER_IDENTITY, VERIFY_USER_IDENTITY_1,
+         * VERIFY_USER_IDENTITY_2
          * 
          * @param path methodName
          * @return the dsl builder
@@ -1232,7 +1237,7 @@ public interface ZendeskEndpointBuilderFactory {
          * 
          * Path parameter: methodName (required)
          * What operation to use
-         * There are 342 enums and the value can be one of:
+         * There are 355 enums and the value can be one of:
          * ADD_TAG_TO_ORGANISATIONS, ADD_TAG_TO_TICKET, ADD_TAG_TO_TOPICS,
          * ASSOCIATE_ATTACHMENTS_TO_ARTICLE, CHANGE_USER_PASSWORD,
          * CREATE_ARTICLE, CREATE_ARTICLE_1, CREATE_ARTICLE_TRANSLATION,
@@ -1269,11 +1274,12 @@ public interface ZendeskEndpointBuilderFactory {
          * DELETE_PERMISSION_GROUP, DELETE_PERMISSION_GROUP_1, DELETE_SECTION,
          * DELETE_SUSPENDED_TICKET, DELETE_SUSPENDED_TICKET_1, DELETE_TARGET,
          * DELETE_TICKET, DELETE_TICKET_1, DELETE_TICKET_FIELD,
-         * DELETE_TICKET_FIELD_1, DELETE_TICKETS, DELETE_TOPIC,
-         * DELETE_TRANSLATION, DELETE_TRANSLATION_1, DELETE_TRIGGER,
-         * DELETE_UPLOAD, DELETE_UPLOAD_1, DELETE_USER, DELETE_USER_1,
-         * DELETE_USER_IDENTITY, DELETE_USER_IDENTITY_1, DELETE_USER_IDENTITY_2,
-         * DELETE_USER_SEGMENT, DELETE_USER_SEGMENT_1, GET_ARTICLE,
+         * DELETE_TICKET_FIELD_1, DELETE_TICKET_FORM, DELETE_TICKET_FORM_1,
+         * DELETE_TICKETS, DELETE_TOPIC, DELETE_TRANSLATION,
+         * DELETE_TRANSLATION_1, DELETE_TRIGGER, DELETE_UPLOAD, DELETE_UPLOAD_1,
+         * DELETE_USER, DELETE_USER_1, DELETE_USER_IDENTITY,
+         * DELETE_USER_IDENTITY_1, DELETE_USER_IDENTITY_2, DELETE_USER_SEGMENT,
+         * DELETE_USER_SEGMENT_1, GET_ACTIVE_TRIGGERS, GET_ARTICLE,
          * GET_ARTICLE_FROM_SEARCH, GET_ARTICLE_FROM_SEARCH_1,
          * GET_ARTICLE_SUBSCRIPTIONS, GET_ARTICLE_SUBSCRIPTIONS_1,
          * GET_ARTICLE_TRANSLATIONS, GET_ARTICLES, GET_ARTICLES_1,
@@ -1281,19 +1287,20 @@ public interface ZendeskEndpointBuilderFactory {
          * GET_ARTICLES_FROM_ANY_LABELS, GET_ARTICLES_FROM_PAGE,
          * GET_ARTICLES_INCREMENTALLY, GET_ASSIGNABLE_GROUP_MEMBERSHIPS,
          * GET_ASSIGNABLE_GROUP_MEMBERSHIPS_1, GET_ASSIGNABLE_GROUPS,
-         * GET_ATTACHMENT, GET_ATTACHMENT_1, GET_ATTACHMENTS_FROM_ARTICLE,
+         * GET_ASSIGNED_TICKETS_COUNT_FOR_USER, GET_ATTACHMENT,
+         * GET_ATTACHMENT_1, GET_ATTACHMENTS_FROM_ARTICLE,
          * GET_AUTHENTICATED_USER, GET_AUTO_COMPLETE_ORGANIZATIONS,
          * GET_AUTOMATION, GET_AUTOMATIONS, GET_BRANDS, GET_CC_REQUESTS,
          * GET_CATEGORIES, GET_CATEGORY, GET_CATEGORY_TRANSLATIONS,
-         * GET_COMPLIANCE_DELETION_STATUSES, GET_CURRENT_USER,
-         * GET_CUSTOM_AGENT_ROLES, GET_DELETED_TICKETS, GET_DELETED_TICKETS_1,
-         * GET_DYNAMIC_CONTENT_ITEM, GET_DYNAMIC_CONTENT_ITEM_VARIANT,
-         * GET_DYNAMIC_CONTENT_ITEM_VARIANTS, GET_DYNAMIC_CONTENT_ITEMS,
-         * GET_FORUM, GET_FORUMS, GET_FORUMS_1, GET_GROUP, GET_GROUP_MEMBERSHIP,
-         * GET_GROUP_MEMBERSHIP_1, GET_GROUP_MEMBERSHIP_BY_USER,
-         * GET_GROUP_MEMBERSHIPS, GET_GROUP_MEMBERSHIPS_1,
-         * GET_GROUP_ORGANIZATION, GET_GROUP_USERS, GET_GROUPS,
-         * GET_HELP_CENTER_LOCALES, GET_HOLIDAYS_FOR_SCHEDULE,
+         * GET_CCD_TICKETS_COUNT_FOR_USER, GET_COMPLIANCE_DELETION_STATUSES,
+         * GET_CURRENT_USER, GET_CUSTOM_AGENT_ROLES, GET_DELETED_TICKETS,
+         * GET_DELETED_TICKETS_1, GET_DYNAMIC_CONTENT_ITEM,
+         * GET_DYNAMIC_CONTENT_ITEM_VARIANT, GET_DYNAMIC_CONTENT_ITEM_VARIANTS,
+         * GET_DYNAMIC_CONTENT_ITEMS, GET_FORUM, GET_FORUMS, GET_FORUMS_1,
+         * GET_GROUP, GET_GROUP_MEMBERSHIP, GET_GROUP_MEMBERSHIP_1,
+         * GET_GROUP_MEMBERSHIP_BY_USER, GET_GROUP_MEMBERSHIPS,
+         * GET_GROUP_MEMBERSHIPS_1, GET_GROUP_ORGANIZATION, GET_GROUP_USERS,
+         * GET_GROUPS, GET_HELP_CENTER_LOCALES, GET_HOLIDAYS_FOR_SCHEDULE,
          * GET_HOLIDAYS_FOR_SCHEDULE_1, GET_INCREMENTAL_TICKETS_RESULT,
          * GET_JOB_STATUS, GET_JOB_STATUS_ASYNC, GET_JOB_STATUSES,
          * GET_JOB_STATUSES_ASYNC, GET_MACRO, GET_MACROS, GET_OPEN_REQUESTS,
@@ -1301,16 +1308,15 @@ public interface ZendeskEndpointBuilderFactory {
          * GET_ORGANIZATION_MEMBERSHIP, GET_ORGANIZATION_MEMBERSHIP_BY_USER,
          * GET_ORGANIZATION_MEMBERSHIP_FOR_USER, GET_ORGANIZATION_MEMBERSHIPS,
          * GET_ORGANIZATION_MEMBERSHIPS_FOR_ORG,
-         * GET_ORGANIZATION_MEMBERSHIPS_FOR_USER, GET_ORGANIZATION_TICKETS,
-         * GET_ORGANIZATION_USERS, GET_ORGANIZATIONS,
-         * GET_ORGANIZATIONS_INCREMENTALLY, GET_PERMISSION_GROUP,
-         * GET_PERMISSION_GROUPS, GET_RECENT_TICKETS, GET_REQUEST,
-         * GET_REQUEST_COMMENT, GET_REQUEST_COMMENT_1, GET_REQUEST_COMMENT_2,
-         * GET_REQUEST_COMMENTS, GET_REQUEST_COMMENTS_1, GET_REQUESTS,
-         * GET_SATISFACTION_RATING, GET_SATISFACTION_RATINGS, GET_SCHEDULE,
-         * GET_SCHEDULE_1, GET_SCHEDULES, GET_SEARCH_RESULTS,
-         * GET_SEARCH_RESULTS_1, GET_SEARCH_RESULTS_2, GET_SEARCH_RESULTS_3,
-         * GET_SEARCH_RESULTS_4, GET_SECTION, GET_SECTION_SUBSCRIPTIONS,
+         * GET_ORGANIZATION_MEMBERSHIPS_FOR_USER, GET_ORGANIZATION_REQUESTS,
+         * GET_ORGANIZATION_TICKETS, GET_ORGANIZATION_USERS, GET_ORGANIZATIONS,
+         * GET_ORGANIZATIONS_1, GET_ORGANIZATIONS_INCREMENTALLY,
+         * GET_PERMISSION_GROUP, GET_PERMISSION_GROUPS, GET_RECENT_TICKETS,
+         * GET_REQUEST, GET_REQUEST_COMMENT, GET_REQUEST_COMMENT_1,
+         * GET_REQUEST_COMMENT_2, GET_REQUEST_COMMENTS, GET_REQUEST_COMMENTS_1,
+         * GET_REQUESTS, GET_SATISFACTION_RATING, GET_SATISFACTION_RATINGS,
+         * GET_SCHEDULE, GET_SCHEDULE_1, GET_SCHEDULES,
+         * GET_SEARCH_TICKET_RESULTS, GET_SECTION, GET_SECTION_SUBSCRIPTIONS,
          * GET_SECTION_SUBSCRIPTIONS_1, GET_SECTION_TRANSLATIONS, GET_SECTIONS,
          * GET_SECTIONS_1, GET_SECTIONS_2, GET_SOLVED_REQUESTS,
          * GET_SUSPENDED_TICKETS, GET_TARGET, GET_TARGETS, GET_TICKET,
@@ -1321,17 +1327,20 @@ public interface ZendeskEndpointBuilderFactory {
          * GET_TICKET_INCIDENTS, GET_TICKET_METRIC, GET_TICKET_METRIC_BY_TICKET,
          * GET_TICKET_METRICS, GET_TICKETS, GET_TICKETS_1,
          * GET_TICKETS_BY_EXTERNAL_ID, GET_TICKETS_BY_EXTERNAL_ID_1,
+         * GET_TICKETS_COUNT, GET_TICKETS_COUNT_FOR_ORGANIZATION,
          * GET_TICKETS_FROM_SEARCH, GET_TICKETS_INCREMENTALLY,
          * GET_TICKETS_INCREMENTALLY_1, GET_TOPIC, GET_TOPICS, GET_TOPICS_1,
          * GET_TOPICS_2, GET_TOPICS_3, GET_TOPICS_BY_USER, GET_TRIGGER,
-         * GET_TRIGGERS, GET_TWITTER_MONITORS, GET_USER, GET_USER_CCD_TICKETS,
-         * GET_USER_FIELDS, GET_USER_IDENTITIES, GET_USER_IDENTITIES_1,
-         * GET_USER_IDENTITY, GET_USER_IDENTITY_1, GET_USER_IDENTITY_2,
-         * GET_USER_RELATED_INFO, GET_USER_REQUESTED_TICKETS, GET_USER_REQUESTS,
-         * GET_USER_REQUESTS_1, GET_USER_SEGMENT, GET_USER_SEGMENTS,
-         * GET_USER_SEGMENTS_1, GET_USER_SEGMENTS_APPLICABLE,
-         * GET_USER_SUBSCRIPTIONS, GET_USER_SUBSCRIPTIONS_1, GET_USERS,
-         * GET_USERS_BY_ROLE, GET_USERS_INCREMENTALLY, IMPORT_TICKET,
+         * GET_TRIGGERS, GET_TRIGGERS_1, GET_TWITTER_MONITORS, GET_USER,
+         * GET_USER_CCD_TICKETS, GET_USER_FIELDS, GET_USER_IDENTITIES,
+         * GET_USER_IDENTITIES_1, GET_USER_IDENTITY, GET_USER_IDENTITY_1,
+         * GET_USER_IDENTITY_2, GET_USER_RELATED_INFO,
+         * GET_USER_REQUESTED_TICKETS, GET_USER_REQUESTS, GET_USER_REQUESTS_1,
+         * GET_USER_SEGMENT, GET_USER_SEGMENTS, GET_USER_SEGMENTS_1,
+         * GET_USER_SEGMENTS_APPLICABLE, GET_USER_SUBSCRIPTIONS,
+         * GET_USER_SUBSCRIPTIONS_1, GET_USERS, GET_USERS_1,
+         * GET_USERS_BY_EXTERNAL_IDS, GET_USERS_BY_ROLE,
+         * GET_USERS_INCREMENTALLY, GET_VIEW, GET_VIEWS, IMPORT_TICKET,
          * IMPORT_TOPIC, LOOKUP_ORGANIZATIONS_BY_EXTERNAL_ID,
          * LOOKUP_USER_BY_EMAIL, LOOKUP_USER_BY_EXTERNAL_ID,
          * MACROS_SHOW_CHANGES_TO_TICKET, MACROS_SHOW_TICKET_AFTER_CHANGES,
@@ -1344,8 +1353,8 @@ public interface ZendeskEndpointBuilderFactory {
          * REMOVE_TAG_FROM_ORGANISATIONS, REMOVE_TAG_FROM_TICKET,
          * REMOVE_TAG_FROM_TOPICS, REQUEST_VERIFY_USER_IDENTITY,
          * REQUEST_VERIFY_USER_IDENTITY_1, REQUEST_VERIFY_USER_IDENTITY_2,
-         * RESET_USER_PASSWORD, RESET_USER_PASSWORD_1,
-         * SET_GROUP_MEMBERSHIP_AS_DEFAULT,
+         * RESET_USER_PASSWORD, RESET_USER_PASSWORD_1, SEARCH_TRIGGERS,
+         * SEARCH_TRIGGERS_1, SET_GROUP_MEMBERSHIP_AS_DEFAULT,
          * SET_ORGANIZATION_MEMBERSHIP_AS_DEFAULT, SET_TAG_ON_ORGANISATIONS,
          * SET_TAG_ON_TICKET, SET_TAG_ON_TOPICS, SET_USER_PRIMARY_IDENTITY,
          * SET_USER_PRIMARY_IDENTITY_1, SET_USER_PRIMARY_IDENTITY_2,
@@ -1358,11 +1367,12 @@ public interface ZendeskEndpointBuilderFactory {
          * UPDATE_ORGANIZATIONS, UPDATE_ORGANIZATIONS_1,
          * UPDATE_ORGANIZATIONS_ASYNC, UPDATE_PERMISSION_GROUP, UPDATE_REQUEST,
          * UPDATE_SECTION, UPDATE_SECTION_TRANSLATION, UPDATE_TICKET,
-         * UPDATE_TICKET_FIELD, UPDATE_TICKETS, UPDATE_TICKETS_1,
-         * UPDATE_TICKETS_ASYNC, UPDATE_TOPIC, UPDATE_TRIGGER, UPDATE_USER,
-         * UPDATE_USER_IDENTITY, UPDATE_USER_IDENTITY_1, UPDATE_USER_SEGMENT,
-         * UPDATE_USERS, UPDATE_USERS_1, UPDATE_USERS_ASYNC,
-         * VERIFY_USER_IDENTITY, VERIFY_USER_IDENTITY_1, VERIFY_USER_IDENTITY_2
+         * UPDATE_TICKET_FIELD, UPDATE_TICKET_FORM, UPDATE_TICKETS,
+         * UPDATE_TICKETS_1, UPDATE_TICKETS_ASYNC, UPDATE_TOPIC, UPDATE_TRIGGER,
+         * UPDATE_USER, UPDATE_USER_IDENTITY, UPDATE_USER_IDENTITY_1,
+         * UPDATE_USER_SEGMENT, UPDATE_USERS, UPDATE_USERS_1,
+         * UPDATE_USERS_ASYNC, VERIFY_USER_IDENTITY, VERIFY_USER_IDENTITY_1,
+         * VERIFY_USER_IDENTITY_2
          * 
          * @param componentName to use a custom component name for the endpoint
          * instead of the default name

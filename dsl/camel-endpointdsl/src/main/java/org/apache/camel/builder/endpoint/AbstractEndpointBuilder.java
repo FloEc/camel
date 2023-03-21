@@ -27,7 +27,6 @@ import java.util.TreeMap;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.NoSuchEndpointException;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.spi.Language;
@@ -42,8 +41,8 @@ public class AbstractEndpointBuilder {
     protected final String scheme;
     protected final String path;
     protected final Map<String, Object> properties = new LinkedHashMap<>();
-    protected final Map<String, Map<String, Object>> multivalues = new HashMap<>();
-    private volatile Endpoint resolvedEndpoint;
+    protected final Map<String, Map<String, Object>> multiValues = new HashMap<>();
+    private volatile Map<String, Object> originalProperties;
     private volatile Language simple;
 
     public AbstractEndpointBuilder(String scheme, String path) {
@@ -52,23 +51,24 @@ public class AbstractEndpointBuilder {
     }
 
     public Endpoint resolve(CamelContext context) throws NoSuchEndpointException {
-        if (resolvedEndpoint != null) {
-            return resolvedEndpoint;
-        }
-
         // properties may contain property placeholder which should be resolved
+        if (originalProperties == null) {
+            originalProperties = new LinkedHashMap<>(properties);
+        } else {
+            // reload from original properties before resolving placeholder in case its updated
+            properties.putAll(originalProperties);
+        }
         resolvePropertyPlaceholders(context, properties);
 
         Map<String, Object> remaining = new LinkedHashMap<>();
         // we should not bind complex objects to registry as we create the endpoint via the properties as-is
         NormalizedEndpointUri uri = computeUri(remaining, context, false, true);
-        ExtendedCamelContext ecc = (ExtendedCamelContext) context;
-        Endpoint endpoint = ecc.getEndpoint(uri, properties);
+        CamelContext ecc = context;
+        Endpoint endpoint = ecc.getCamelContextExtension().getEndpoint(uri, properties);
         if (endpoint == null) {
             throw new NoSuchEndpointException(uri.getUri());
         }
 
-        resolvedEndpoint = endpoint;
         return endpoint;
     }
 
@@ -78,7 +78,7 @@ public class AbstractEndpointBuilder {
             Object value = entry.getValue();
             if (value instanceof String) {
                 String text = (String) value;
-                String changed = context.adapt(ExtendedCamelContext.class).resolvePropertyPlaceholders(text, true);
+                String changed = context.getCamelContextExtension().resolvePropertyPlaceholders(text, true);
                 if (changed.startsWith(PropertiesComponent.PREFIX_OPTIONAL_TOKEN)) {
                     // unresolved then remove it
                     toRemove.add(entry.getKey());
@@ -103,15 +103,19 @@ public class AbstractEndpointBuilder {
         return computeUri(new LinkedHashMap<>(), null, false, true).getUri();
     }
 
+    public String getRawUri() {
+        return computeUri(new LinkedHashMap<>(), null, false, false).getUri();
+    }
+
     protected NormalizedUri computeUri(
             Map<String, Object> remaining, CamelContext camelContext, boolean bindToRegistry, boolean encode) {
         NormalizedUri answer;
 
         // sort parameters so it can be regarded as normalized
         Map<String, Object> params = new TreeMap<>();
-        // compute from properties and multivalues
+        // compute from properties and multi values
         computeProperties(remaining, camelContext, bindToRegistry, params, properties);
-        for (Map<String, Object> map : multivalues.values()) {
+        for (Map<String, Object> map : multiValues.values()) {
             computeProperties(remaining, camelContext, bindToRegistry, params, map);
         }
         if (!remaining.isEmpty()) {
@@ -175,7 +179,7 @@ public class AbstractEndpointBuilder {
     }
 
     public void doSetMultiValueProperty(String name, String key, Object value) {
-        Map<String, Object> map = multivalues.computeIfAbsent(name, k -> new LinkedHashMap<>());
+        Map<String, Object> map = multiValues.computeIfAbsent(name, k -> new LinkedHashMap<>());
         map.put(key, value);
     }
 

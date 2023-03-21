@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -36,25 +36,26 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
 
 
     /**
-     * Builder for endpoint for the Kubernetes ConfigMap component.
+     * Builder for endpoint consumers for the Kubernetes ConfigMap component.
      */
-    public interface KubernetesConfigMapsEndpointBuilder
+    public interface KubernetesConfigMapsEndpointConsumerBuilder
             extends
-                EndpointProducerBuilder {
-        default AdvancedKubernetesConfigMapsEndpointBuilder advanced() {
-            return (AdvancedKubernetesConfigMapsEndpointBuilder) this;
+                EndpointConsumerBuilder {
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder advanced() {
+            return (AdvancedKubernetesConfigMapsEndpointConsumerBuilder) this;
         }
         /**
          * The Kubernetes API Version to use.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: common
          * 
          * @param apiVersion the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder apiVersion(String apiVersion) {
+        default KubernetesConfigMapsEndpointConsumerBuilder apiVersion(
+                String apiVersion) {
             doSetProperty("apiVersion", apiVersion);
             return this;
         }
@@ -63,12 +64,13 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: common
          * 
          * @param dnsDomain the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder dnsDomain(String dnsDomain) {
+        default KubernetesConfigMapsEndpointConsumerBuilder dnsDomain(
+                String dnsDomain) {
             doSetProperty("dnsDomain", dnsDomain);
             return this;
         }
@@ -78,12 +80,12 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * The option is a:
          * &lt;code&gt;io.fabric8.kubernetes.client.KubernetesClient&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: common
          * 
          * @param kubernetesClient the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder kubernetesClient(
+        default KubernetesConfigMapsEndpointConsumerBuilder kubernetesClient(
                 io.fabric8.kubernetes.client.KubernetesClient kubernetesClient) {
             doSetProperty("kubernetesClient", kubernetesClient);
             return this;
@@ -94,15 +96,896 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * The option will be converted to a
          * &lt;code&gt;io.fabric8.kubernetes.client.KubernetesClient&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: common
          * 
          * @param kubernetesClient the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder kubernetesClient(
+        default KubernetesConfigMapsEndpointConsumerBuilder kubernetesClient(
                 String kubernetesClient) {
             doSetProperty("kubernetesClient", kubernetesClient);
             return this;
+        }
+        /**
+         * The port name, used for ServiceCall EIP.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param portName the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder portName(
+                String portName) {
+            doSetProperty("portName", portName);
+            return this;
+        }
+        /**
+         * The port protocol, used for ServiceCall EIP.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: tcp
+         * Group: common
+         * 
+         * @param portProtocol the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder portProtocol(
+                String portProtocol) {
+            doSetProperty("portProtocol", portProtocol);
+            return this;
+        }
+        /**
+         * The Consumer CRD Resource Group we would like to watch.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param crdGroup the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder crdGroup(
+                String crdGroup) {
+            doSetProperty("crdGroup", crdGroup);
+            return this;
+        }
+        /**
+         * The Consumer CRD Resource name we would like to watch.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param crdName the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder crdName(
+                String crdName) {
+            doSetProperty("crdName", crdName);
+            return this;
+        }
+        /**
+         * The Consumer CRD Resource Plural we would like to watch.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param crdPlural the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder crdPlural(
+                String crdPlural) {
+            doSetProperty("crdPlural", crdPlural);
+            return this;
+        }
+        /**
+         * The Consumer CRD Resource Scope we would like to watch.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param crdScope the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder crdScope(
+                String crdScope) {
+            doSetProperty("crdScope", crdScope);
+            return this;
+        }
+        /**
+         * The Consumer CRD Resource Version we would like to watch.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param crdVersion the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder crdVersion(
+                String crdVersion) {
+            doSetProperty("crdVersion", crdVersion);
+            return this;
+        }
+        /**
+         * The Consumer Label key when watching at some resources.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param labelKey the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder labelKey(
+                String labelKey) {
+            doSetProperty("labelKey", labelKey);
+            return this;
+        }
+        /**
+         * The Consumer Label value when watching at some resources.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param labelValue the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder labelValue(
+                String labelValue) {
+            doSetProperty("labelValue", labelValue);
+            return this;
+        }
+        /**
+         * The namespace.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param namespace the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder namespace(
+                String namespace) {
+            doSetProperty("namespace", namespace);
+            return this;
+        }
+        /**
+         * The Consumer pool size.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 1
+         * Group: consumer
+         * 
+         * @param poolSize the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder poolSize(
+                int poolSize) {
+            doSetProperty("poolSize", poolSize);
+            return this;
+        }
+        /**
+         * The Consumer pool size.
+         * 
+         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 1
+         * Group: consumer
+         * 
+         * @param poolSize the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder poolSize(
+                String poolSize) {
+            doSetProperty("poolSize", poolSize);
+            return this;
+        }
+        /**
+         * The Consumer Resource Name we would like to watch.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param resourceName the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder resourceName(
+                String resourceName) {
+            doSetProperty("resourceName", resourceName);
+            return this;
+        }
+        /**
+         * The CA Cert Data.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param caCertData the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder caCertData(
+                String caCertData) {
+            doSetProperty("caCertData", caCertData);
+            return this;
+        }
+        /**
+         * The CA Cert File.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param caCertFile the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder caCertFile(
+                String caCertFile) {
+            doSetProperty("caCertFile", caCertFile);
+            return this;
+        }
+        /**
+         * The Client Cert Data.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientCertData the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder clientCertData(
+                String clientCertData) {
+            doSetProperty("clientCertData", clientCertData);
+            return this;
+        }
+        /**
+         * The Client Cert File.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientCertFile the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder clientCertFile(
+                String clientCertFile) {
+            doSetProperty("clientCertFile", clientCertFile);
+            return this;
+        }
+        /**
+         * The Key Algorithm used by the client.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyAlgo the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder clientKeyAlgo(
+                String clientKeyAlgo) {
+            doSetProperty("clientKeyAlgo", clientKeyAlgo);
+            return this;
+        }
+        /**
+         * The Client Key data.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyData the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder clientKeyData(
+                String clientKeyData) {
+            doSetProperty("clientKeyData", clientKeyData);
+            return this;
+        }
+        /**
+         * The Client Key file.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyFile the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder clientKeyFile(
+                String clientKeyFile) {
+            doSetProperty("clientKeyFile", clientKeyFile);
+            return this;
+        }
+        /**
+         * The Client Key Passphrase.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyPassphrase the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder clientKeyPassphrase(
+                String clientKeyPassphrase) {
+            doSetProperty("clientKeyPassphrase", clientKeyPassphrase);
+            return this;
+        }
+        /**
+         * The Auth Token.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param oauthToken the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder oauthToken(
+                String oauthToken) {
+            doSetProperty("oauthToken", oauthToken);
+            return this;
+        }
+        /**
+         * Password to connect to Kubernetes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param password the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder password(
+                String password) {
+            doSetProperty("password", password);
+            return this;
+        }
+        /**
+         * Define if the certs we used are trusted anyway or not.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param trustCerts the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder trustCerts(
+                Boolean trustCerts) {
+            doSetProperty("trustCerts", trustCerts);
+            return this;
+        }
+        /**
+         * Define if the certs we used are trusted anyway or not.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param trustCerts the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder trustCerts(
+                String trustCerts) {
+            doSetProperty("trustCerts", trustCerts);
+            return this;
+        }
+        /**
+         * Username to connect to Kubernetes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param username the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointConsumerBuilder username(
+                String username) {
+            doSetProperty("username", username);
+            return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint consumers for the Kubernetes ConfigMap
+     * component.
+     */
+    public interface AdvancedKubernetesConfigMapsEndpointConsumerBuilder
+            extends
+                EndpointConsumerBuilder {
+        default KubernetesConfigMapsEndpointConsumerBuilder basic() {
+            return (KubernetesConfigMapsEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * To let the consumer use a custom ExceptionHandler. Notice if the
+         * option bridgeErrorHandler is enabled then this option is not in use.
+         * By default the consumer will deal with exceptions, that will be
+         * logged at WARN or ERROR level and ignored.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.spi.ExceptionHandler&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param exceptionHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder exceptionHandler(
+                org.apache.camel.spi.ExceptionHandler exceptionHandler) {
+            doSetProperty("exceptionHandler", exceptionHandler);
+            return this;
+        }
+        /**
+         * To let the consumer use a custom ExceptionHandler. Notice if the
+         * option bridgeErrorHandler is enabled then this option is not in use.
+         * By default the consumer will deal with exceptions, that will be
+         * logged at WARN or ERROR level and ignored.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.spi.ExceptionHandler&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param exceptionHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder exceptionHandler(
+                String exceptionHandler) {
+            doSetProperty("exceptionHandler", exceptionHandler);
+            return this;
+        }
+        /**
+         * Sets the exchange pattern when the consumer creates an exchange.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.ExchangePattern&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param exchangePattern the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder exchangePattern(
+                org.apache.camel.ExchangePattern exchangePattern) {
+            doSetProperty("exchangePattern", exchangePattern);
+            return this;
+        }
+        /**
+         * Sets the exchange pattern when the consumer creates an exchange.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.ExchangePattern&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param exchangePattern the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder exchangePattern(
+                String exchangePattern) {
+            doSetProperty("exchangePattern", exchangePattern);
+            return this;
+        }
+        /**
+         * Connection timeout in milliseconds to use when making requests to the
+         * Kubernetes API server.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
+         * 
+         * Group: advanced
+         * 
+         * @param connectionTimeout the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder connectionTimeout(
+                Integer connectionTimeout) {
+            doSetProperty("connectionTimeout", connectionTimeout);
+            return this;
+        }
+        /**
+         * Connection timeout in milliseconds to use when making requests to the
+         * Kubernetes API server.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
+         * 
+         * Group: advanced
+         * 
+         * @param connectionTimeout the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointConsumerBuilder connectionTimeout(
+                String connectionTimeout) {
+            doSetProperty("connectionTimeout", connectionTimeout);
+            return this;
+        }
+    }
+
+    /**
+     * Builder for endpoint producers for the Kubernetes ConfigMap component.
+     */
+    public interface KubernetesConfigMapsEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default AdvancedKubernetesConfigMapsEndpointProducerBuilder advanced() {
+            return (AdvancedKubernetesConfigMapsEndpointProducerBuilder) this;
+        }
+        /**
+         * The Kubernetes API Version to use.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param apiVersion the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder apiVersion(
+                String apiVersion) {
+            doSetProperty("apiVersion", apiVersion);
+            return this;
+        }
+        /**
+         * The dns domain, used for ServiceCall EIP.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param dnsDomain the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder dnsDomain(
+                String dnsDomain) {
+            doSetProperty("dnsDomain", dnsDomain);
+            return this;
+        }
+        /**
+         * Default KubernetesClient to use if provided.
+         * 
+         * The option is a:
+         * &lt;code&gt;io.fabric8.kubernetes.client.KubernetesClient&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param kubernetesClient the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder kubernetesClient(
+                io.fabric8.kubernetes.client.KubernetesClient kubernetesClient) {
+            doSetProperty("kubernetesClient", kubernetesClient);
+            return this;
+        }
+        /**
+         * Default KubernetesClient to use if provided.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;io.fabric8.kubernetes.client.KubernetesClient&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param kubernetesClient the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder kubernetesClient(
+                String kubernetesClient) {
+            doSetProperty("kubernetesClient", kubernetesClient);
+            return this;
+        }
+        /**
+         * The port name, used for ServiceCall EIP.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param portName the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder portName(
+                String portName) {
+            doSetProperty("portName", portName);
+            return this;
+        }
+        /**
+         * The port protocol, used for ServiceCall EIP.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: tcp
+         * Group: common
+         * 
+         * @param portProtocol the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder portProtocol(
+                String portProtocol) {
+            doSetProperty("portProtocol", portProtocol);
+            return this;
+        }
+        /**
+         * Producer operation to do on Kubernetes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: producer
+         * 
+         * @param operation the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder operation(
+                String operation) {
+            doSetProperty("operation", operation);
+            return this;
+        }
+        /**
+         * The CA Cert Data.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param caCertData the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder caCertData(
+                String caCertData) {
+            doSetProperty("caCertData", caCertData);
+            return this;
+        }
+        /**
+         * The CA Cert File.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param caCertFile the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder caCertFile(
+                String caCertFile) {
+            doSetProperty("caCertFile", caCertFile);
+            return this;
+        }
+        /**
+         * The Client Cert Data.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientCertData the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder clientCertData(
+                String clientCertData) {
+            doSetProperty("clientCertData", clientCertData);
+            return this;
+        }
+        /**
+         * The Client Cert File.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientCertFile the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder clientCertFile(
+                String clientCertFile) {
+            doSetProperty("clientCertFile", clientCertFile);
+            return this;
+        }
+        /**
+         * The Key Algorithm used by the client.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyAlgo the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder clientKeyAlgo(
+                String clientKeyAlgo) {
+            doSetProperty("clientKeyAlgo", clientKeyAlgo);
+            return this;
+        }
+        /**
+         * The Client Key data.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyData the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder clientKeyData(
+                String clientKeyData) {
+            doSetProperty("clientKeyData", clientKeyData);
+            return this;
+        }
+        /**
+         * The Client Key file.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyFile the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder clientKeyFile(
+                String clientKeyFile) {
+            doSetProperty("clientKeyFile", clientKeyFile);
+            return this;
+        }
+        /**
+         * The Client Key Passphrase.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param clientKeyPassphrase the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder clientKeyPassphrase(
+                String clientKeyPassphrase) {
+            doSetProperty("clientKeyPassphrase", clientKeyPassphrase);
+            return this;
+        }
+        /**
+         * The Auth Token.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param oauthToken the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder oauthToken(
+                String oauthToken) {
+            doSetProperty("oauthToken", oauthToken);
+            return this;
+        }
+        /**
+         * Password to connect to Kubernetes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param password the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder password(
+                String password) {
+            doSetProperty("password", password);
+            return this;
+        }
+        /**
+         * Define if the certs we used are trusted anyway or not.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param trustCerts the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder trustCerts(
+                Boolean trustCerts) {
+            doSetProperty("trustCerts", trustCerts);
+            return this;
+        }
+        /**
+         * Define if the certs we used are trusted anyway or not.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param trustCerts the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder trustCerts(
+                String trustCerts) {
+            doSetProperty("trustCerts", trustCerts);
+            return this;
+        }
+        /**
+         * Username to connect to Kubernetes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param username the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointProducerBuilder username(
+                String username) {
+            doSetProperty("username", username);
+            return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the Kubernetes ConfigMap
+     * component.
+     */
+    public interface AdvancedKubernetesConfigMapsEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default KubernetesConfigMapsEndpointProducerBuilder basic() {
+            return (KubernetesConfigMapsEndpointProducerBuilder) this;
         }
         /**
          * Whether the producer should be started lazy (on the first message).
@@ -118,12 +1001,12 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder lazyStartProducer(
+        default AdvancedKubernetesConfigMapsEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -143,28 +1026,119 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder lazyStartProducer(
+        default AdvancedKubernetesConfigMapsEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
-         * Producer operation to do on Kubernetes.
+         * Connection timeout in milliseconds to use when making requests to the
+         * Kubernetes API server.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
+         * 
+         * Group: advanced
+         * 
+         * @param connectionTimeout the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointProducerBuilder connectionTimeout(
+                Integer connectionTimeout) {
+            doSetProperty("connectionTimeout", connectionTimeout);
+            return this;
+        }
+        /**
+         * Connection timeout in milliseconds to use when making requests to the
+         * Kubernetes API server.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
+         * 
+         * Group: advanced
+         * 
+         * @param connectionTimeout the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKubernetesConfigMapsEndpointProducerBuilder connectionTimeout(
+                String connectionTimeout) {
+            doSetProperty("connectionTimeout", connectionTimeout);
+            return this;
+        }
+    }
+
+    /**
+     * Builder for endpoint for the Kubernetes ConfigMap component.
+     */
+    public interface KubernetesConfigMapsEndpointBuilder
+            extends
+                KubernetesConfigMapsEndpointConsumerBuilder,
+                KubernetesConfigMapsEndpointProducerBuilder {
+        default AdvancedKubernetesConfigMapsEndpointBuilder advanced() {
+            return (AdvancedKubernetesConfigMapsEndpointBuilder) this;
+        }
+        /**
+         * The Kubernetes API Version to use.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: common
          * 
-         * @param operation the value to set
+         * @param apiVersion the value to set
          * @return the dsl builder
          */
-        default KubernetesConfigMapsEndpointBuilder operation(String operation) {
-            doSetProperty("operation", operation);
+        default KubernetesConfigMapsEndpointBuilder apiVersion(String apiVersion) {
+            doSetProperty("apiVersion", apiVersion);
+            return this;
+        }
+        /**
+         * The dns domain, used for ServiceCall EIP.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param dnsDomain the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointBuilder dnsDomain(String dnsDomain) {
+            doSetProperty("dnsDomain", dnsDomain);
+            return this;
+        }
+        /**
+         * Default KubernetesClient to use if provided.
+         * 
+         * The option is a:
+         * &lt;code&gt;io.fabric8.kubernetes.client.KubernetesClient&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param kubernetesClient the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointBuilder kubernetesClient(
+                io.fabric8.kubernetes.client.KubernetesClient kubernetesClient) {
+            doSetProperty("kubernetesClient", kubernetesClient);
+            return this;
+        }
+        /**
+         * Default KubernetesClient to use if provided.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;io.fabric8.kubernetes.client.KubernetesClient&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param kubernetesClient the value to set
+         * @return the dsl builder
+         */
+        default KubernetesConfigMapsEndpointBuilder kubernetesClient(
+                String kubernetesClient) {
+            doSetProperty("kubernetesClient", kubernetesClient);
             return this;
         }
         /**
@@ -172,7 +1146,7 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: common
          * 
          * @param portName the value to set
          * @return the dsl builder
@@ -187,7 +1161,7 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Default: tcp
-         * Group: producer
+         * Group: common
          * 
          * @param portProtocol the value to set
          * @return the dsl builder
@@ -394,7 +1368,8 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
      */
     public interface AdvancedKubernetesConfigMapsEndpointBuilder
             extends
-                EndpointProducerBuilder {
+                AdvancedKubernetesConfigMapsEndpointConsumerBuilder,
+                AdvancedKubernetesConfigMapsEndpointProducerBuilder {
         default KubernetesConfigMapsEndpointBuilder basic() {
             return (KubernetesConfigMapsEndpointBuilder) this;
         }
@@ -443,6 +1418,20 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
          * Since: 2.17
          * Maven coordinates: org.apache.camel:camel-kubernetes
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default KubernetesConfigMapsHeaderNameBuilder kubernetesConfigMaps() {
+            return KubernetesConfigMapsHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Kubernetes ConfigMap (camel-kubernetes)
+         * Perform operations on Kubernetes ConfigMaps and get notified on
+         * ConfigMaps changes.
+         * 
+         * Category: container,cloud,paas
+         * Since: 2.17
+         * Maven coordinates: org.apache.camel:camel-kubernetes
+         * 
          * Syntax: <code>kubernetes-config-maps:masterUrl</code>
          * 
          * Path parameter: masterUrl (required)
@@ -478,6 +1467,109 @@ public interface KubernetesConfigMapsEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return KubernetesConfigMapsEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Kubernetes ConfigMap component.
+     */
+    public static class KubernetesConfigMapsHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final KubernetesConfigMapsHeaderNameBuilder INSTANCE = new KubernetesConfigMapsHeaderNameBuilder();
+
+        /**
+         * The Producer operation.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code KubernetesOperation}.
+         */
+        public String kubernetesOperation() {
+            return "KubernetesOperation";
+        }
+
+        /**
+         * The namespace name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code KubernetesNamespaceName}.
+         */
+        public String kubernetesNamespaceName() {
+            return "KubernetesNamespaceName";
+        }
+
+        /**
+         * The ConfigMap labels.
+         * 
+         * The option is a: {@code Map<String, String>} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code KubernetesConfigMapsLabels}.
+         */
+        public String kubernetesConfigMapsLabels() {
+            return "KubernetesConfigMapsLabels";
+        }
+
+        /**
+         * The ConfigMap name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code KubernetesConfigMapName}.
+         */
+        public String kubernetesConfigMapName() {
+            return "KubernetesConfigMapName";
+        }
+
+        /**
+         * The ConfigMap Data.
+         * 
+         * The option is a: {@code Map<String, String>} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code KubernetesConfigData}.
+         */
+        public String kubernetesConfigData() {
+            return "KubernetesConfigData";
+        }
+
+        /**
+         * Action watched by the consumer.
+         * 
+         * The option is a: {@code io.fabric8.kubernetes.client.Watcher.Action}
+         * type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code KubernetesEventAction}.
+         */
+        public String kubernetesEventAction() {
+            return "KubernetesEventAction";
+        }
+
+        /**
+         * Timestamp of the action watched by the consumer.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code KubernetesEventTimestamp}.
+         */
+        public String kubernetesEventTimestamp() {
+            return "KubernetesEventTimestamp";
         }
     }
     static KubernetesConfigMapsEndpointBuilder endpointBuilder(

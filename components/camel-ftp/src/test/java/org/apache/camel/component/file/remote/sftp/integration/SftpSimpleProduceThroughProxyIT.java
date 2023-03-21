@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpSimpleProduceThroughProxyIT extends SftpServerTestSupport {
 
     private static HttpProxyServer proxyServer;
@@ -102,7 +102,7 @@ public class SftpSimpleProduceThroughProxyIT extends SftpServerTestSupport {
     }
 
     @BindToRegistry("proxy")
-    public ProxyHTTP createProxy() throws Exception {
+    public ProxyHTTP createProxy() {
 
         final ProxyHTTP proxyHTTP = new ProxyHTTP("localhost", proxyPort);
         proxyHTTP.setUserPasswd("user", "password");

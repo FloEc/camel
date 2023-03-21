@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>core</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-xml-io</artifactId>
@@ -31,7 +31,10 @@
     <description>Camel XML IO</description>
 
     <properties>
+        <firstVersion>3.1.0</firstVersion>
+        <label>dsl</label>
         <camel-generate-xml-parser>true</camel-generate-xml-parser>
+        <camel-generate-xml-writer>true</camel-generate-xml-writer>
     </properties>
 
     <dependencies>
@@ -51,11 +54,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -69,6 +67,7 @@
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-xml-parser</goal>
+                            <goal>generate-xml-writer</goal>
                         </goals>
                     </execution>
                 </executions>

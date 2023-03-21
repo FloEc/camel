@@ -24,22 +24,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class KafkaToDIT extends BaseEmbeddedKafkaTestSupport {
 
     @Test
-    public void testToD() throws Exception {
-        template.sendBodyAndHeader("direct:start", "Hello bar", "where", "bar");
-        template.sendBodyAndHeader("direct:start", "Hello beer", "where", "beer");
+    public void testToD() {
+        contextExtension.getProducerTemplate().sendBodyAndHeader("direct:start", "Hello bar", "where", "bar");
+        contextExtension.getProducerTemplate().sendBodyAndHeader("direct:start", "Hello beer", "where", "beer");
 
         // there should only be one kafka endpoint
-        long count = context.getEndpoints().stream().filter(e -> e.getEndpointUri().startsWith("kafka:")).count();
+        long count = contextExtension.getContext().getEndpoints().stream().filter(e -> e.getEndpointUri().startsWith("kafka:"))
+                .count();
         assertEquals(1, count, "There should only be 1 kafka endpoint");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // route message dynamic using toD
-                from("direct:start").toD("kafka:${header.where}");
+                from("direct:start").toD("kafka://${header.where}");
             }
         };
     }

@@ -16,7 +16,6 @@
  */
 package org.apache.camel.component.github.services;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,14 +56,13 @@ public class MockCommitService extends CommitService {
         }
         rc.setCommit(commit);
         LOG.debug("In MockCommitService added commit with sha " + rc.getSha());
-        commitsList.add(rc);
+        commitsList.add(0, rc);
 
         return rc;
     }
 
     @Override
-    public synchronized List<RepositoryCommit> getCommits(IRepositoryIdProvider repository, String sha, String path)
-            throws IOException {
+    public synchronized List<RepositoryCommit> getCommits(IRepositoryIdProvider repository, String sha, String path) {
         LOG.debug("Returning list of size " + commitsList.size());
 
         if (sha != null) {
@@ -81,8 +79,7 @@ public class MockCommitService extends CommitService {
     @Override
     public CommitStatus createStatus(
             IRepositoryIdProvider repository,
-            String sha, CommitStatus status)
-            throws IOException {
+            String sha, CommitStatus status) {
         commitStatus.put(sha, status);
 
         return status;

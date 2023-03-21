@@ -30,12 +30,12 @@ public final class ECS2ClientFactory {
 
     /**
      * Return the correct AWS ECS client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               EcsClient
      */
     public static ECS2InternalClient getEcsClient(ECS2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new ECS2ClientIAMOptimizedImpl(configuration) : new ECS2ClientStandardImpl(configuration);
     }
 }

@@ -26,6 +26,8 @@ import org.apache.camel.Route;
 import org.apache.camel.RouteTemplateContext;
 import org.apache.camel.TypeConverter;
 import org.apache.camel.catalog.RuntimeCamelCatalog;
+import org.apache.camel.console.DevConsoleRegistry;
+import org.apache.camel.console.DevConsoleResolver;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.health.HealthCheckResolver;
 import org.apache.camel.impl.converter.DefaultTypeConverter;
@@ -36,7 +38,9 @@ import org.apache.camel.spi.BeanProcessorFactory;
 import org.apache.camel.spi.BeanProxyFactory;
 import org.apache.camel.spi.CamelBeanPostProcessor;
 import org.apache.camel.spi.CamelContextNameStrategy;
+import org.apache.camel.spi.CamelDependencyInjectionAnnotationFactory;
 import org.apache.camel.spi.ClassResolver;
+import org.apache.camel.spi.CliConnectorFactory;
 import org.apache.camel.spi.ComponentNameResolver;
 import org.apache.camel.spi.ComponentResolver;
 import org.apache.camel.spi.ConfigurerResolver;
@@ -58,9 +62,12 @@ import org.apache.camel.spi.ManagementNameStrategy;
 import org.apache.camel.spi.MessageHistoryFactory;
 import org.apache.camel.spi.ModelJAXBContextFactory;
 import org.apache.camel.spi.ModelToXMLDumper;
+import org.apache.camel.spi.ModelineFactory;
 import org.apache.camel.spi.NodeIdFactory;
 import org.apache.camel.spi.PackageScanClassResolver;
 import org.apache.camel.spi.PackageScanResourceResolver;
+import org.apache.camel.spi.PeriodTaskResolver;
+import org.apache.camel.spi.PeriodTaskScheduler;
 import org.apache.camel.spi.ProcessorExchangeFactory;
 import org.apache.camel.spi.ProcessorFactory;
 import org.apache.camel.spi.PropertiesComponent;
@@ -81,7 +88,6 @@ import org.apache.camel.spi.UnitOfWorkFactory;
 import org.apache.camel.spi.UriFactoryResolver;
 import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.spi.ValidatorRegistry;
-import org.apache.camel.spi.XMLRoutesDefinitionLoader;
 import org.apache.camel.support.DefaultRegistry;
 import org.apache.camel.support.DefaultUuidGenerator;
 import org.apache.camel.support.NormalizedUri;
@@ -128,6 +134,17 @@ public class SimpleCamelContext extends AbstractCamelContext {
                 getBootstrapFactoryFinder(),
                 HealthCheckRegistry.FACTORY,
                 HealthCheckRegistry.class);
+
+        return result.orElse(null);
+    }
+
+    @Override
+    protected DevConsoleRegistry createDevConsoleRegistry() {
+        Optional<DevConsoleRegistry> result = ResolverHelper.resolveService(
+                getCamelContextReference(),
+                getBootstrapFactoryFinder(),
+                DevConsoleRegistry.FACTORY,
+                DevConsoleRegistry.class);
 
         return result.orElse(null);
     }
@@ -180,6 +197,11 @@ public class SimpleCamelContext extends AbstractCamelContext {
     }
 
     @Override
+    protected CamelDependencyInjectionAnnotationFactory createDependencyInjectionAnnotationFactory() {
+        return new DefaultDependencyInjectionAnnotationFactory(getCamelContextReference());
+    }
+
+    @Override
     protected ComponentResolver createComponentResolver() {
         return new DefaultComponentResolver();
     }
@@ -218,6 +240,35 @@ public class SimpleCamelContext extends AbstractCamelContext {
     @Override
     protected NodeIdFactory createNodeIdFactory() {
         return new DefaultNodeIdFactory();
+    }
+
+    @Override
+    protected ModelineFactory createModelineFactory() {
+        Optional<ModelineFactory> result = ResolverHelper.resolveService(
+                getCamelContextReference(),
+                getBootstrapFactoryFinder(),
+                ModelineFactory.FACTORY,
+                ModelineFactory.class);
+
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            throw new IllegalArgumentException(
+                    "Cannot find ModelineFactory on classpath. Add camel-dsl-modeline to classpath.");
+        }
+    }
+
+    @Override
+    protected PeriodTaskResolver createPeriodTaskResolver() {
+        // we need a factory finder
+        FactoryFinder finder = getCamelContextExtension().getFactoryFinderResolver()
+                .resolveBootstrapFactoryFinder(getClassResolver(), PeriodTaskResolver.RESOURCE_PATH);
+        return new DefaultPeriodTaskResolver(finder);
+    }
+
+    @Override
+    protected PeriodTaskScheduler createPeriodTaskScheduler() {
+        return new DefaultPeriodTaskScheduler();
     }
 
     @Override
@@ -280,6 +331,11 @@ public class SimpleCamelContext extends AbstractCamelContext {
     @Override
     protected HealthCheckResolver createHealthCheckResolver() {
         return new DefaultHealthCheckResolver();
+    }
+
+    @Override
+    protected DevConsoleResolver createDevConsoleResolver() {
+        return new DefaultDevConsoleResolver();
     }
 
     @Override
@@ -369,6 +425,23 @@ public class SimpleCamelContext extends AbstractCamelContext {
     }
 
     @Override
+    protected CliConnectorFactory createCliConnectorFactory() {
+        // lookup in registry first
+        CliConnectorFactory ccf = getCamelContextReference().getRegistry().findSingleByType(CliConnectorFactory.class);
+        if (ccf != null) {
+            return ccf;
+        }
+        // then classpath scanning
+        Optional<CliConnectorFactory> result = ResolverHelper.resolveService(
+                getCamelContextReference(),
+                getBootstrapFactoryFinder(),
+                CliConnectorFactory.FACTORY,
+                CliConnectorFactory.class);
+        // cli-connector is optional
+        return result.orElse(null);
+    }
+
+    @Override
     protected BeanProxyFactory createBeanProxyFactory() {
         Optional<BeanProxyFactory> result = ResolverHelper.resolveService(
                 getCamelContextReference(),
@@ -433,22 +506,6 @@ public class SimpleCamelContext extends AbstractCamelContext {
     @Override
     protected BeanIntrospection createBeanIntrospection() {
         return new DefaultBeanIntrospection();
-    }
-
-    @Override
-    protected XMLRoutesDefinitionLoader createXMLRoutesDefinitionLoader() {
-        Optional<XMLRoutesDefinitionLoader> result = ResolverHelper.resolveService(
-                getCamelContextReference(),
-                getBootstrapFactoryFinder(),
-                XMLRoutesDefinitionLoader.FACTORY,
-                XMLRoutesDefinitionLoader.class);
-
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            throw new IllegalArgumentException(
-                    "Cannot find XMLRoutesDefinitionLoader on classpath. Add either camel-xml-io-dsl or camel-xml-jaxb-dsl to classpath.");
-        }
     }
 
     @Override
@@ -631,7 +688,20 @@ public class SimpleCamelContext extends AbstractCamelContext {
     }
 
     @Override
+    public String addRouteFromTemplate(String routeId, String routeTemplateId, String prefixId, Map<String, Object> parameters)
+            throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
+            throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String addRouteFromTemplate(
+            String routeId, String routeTemplateId, String prefixId, RouteTemplateContext routeTemplateContext)
             throws Exception {
         throw new UnsupportedOperationException();
     }

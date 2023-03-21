@@ -37,14 +37,14 @@ public class FtpProducerReplyStringIT extends FtpServerTestSupport {
 
         template.requestBodyAndHeader("direct:start", "Bye World", Exchange.FILE_NAME, "hello.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to(getFtpUrl()).to("mock:result");
             }
         };

@@ -116,13 +116,16 @@ public class ApiComponentGeneratorMojo extends AbstractApiMethodBaseMojo {
                 .hash("excludeConfigTypes", excludeConfigTypes)
                 .hash("extraOptions", extraOptions)
                 .toString();
-        Instant newDate = Stream.of(generatedSrcDir, generatedTestDir)
-                .map(File::toPath)
-                .flatMap(this::walk)
-                .filter(Files::isRegularFile)
-                .map(this::lastModified)
-                .max(Comparator.naturalOrder())
-                .orElse(Instant.now());
+        Instant newDate;
+        try (Stream<File> stream = Stream.of(this.generatedSrcDir, generatedTestDir)) {
+            newDate = stream
+                    .map(File::toPath)
+                    .flatMap(this::walk)
+                    .filter(Files::isRegularFile)
+                    .map(this::lastModified)
+                    .max(Comparator.naturalOrder())
+                    .orElse(Instant.now());
+        }
 
         List<String> cache = readCacheFile();
         String prevHash = cache.stream().filter(s -> s.startsWith("hash=")).findFirst()
@@ -191,13 +194,15 @@ public class ApiComponentGeneratorMojo extends AbstractApiMethodBaseMojo {
         // generate ApiName
         mergeTemplate(getApiContext(), getApiNameFile(), "/api-name-enum.vm");
 
-        newDate = Stream.of(generatedSrcDir, generatedTestDir)
-                .map(File::toPath)
-                .flatMap(this::walk)
-                .filter(Files::isRegularFile)
-                .map(this::lastModified)
-                .max(Comparator.naturalOrder())
-                .orElse(Instant.now());
+        try (Stream<File> stream = Stream.of(this.generatedSrcDir, generatedTestDir)) {
+            newDate = stream
+                    .map(File::toPath)
+                    .flatMap(this::walk)
+                    .filter(Files::isRegularFile)
+                    .map(this::lastModified)
+                    .max(Comparator.naturalOrder())
+                    .orElse(Instant.now());
+        }
         writeCacheFile(Arrays.asList(
                 "# ApiComponentGenerator cache file",
                 "hash=" + newHash,
@@ -314,12 +319,22 @@ public class ApiComponentGeneratorMojo extends AbstractApiMethodBaseMojo {
         return fileName;
     }
 
+    /*
+     * This is used when configuring the plugin instead of directly, which is why it reports as unused
+     * without the annotation
+     */
+    @SuppressWarnings("unused")
     public static String getApiMethod(String proxyClass, String classPrefix) {
         String proxyClassWithCanonicalName = getProxyClassWithCanonicalName(proxyClass);
         String prefix = classPrefix != null ? classPrefix : "";
         return prefix + proxyClassWithCanonicalName.substring(proxyClassWithCanonicalName.lastIndexOf('.') + 1) + "ApiMethod";
     }
 
+    /*
+     * This is used when configuring the plugin instead of directly, which is why it reports as unused
+     * without the annotation
+     */
+    @SuppressWarnings("unused")
     public static String getEndpointConfig(String proxyClass, String classPrefix) {
         String proxyClassWithCanonicalName = getProxyClassWithCanonicalName(proxyClass);
         String prefix = classPrefix != null ? classPrefix : "";
@@ -331,6 +346,11 @@ public class ApiComponentGeneratorMojo extends AbstractApiMethodBaseMojo {
         return proxyClass.replace("$", "");
     }
 
+    /*
+     * This is used when configuring the plugin instead of directly, which is why it reports as unused
+     * without the annotation
+     */
+    @SuppressWarnings("unused")
     public static String getEnumConstant(String enumValue) {
         if (enumValue == null || enumValue.isEmpty()) {
             return "DEFAULT";
@@ -342,6 +362,11 @@ public class ApiComponentGeneratorMojo extends AbstractApiMethodBaseMojo {
         return value;
     }
 
+    /*
+     * This is used when configuring the plugin instead of directly, which is why it reports as unused
+     * without the annotation
+     */
+    @SuppressWarnings("unused")
     public static String getNullableOptionValues(String[] nullableOptions) {
         if (nullableOptions == null || nullableOptions.length == 0) {
             return "";

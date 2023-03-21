@@ -19,63 +19,68 @@ public class BlobEndpointUriFactory extends org.apache.camel.support.component.E
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(50);
-        props.add("blobName");
-        props.add("prefix");
-        props.add("initialDelay");
-        props.add("blobServiceClient");
-        props.add("bridgeErrorHandler");
-        props.add("containerName");
-        props.add("closeStreamAfterRead");
-        props.add("greedy");
-        props.add("scheduledExecutorService");
-        props.add("closeStreamAfterWrite");
-        props.add("repeatCount");
-        props.add("maxResultsPerPage");
-        props.add("sendEmptyMessageWhenIdle");
-        props.add("schedulerProperties");
-        props.add("backoffIdleThreshold");
-        props.add("createAppendBlob");
-        props.add("regex");
-        props.add("lazyStartProducer");
-        props.add("delay");
-        props.add("blobSequenceNumber");
-        props.add("startScheduler");
+        Set<String> props = new HashSet<>(51);
         props.add("accessKey");
-        props.add("commitBlockListLater");
-        props.add("blobType");
-        props.add("exceptionHandler");
-        props.add("backoffMultiplier");
         props.add("accountName");
-        props.add("credentials");
-        props.add("createPageBlob");
-        props.add("blobOffset");
-        props.add("timeout");
-        props.add("dataCount");
-        props.add("scheduler");
-        props.add("maxRetryRequests");
-        props.add("useFixedDelay");
-        props.add("runLoggingLevel");
         props.add("backoffErrorThreshold");
-        props.add("changeFeedStartTime");
-        props.add("timeUnit");
-        props.add("downloadLinkExpiration");
-        props.add("exchangePattern");
-        props.add("changeFeedEndTime");
+        props.add("backoffIdleThreshold");
+        props.add("backoffMultiplier");
+        props.add("blobName");
+        props.add("blobOffset");
+        props.add("blobSequenceNumber");
+        props.add("blobServiceClient");
+        props.add("blobType");
         props.add("blockListType");
-        props.add("pollStrategy");
-        props.add("serviceClient");
-        props.add("fileDir");
+        props.add("bridgeErrorHandler");
         props.add("changeFeedContext");
-        props.add("pageBlobSize");
+        props.add("changeFeedEndTime");
+        props.add("changeFeedStartTime");
+        props.add("closeStreamAfterRead");
+        props.add("closeStreamAfterWrite");
+        props.add("commitBlockListLater");
+        props.add("containerName");
+        props.add("createAppendBlob");
+        props.add("createPageBlob");
+        props.add("credentialType");
+        props.add("credentials");
+        props.add("dataCount");
+        props.add("delay");
+        props.add("downloadLinkExpiration");
+        props.add("exceptionHandler");
+        props.add("exchangePattern");
+        props.add("fileDir");
+        props.add("greedy");
+        props.add("initialDelay");
+        props.add("lazyStartProducer");
+        props.add("maxResultsPerPage");
+        props.add("maxRetryRequests");
         props.add("operation");
+        props.add("pageBlobSize");
+        props.add("pollStrategy");
+        props.add("prefix");
+        props.add("regex");
+        props.add("repeatCount");
+        props.add("runLoggingLevel");
+        props.add("scheduledExecutorService");
+        props.add("scheduler");
+        props.add("schedulerProperties");
+        props.add("sendEmptyMessageWhenIdle");
+        props.add("serviceClient");
         props.add("sourceBlobAccessKey");
+        props.add("startScheduler");
+        props.add("timeUnit");
+        props.add("timeout");
+        props.add("useFixedDelay");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         Set<String> secretProps = new HashSet<>(2);
         secretProps.add("accessKey");
         secretProps.add("sourceBlobAccessKey");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        Set<String> prefixes = new HashSet<>(1);
+        prefixes.add("scheduler.");
+        MULTI_VALUE_PREFIXES = Collections.unmodifiableSet(prefixes);
     }
 
     @Override
@@ -104,6 +109,11 @@ public class BlobEndpointUriFactory extends org.apache.camel.support.component.E
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

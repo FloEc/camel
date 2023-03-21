@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
@@ -58,11 +57,11 @@ public class LogReifier extends ProcessorReifier<LogDefinition> {
         }
 
         // get logger explicitly set in the definition
-        Logger logger = definition.getLogger();
+        Logger logger = definition.getLoggerBean();
 
         // get logger which may be set in XML definition
-        if (logger == null && ObjectHelper.isNotEmpty(definition.getLoggerRef())) {
-            logger = mandatoryLookup(definition.getLoggerRef(), Logger.class);
+        if (logger == null && ObjectHelper.isNotEmpty(definition.getLogger())) {
+            logger = mandatoryLookup(definition.getLogger(), Logger.class);
         }
 
         if (logger == null) {
@@ -105,17 +104,17 @@ public class LogReifier extends ProcessorReifier<LogDefinition> {
         if (exp != null) {
             // dynamic log message via simple expression
             return new LogProcessor(
-                    exp, camelLogger, getMaskingFormatter(), camelContext.adapt(ExtendedCamelContext.class).getLogListeners());
+                    exp, camelLogger, getMaskingFormatter(), camelContext.getCamelContextExtension().getLogListeners());
         } else {
             // static log message via string message
             return new LogProcessor(
-                    msg, camelLogger, getMaskingFormatter(), camelContext.adapt(ExtendedCamelContext.class).getLogListeners());
+                    msg, camelLogger, getMaskingFormatter(), camelContext.getCamelContextExtension().getLogListeners());
         }
     }
 
     private MaskingFormatter getMaskingFormatter() {
         if (route.isLogMask()) {
-            MaskingFormatter formatter = lookup(MaskingFormatter.CUSTOM_LOG_MASK_REF, MaskingFormatter.class);
+            MaskingFormatter formatter = lookupByNameAndType(MaskingFormatter.CUSTOM_LOG_MASK_REF, MaskingFormatter.class);
             if (formatter == null) {
                 formatter = new DefaultMaskingFormatter();
             }

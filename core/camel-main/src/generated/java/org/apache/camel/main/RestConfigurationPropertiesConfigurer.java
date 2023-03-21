@@ -23,10 +23,6 @@ public class RestConfigurationPropertiesConfigurer extends org.apache.camel.supp
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "apicomponent":
         case "ApiComponent": target.setApiComponent(property(camelContext, java.lang.String.class, value)); return true;
-        case "apicontextidpattern":
-        case "ApiContextIdPattern": target.setApiContextIdPattern(property(camelContext, java.lang.String.class, value)); return true;
-        case "apicontextlisting":
-        case "ApiContextListing": target.setApiContextListing(property(camelContext, boolean.class, value)); return true;
         case "apicontextpath":
         case "ApiContextPath": target.setApiContextPath(property(camelContext, java.lang.String.class, value)); return true;
         case "apicontextrouteid":
@@ -61,6 +57,8 @@ public class RestConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Host": target.setHost(property(camelContext, java.lang.String.class, value)); return true;
         case "hostnameresolver":
         case "HostNameResolver": target.setHostNameResolver(property(camelContext, java.lang.String.class, value)); return true;
+        case "inlineroutes":
+        case "InlineRoutes": target.setInlineRoutes(property(camelContext, boolean.class, value)); return true;
         case "jsondataformat":
         case "JsonDataFormat": target.setJsonDataFormat(property(camelContext, java.lang.String.class, value)); return true;
         case "port":
@@ -86,10 +84,6 @@ public class RestConfigurationPropertiesConfigurer extends org.apache.camel.supp
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "apicomponent":
         case "ApiComponent": return java.lang.String.class;
-        case "apicontextidpattern":
-        case "ApiContextIdPattern": return java.lang.String.class;
-        case "apicontextlisting":
-        case "ApiContextListing": return boolean.class;
         case "apicontextpath":
         case "ApiContextPath": return java.lang.String.class;
         case "apicontextrouteid":
@@ -124,6 +118,8 @@ public class RestConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Host": return java.lang.String.class;
         case "hostnameresolver":
         case "HostNameResolver": return java.lang.String.class;
+        case "inlineroutes":
+        case "InlineRoutes": return boolean.class;
         case "jsondataformat":
         case "JsonDataFormat": return java.lang.String.class;
         case "port":
@@ -150,10 +146,6 @@ public class RestConfigurationPropertiesConfigurer extends org.apache.camel.supp
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "apicomponent":
         case "ApiComponent": return target.getApiComponent();
-        case "apicontextidpattern":
-        case "ApiContextIdPattern": return target.getApiContextIdPattern();
-        case "apicontextlisting":
-        case "ApiContextListing": return target.isApiContextListing();
         case "apicontextpath":
         case "ApiContextPath": return target.getApiContextPath();
         case "apicontextrouteid":
@@ -188,6 +180,8 @@ public class RestConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Host": return target.getHost();
         case "hostnameresolver":
         case "HostNameResolver": return target.getHostNameResolver();
+        case "inlineroutes":
+        case "InlineRoutes": return target.isInlineRoutes();
         case "jsondataformat":
         case "JsonDataFormat": return target.getJsonDataFormat();
         case "port":

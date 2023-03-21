@@ -42,6 +42,7 @@ public enum ExchangePropertyKey {
     CLAIM_CHECK_REPOSITORY(Exchange.CLAIM_CHECK_REPOSITORY),
     CORRELATION_ID(Exchange.CORRELATION_ID),
     DUPLICATE_MESSAGE(Exchange.DUPLICATE_MESSAGE),
+    ERRORHANDLER_BRIDGE(Exchange.ERRORHANDLER_BRIDGE),
     ERRORHANDLER_CIRCUIT_DETECTED(Exchange.ERRORHANDLER_CIRCUIT_DETECTED),
     EVALUATE_EXPRESSION_RESULT(Exchange.EVALUATE_EXPRESSION_RESULT),
     EXCEPTION_CAUGHT(Exchange.EXCEPTION_CAUGHT),
@@ -60,6 +61,7 @@ public enum ExchangePropertyKey {
     ON_COMPLETION(Exchange.ON_COMPLETION),
     ON_COMPLETION_ROUTE_IDS(Exchange.ON_COMPLETION_ROUTE_IDS),
     PARENT_UNIT_OF_WORK(Exchange.PARENT_UNIT_OF_WORK),
+    RECEIVED_TIMESTAMP(Exchange.RECEIVED_TIMESTAMP),
     RECIPIENT_LIST_ENDPOINT(Exchange.RECIPIENT_LIST_ENDPOINT),
     SLIP_ENDPOINT(Exchange.SLIP_ENDPOINT),
     SLIP_PRODUCER(Exchange.SLIP_PRODUCER),
@@ -123,6 +125,8 @@ public enum ExchangePropertyKey {
                 return CORRELATION_ID;
             case Exchange.DUPLICATE_MESSAGE:
                 return DUPLICATE_MESSAGE;
+            case Exchange.ERRORHANDLER_BRIDGE:
+                return ERRORHANDLER_BRIDGE;
             case Exchange.ERRORHANDLER_CIRCUIT_DETECTED:
                 return ERRORHANDLER_CIRCUIT_DETECTED;
             case Exchange.EVALUATE_EXPRESSION_RESULT:
@@ -133,8 +137,6 @@ public enum ExchangePropertyKey {
                 return EXCEPTION_HANDLED;
             case Exchange.FAILURE_ENDPOINT:
                 return FAILURE_ENDPOINT;
-            case Exchange.FAILURE_HANDLED:
-                return FAILURE_HANDLED;
             case Exchange.FAILURE_ROUTE_ID:
                 return FAILURE_ROUTE_ID;
             case Exchange.FATAL_FALLBACK_ERROR_HANDLER:
@@ -159,6 +161,8 @@ public enum ExchangePropertyKey {
                 return ON_COMPLETION_ROUTE_IDS;
             case Exchange.PARENT_UNIT_OF_WORK:
                 return PARENT_UNIT_OF_WORK;
+            case Exchange.RECEIVED_TIMESTAMP:
+                return RECEIVED_TIMESTAMP;
             case Exchange.RECIPIENT_LIST_ENDPOINT:
                 return RECIPIENT_LIST_ENDPOINT;
             case Exchange.SLIP_ENDPOINT:

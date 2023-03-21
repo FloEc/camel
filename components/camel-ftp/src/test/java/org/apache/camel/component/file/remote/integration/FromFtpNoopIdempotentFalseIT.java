@@ -53,7 +53,7 @@ public class FromFtpNoopIdempotentFalseIT extends FtpServerTestSupport {
         mock.assertIsSatisfied();
 
         // assert the file is still there
-        File file = ftpFile("noop/hello.txt").toFile();
+        File file = service.ftpFile("noop/hello.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 
@@ -72,9 +72,9 @@ public class FromFtpNoopIdempotentFalseIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("log:result", "mock:result");
             }
         };

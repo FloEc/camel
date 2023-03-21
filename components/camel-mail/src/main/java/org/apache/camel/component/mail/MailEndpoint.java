@@ -16,8 +16,8 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.Message;
-import javax.mail.search.SearchTerm;
+import jakarta.mail.Message;
+import jakarta.mail.search.SearchTerm;
 
 import com.sun.mail.imap.SortTerm;
 import org.apache.camel.Category;
@@ -32,12 +32,15 @@ import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.support.ScheduledPollEndpoint;
 
+import static org.apache.camel.component.mail.MailConstants.MAIL_GENERATE_MISSING_ATTACHMENT_NAMES_NEVER;
+import static org.apache.camel.component.mail.MailConstants.MAIL_HANDLE_DUPLICATE_ATTACHMENT_NAMES_NEVER;
+
 /**
  * Send and receive emails using imap, pop3 and smtp protocols.
  */
 @UriEndpoint(firstVersion = "1.0.0", scheme = "imap,imaps,pop3,pop3s,smtp,smtps", title = "IMAP,IMAPS,POP3,POP3S,SMTP,SMTPS",
              syntax = "imap:host:port", alternativeSyntax = "imap:username:password@host:port",
-             category = { Category.MAIL })
+             category = { Category.MAIL }, headersClass = MailConstants.class)
 public class MailEndpoint extends ScheduledPollEndpoint implements HeaderFilterStrategyAware {
 
     @UriParam(defaultValue = "" + MailConsumer.DEFAULT_CONSUMER_DELAY, javaType = "java.time.Duration",
@@ -89,7 +92,7 @@ public class MailEndpoint extends ScheduledPollEndpoint implements HeaderFilterS
         JavaMailSender sender = configuration.getJavaMailSender();
         if (sender == null) {
             // use default mail sender
-            sender = configuration.createJavaMailSender();
+            sender = configuration.createJavaMailSender(getCamelContext());
         }
         return createProducer(sender);
     }
@@ -110,7 +113,7 @@ public class MailEndpoint extends ScheduledPollEndpoint implements HeaderFilterS
         }
 
         // must use java mail sender impl as we need to get hold of a mail session
-        JavaMailSender sender = configuration.createJavaMailSender();
+        JavaMailSender sender = configuration.createJavaMailSender(getCamelContext());
         return createConsumer(processor, sender);
     }
 
@@ -140,7 +143,15 @@ public class MailEndpoint extends ScheduledPollEndpoint implements HeaderFilterS
         if (binding == null) {
             boolean decode = getConfiguration() != null && getConfiguration().isDecodeFilename();
             boolean mapMailMessage = getConfiguration() != null && getConfiguration().isMapMailMessage();
-            binding = new MailBinding(headerFilterStrategy, contentTypeResolver, decode, mapMailMessage);
+            boolean failDuplicate = getConfiguration() != null && getConfiguration().isFailOnDuplicateFileAttachment();
+            String generateMissingAttachmentNames = getConfiguration() != null
+                    ? getConfiguration().getGenerateMissingAttachmentNames() : MAIL_GENERATE_MISSING_ATTACHMENT_NAMES_NEVER;
+            String handleDuplicateAttachmentNames = getConfiguration() != null
+                    ? getConfiguration().getHandleDuplicateAttachmentNames() : MAIL_HANDLE_DUPLICATE_ATTACHMENT_NAMES_NEVER;
+            binding = new MailBinding(
+                    headerFilterStrategy, contentTypeResolver, decode, mapMailMessage, failDuplicate,
+                    generateMissingAttachmentNames,
+                    handleDuplicateAttachmentNames);
         }
         return binding;
     }
@@ -205,7 +216,7 @@ public class MailEndpoint extends ScheduledPollEndpoint implements HeaderFilterS
     }
 
     /**
-     * Refers to a {@link javax.mail.search.SearchTerm} which allows to filter mails based on search criteria such as
+     * Refers to a {@link jakarta.mail.search.SearchTerm} which allows to filter mails based on search criteria such as
      * subject, body, from, sent after a certain date etc.
      */
     public void setSearchTerm(SearchTerm searchTerm) {

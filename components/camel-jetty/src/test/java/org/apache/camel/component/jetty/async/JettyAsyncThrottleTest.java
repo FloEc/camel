@@ -19,6 +19,7 @@ package org.apache.camel.component.jetty.async;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jetty.BaseJettyTest;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.AvailablePortFinder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -45,7 +46,7 @@ public class JettyAsyncThrottleTest extends BaseJettyTest {
         template.asyncRequestBody("http://localhost:{{port}}/myservice", null);
         template.asyncRequestBody("http://localhost:{{port}}/myservice", null);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         int size = getMockEndpoint("mock:result").getReceivedExchanges().size();
 
         for (int i = 0; i < size; i++) {
@@ -55,10 +56,10 @@ public class JettyAsyncThrottleTest extends BaseJettyTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("jetty:http://localhost:{{port}}/myservice").removeHeaders("*").throttle(2).asyncDelayed().loadBalance()
                         .failover().to("http://localhost:" + port2 + "/foo")
                         .to("http://localhost:" + port3 + "/bar").end().to("mock:result");

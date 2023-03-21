@@ -99,7 +99,7 @@ public class DefaultTimeoutMapTest {
 
         Object old = map.remove("A");
         assertEquals(123, old);
-        assertEquals(null, (Object) map.get("A"));
+        assertNull((Object) map.get("A"));
         assertEquals(0, map.size());
 
         map.stop();
@@ -148,8 +148,11 @@ public class DefaultTimeoutMapTest {
         // is not expired
         map.put("F", 6, 800);
 
-        await().atMost(Duration.ofSeconds(1))
-                .untilAsserted(() -> assertEquals("D", keys.get(0)));
+        await().atMost(Duration.ofSeconds(2))
+                .untilAsserted(() -> {
+                    assertFalse(keys.isEmpty());
+                    assertEquals("D", keys.get(0));
+                });
 
         assertEquals(4, values.get(0).intValue());
         assertEquals("B", keys.get(1));

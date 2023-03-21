@@ -17,15 +17,16 @@
 package org.apache.camel.component.jms.tx;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jms.AbstractSpringJMSTestSupport;
 import org.apache.camel.component.jms.async.MyAsyncComponent;
-import org.apache.camel.test.spring.junit5.CamelSpringTestSupport;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AsyncEndpointJmsTXRecipientListTest extends CamelSpringTestSupport {
+public class AsyncEndpointJmsTXRecipientListTest extends AbstractSpringJMSTestSupport {
     private static String beforeThreadName;
     private static String afterThreadName;
 
@@ -42,17 +43,17 @@ public class AsyncEndpointJmsTXRecipientListTest extends CamelSpringTestSupport 
 
         template.sendBody("activemq:queue:inbox", "Hello Camel");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // we are asynchronous due to multicast so we should ideally use same thread during processing
         assertTrue(beforeThreadName.equalsIgnoreCase(afterThreadName), "Should use same threads");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 context.addComponent("async", new MyAsyncComponent());
 
                 from("activemq:queue:inbox")

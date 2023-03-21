@@ -36,25 +36,25 @@ public class DumpModelAsXmlSourceLocationTest extends ContextTestSupport {
 
     @Test
     public void testDumpModelAsXml() throws Exception {
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
         String xml = ecc.getModelToXMLDumper().dumpModelAsXml(context, context.getRouteDefinition("myRoute"));
         assertNotNull(xml);
         log.info(xml);
 
         Assertions.assertTrue(xml.contains(
-                "sourceLineNumber=\"66\" sourceLocation=\"org.apache.camel.util.DumpModelAsXmlSourceLocationTest$1\""));
+                "sourceLineNumber=\"66\" sourceLocation=\"DumpModelAsXmlSourceLocationTest.java\""));
     }
 
     @Test
     public void testDumpModelAsXmlExternal() throws Exception {
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
         String xml = ecc.getModelToXMLDumper().dumpModelAsXml(context, context.getRouteDefinition("cool"));
         assertNotNull(xml);
         log.info(xml);
 
         Assertions.assertTrue(xml.contains(
-                "<from sourceLineNumber=\"25\" sourceLocation=\"org.apache.camel.util.MyCoolRoute\" uri=\"direct:cool\"/>"));
-        Assertions.assertTrue(xml.contains("sourceLineNumber=\"26\" sourceLocation=\"org.apache.camel.util.MyCoolRoute\""));
+                "<from sourceLineNumber=\"25\" sourceLocation=\"MyCoolRoute.java\" uri=\"direct:cool\"/>"));
+        Assertions.assertTrue(xml.contains("sourceLineNumber=\"26\" sourceLocation=\"MyCoolRoute.java\""));
     }
 
     @Override

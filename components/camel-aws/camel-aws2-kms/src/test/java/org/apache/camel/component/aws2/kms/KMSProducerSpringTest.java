@@ -43,12 +43,12 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listKeys", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.listKeys);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListKeysResponse resultGet = (ListKeysResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.keys().size());
@@ -61,12 +61,12 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.createKey);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateKeyResponse resultGet = (CreateKeyResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.keyMetadata().keyId());
@@ -79,13 +79,13 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         template.request("direct:disableKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.disableKey);
                 exchange.getIn().setHeader(KMS2Constants.KEY_ID, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
     }
 
@@ -95,13 +95,13 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         template.request("direct:enableKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.enableKey);
                 exchange.getIn().setHeader(KMS2Constants.KEY_ID, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
     }
 
@@ -111,13 +111,13 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:scheduleDelete", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.scheduleKeyDeletion);
                 exchange.getIn().setHeader(KMS2Constants.KEY_ID, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ScheduleKeyDeletionResponse resultGet = (ScheduleKeyDeletionResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.keyId());
@@ -129,13 +129,13 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:describeKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.describeKey);
                 exchange.getIn().setHeader(KMS2Constants.KEY_ID, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DescribeKeyResponse resultGet = exchange.getIn().getBody(DescribeKeyResponse.class);
         assertEquals("test", resultGet.keyMetadata().keyId());
@@ -149,13 +149,13 @@ public class KMSProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listKeysPojo", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(KMS2Constants.OPERATION, KMS2Operations.listKeys);
                 exchange.getIn().setBody(ListKeysRequest.builder().limit(10).build());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListKeysResponse resultGet = (ListKeysResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.keys().size());

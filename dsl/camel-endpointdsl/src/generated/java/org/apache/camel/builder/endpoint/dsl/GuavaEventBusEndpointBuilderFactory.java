@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -52,8 +52,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * together with listenerInterface option.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -74,8 +73,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * together with listenerInterface option.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -95,8 +93,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * This option cannot be used together with eventClass option.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -116,8 +113,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * This option cannot be used together with eventClass option.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -128,6 +124,17 @@ public interface GuavaEventBusEndpointBuilderFactory {
                 String listenerInterface) {
             doSetProperty("listenerInterface", listenerInterface);
             return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint consumers for the Guava EventBus component.
+     */
+    public interface AdvancedGuavaEventBusEndpointConsumerBuilder
+            extends
+                EndpointConsumerBuilder {
+        default GuavaEventBusEndpointConsumerBuilder basic() {
+            return (GuavaEventBusEndpointConsumerBuilder) this;
         }
         /**
          * Allows for bridging the consumer to the Camel routing Error Handler,
@@ -141,12 +148,12 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: consumer (advanced)
          * 
          * @param bridgeErrorHandler the value to set
          * @return the dsl builder
          */
-        default GuavaEventBusEndpointConsumerBuilder bridgeErrorHandler(
+        default AdvancedGuavaEventBusEndpointConsumerBuilder bridgeErrorHandler(
                 boolean bridgeErrorHandler) {
             doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
@@ -164,26 +171,15 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: consumer (advanced)
          * 
          * @param bridgeErrorHandler the value to set
          * @return the dsl builder
          */
-        default GuavaEventBusEndpointConsumerBuilder bridgeErrorHandler(
+        default AdvancedGuavaEventBusEndpointConsumerBuilder bridgeErrorHandler(
                 String bridgeErrorHandler) {
             doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint consumers for the Guava EventBus component.
-     */
-    public interface AdvancedGuavaEventBusEndpointConsumerBuilder
-            extends
-                EndpointConsumerBuilder {
-        default GuavaEventBusEndpointConsumerBuilder basic() {
-            return (GuavaEventBusEndpointConsumerBuilder) this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -275,8 +271,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * together with listenerInterface option.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -297,8 +292,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * together with listenerInterface option.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -318,8 +312,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * This option cannot be used together with eventClass option.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -339,8 +332,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * This option cannot be used together with eventClass option.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -351,6 +343,17 @@ public interface GuavaEventBusEndpointBuilderFactory {
                 String listenerInterface) {
             doSetProperty("listenerInterface", listenerInterface);
             return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the Guava EventBus component.
+     */
+    public interface AdvancedGuavaEventBusEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default GuavaEventBusEndpointProducerBuilder basic() {
+            return (GuavaEventBusEndpointProducerBuilder) this;
         }
         /**
          * Whether the producer should be started lazy (on the first message).
@@ -366,12 +369,12 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default GuavaEventBusEndpointProducerBuilder lazyStartProducer(
+        default AdvancedGuavaEventBusEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -391,26 +394,15 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default GuavaEventBusEndpointProducerBuilder lazyStartProducer(
+        default AdvancedGuavaEventBusEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint producers for the Guava EventBus component.
-     */
-    public interface AdvancedGuavaEventBusEndpointProducerBuilder
-            extends
-                EndpointProducerBuilder {
-        default GuavaEventBusEndpointProducerBuilder basic() {
-            return (GuavaEventBusEndpointProducerBuilder) this;
         }
     }
 
@@ -433,8 +425,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * together with listenerInterface option.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -455,8 +446,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * together with listenerInterface option.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -475,8 +465,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * This option cannot be used together with eventClass option.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -496,8 +485,7 @@ public interface GuavaEventBusEndpointBuilderFactory {
          * This option cannot be used together with eventClass option.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 

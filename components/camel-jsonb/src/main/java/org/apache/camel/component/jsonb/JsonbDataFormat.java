@@ -20,12 +20,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.config.BinaryDataStrategy;
-import javax.json.bind.config.PropertyNamingStrategy;
-import javax.json.bind.config.PropertyOrderStrategy;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.json.bind.config.BinaryDataStrategy;
+import jakarta.json.bind.config.PropertyNamingStrategy;
+import jakarta.json.bind.config.PropertyOrderStrategy;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
@@ -39,7 +39,7 @@ import org.apache.camel.support.service.ServiceSupport;
 /**
  * Marshal POJOs to JSON and back using JSON-B.
  */
-@Dataformat("json-jsonb")
+@Dataformat("jsonb")
 @Metadata(includeProperties = "unmarshalTypeName,unmarshalType,objectMapper,prettyPrint,binaryStrategy,encoding,propertyOrder,propertyamingStrategy,skipNull")
 public class JsonbDataFormat extends ServiceSupport implements DataFormat, DataFormatName, CamelContextAware {
     private CamelContext camelContext;
@@ -98,7 +98,7 @@ public class JsonbDataFormat extends ServiceSupport implements DataFormat, DataF
 
     @Override
     public String getDataFormatName() {
-        return "json-jsonb";
+        return "jsonb";
     }
 
     public Jsonb getObjectMapper() {
@@ -107,7 +107,7 @@ public class JsonbDataFormat extends ServiceSupport implements DataFormat, DataF
 
     /**
      * Set a custom Jsonb instance, potentially initialized with a custom JsonbConfig.
-     * 
+     *
      * @param objectMapper the Jsonb instance to set.
      */
     public void setObjectMapper(Jsonb objectMapper) {

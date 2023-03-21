@@ -24,7 +24,6 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.fhir.internal.FhirApiCollection;
 import org.apache.camel.component.fhir.internal.FhirCreateApiMethod;
@@ -47,7 +46,7 @@ public class FhirConfigurationIT extends AbstractFhirTestSupport {
 
     private static final String TEST_URI = "fhir://" + PATH_PREFIX + "/resource?inBody=resourceAsString&log=true&"
                                            + "encoding=JSON&summary=TEXT&compress=true&username=art&password=tatum&sessionCookie=mycookie%3DChips%20Ahoy"
-                                           + "&accessToken=token&serverUrl=http://localhost:8080/hapi-fhir-jpaserver-example/baseDstu3&fhirVersion=DSTU3";
+                                           + "&accessToken=token&serverUrl=http://localhost:8080/hapi-fhir-jpaserver-example/baseR4&fhirVersion=R4";
     private FhirConfiguration componentConfiguration;
 
     @Mock
@@ -68,8 +67,8 @@ public class FhirConfigurationIT extends AbstractFhirTestSupport {
         fhirConfiguration.setPassword("tatum");
         fhirConfiguration.setSessionCookie("mycookie=Chips Ahoy");
         fhirConfiguration.setAccessToken("token");
-        fhirConfiguration.setServerUrl("http://localhost:8080/hapi-fhir-jpaserver-example/baseDstu3");
-        fhirConfiguration.setFhirVersion("DSTU3");
+        fhirConfiguration.setServerUrl("http://localhost:8080/hapi-fhir-jpaserver-example/baseR4");
+        fhirConfiguration.setFhirVersion("R4");
         component.setConfiguration(fhirConfiguration);
 
         final IGenericClient client = component.createClient(fhirConfiguration);
@@ -83,12 +82,12 @@ public class FhirConfigurationIT extends AbstractFhirTestSupport {
     }
 
     @Test
-    public void testConfiguration() throws Exception {
+    public void testConfiguration() {
         FhirEndpoint endpoint = getMandatoryEndpoint(TEST_URI, FhirEndpoint.class);
         GenericClient client = (GenericClient) endpoint.getClient();
         FhirConfiguration configuration = endpoint.getConfiguration();
         assertEquals(this.componentConfiguration, configuration);
-        assertEquals("http://localhost:8080/hapi-fhir-jpaserver-example/baseDstu3", client.getUrlBase());
+        assertEquals("http://localhost:8080/hapi-fhir-jpaserver-example/baseR4", client.getUrlBase());
         assertEquals(EncodingEnum.JSON, client.getEncoding());
         assertEquals(SummaryEnum.TEXT, client.getSummary());
         List<Object> interceptors = client.getInterceptorService().getAllRegisteredInterceptors();
@@ -96,7 +95,7 @@ public class FhirConfigurationIT extends AbstractFhirTestSupport {
 
         assertTrue(interceptors.contains(this.mockClientInterceptor), "User defined IClientInterceptor not found");
 
-        long counter = context.adapt(ExtendedCamelContext.class).getBeanIntrospection().getInvokedCounter();
+        long counter = context.getCamelContextExtension().getBeanIntrospection().getInvokedCounter();
         assertEquals(0, counter, "Should not use reflection");
     }
 
@@ -106,7 +105,7 @@ public class FhirConfigurationIT extends AbstractFhirTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

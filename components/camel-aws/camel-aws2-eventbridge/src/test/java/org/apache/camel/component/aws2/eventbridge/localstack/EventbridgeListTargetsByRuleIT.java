@@ -47,7 +47,7 @@ public class EventbridgeListTargetsByRuleIT extends Aws2EventbridgeBase {
         template.send("direct:evs", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
             }
         });
@@ -55,7 +55,7 @@ public class EventbridgeListTargetsByRuleIT extends Aws2EventbridgeBase {
         template.send("direct:evs-targets", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
                 Target target = Target.builder().id("sqs-queue").arn("arn:aws:sqs:eu-west-1:780410022472:camel-connector-test")
                         .build();
@@ -68,11 +68,11 @@ public class EventbridgeListTargetsByRuleIT extends Aws2EventbridgeBase {
         template.send("direct:evs-list-targets", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(EventbridgeConstants.RULE_NAME, "firstrule");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         assertEquals(1, result.getExchanges().size());
         assertEquals(1, result.getExchanges().get(0).getIn().getBody(ListTargetsByRuleResponse.class).targets().size());
         assertEquals("sqs-queue",
@@ -80,10 +80,10 @@ public class EventbridgeListTargetsByRuleIT extends Aws2EventbridgeBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint
                         = "aws2-eventbridge://default?operation=putRule&eventPatternFile=file:src/test/resources/eventpattern.json";
                 String target = "aws2-eventbridge://default?operation=putTargets";

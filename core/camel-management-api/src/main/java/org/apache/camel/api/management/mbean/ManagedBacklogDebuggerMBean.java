@@ -89,22 +89,8 @@ public interface ManagedBacklogDebuggerMBean {
     @ManagedOperation(description = "Steps to next node in step mode")
     void step();
 
-    /**
-     * @deprecated use {@link #breakpoints()}
-     */
-    @ManagedOperation(description = "Return the node ids which has breakpoints")
-    @Deprecated
-    Set<String> getBreakpoints();
-
     @ManagedOperation(description = "Return the node ids which has breakpoints")
     Set<String> breakpoints();
-
-    /**
-     * @deprecated use {@link #suspendedBreakpointNodeIds()}
-     */
-    @ManagedOperation(description = "Return the node ids which is currently suspended")
-    @Deprecated
-    Set<String> getSuspendedBreakpointNodeIds();
 
     @ManagedOperation(description = "Return the node ids which is currently suspended")
     Set<String> suspendedBreakpointNodeIds();
@@ -139,13 +125,6 @@ public interface ManagedBacklogDebuggerMBean {
     @ManagedAttribute(description = "Whether to include file based message body in the trace message.")
     void setBodyIncludeFiles(boolean bodyIncludeFiles);
 
-    /**
-     * @deprecated use {@link #dumpTracedMessagesAsXml(String, boolean)}
-     */
-    @ManagedOperation(description = "Dumps the messages in xml format from the suspended breakpoint at the given node")
-    @Deprecated
-    String dumpTracedMessagesAsXml(String nodeId);
-
     @ManagedOperation(description = "Dumps the messages in xml format from the suspended breakpoint at the given node, optionally including the exchange properties")
     String dumpTracedMessagesAsXml(String nodeId, boolean includeExchangeProperties);
 
@@ -172,4 +151,13 @@ public interface ManagedBacklogDebuggerMBean {
 
     @ManagedOperation(description = "Updates/adds the exchange property (with a new type) on the suspended breakpoint at the given node id")
     void setExchangePropertyOnBreakpoint(String nodeId, String exchangePropertyName, Object value, String type);
+
+    @ManagedOperation(description = "Returns the message history at the given node id as XML")
+    String messageHistoryOnBreakpointAsXml(String nodeId);
+
+    @ManagedOperation(description = "Attach the debugger")
+    void attach();
+
+    @ManagedOperation(description = "Detach the debugger")
+    void detach();
 }

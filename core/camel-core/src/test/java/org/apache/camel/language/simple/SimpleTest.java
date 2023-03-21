@@ -32,21 +32,29 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Expression;
 import org.apache.camel.ExpressionIllegalSyntaxException;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.InvalidPayloadException;
 import org.apache.camel.LanguageTestSupport;
 import org.apache.camel.Predicate;
 import org.apache.camel.component.bean.MethodNotFoundException;
 import org.apache.camel.language.bean.RuntimeBeanExpressionException;
+import org.apache.camel.language.simple.myconverter.MyCustomDate;
 import org.apache.camel.language.simple.types.SimpleIllegalSyntaxException;
 import org.apache.camel.spi.Language;
+import org.apache.camel.spi.PropertiesComponent;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.util.InetAddressUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SimpleTest extends LanguageTestSupport {
 
@@ -92,9 +100,8 @@ public class SimpleTest extends LanguageTestSupport {
         assertEquals("123",
                 context.resolveLanguage("simple").createExpression("${header.bar}").evaluate(exchange, String.class));
         // should not be possible
-        assertEquals(null, context.resolveLanguage("simple").createExpression("${header.bar}").evaluate(exchange, Date.class));
-        assertEquals(null,
-                context.resolveLanguage("simple").createExpression("${header.unknown}").evaluate(exchange, String.class));
+        assertNull(context.resolveLanguage("simple").createExpression("${header.bar}").evaluate(exchange, Date.class));
+        assertNull(context.resolveLanguage("simple").createExpression("${header.unknown}").evaluate(exchange, String.class));
     }
 
     @Test
@@ -224,7 +231,7 @@ public class SimpleTest extends LanguageTestSupport {
         assertExpression("${header.foo}", "abc");
         assertExpression("${headers.foo}", "abc");
         assertExpression("${routeId}", exchange.getFromRouteId());
-        exchange.adapt(ExtendedExchange.class).setFromRouteId("myRouteId");
+        exchange.getExchangeExtension().setFromRouteId("myRouteId");
         assertExpression("${routeId}", "myRouteId");
     }
 
@@ -602,6 +609,23 @@ public class SimpleTest extends LanguageTestSupport {
 
         assertExpression("${date:header.birthday - 10s:yyyy-MM-dd'T'HH:mm:ss:SSS}", "1974-04-20T08:55:37:123");
         assertExpression("${date:header.birthday:yyyy-MM-dd'T'HH:mm:ss:SSS}", "1974-04-20T08:55:47:123");
+    }
+
+    @Test
+    public void testDateWithConverterExpressions() throws Exception {
+        exchange.getIn().setHeader("birthday", new MyCustomDate(1974, Calendar.APRIL, 20));
+        exchange.setProperty("birthday", new MyCustomDate(1974, Calendar.APRIL, 20));
+        exchange.getIn().setHeader("other", new ArrayList<>());
+
+        assertExpression("${date:header.birthday:yyyyMMdd}", "19740420");
+        assertExpression("${date:exchangeProperty.birthday:yyyyMMdd}", "19740420");
+
+        try {
+            assertExpression("${date:header.other:yyyyMMdd}", "19740420");
+            fail("Should thrown an exception");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Cannot find Date/long object at command: header.other", e.getMessage());
+        }
     }
 
     @Test
@@ -1826,6 +1850,32 @@ public class SimpleTest extends LanguageTestSupport {
     }
 
     @Test
+    public void testJoinBody() throws Exception {
+        List<Object> data = new ArrayList<>();
+        data.add("A");
+        data.add("B");
+        data.add("C");
+        exchange.getIn().setBody(data);
+
+        assertExpression("${join()}", "A,B,C");
+        assertExpression("${join(;)}", "A;B;C");
+        assertExpression("${join(' ')}", "A B C");
+        assertExpression("${join(',','id=')}", "id=A,id=B,id=C");
+        assertExpression("${join(&,id=)}", "id=A&id=B&id=C");
+    }
+
+    @Test
+    public void testJoinHeader() throws Exception {
+        List<Object> data = new ArrayList<>();
+        data.add("A");
+        data.add("B");
+        data.add("C");
+        exchange.getIn().setHeader("id", data);
+
+        assertExpression("${join('&','id=','${header.id}')}", "id=A&id=B&id=C");
+    }
+
+    @Test
     public void testRandomExpression() throws Exception {
         int min = 1;
         int max = 10;
@@ -1955,6 +2005,61 @@ public class SimpleTest extends LanguageTestSupport {
     public void testMessageTimestamp() throws Exception {
         exchange.getIn().setHeader(Exchange.MESSAGE_TIMESTAMP, 1234L);
         assertExpression("${messageTimestamp}", 1234L);
+    }
+
+    @Test
+    public void testParenthesisReplaceAll() throws Exception {
+        exchange.getIn().setBody("Bik (Ru)");
+        assertExpression("${body.replaceAll(\"Bik \\(Ru\\)\",\"bik_ru\").replaceAll(\"b\",\"c\")}", "cik_ru");
+    }
+
+    @Test
+    public void testParenthesisReplace() throws Exception {
+        exchange.getIn().setBody("Hello (( World (((( Again");
+        assertExpression("${body.replace(\"((\", \"--\").replace(\"((((\", \"----\")}", "Hello -- World ---- Again");
+    }
+
+    @Test
+    public void testPropertiesExist() throws Exception {
+        PropertiesComponent pc = context.getPropertiesComponent();
+
+        assertExpression("${propertiesExist:myKey}", "false");
+        assertExpression("${propertiesExist:!myKey}", "true");
+        assertPredicate("${propertiesExist:myKey}", false);
+        assertPredicate("${propertiesExist:!myKey}", true);
+
+        pc.addInitialProperty("myKey", "abc");
+        assertExpression("${propertiesExist:myKey}", "true");
+        assertExpression("${propertiesExist:!myKey}", "false");
+        assertPredicate("${propertiesExist:myKey}", true);
+        assertPredicate("${propertiesExist:!myKey}", false);
+    }
+
+    @Test
+    public void testUuid() throws Exception {
+        Expression expression = context.resolveLanguage("simple").createExpression("${uuid}");
+        String s = expression.evaluate(exchange, String.class);
+        assertNotNull(s);
+
+        expression = context.resolveLanguage("simple").createExpression("${uuid(default)}");
+        s = expression.evaluate(exchange, String.class);
+        assertNotNull(s);
+
+        expression = context.resolveLanguage("simple").createExpression("${uuid(short)}");
+        s = expression.evaluate(exchange, String.class);
+        assertNotNull(s);
+
+        expression = context.resolveLanguage("simple").createExpression("${uuid(simple)}");
+        s = expression.evaluate(exchange, String.class);
+        assertNotNull(s);
+
+        expression = context.resolveLanguage("simple").createExpression("${uuid(classic)}");
+        s = expression.evaluate(exchange, String.class);
+        assertNotNull(s);
+
+        // custom generator
+        context.getRegistry().bind("mygen", (UuidGenerator) () -> "1234");
+        assertExpression("${uuid(mygen)}", "1234");
     }
 
     @Override

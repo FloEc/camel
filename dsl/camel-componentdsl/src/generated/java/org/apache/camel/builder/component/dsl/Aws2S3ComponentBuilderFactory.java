@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -120,6 +120,22 @@ public interface Aws2S3ComponentBuilderFactory {
             return this;
         }
         /**
+         * The delimiter which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delimiter the value to set
+         * @return the dsl builder
+         */
+        default Aws2S3ComponentBuilder delimiter(java.lang.String delimiter) {
+            doSetProperty("delimiter", delimiter);
+            return this;
+        }
+        /**
          * Set the need for overidding the endpoint. This option needs to be
          * used in combination with uriEndpointOverride option.
          * 
@@ -163,6 +179,38 @@ public interface Aws2S3ComponentBuilderFactory {
          */
         default Aws2S3ComponentBuilder policy(java.lang.String policy) {
             doSetProperty("policy", policy);
+            return this;
+        }
+        /**
+         * The prefix which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param prefix the value to set
+         * @return the dsl builder
+         */
+        default Aws2S3ComponentBuilder prefix(java.lang.String prefix) {
+            doSetProperty("prefix", prefix);
+            return this;
+        }
+        /**
+         * If using a profile credentials provider this parameter will set the
+         * profile name.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param profileCredentialsName the value to set
+         * @return the dsl builder
+         */
+        default Aws2S3ComponentBuilder profileCredentialsName(
+                java.lang.String profileCredentialsName) {
+            doSetProperty("profileCredentialsName", profileCredentialsName);
             return this;
         }
         /**
@@ -262,8 +310,7 @@ public interface Aws2S3ComponentBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -276,6 +323,23 @@ public interface Aws2S3ComponentBuilderFactory {
         default Aws2S3ComponentBuilder useDefaultCredentialsProvider(
                 boolean useDefaultCredentialsProvider) {
             doSetProperty("useDefaultCredentialsProvider", useDefaultCredentialsProvider);
+            return this;
+        }
+        /**
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param useProfileCredentialsProvider the value to set
+         * @return the dsl builder
+         */
+        default Aws2S3ComponentBuilder useProfileCredentialsProvider(
+                boolean useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
             return this;
         }
         /**
@@ -348,12 +412,12 @@ public interface Aws2S3ComponentBuilderFactory {
         /**
          * Delete objects from S3 after they have been retrieved. The delete is
          * only performed if the Exchange is committed. If a rollback occurs,
-         * the object is not deleted. &lt;p/&gt; If this option is false, then
-         * the same objects will be retrieve over and over again on the polls.
-         * Therefore you need to use the Idempotent Consumer EIP in the route to
-         * filter out duplicates. You can filter using the
-         * AWS2S3Constants#BUCKET_NAME and AWS2S3Constants#KEY headers, or only
-         * the AWS2S3Constants#KEY header.
+         * the object is not deleted. If this option is false, then the same
+         * objects will be retrieve over and over again on the polls. Therefore
+         * you need to use the Idempotent Consumer EIP in the route to filter
+         * out duplicates. You can filter using the AWS2S3Constants#BUCKET_NAME
+         * and AWS2S3Constants#KEY headers, or only the AWS2S3Constants#KEY
+         * header.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -365,22 +429,6 @@ public interface Aws2S3ComponentBuilderFactory {
          */
         default Aws2S3ComponentBuilder deleteAfterRead(boolean deleteAfterRead) {
             doSetProperty("deleteAfterRead", deleteAfterRead);
-            return this;
-        }
-        /**
-         * The delimiter which is used in the
-         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
-         * objects we are interested in.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param delimiter the value to set
-         * @return the dsl builder
-         */
-        default Aws2S3ComponentBuilder delimiter(java.lang.String delimiter) {
-            doSetProperty("delimiter", delimiter);
             return this;
         }
         /**
@@ -535,22 +583,6 @@ public interface Aws2S3ComponentBuilderFactory {
          */
         default Aws2S3ComponentBuilder moveAfterRead(boolean moveAfterRead) {
             doSetProperty("moveAfterRead", moveAfterRead);
-            return this;
-        }
-        /**
-         * The prefix which is used in the
-         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
-         * objects we are interested in.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param prefix the value to set
-         * @return the dsl builder
-         */
-        default Aws2S3ComponentBuilder prefix(java.lang.String prefix) {
-            doSetProperty("prefix", prefix);
             return this;
         }
         /**
@@ -833,6 +865,21 @@ public interface Aws2S3ComponentBuilderFactory {
             return this;
         }
         /**
+         * Define if SSE S3 must be used or not.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param useSSES3 the value to set
+         * @return the dsl builder
+         */
+        default Aws2S3ComponentBuilder useSSES3(boolean useSSES3) {
+            doSetProperty("useSSES3", useSSES3);
+            return this;
+        }
+        /**
          * Whether autowiring is enabled. This is used for automatic autowiring
          * options (the option must be marked as autowired) by looking up in the
          * registry to find if there is a single instance of matching type,
@@ -908,9 +955,12 @@ public interface Aws2S3ComponentBuilderFactory {
             case "amazonS3Presigner": getOrCreateConfiguration((AWS2S3Component) component).setAmazonS3Presigner((software.amazon.awssdk.services.s3.presigner.S3Presigner) value); return true;
             case "autoCreateBucket": getOrCreateConfiguration((AWS2S3Component) component).setAutoCreateBucket((boolean) value); return true;
             case "configuration": ((AWS2S3Component) component).setConfiguration((org.apache.camel.component.aws2.s3.AWS2S3Configuration) value); return true;
+            case "delimiter": getOrCreateConfiguration((AWS2S3Component) component).setDelimiter((java.lang.String) value); return true;
             case "overrideEndpoint": getOrCreateConfiguration((AWS2S3Component) component).setOverrideEndpoint((boolean) value); return true;
             case "pojoRequest": getOrCreateConfiguration((AWS2S3Component) component).setPojoRequest((boolean) value); return true;
             case "policy": getOrCreateConfiguration((AWS2S3Component) component).setPolicy((java.lang.String) value); return true;
+            case "prefix": getOrCreateConfiguration((AWS2S3Component) component).setPrefix((java.lang.String) value); return true;
+            case "profileCredentialsName": getOrCreateConfiguration((AWS2S3Component) component).setProfileCredentialsName((java.lang.String) value); return true;
             case "proxyHost": getOrCreateConfiguration((AWS2S3Component) component).setProxyHost((java.lang.String) value); return true;
             case "proxyPort": getOrCreateConfiguration((AWS2S3Component) component).setProxyPort((java.lang.Integer) value); return true;
             case "proxyProtocol": getOrCreateConfiguration((AWS2S3Component) component).setProxyProtocol((software.amazon.awssdk.core.Protocol) value); return true;
@@ -918,12 +968,12 @@ public interface Aws2S3ComponentBuilderFactory {
             case "trustAllCertificates": getOrCreateConfiguration((AWS2S3Component) component).setTrustAllCertificates((boolean) value); return true;
             case "uriEndpointOverride": getOrCreateConfiguration((AWS2S3Component) component).setUriEndpointOverride((java.lang.String) value); return true;
             case "useDefaultCredentialsProvider": getOrCreateConfiguration((AWS2S3Component) component).setUseDefaultCredentialsProvider((boolean) value); return true;
+            case "useProfileCredentialsProvider": getOrCreateConfiguration((AWS2S3Component) component).setUseProfileCredentialsProvider((boolean) value); return true;
             case "customerAlgorithm": getOrCreateConfiguration((AWS2S3Component) component).setCustomerAlgorithm((java.lang.String) value); return true;
             case "customerKeyId": getOrCreateConfiguration((AWS2S3Component) component).setCustomerKeyId((java.lang.String) value); return true;
             case "customerKeyMD5": getOrCreateConfiguration((AWS2S3Component) component).setCustomerKeyMD5((java.lang.String) value); return true;
             case "bridgeErrorHandler": ((AWS2S3Component) component).setBridgeErrorHandler((boolean) value); return true;
             case "deleteAfterRead": getOrCreateConfiguration((AWS2S3Component) component).setDeleteAfterRead((boolean) value); return true;
-            case "delimiter": getOrCreateConfiguration((AWS2S3Component) component).setDelimiter((java.lang.String) value); return true;
             case "destinationBucket": getOrCreateConfiguration((AWS2S3Component) component).setDestinationBucket((java.lang.String) value); return true;
             case "destinationBucketPrefix": getOrCreateConfiguration((AWS2S3Component) component).setDestinationBucketPrefix((java.lang.String) value); return true;
             case "destinationBucketSuffix": getOrCreateConfiguration((AWS2S3Component) component).setDestinationBucketSuffix((java.lang.String) value); return true;
@@ -933,7 +983,6 @@ public interface Aws2S3ComponentBuilderFactory {
             case "includeBody": getOrCreateConfiguration((AWS2S3Component) component).setIncludeBody((boolean) value); return true;
             case "includeFolders": getOrCreateConfiguration((AWS2S3Component) component).setIncludeFolders((boolean) value); return true;
             case "moveAfterRead": getOrCreateConfiguration((AWS2S3Component) component).setMoveAfterRead((boolean) value); return true;
-            case "prefix": getOrCreateConfiguration((AWS2S3Component) component).setPrefix((java.lang.String) value); return true;
             case "autocloseBody": getOrCreateConfiguration((AWS2S3Component) component).setAutocloseBody((boolean) value); return true;
             case "batchMessageNumber": getOrCreateConfiguration((AWS2S3Component) component).setBatchMessageNumber((int) value); return true;
             case "batchSize": getOrCreateConfiguration((AWS2S3Component) component).setBatchSize((int) value); return true;
@@ -951,6 +1000,7 @@ public interface Aws2S3ComponentBuilderFactory {
             case "awsKMSKeyId": getOrCreateConfiguration((AWS2S3Component) component).setAwsKMSKeyId((java.lang.String) value); return true;
             case "useAwsKMS": getOrCreateConfiguration((AWS2S3Component) component).setUseAwsKMS((boolean) value); return true;
             case "useCustomerKey": getOrCreateConfiguration((AWS2S3Component) component).setUseCustomerKey((boolean) value); return true;
+            case "useSSES3": getOrCreateConfiguration((AWS2S3Component) component).setUseSSES3((boolean) value); return true;
             case "autowiredEnabled": ((AWS2S3Component) component).setAutowiredEnabled((boolean) value); return true;
             case "accessKey": getOrCreateConfiguration((AWS2S3Component) component).setAccessKey((java.lang.String) value); return true;
             case "secretKey": getOrCreateConfiguration((AWS2S3Component) component).setSecretKey((java.lang.String) value); return true;

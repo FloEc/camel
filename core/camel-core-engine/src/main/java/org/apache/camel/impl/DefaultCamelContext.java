@@ -16,18 +16,17 @@
  */
 package org.apache.camel.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.FailedToStartRouteException;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
@@ -37,8 +36,6 @@ import org.apache.camel.RouteTemplateContext;
 import org.apache.camel.StartupStep;
 import org.apache.camel.ValueHolder;
 import org.apache.camel.api.management.JmxSystemPropertyKeys;
-import org.apache.camel.builder.AdviceWith;
-import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.impl.engine.DefaultExecutorServiceManager;
 import org.apache.camel.impl.engine.RouteService;
 import org.apache.camel.impl.engine.SimpleCamelContext;
@@ -48,7 +45,6 @@ import org.apache.camel.impl.scan.AssignableToPackageScanFilter;
 import org.apache.camel.impl.scan.InvertingPackageScanFilter;
 import org.apache.camel.model.DataFormatDefinition;
 import org.apache.camel.model.FaultToleranceConfigurationDefinition;
-import org.apache.camel.model.HystrixConfigurationDefinition;
 import org.apache.camel.model.Model;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.ModelLifecycleStrategy;
@@ -61,6 +57,7 @@ import org.apache.camel.model.RouteDefinitionHelper;
 import org.apache.camel.model.RouteTemplateDefinition;
 import org.apache.camel.model.RouteTemplatesDefinition;
 import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.model.TemplatedRouteDefinition;
 import org.apache.camel.model.cloud.ServiceCallConfigurationDefinition;
 import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.model.rest.RestDefinition;
@@ -86,8 +83,10 @@ import org.apache.camel.support.DefaultRegistry;
 import org.apache.camel.support.LocalBeanRegistry;
 import org.apache.camel.support.SimpleUuidGenerator;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.util.OrderedLocationProperties;
 import org.apache.camel.util.StopWatch;
 import org.apache.camel.util.StringHelper;
+import org.apache.camel.util.concurrent.NamedThreadLocal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +95,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultCamelContext extends SimpleCamelContext implements ModelCamelContext {
 
-    protected static final ThreadLocal<OptionHolder> OPTIONS = ThreadLocal.withInitial(OptionHolder::new);
+    // global options that can be set on CamelContext as part of concurrent testing
+    // which means options should be isolated via thread-locals and not a static instance
+    // use a HashMap to store only JDK classes in the thread-local so there will not be any Camel classes leaking
+    private static final ThreadLocal<Map<String, Object>> OPTIONS = new NamedThreadLocal<>("CamelContextOptions", HashMap::new);
+    private static final String OPTION_NO_START = "OptionNoStart";
+    private static final String OPTION_DISABLE_JMX = "OptionDisableJMX";
+    private static final String OPTION_EXCLUDE_ROUTES = "OptionExcludeRoutes";
+
     private static final Logger LOG = LoggerFactory.getLogger(DefaultCamelContext.class);
     private static final UuidGenerator UUID = new SimpleUuidGenerator();
 
@@ -128,7 +134,7 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
      */
     public DefaultCamelContext(Registry registry) {
         this();
-        setRegistry(registry);
+        getCamelContextExtension().setRegistry(registry);
     }
 
     public DefaultCamelContext(boolean init) {
@@ -136,6 +142,12 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         if (isDisableJmx()) {
             disableJMX();
         }
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+        super.doStop();
+        OPTIONS.remove();
     }
 
     @Override
@@ -198,19 +210,19 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     public static void setNoStart(boolean b) {
-        getOptions().noStart = b;
+        getOptions().put(OPTION_NO_START, b);
     }
 
     public static boolean isNoStart() {
-        return getOptions().noStart;
+        return (Boolean) getOptions().getOrDefault(OPTION_NO_START, Boolean.FALSE);
     }
 
     public static void setDisableJmx(boolean b) {
-        getOptions().disableJmx = b;
+        getOptions().put(OPTION_DISABLE_JMX, b);
     }
 
     public static boolean isDisableJmx() {
-        return getOptions().disableJmx;
+        return (Boolean) getOptions().getOrDefault(OPTION_DISABLE_JMX, Boolean.getBoolean(JmxSystemPropertyKeys.DISABLED));
     }
 
     @Override
@@ -219,18 +231,18 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     public static String getExcludeRoutes() {
-        return getOptions().excludeRoutes;
+        return (String) getOptions().get(OPTION_EXCLUDE_ROUTES);
     }
 
     public static void setExcludeRoutes(String s) {
-        getOptions().excludeRoutes = s;
+        getOptions().put(OPTION_EXCLUDE_ROUTES, s);
     }
 
     public static void clearOptions() {
-        OPTIONS.set(new OptionHolder());
+        OPTIONS.get().clear();
     }
 
-    private static OptionHolder getOptions() {
+    private static Map<String, Object> getOptions() {
         return OPTIONS.get();
     }
 
@@ -313,6 +325,22 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     @Override
+    public RouteConfigurationDefinition getRouteConfigurationDefinition(String id) {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        return model.getRouteConfigurationDefinition(id);
+    }
+
+    @Override
+    public void removeRouteConfiguration(RouteConfigurationDefinition routeConfigurationDefinition) throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        model.removeRouteConfiguration(routeConfigurationDefinition);
+    }
+
+    @Override
     public List<RouteDefinition> getRouteDefinitions() {
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
@@ -349,7 +377,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
-        model.removeRouteDefinitions(routeDefinitions);
+        if (!isLockModel()) {
+            model.removeRouteDefinitions(routeDefinitions);
+        }
     }
 
     @Override
@@ -357,7 +387,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
-        model.removeRouteDefinition(routeDefinition);
+        if (!isLockModel()) {
+            model.removeRouteDefinition(routeDefinition);
+        }
     }
 
     @Override
@@ -397,7 +429,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
-        model.removeRouteTemplateDefinitions(routeTemplateDefinitions);
+        if (!isLockModel()) {
+            model.removeRouteTemplateDefinitions(routeTemplateDefinitions);
+        }
     }
 
     @Override
@@ -405,7 +439,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
-        model.removeRouteTemplateDefinition(routeTemplateDefinition);
+        if (!isLockModel()) {
+            model.removeRouteTemplateDefinition(routeTemplateDefinition);
+        }
     }
 
     @Override
@@ -413,7 +449,9 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
-        model.removeRouteTemplateDefinitions(pattern);
+        if (!isLockModel()) {
+            model.removeRouteTemplateDefinitions(pattern);
+        }
     }
 
     @Override
@@ -434,6 +472,15 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     @Override
+    public String addRouteFromTemplate(String routeId, String routeTemplateId, String prefixId, Map<String, Object> parameters)
+            throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        return model.addRouteFromTemplate(routeId, routeTemplateId, prefixId, parameters);
+    }
+
+    @Override
     public String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
             throws Exception {
         if (model == null && isLightweight()) {
@@ -443,11 +490,32 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     @Override
+    public String addRouteFromTemplate(
+            String routeId, String routeTemplateId, String prefixId, RouteTemplateContext routeTemplateContext)
+            throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        return model.addRouteFromTemplate(routeId, routeTemplateId, prefixId, routeTemplateContext);
+    }
+
+    @Override
+    public void addRouteFromTemplatedRoute(TemplatedRouteDefinition templatedRouteDefinition)
+            throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        model.addRouteFromTemplatedRoute(templatedRouteDefinition);
+    }
+
+    @Override
     public void removeRouteTemplates(String pattern) throws Exception {
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
-        model.removeRouteTemplateDefinitions(pattern);
+        if (!isLockModel()) {
+            model.removeRouteTemplateDefinitions(pattern);
+        }
     }
 
     @Override
@@ -512,38 +580,6 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
             throw new IllegalStateException("Access to model not supported in lightweight mode");
         }
         model.setValidators(validators);
-    }
-
-    @Override
-    public HystrixConfigurationDefinition getHystrixConfiguration(String id) {
-        if (model == null && isLightweight()) {
-            throw new IllegalStateException("Access to model not supported in lightweight mode");
-        }
-        return model.getHystrixConfiguration(id);
-    }
-
-    @Override
-    public void setHystrixConfiguration(HystrixConfigurationDefinition configuration) {
-        if (model == null && isLightweight()) {
-            throw new IllegalStateException("Access to model not supported in lightweight mode");
-        }
-        model.setHystrixConfiguration(configuration);
-    }
-
-    @Override
-    public void setHystrixConfigurations(List<HystrixConfigurationDefinition> configurations) {
-        if (model == null && isLightweight()) {
-            throw new IllegalStateException("Access to model not supported in lightweight mode");
-        }
-        model.setHystrixConfigurations(configurations);
-    }
-
-    @Override
-    public void addHystrixConfiguration(String id, HystrixConfigurationDefinition configuration) {
-        if (model == null && isLightweight()) {
-            throw new IllegalStateException("Access to model not supported in lightweight mode");
-        }
-        model.addHystrixConfiguration(id, configuration);
     }
 
     @Override
@@ -755,8 +791,25 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         }
         List<RouteDefinition> routeDefinitions = model.getRouteDefinitions();
         if (routeDefinitions != null) {
-            startRouteDefinitions(routeDefinitions);
+            // defensive copy of routes to be started as kamelets
+            // can add route definitions from existing routes
+            List<RouteDefinition> toBeStarted = new ArrayList<>(routeDefinitions);
+            startRouteDefinitions(toBeStarted);
         }
+    }
+
+    @Override
+    public void removeRouteDefinitionsFromTemplate() throws Exception {
+        if (model == null && isLightweight()) {
+            throw new IllegalStateException("Access to model not supported in lightweight mode");
+        }
+        List<RouteDefinition> toBeRemoved = new ArrayList<>();
+        for (RouteDefinition rd : model.getRouteDefinitions()) {
+            if (rd.isTemplate() != null && rd.isTemplate()) {
+                toBeRemoved.add(rd);
+            }
+        }
+        removeRouteDefinitions(toBeRemoved);
     }
 
     public void startRouteDefinitions(List<RouteDefinition> routeDefinitions) throws Exception {
@@ -780,9 +833,11 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
         }
         try {
             RouteDefinitionHelper.forceAssignIds(getCamelContextReference(), routeDefinitions);
+            List<RouteDefinition> routeDefinitionsToRemove = null;
             for (RouteDefinition routeDefinition : routeDefinitions) {
                 // assign ids to the routes and validate that the id's is all unique
-                String duplicate = RouteDefinitionHelper.validateUniqueIds(routeDefinition, routeDefinitions);
+                String duplicate = RouteDefinitionHelper.validateUniqueIds(routeDefinition, routeDefinitions,
+                        routeDefinition.getNodePrefixId());
                 if (duplicate != null) {
                     throw new FailedToStartRouteException(
                             routeDefinition.getId(),
@@ -799,8 +854,8 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                                 .accept(routeDefinition.getRouteTemplateContext());
                     }
 
-                    // copy parameters/bean repository to not cause side-effect
-                    Map<String, Object> params = new HashMap<>(routeDefinition.getTemplateParameters());
+                    // copy parameters/bean repository to not cause side effect
+                    Map<Object, Object> params = new HashMap<>(routeDefinition.getTemplateParameters());
                     LocalBeanRegistry bbr
                             = (LocalBeanRegistry) routeDefinition.getRouteTemplateContext().getLocalBeanRepository();
                     LocalBeanRegistry bbrCopy = new LocalBeanRegistry();
@@ -810,7 +865,7 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                     // no side-effect from previously used values that Camel may use in its endpoint
                     // registry and elsewhere
                     if (bbr != null && !bbr.isEmpty()) {
-                        for (Map.Entry<String, Object> param : params.entrySet()) {
+                        for (Map.Entry<Object, Object> param : params.entrySet()) {
                             Object value = param.getValue();
                             if (value instanceof String) {
                                 String oldKey = (String) value;
@@ -843,8 +898,16 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                         }
                     }
 
-                    Properties prop = new Properties();
-                    prop.putAll(params);
+                    OrderedLocationProperties prop = new OrderedLocationProperties();
+                    if (routeDefinition.getTemplateDefaultParameters() != null) {
+                        // need to keep track if a parameter is set as default value or end user configured value
+                        params.forEach((k, v) -> {
+                            Object dv = routeDefinition.getTemplateDefaultParameters().get(k);
+                            prop.put(routeDefinition.getLocation(), k, v, dv);
+                        });
+                    } else {
+                        prop.putAll(routeDefinition.getLocation(), params);
+                    }
                     pc.setLocalProperties(prop);
 
                     // we need to shadow the bean registry on the CamelContext with the local beans from the route template context
@@ -854,28 +917,42 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
 
                     // need to reset auto assigned ids, so there is no clash when creating routes
                     ProcessorDefinitionHelper.resetAllAutoAssignedNodeIds(routeDefinition);
+                    // must re-init parent when created from a template
+                    RouteDefinitionHelper.initParent(routeDefinition);
                 }
+                // Check if the route is included
+                if (includedRoute(routeDefinition)) {
+                    // must ensure route is prepared, before we can start it
+                    if (!routeDefinition.isPrepared()) {
+                        RouteDefinitionHelper.prepareRoute(getCamelContextReference(), routeDefinition);
+                        routeDefinition.markPrepared();
+                    }
 
-                // must ensure route is prepared, before we can start it
-                if (!routeDefinition.isPrepared()) {
-                    RouteDefinitionHelper.prepareRoute(getCamelContextReference(), routeDefinition);
-                    routeDefinition.markPrepared();
+                    StartupStepRecorder recorder
+                            = getCamelContextReference().getCamelContextExtension().getStartupStepRecorder();
+                    StartupStep step = recorder.beginStep(Route.class, routeDefinition.getRouteId(), "Create Route");
+                    Route route = model.getModelReifierFactory().createRoute(this, routeDefinition);
+                    recorder.endStep(step);
+
+                    RouteService routeService = new RouteService(route);
+                    startRouteService(routeService, true);
+                } else {
+                    // Add the definition to the list of definitions to remove as the route is excluded
+                    if (routeDefinitionsToRemove == null) {
+                        routeDefinitionsToRemove = new ArrayList<>(routeDefinitions.size());
+                    }
+                    routeDefinitionsToRemove.add(routeDefinition);
                 }
-
-                StartupStepRecorder recorder
-                        = getCamelContextReference().adapt(ExtendedCamelContext.class).getStartupStepRecorder();
-                StartupStep step = recorder.beginStep(Route.class, routeDefinition.getRouteId(), "Create Route");
-                Route route = model.getModelReifierFactory().createRoute(this, routeDefinition);
-                recorder.endStep(step);
-
-                RouteService routeService = new RouteService(route);
-                startRouteService(routeService, true);
 
                 // clear local after the route is created via the reifier
                 pc.setLocalProperties(null);
                 if (localBeans != null) {
                     localBeans.setLocalBeanRepository(null);
                 }
+            }
+            if (routeDefinitionsToRemove != null) {
+                // Remove all the excluded routes
+                model.removeRouteDefinitions(routeDefinitionsToRemove);
             }
         } finally {
             if (!alreadyStartingRoutes) {
@@ -918,11 +995,6 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     @Override
-    public RouteDefinition adviceWith(RouteDefinition definition, AdviceWithRouteBuilder builder) throws Exception {
-        return AdviceWith.adviceWith(definition, this, builder);
-    }
-
-    @Override
     public void registerValidator(ValidatorDefinition def) {
         if (model == null && isLightweight()) {
             throw new IllegalStateException("Access to model not supported in lightweight mode");
@@ -947,16 +1019,39 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
     }
 
     @Override
-    protected synchronized boolean removeRoute(String routeId, LoggingLevel loggingLevel) throws Exception {
-        boolean removed = super.removeRoute(routeId, loggingLevel);
-        if (removed) {
-            // must also remove the route definition
-            RouteDefinition def = getRouteDefinition(routeId);
-            if (def != null) {
-                removeRouteDefinition(def);
+    protected boolean removeRoute(String routeId, LoggingLevel loggingLevel) throws Exception {
+        // synchronize on model first to avoid deadlock with concurrent 'addRoutes' calls:
+        synchronized (model) {
+            synchronized (this) {
+                boolean removed = super.removeRoute(routeId, loggingLevel);
+                if (removed) {
+                    // must also remove the route definition
+                    RouteDefinition def = getRouteDefinition(routeId);
+                    if (def != null) {
+                        removeRouteDefinition(def);
+                    }
+                }
+                return removed;
             }
         }
-        return removed;
+    }
+
+    @Override
+    public boolean removeRoute(String routeId) throws Exception {
+        // synchronize on model first to avoid deadlock with concurrent 'addRoutes' calls:
+        synchronized (model) {
+            return super.removeRoute(routeId);
+        }
+    }
+
+    /**
+     * Indicates whether the route should be included according to the precondition.
+     *
+     * @param  definition the definition of the route to check.
+     * @return            {@code true} if the route should be included, {@code false} otherwise.
+     */
+    private boolean includedRoute(RouteDefinition definition) {
+        return PreconditionHelper.included(definition, this);
     }
 
     private static ValueHolder<String> createTransformerKey(TransformerDefinition def) {
@@ -965,9 +1060,4 @@ public class DefaultCamelContext extends SimpleCamelContext implements ModelCame
                 : new TransformerKey(new DataType(def.getFromType()), new DataType(def.getToType()));
     }
 
-    protected static class OptionHolder {
-        public boolean noStart;
-        public boolean disableJmx = Boolean.getBoolean(JmxSystemPropertyKeys.DISABLED);
-        public String excludeRoutes;
-    }
 }

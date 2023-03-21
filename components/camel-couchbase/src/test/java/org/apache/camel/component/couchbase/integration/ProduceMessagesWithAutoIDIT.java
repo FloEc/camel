@@ -30,14 +30,14 @@ public class ProduceMessagesWithAutoIDIT extends CouchbaseIntegrationTestBase {
         template.sendBody("direct:start", "ugol1");
         template.sendBody("direct:start", "ugol2");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to(
                         getConnectionUri() + "&autoStartIdForInserts=true&startingIdForInsertsFrom=1000")
                         .to("mock:result");

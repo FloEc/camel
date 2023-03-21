@@ -43,10 +43,10 @@ public class FtpConsumerRelativeFileNameIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };
@@ -59,7 +59,7 @@ public class FtpConsumerRelativeFileNameIT extends FtpServerTestSupport {
         // should have file name header set
         mock.allMessages().header(Exchange.FILE_NAME).isNotNull();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // give time for ftp consumer to disconnect
         // and expect name to contain target/filename-consumer-XXX.txt

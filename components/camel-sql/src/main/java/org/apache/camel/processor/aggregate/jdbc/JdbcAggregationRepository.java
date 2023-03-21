@@ -34,7 +34,6 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.spi.OptimisticLockingAggregationRepository;
-import org.apache.camel.spi.OptimisticLockingAggregationRepository.OptimisticLockingException;
 import org.apache.camel.spi.RecoverableAggregationRepository;
 import org.apache.camel.support.service.ServiceSupport;
 import org.apache.camel.util.ObjectHelper;
@@ -69,31 +68,32 @@ public class JdbcAggregationRepository extends ServiceSupport
     protected static final String BODY = "body";
 
     // optimistic locking: version identifier needed to avoid the lost update problem
-    private static final String VERSION = "version";
-    private static final String VERSION_PROPERTY = "CamelOptimisticLockVersion";
+    protected static final String VERSION = "version";
+    protected static final String VERSION_PROPERTY = "CamelOptimisticLockVersion";
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbcAggregationRepository.class);
     private static final Constants PROPAGATION_CONSTANTS = new Constants(TransactionDefinition.class);
+
+    protected JdbcCamelCodec codec = new JdbcCamelCodec();
+    protected JdbcTemplate jdbcTemplate;
+    protected TransactionTemplate transactionTemplate;
+    protected TransactionTemplate transactionTemplateReadOnly;
+    protected boolean allowSerializedHeaders;
 
     private JdbcOptimisticLockingExceptionMapper jdbcOptimisticLockingExceptionMapper
             = new DefaultJdbcOptimisticLockingExceptionMapper();
     private PlatformTransactionManager transactionManager;
     private DataSource dataSource;
-    private TransactionTemplate transactionTemplate;
-    private TransactionTemplate transactionTemplateReadOnly;
     private int propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRED;
-    private JdbcTemplate jdbcTemplate;
     private LobHandler lobHandler = new DefaultLobHandler();
     private String repositoryName;
     private boolean returnOldExchange;
-    private JdbcCamelCodec codec = new JdbcCamelCodec();
     private long recoveryInterval = 5000;
     private boolean useRecovery = true;
     private int maximumRedeliveries;
     private String deadLetterUri;
     private List<String> headersToStoreAsText;
     private boolean storeBodyAsText;
-    private boolean allowSerializedHeaders;
 
     /**
      * Creates an aggregation repository
@@ -276,7 +276,7 @@ public class JdbcAggregationRepository extends ServiceSupport
     protected int insertHelper(
             final CamelContext camelContext, final String key, final Exchange exchange, String sql, final Long version)
             throws Exception {
-        final byte[] data = codec.marshallExchange(camelContext, exchange, allowSerializedHeaders);
+        final byte[] data = codec.marshallExchange(exchange, allowSerializedHeaders);
         Integer insertCount = jdbcTemplate.execute(sql,
                 new AbstractLobCreatingPreparedStatementCallback(getLobHandler()) {
                     @Override
@@ -302,7 +302,7 @@ public class JdbcAggregationRepository extends ServiceSupport
     protected int updateHelper(
             final CamelContext camelContext, final String key, final Exchange exchange, String sql, final Long version)
             throws Exception {
-        final byte[] data = codec.marshallExchange(camelContext, exchange, allowSerializedHeaders);
+        final byte[] data = codec.marshallExchange(exchange, allowSerializedHeaders);
         Integer updateCount = jdbcTemplate.execute(sql,
                 new AbstractLobCreatingPreparedStatementCallback(getLobHandler()) {
                     @Override
@@ -388,6 +388,7 @@ public class JdbcAggregationRepository extends ServiceSupport
                             key, version);
 
                     insert(camelContext, confirmKey, exchange, getRepositoryNameCompleted(), version);
+                    LOG.debug("Removed key {}", key);
 
                 } catch (Exception e) {
                     throw new RuntimeException("Error removing key " + key + " from repository " + repositoryName, e);
@@ -398,14 +399,23 @@ public class JdbcAggregationRepository extends ServiceSupport
 
     @Override
     public void confirm(final CamelContext camelContext, final String exchangeId) {
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
+        confirmWithResult(camelContext, exchangeId);
+    }
+
+    @Override
+    public boolean confirmWithResult(final CamelContext camelContext, final String exchangeId) {
+        return transactionTemplate.execute(new TransactionCallback<Boolean>() {
+            public Boolean doInTransaction(TransactionStatus status) {
                 LOG.debug("Confirming exchangeId {}", exchangeId);
                 final String confirmKey = exchangeId;
-
-                jdbcTemplate.update("DELETE FROM " + getRepositoryNameCompleted() + " WHERE " + ID + " = ?",
-                        confirmKey);
-
+                final int mustBeOne = jdbcTemplate
+                        .update("DELETE FROM " + getRepositoryNameCompleted() + " WHERE " + ID + " = ?", confirmKey);
+                if (mustBeOne != 1) {
+                    LOG.error("problem removing row {} from {} - DELETE statement did not return 1 but {}",
+                            confirmKey, getRepositoryNameCompleted(), mustBeOne);
+                    return false;
+                }
+                return true;
             }
         });
     }
@@ -578,7 +588,7 @@ public class JdbcAggregationRepository extends ServiceSupport
      * Sets propagation behavior to use with spring transaction templates which are used for database access. The
      * default is TransactionDefinition.PROPAGATION_REQUIRED. This setter accepts names of the constants, like
      * "PROPAGATION_REQUIRED".
-     * 
+     *
      * @param propagationBehaviorName
      */
     public void setPropagationBehaviorName(String propagationBehaviorName) {
@@ -632,13 +642,17 @@ public class JdbcAggregationRepository extends ServiceSupport
         transactionTemplateReadOnly.setReadOnly(true);
     }
 
+    private int rowCount(final String repository) {
+        return jdbcTemplate.queryForObject("SELECT COUNT(1) FROM " + repository, Integer.class);
+    }
+
     @Override
     protected void doStart() throws Exception {
         super.doStart();
 
         // log number of existing exchanges
-        int current = getKeys().size();
-        int completed = scan(null).size();
+        final int current = rowCount(getRepositoryName());
+        final int completed = rowCount(getRepositoryNameCompleted());
 
         if (current > 0) {
             LOG.info("On startup there are {} aggregate exchanges (not completed) in repository: {}", current,

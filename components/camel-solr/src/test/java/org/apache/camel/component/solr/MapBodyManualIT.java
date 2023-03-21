@@ -47,7 +47,7 @@ public class MapBodyManualIT extends CamelTestSupport {
         template.send("direct:start", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 Map<String, String> map = new HashMap<>();
                 map.put("id", "0553579923");
                 map.put("cat", "Test");
@@ -62,14 +62,14 @@ public class MapBodyManualIT extends CamelTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to("{{solr.address}}").to("mock:result");
             }
         };

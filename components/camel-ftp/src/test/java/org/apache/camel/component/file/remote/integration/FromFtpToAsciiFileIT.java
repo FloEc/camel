@@ -17,14 +17,17 @@
 package org.apache.camel.component.file.remote.integration;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Producer;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Unit test to verify that we can pool an ASCII file from the FTP Server and store it on a local file path
  */
 public class FromFtpToAsciiFileIT extends FtpServerTestSupport {
+    @TempDir
+    Path testDirectory;
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/tmp3/camel?password=admin&binary=false&fileExist=Override";
@@ -53,7 +58,7 @@ public class FromFtpToAsciiFileIT extends FtpServerTestSupport {
         resultEndpoint.assertIsSatisfied();
 
         // assert the file
-        File file = testFile("deleteme.txt").toFile();
+        File file = testDirectory.resolve("deleteme.txt").toFile();
         assertTrue(file.exists(), "The ASCII file should exists");
         assertTrue(file.length() > 10, "File size wrong");
     }
@@ -73,11 +78,11 @@ public class FromFtpToAsciiFileIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).setHeader(Exchange.FILE_NAME, constant("deleteme.txt")).convertBodyTo(String.class)
-                        .to(fileUri("?fileExist=Override&noop=true")).to("mock:result");
+                        .to(TestSupport.fileUri(testDirectory, "?fileExist=Override&noop=true")).to("mock:result");
             }
         };
     }

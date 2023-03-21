@@ -26,8 +26,6 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.MessageHistory;
 import org.apache.camel.NamedNode;
 import org.apache.camel.NamedRoute;
@@ -56,8 +54,8 @@ import org.apache.camel.spi.Tracer;
 import org.apache.camel.spi.Transformer;
 import org.apache.camel.spi.UnitOfWork;
 import org.apache.camel.spi.UnitOfWorkFactory;
-import org.apache.camel.spi.annotations.EagerClassloaded;
 import org.apache.camel.support.CamelContextHelper;
+import org.apache.camel.support.EventHelper;
 import org.apache.camel.support.ExchangeHelper;
 import org.apache.camel.support.LoggerHelper;
 import org.apache.camel.support.MessageHelper;
@@ -98,7 +96,6 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * The added advices can implement {@link Ordered} to control in which order the advices are executed.
  */
-@EagerClassloaded
 public class CamelInternalProcessor extends DelegateAsyncProcessor implements InternalProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(CamelInternalProcessor.class);
@@ -115,14 +112,14 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
 
     public CamelInternalProcessor(CamelContext camelContext) {
         this.camelContext = camelContext;
-        this.reactiveExecutor = camelContext.adapt(ExtendedCamelContext.class).getReactiveExecutor();
+        this.reactiveExecutor = camelContext.getCamelContextExtension().getReactiveExecutor();
         this.shutdownStrategy = camelContext.getShutdownStrategy();
     }
 
     public CamelInternalProcessor(CamelContext camelContext, Processor processor) {
         super(processor);
         this.camelContext = camelContext;
-        this.reactiveExecutor = camelContext.adapt(ExtendedCamelContext.class).getReactiveExecutor();
+        this.reactiveExecutor = camelContext.getCamelContextExtension().getReactiveExecutor();
         this.shutdownStrategy = camelContext.getShutdownStrategy();
     }
 
@@ -131,23 +128,17 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         camelContext = null;
         reactiveExecutor = null;
         shutdownStrategy = null;
-        AsyncAfterTask task = new AsyncAfterTask(null);
-        log.trace("Loaded {}", task.getClass().getSimpleName());
-    }
-
-    public static void onClassloaded(Logger log) {
-        CamelInternalProcessor dummy = new CamelInternalProcessor(log);
-        log.trace("Loaded {}", dummy.getClass().getSimpleName());
+        log.trace("Loaded {}", AsyncAfterTask.class.getSimpleName());
     }
 
     @Override
     protected void doBuild() throws Exception {
-        boolean pooled = camelContext.adapt(ExtendedCamelContext.class).getExchangeFactory().isPooled();
+        boolean pooled = camelContext.getCamelContextExtension().getExchangeFactory().isPooled();
 
         // only create pooled task factory
         if (pooled) {
             taskFactory = new CamelInternalPooledTaskFactory();
-            int capacity = camelContext.adapt(ExtendedCamelContext.class).getExchangeFactory().getCapacity();
+            int capacity = camelContext.getCamelContextExtension().getExchangeFactory().getCapacity();
             taskFactory.setCapacity(capacity);
             LOG.trace("Using TaskFactory: {}", taskFactory);
 
@@ -254,19 +245,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         @SuppressWarnings("unchecked")
         public void done(boolean doneSync) {
             try {
-                for (int i = advices.size() - 1, j = states.length - 1; i >= 0; i--) {
-                    CamelInternalProcessorAdvice task = advices.get(i);
-                    Object state = null;
-                    if (task.hasState()) {
-                        state = states[j--];
-                    }
-                    try {
-                        task.after(exchange, state);
-                    } catch (Throwable e) {
-                        exchange.setException(e);
-                        // allow all advices to complete even if there was an exception
-                    }
-                }
+                AdviceIterator.runAfterTasks(advices, states, exchange);
             } finally {
                 // ----------------------------------------------------------
                 // CAMEL END USER - DEBUG ME HERE +++ START +++
@@ -397,18 +376,15 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
                 LOG.trace("Processing exchange for exchangeId: {} -> {}", exchange.getExchangeId(), exchange);
             }
             boolean sync = processor.process(exchange, async);
+            if (!sync) {
+                EventHelper.notifyExchangeAsyncProcessingStartedEvent(camelContext, exchange);
+            }
+
             // ----------------------------------------------------------
             // CAMEL END USER - DEBUG ME HERE +++ END +++
             // ----------------------------------------------------------
 
-            // optimize to only do after uow processing if really needed
-            if (beforeAndAfter) {
-                // use the same callback as with beforeProcess
-                final CamelInternalTask afterCallback = afterTask;
-                reactiveExecutor.schedule(() -> {
-                    uow.afterProcess(processor, exchange, afterCallback, sync);
-                });
-            }
+            // CAMEL-18255: move uow.afterProcess handling to the callback
 
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Exchange processed and is continued routed {} for exchangeId: {} -> {}",
@@ -573,7 +549,8 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
     /**
      * Advice to execute the {@link BacklogTracer} if enabled.
      */
-    public static final class BacklogTracerAdvice implements CamelInternalProcessorAdvice, Ordered {
+    public static final class BacklogTracerAdvice
+            implements CamelInternalProcessorAdvice<DefaultBacklogTracerEventMessage>, Ordered {
 
         private final BacklogTracer backlogTracer;
         private final NamedNode processorDefinition;
@@ -589,39 +566,96 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         }
 
         @Override
-        public Object before(Exchange exchange) throws Exception {
+        public DefaultBacklogTracerEventMessage before(Exchange exchange) throws Exception {
             if (backlogTracer.shouldTrace(processorDefinition, exchange)) {
                 long timestamp = System.currentTimeMillis();
                 String toNode = processorDefinition.getId();
                 String exchangeId = exchange.getExchangeId();
-                String messageAsXml = MessageHelper.dumpAsXml(exchange.getIn(), true, 4,
-                        backlogTracer.isBodyIncludeStreams(), backlogTracer.isBodyIncludeFiles(),
+                boolean includeExchangeProperties = backlogTracer.isIncludeExchangeProperties();
+                String messageAsXml = MessageHelper.dumpAsXml(exchange.getIn(), includeExchangeProperties, true, 4,
+                        true, backlogTracer.isBodyIncludeStreams(), backlogTracer.isBodyIncludeFiles(),
                         backlogTracer.getBodyMaxChars());
+                String messageAsJSon = MessageHelper.dumpAsJSon(exchange.getIn(), includeExchangeProperties, true, 4,
+                        true, backlogTracer.isBodyIncludeStreams(), backlogTracer.isBodyIncludeFiles(),
+                        backlogTracer.getBodyMaxChars(), true);
 
                 // if first we should add a pseudo trace message as well, so we have a starting message (eg from the route)
                 String routeId = routeDefinition != null ? routeDefinition.getRouteId() : null;
                 if (first) {
+                    // use route as pseudo source when first
+                    String source = LoggerHelper.getLineNumberLoggerName(routeDefinition);
                     long created = exchange.getCreated();
-                    DefaultBacklogTracerEventMessage pseudo = new DefaultBacklogTracerEventMessage(
-                            backlogTracer.incrementTraceCounter(), created, routeId, null, exchangeId, messageAsXml);
-                    backlogTracer.traceEvent(pseudo);
+                    DefaultBacklogTracerEventMessage pseudoFirst = new DefaultBacklogTracerEventMessage(
+                            true, false, backlogTracer.incrementTraceCounter(), created, source, routeId, null, exchangeId,
+                            messageAsXml,
+                            messageAsJSon);
+                    backlogTracer.traceEvent(pseudoFirst);
+                    exchange.getExchangeExtension().addOnCompletion(new SynchronizationAdapter() {
+                        @Override
+                        public void onDone(Exchange exchange) {
+                            // create pseudo last
+                            String routeId = routeDefinition != null ? routeDefinition.getRouteId() : null;
+                            String exchangeId = exchange.getExchangeId();
+                            boolean includeExchangeProperties = backlogTracer.isIncludeExchangeProperties();
+                            long created = exchange.getCreated();
+                            String messageAsXml = MessageHelper.dumpAsXml(exchange.getIn(), includeExchangeProperties, true, 4,
+                                    true, backlogTracer.isBodyIncludeStreams(), backlogTracer.isBodyIncludeFiles(),
+                                    backlogTracer.getBodyMaxChars());
+                            String messageAsJSon
+                                    = MessageHelper.dumpAsJSon(exchange.getIn(), includeExchangeProperties, true, 4,
+                                            true, backlogTracer.isBodyIncludeStreams(), backlogTracer.isBodyIncludeFiles(),
+                                            backlogTracer.getBodyMaxChars(), true);
+                            DefaultBacklogTracerEventMessage pseudoLast = new DefaultBacklogTracerEventMessage(
+                                    false, true, backlogTracer.incrementTraceCounter(), created, source, routeId, null,
+                                    exchangeId,
+                                    messageAsXml,
+                                    messageAsJSon);
+                            backlogTracer.traceEvent(pseudoLast);
+                            doneProcessing(exchange, pseudoLast);
+                            doneProcessing(exchange, pseudoFirst);
+                            // to not be confused then lets store duration on first/last as (first = 0, last = total time to process)
+                            pseudoLast.setElapsed(pseudoFirst.getElapsed());
+                            pseudoFirst.setElapsed(0);
+                        }
+                    });
                 }
+                String source = LoggerHelper.getLineNumberLoggerName(processorDefinition);
                 DefaultBacklogTracerEventMessage event = new DefaultBacklogTracerEventMessage(
-                        backlogTracer.incrementTraceCounter(), timestamp, routeId, toNode, exchangeId, messageAsXml);
+                        false, false, backlogTracer.incrementTraceCounter(), timestamp, source, routeId, toNode, exchangeId,
+                        messageAsXml,
+                        messageAsJSon);
                 backlogTracer.traceEvent(event);
+
+                return event;
             }
 
             return null;
         }
 
         @Override
-        public void after(Exchange exchange, Object data) throws Exception {
-            // noop
+        public void after(Exchange exchange, DefaultBacklogTracerEventMessage data) throws Exception {
+            doneProcessing(exchange, data);
+        }
+
+        private void doneProcessing(Exchange exchange, DefaultBacklogTracerEventMessage data) {
+            if (data != null) {
+                data.doneProcessing();
+                if (!data.isFirst()) {
+                    // we want to capture if there was an exception
+                    Throwable e = exchange.getException();
+                    if (e != null) {
+                        String xml = MessageHelper.dumpExceptionAsXML(e, 4);
+                        data.setExceptionAsXml(xml);
+                        String json = MessageHelper.dumpExceptionAsJSon(e, 4, true);
+                        data.setExceptionAsJSon(json);
+                    }
+                }
+            }
         }
 
         @Override
         public boolean hasState() {
-            return false;
+            return true;
         }
 
         @Override
@@ -639,24 +673,16 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         private final BacklogDebugger backlogDebugger;
         private final Processor target;
         private final NamedNode definition;
-        private final String nodeId;
 
         public BacklogDebuggerAdvice(BacklogDebugger backlogDebugger, Processor target, NamedNode definition) {
             this.backlogDebugger = backlogDebugger;
             this.target = target;
             this.definition = definition;
-            this.nodeId = definition.getId();
         }
 
         @Override
         public StopWatch before(Exchange exchange) throws Exception {
-            if (backlogDebugger.isEnabled() && (backlogDebugger.hasBreakpoint(nodeId) || backlogDebugger.isSingleStepMode())) {
-                StopWatch watch = new StopWatch();
-                backlogDebugger.beforeProcess(exchange, target, definition);
-                return watch;
-            } else {
-                return null;
-            }
+            return backlogDebugger.beforeProcess(exchange, target, definition);
         }
 
         @Override
@@ -721,7 +747,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
             if (route != null) {
                 this.routeId = route.getRouteId();
             }
-            this.uowFactory = camelContext.adapt(ExtendedCamelContext.class).getUnitOfWorkFactory();
+            this.uowFactory = camelContext.getCamelContextExtension().getUnitOfWorkFactory();
             // optimize uow factory to initialize it early and once per advice
             this.uowFactory.afterPropertiesConfigured(camelContext);
         }
@@ -734,8 +760,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
                 if (routeId == null) {
                     this.routeId = route.getRouteId();
                 }
-                ExtendedExchange ee = (ExtendedExchange) exchange;
-                ee.setFromRouteId(routeId);
+                exchange.getExchangeExtension().setFromRouteId(routeId);
             }
 
             // only return UnitOfWork if we created a new as then its us that handle the lifecycle to done the created UoW
@@ -746,15 +771,13 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
                 // If there is no existing UoW, then we should start one and
                 // terminate it once processing is completed for the exchange.
                 created = createUnitOfWork(exchange);
-                ExtendedExchange ee = (ExtendedExchange) exchange;
-                ee.setUnitOfWork(created);
+                exchange.getExchangeExtension().setUnitOfWork(created);
                 uow = created;
             } else {
                 // reuse existing exchange
                 if (uow.onPrepare(exchange)) {
                     // need to re-attach uow
-                    ExtendedExchange ee = (ExtendedExchange) exchange;
-                    ee.setUnitOfWork(uow);
+                    exchange.getExchangeExtension().setUnitOfWork(uow);
                     // we are prepared for reuse and can regard it as-if we created the unit of work
                     // so the after method knows that this is the outer bounds and should done the unit of work
                     created = uow;
@@ -788,7 +811,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
             if (uowFactory != null) {
                 return uowFactory.createUnitOfWork(exchange);
             } else {
-                return exchange.getContext().adapt(ExtendedCamelContext.class).getUnitOfWorkFactory()
+                return exchange.getContext().getCamelContextExtension().getUnitOfWorkFactory()
                         .createUnitOfWork(exchange);
             }
         }
@@ -878,19 +901,17 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
 
         @Override
         public String before(Exchange exchange) throws Exception {
-            ExtendedExchange ee = (ExtendedExchange) exchange;
-            ee.setHistoryNodeId(id);
-            ee.setHistoryNodeLabel(label);
-            ee.setHistoryNodeSource(source);
+            exchange.getExchangeExtension().setHistoryNodeId(id);
+            exchange.getExchangeExtension().setHistoryNodeLabel(label);
+            exchange.getExchangeExtension().setHistoryNodeSource(source);
             return null;
         }
 
         @Override
         public void after(Exchange exchange, Object data) throws Exception {
-            ExtendedExchange ee = (ExtendedExchange) exchange;
-            ee.setHistoryNodeId(null);
-            ee.setHistoryNodeLabel(null);
-            ee.setHistoryNodeSource(null);
+            exchange.getExchangeExtension().setHistoryNodeId(null);
+            exchange.getExchangeExtension().setHistoryNodeLabel(null);
+            exchange.getExchangeExtension().setHistoryNodeSource(null);
         }
 
         @Override
@@ -913,14 +934,23 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
         @Override
         public StreamCache before(Exchange exchange) throws Exception {
             // check if body is already cached
-            Object body = exchange.getIn().getBody();
-            if (body == null) {
-                return null;
-            } else if (body instanceof StreamCache) {
-                StreamCache sc = (StreamCache) body;
-                // reset so the cache is ready to be used before processing
-                sc.reset();
-                return sc;
+            try {
+                Object body = exchange.getIn().getBody();
+                if (body == null) {
+                    return null;
+                } else if (body instanceof StreamCache) {
+                    StreamCache sc = (StreamCache) body;
+                    // reset so the cache is ready to be used before processing
+                    sc.reset();
+                    return sc;
+                }
+            } catch (Exception e) {
+                // lets allow Camels error handler to deal with stream cache failures
+                StreamCacheException tce = new StreamCacheException(null, e);
+                exchange.setException(tce);
+                // because this is stream caching error then we cannot use redelivery as the message body is corrupt
+                // so mark as redelivery exhausted
+                exchange.getExchangeExtension().setRedeliveryExhausted(true);
             }
             // check if we somewhere failed due to a stream caching exception
             Throwable cause = exchange.getException();
@@ -929,6 +959,10 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
             }
             boolean failed = cause != null && ObjectHelper.getException(StreamCacheException.class, cause) != null;
             if (!failed) {
+                boolean disabled = exchange.getExchangeExtension().isStreamCacheDisabled();
+                if (disabled) {
+                    return null;
+                }
                 try {
                     // cache the body and if we could do that replace it as the new body
                     StreamCache sc = strategy.cache(exchange);
@@ -942,7 +976,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
                     exchange.setException(tce);
                     // because this is stream caching error then we cannot use redelivery as the message body is corrupt
                     // so mark as redelivery exhausted
-                    exchange.adapt(ExtendedExchange.class).setRedeliveryExhausted(true);
+                    exchange.getExchangeExtension().setRedeliveryExhausted(true);
                 }
             }
             return null;
@@ -1027,7 +1061,7 @@ public class CamelInternalProcessor extends DelegateAsyncProcessor implements In
                     boolean contains = exchange.getUnitOfWork().containsSynchronization(tracingAfterRoute);
                     if (!contains) {
                         tracer.traceBeforeRoute(routeDefinition, exchange);
-                        exchange.adapt(ExtendedExchange.class).addOnCompletion(tracingAfterRoute);
+                        exchange.getExchangeExtension().addOnCompletion(tracingAfterRoute);
                     }
                 }
                 tracer.traceBeforeNode(processorDefinition, exchange);

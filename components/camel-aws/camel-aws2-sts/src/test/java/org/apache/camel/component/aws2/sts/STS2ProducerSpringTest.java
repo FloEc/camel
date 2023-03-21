@@ -40,14 +40,14 @@ public class STS2ProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:assumeRole", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(STS2Constants.OPERATION, STS2Operations.assumeRole);
                 exchange.getIn().setHeader(STS2Constants.ROLE_ARN, "arn");
                 exchange.getIn().setHeader(STS2Constants.ROLE_SESSION_NAME, "sessionarn");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         AssumeRoleResponse resultGet = (AssumeRoleResponse) exchange.getIn().getBody();
         assertEquals("arn", resultGet.assumedRoleUser().arn());
@@ -59,12 +59,12 @@ public class STS2ProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:getSessionToken", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(STS2Constants.OPERATION, STS2Operations.getSessionToken);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         GetSessionTokenResponse resultGet = (GetSessionTokenResponse) exchange.getIn().getBody();
         assertEquals("xxx", resultGet.credentials().accessKeyId());
@@ -75,13 +75,13 @@ public class STS2ProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:getFederationToken", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(STS2Constants.OPERATION, STS2Operations.getFederationToken);
                 exchange.getIn().setHeader(STS2Constants.FEDERATED_NAME, "federation-account");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         GetFederationTokenResponse resultGet = (GetFederationTokenResponse) exchange.getIn().getBody();
         assertEquals("xxx", resultGet.credentials().accessKeyId());

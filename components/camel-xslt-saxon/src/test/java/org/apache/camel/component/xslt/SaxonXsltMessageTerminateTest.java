@@ -17,12 +17,15 @@
 package org.apache.camel.component.xslt;
 
 import net.sf.saxon.expr.instruct.TerminationException;
+import net.sf.saxon.trans.XPathException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.camel.test.junit5.TestSupport.assertIsInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SaxonXsltMessageTerminateTest extends CamelTestSupport {
@@ -34,7 +37,7 @@ public class SaxonXsltMessageTerminateTest extends CamelTestSupport {
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange out = getMockEndpoint("mock:dead").getReceivedExchanges().get(0);
         assertNotNull(out);
@@ -46,6 +49,7 @@ public class SaxonXsltMessageTerminateTest extends CamelTestSupport {
         Exception error = out.getProperty(Exchange.XSLT_FATAL_ERROR, Exception.class);
         assertNotNull(error);
         assertIsInstanceOf(TerminationException.class, error);
+        assertEquals("Error: DOB is an empty string!", ((XPathException) error).getErrorObject().head().getStringValue());
     }
 
     @Override

@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.camel.ContextTestSupport;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.spi.EndpointUriFactory;
 import org.apache.camel.support.component.EndpointUriFactorySupport;
 import org.junit.jupiter.api.Assertions;
@@ -60,7 +59,7 @@ public class CustomEndpointUriFactoryTest extends ContextTestSupport {
         params.put("port", 4444);
         params.put("verbose", true);
 
-        assembler = context.adapt(ExtendedCamelContext.class).getEndpointUriFactory("acme");
+        assembler = context.getCamelContextExtension().getEndpointUriFactory("acme");
         String uri = assembler.buildUri("acme", params);
         Assertions.assertEquals("acme:foo:4444?amount=123&verbose=true", uri);
     }
@@ -306,6 +305,11 @@ public class CustomEndpointUriFactoryTest extends ContextTestSupport {
         }
 
         @Override
+        public Set<String> multiValuePrefixes() {
+            return Collections.emptySet();
+        }
+
+        @Override
         public boolean isLenientProperties() {
             return false;
         }
@@ -348,6 +352,11 @@ public class CustomEndpointUriFactoryTest extends ContextTestSupport {
         }
 
         @Override
+        public Set<String> multiValuePrefixes() {
+            return Collections.emptySet();
+        }
+
+        @Override
         public boolean isLenientProperties() {
             return false;
         }
@@ -382,6 +391,11 @@ public class CustomEndpointUriFactoryTest extends ContextTestSupport {
 
         @Override
         public Set<String> secretPropertyNames() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public Set<String> multiValuePrefixes() {
             return Collections.emptySet();
         }
 
@@ -421,6 +435,11 @@ public class CustomEndpointUriFactoryTest extends ContextTestSupport {
         }
 
         @Override
+        public Set<String> multiValuePrefixes() {
+            return Collections.emptySet();
+        }
+
+        @Override
         public boolean isLenientProperties() {
             return false;
         }
@@ -454,6 +473,11 @@ public class CustomEndpointUriFactoryTest extends ContextTestSupport {
 
         @Override
         public Set<String> secretPropertyNames() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public Set<String> multiValuePrefixes() {
             return Collections.emptySet();
         }
 

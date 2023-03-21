@@ -39,12 +39,20 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "AutowiredEnabled": target.setAutowiredEnabled(property(camelContext, boolean.class, value)); return true;
         case "backlogtracing":
         case "BacklogTracing": target.setBacklogTracing(property(camelContext, boolean.class, value)); return true;
+        case "backlogtracingstandby":
+        case "BacklogTracingStandby": target.setBacklogTracingStandby(property(camelContext, boolean.class, value)); return true;
+        case "basepackagescan":
+        case "BasePackageScan": target.setBasePackageScan(property(camelContext, java.lang.String.class, value)); return true;
+        case "basepackagescanenabled":
+        case "BasePackageScanEnabled": target.setBasePackageScanEnabled(property(camelContext, boolean.class, value)); return true;
         case "beanintrospectionextendedstatistics":
         case "BeanIntrospectionExtendedStatistics": target.setBeanIntrospectionExtendedStatistics(property(camelContext, boolean.class, value)); return true;
         case "beanintrospectionlogginglevel":
         case "BeanIntrospectionLoggingLevel": target.setBeanIntrospectionLoggingLevel(property(camelContext, org.apache.camel.LoggingLevel.class, value)); return true;
         case "beanpostprocessorenabled":
         case "BeanPostProcessorEnabled": target.setBeanPostProcessorEnabled(property(camelContext, boolean.class, value)); return true;
+        case "cameleventstimestampenabled":
+        case "CamelEventsTimestampEnabled": target.setCamelEventsTimestampEnabled(property(camelContext, boolean.class, value)); return true;
         case "caseinsensitiveheaders":
         case "CaseInsensitiveHeaders": target.setCaseInsensitiveHeaders(property(camelContext, boolean.class, value)); return true;
         case "configurationclasses":
@@ -53,8 +61,14 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Configurations": target.setConfigurations(property(camelContext, java.util.List.class, value)); return true;
         case "consumertemplatecachesize":
         case "ConsumerTemplateCacheSize": target.setConsumerTemplateCacheSize(property(camelContext, int.class, value)); return true;
+        case "contextreloadenabled":
+        case "ContextReloadEnabled": target.setContextReloadEnabled(property(camelContext, boolean.class, value)); return true;
         case "debugging":
         case "Debugging": target.setDebugging(property(camelContext, boolean.class, value)); return true;
+        case "description":
+        case "Description": target.setDescription(property(camelContext, java.lang.String.class, value)); return true;
+        case "devconsoleenabled":
+        case "DevConsoleEnabled": target.setDevConsoleEnabled(property(camelContext, boolean.class, value)); return true;
         case "dumproutes":
         case "DumpRoutes": target.setDumpRoutes(property(camelContext, boolean.class, value)); return true;
         case "durationhitexitcode":
@@ -67,8 +81,6 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "DurationMaxMessages": target.setDurationMaxMessages(property(camelContext, int.class, value)); return true;
         case "durationmaxseconds":
         case "DurationMaxSeconds": target.setDurationMaxSeconds(property(camelContext, int.class, value)); return true;
-        case "eagerclassloading":
-        case "EagerClassloading": target.setEagerClassloading(property(camelContext, boolean.class, value)); return true;
         case "endpointbridgeerrorhandler":
         case "EndpointBridgeErrorHandler": target.setEndpointBridgeErrorHandler(property(camelContext, boolean.class, value)); return true;
         case "endpointlazystartproducer":
@@ -81,6 +93,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "ExchangeFactoryCapacity": target.setExchangeFactoryCapacity(property(camelContext, int.class, value)); return true;
         case "exchangefactorystatisticsenabled":
         case "ExchangeFactoryStatisticsEnabled": target.setExchangeFactoryStatisticsEnabled(property(camelContext, boolean.class, value)); return true;
+        case "extrashutdowntimeout":
+        case "ExtraShutdownTimeout": target.setExtraShutdownTimeout(property(camelContext, int.class, value)); return true;
         case "fileconfigurations":
         case "FileConfigurations": target.setFileConfigurations(property(camelContext, java.lang.String.class, value)); return true;
         case "globaloptions":
@@ -93,6 +107,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "JavaRoutesIncludePattern": target.setJavaRoutesIncludePattern(property(camelContext, java.lang.String.class, value)); return true;
         case "jmxenabled":
         case "JmxEnabled": target.setJmxEnabled(property(camelContext, boolean.class, value)); return true;
+        case "jmxmanagementmbeanslevel":
+        case "JmxManagementMBeansLevel": target.setJmxManagementMBeansLevel(property(camelContext, org.apache.camel.ManagementMBeansLevel.class, value)); return true;
         case "jmxmanagementnamepattern":
         case "JmxManagementNamePattern": target.setJmxManagementNamePattern(property(camelContext, java.lang.String.class, value)); return true;
         case "jmxmanagementstatisticslevel":
@@ -101,6 +117,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Lightweight": target.setLightweight(property(camelContext, boolean.class, value)); return true;
         case "loadhealthchecks":
         case "LoadHealthChecks": target.setLoadHealthChecks(property(camelContext, boolean.class, value)); return true;
+        case "loadstatisticsenabled":
+        case "LoadStatisticsEnabled": target.setLoadStatisticsEnabled(property(camelContext, boolean.class, value)); return true;
         case "loadtypeconverters":
         case "LoadTypeConverters": target.setLoadTypeConverters(property(camelContext, boolean.class, value)); return true;
         case "logdebugmaxchars":
@@ -113,10 +131,10 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "MdcLoggingKeysPattern": target.setMdcLoggingKeysPattern(property(camelContext, java.lang.String.class, value)); return true;
         case "messagehistory":
         case "MessageHistory": target.setMessageHistory(property(camelContext, boolean.class, value)); return true;
+        case "modeline":
+        case "Modeline": target.setModeline(property(camelContext, boolean.class, value)); return true;
         case "name":
         case "Name": target.setName(property(camelContext, java.lang.String.class, value)); return true;
-        case "packagescanroutebuilders":
-        case "PackageScanRouteBuilders": target.setPackageScanRouteBuilders(property(camelContext, java.lang.String.class, value)); return true;
         case "producertemplatecachesize":
         case "ProducerTemplateCacheSize": target.setProducerTemplateCacheSize(property(camelContext, int.class, value)); return true;
         case "routecontrollerbackoffdelay":
@@ -135,8 +153,6 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "RouteControllerIncludeRoutes": target.setRouteControllerIncludeRoutes(property(camelContext, java.lang.String.class, value)); return true;
         case "routecontrollerinitialdelay":
         case "RouteControllerInitialDelay": target.setRouteControllerInitialDelay(property(camelContext, long.class, value)); return true;
-        case "routecontrollerlogginglevel":
-        case "RouteControllerLoggingLevel": target.setRouteControllerLoggingLevel(property(camelContext, org.apache.camel.LoggingLevel.class, value)); return true;
         case "routecontrollersuperviseenabled":
         case "RouteControllerSuperviseEnabled": target.setRouteControllerSuperviseEnabled(property(camelContext, boolean.class, value)); return true;
         case "routecontrollerthreadpoolsize":
@@ -207,6 +223,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "StreamCachingSpoolCipher": target.setStreamCachingSpoolCipher(property(camelContext, java.lang.String.class, value)); return true;
         case "streamcachingspooldirectory":
         case "StreamCachingSpoolDirectory": target.setStreamCachingSpoolDirectory(property(camelContext, java.lang.String.class, value)); return true;
+        case "streamcachingspoolenabled":
+        case "StreamCachingSpoolEnabled": target.setStreamCachingSpoolEnabled(property(camelContext, boolean.class, value)); return true;
         case "streamcachingspoolthreshold":
         case "StreamCachingSpoolThreshold": target.setStreamCachingSpoolThreshold(property(camelContext, long.class, value)); return true;
         case "streamcachingspoolusedheapmemorylimit":
@@ -219,10 +237,14 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "ThreadNamePattern": target.setThreadNamePattern(property(camelContext, java.lang.String.class, value)); return true;
         case "tracing":
         case "Tracing": target.setTracing(property(camelContext, boolean.class, value)); return true;
+        case "tracingloggingformat":
+        case "TracingLoggingFormat": target.setTracingLoggingFormat(property(camelContext, java.lang.String.class, value)); return true;
         case "tracingpattern":
         case "TracingPattern": target.setTracingPattern(property(camelContext, java.lang.String.class, value)); return true;
         case "tracingstandby":
         case "TracingStandby": target.setTracingStandby(property(camelContext, boolean.class, value)); return true;
+        case "typeconverterstatisticsenabled":
+        case "TypeConverterStatisticsEnabled": target.setTypeConverterStatisticsEnabled(property(camelContext, boolean.class, value)); return true;
         case "usebreadcrumb":
         case "UseBreadcrumb": target.setUseBreadcrumb(property(camelContext, boolean.class, value)); return true;
         case "usedatatype":
@@ -256,12 +278,20 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "AutowiredEnabled": return boolean.class;
         case "backlogtracing":
         case "BacklogTracing": return boolean.class;
+        case "backlogtracingstandby":
+        case "BacklogTracingStandby": return boolean.class;
+        case "basepackagescan":
+        case "BasePackageScan": return java.lang.String.class;
+        case "basepackagescanenabled":
+        case "BasePackageScanEnabled": return boolean.class;
         case "beanintrospectionextendedstatistics":
         case "BeanIntrospectionExtendedStatistics": return boolean.class;
         case "beanintrospectionlogginglevel":
         case "BeanIntrospectionLoggingLevel": return org.apache.camel.LoggingLevel.class;
         case "beanpostprocessorenabled":
         case "BeanPostProcessorEnabled": return boolean.class;
+        case "cameleventstimestampenabled":
+        case "CamelEventsTimestampEnabled": return boolean.class;
         case "caseinsensitiveheaders":
         case "CaseInsensitiveHeaders": return boolean.class;
         case "configurationclasses":
@@ -270,8 +300,14 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Configurations": return java.util.List.class;
         case "consumertemplatecachesize":
         case "ConsumerTemplateCacheSize": return int.class;
+        case "contextreloadenabled":
+        case "ContextReloadEnabled": return boolean.class;
         case "debugging":
         case "Debugging": return boolean.class;
+        case "description":
+        case "Description": return java.lang.String.class;
+        case "devconsoleenabled":
+        case "DevConsoleEnabled": return boolean.class;
         case "dumproutes":
         case "DumpRoutes": return boolean.class;
         case "durationhitexitcode":
@@ -284,8 +320,6 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "DurationMaxMessages": return int.class;
         case "durationmaxseconds":
         case "DurationMaxSeconds": return int.class;
-        case "eagerclassloading":
-        case "EagerClassloading": return boolean.class;
         case "endpointbridgeerrorhandler":
         case "EndpointBridgeErrorHandler": return boolean.class;
         case "endpointlazystartproducer":
@@ -298,6 +332,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "ExchangeFactoryCapacity": return int.class;
         case "exchangefactorystatisticsenabled":
         case "ExchangeFactoryStatisticsEnabled": return boolean.class;
+        case "extrashutdowntimeout":
+        case "ExtraShutdownTimeout": return int.class;
         case "fileconfigurations":
         case "FileConfigurations": return java.lang.String.class;
         case "globaloptions":
@@ -310,6 +346,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "JavaRoutesIncludePattern": return java.lang.String.class;
         case "jmxenabled":
         case "JmxEnabled": return boolean.class;
+        case "jmxmanagementmbeanslevel":
+        case "JmxManagementMBeansLevel": return org.apache.camel.ManagementMBeansLevel.class;
         case "jmxmanagementnamepattern":
         case "JmxManagementNamePattern": return java.lang.String.class;
         case "jmxmanagementstatisticslevel":
@@ -318,6 +356,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Lightweight": return boolean.class;
         case "loadhealthchecks":
         case "LoadHealthChecks": return boolean.class;
+        case "loadstatisticsenabled":
+        case "LoadStatisticsEnabled": return boolean.class;
         case "loadtypeconverters":
         case "LoadTypeConverters": return boolean.class;
         case "logdebugmaxchars":
@@ -330,10 +370,10 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "MdcLoggingKeysPattern": return java.lang.String.class;
         case "messagehistory":
         case "MessageHistory": return boolean.class;
+        case "modeline":
+        case "Modeline": return boolean.class;
         case "name":
         case "Name": return java.lang.String.class;
-        case "packagescanroutebuilders":
-        case "PackageScanRouteBuilders": return java.lang.String.class;
         case "producertemplatecachesize":
         case "ProducerTemplateCacheSize": return int.class;
         case "routecontrollerbackoffdelay":
@@ -352,8 +392,6 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "RouteControllerIncludeRoutes": return java.lang.String.class;
         case "routecontrollerinitialdelay":
         case "RouteControllerInitialDelay": return long.class;
-        case "routecontrollerlogginglevel":
-        case "RouteControllerLoggingLevel": return org.apache.camel.LoggingLevel.class;
         case "routecontrollersuperviseenabled":
         case "RouteControllerSuperviseEnabled": return boolean.class;
         case "routecontrollerthreadpoolsize":
@@ -424,6 +462,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "StreamCachingSpoolCipher": return java.lang.String.class;
         case "streamcachingspooldirectory":
         case "StreamCachingSpoolDirectory": return java.lang.String.class;
+        case "streamcachingspoolenabled":
+        case "StreamCachingSpoolEnabled": return boolean.class;
         case "streamcachingspoolthreshold":
         case "StreamCachingSpoolThreshold": return long.class;
         case "streamcachingspoolusedheapmemorylimit":
@@ -436,10 +476,14 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "ThreadNamePattern": return java.lang.String.class;
         case "tracing":
         case "Tracing": return boolean.class;
+        case "tracingloggingformat":
+        case "TracingLoggingFormat": return java.lang.String.class;
         case "tracingpattern":
         case "TracingPattern": return java.lang.String.class;
         case "tracingstandby":
         case "TracingStandby": return boolean.class;
+        case "typeconverterstatisticsenabled":
+        case "TypeConverterStatisticsEnabled": return boolean.class;
         case "usebreadcrumb":
         case "UseBreadcrumb": return boolean.class;
         case "usedatatype":
@@ -474,12 +518,20 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "AutowiredEnabled": return target.isAutowiredEnabled();
         case "backlogtracing":
         case "BacklogTracing": return target.isBacklogTracing();
+        case "backlogtracingstandby":
+        case "BacklogTracingStandby": return target.isBacklogTracingStandby();
+        case "basepackagescan":
+        case "BasePackageScan": return target.getBasePackageScan();
+        case "basepackagescanenabled":
+        case "BasePackageScanEnabled": return target.isBasePackageScanEnabled();
         case "beanintrospectionextendedstatistics":
         case "BeanIntrospectionExtendedStatistics": return target.isBeanIntrospectionExtendedStatistics();
         case "beanintrospectionlogginglevel":
         case "BeanIntrospectionLoggingLevel": return target.getBeanIntrospectionLoggingLevel();
         case "beanpostprocessorenabled":
         case "BeanPostProcessorEnabled": return target.isBeanPostProcessorEnabled();
+        case "cameleventstimestampenabled":
+        case "CamelEventsTimestampEnabled": return target.isCamelEventsTimestampEnabled();
         case "caseinsensitiveheaders":
         case "CaseInsensitiveHeaders": return target.isCaseInsensitiveHeaders();
         case "configurationclasses":
@@ -488,8 +540,14 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Configurations": return target.getConfigurations();
         case "consumertemplatecachesize":
         case "ConsumerTemplateCacheSize": return target.getConsumerTemplateCacheSize();
+        case "contextreloadenabled":
+        case "ContextReloadEnabled": return target.isContextReloadEnabled();
         case "debugging":
         case "Debugging": return target.isDebugging();
+        case "description":
+        case "Description": return target.getDescription();
+        case "devconsoleenabled":
+        case "DevConsoleEnabled": return target.isDevConsoleEnabled();
         case "dumproutes":
         case "DumpRoutes": return target.isDumpRoutes();
         case "durationhitexitcode":
@@ -502,8 +560,6 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "DurationMaxMessages": return target.getDurationMaxMessages();
         case "durationmaxseconds":
         case "DurationMaxSeconds": return target.getDurationMaxSeconds();
-        case "eagerclassloading":
-        case "EagerClassloading": return target.isEagerClassloading();
         case "endpointbridgeerrorhandler":
         case "EndpointBridgeErrorHandler": return target.isEndpointBridgeErrorHandler();
         case "endpointlazystartproducer":
@@ -516,6 +572,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "ExchangeFactoryCapacity": return target.getExchangeFactoryCapacity();
         case "exchangefactorystatisticsenabled":
         case "ExchangeFactoryStatisticsEnabled": return target.isExchangeFactoryStatisticsEnabled();
+        case "extrashutdowntimeout":
+        case "ExtraShutdownTimeout": return target.getExtraShutdownTimeout();
         case "fileconfigurations":
         case "FileConfigurations": return target.getFileConfigurations();
         case "globaloptions":
@@ -528,6 +586,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "JavaRoutesIncludePattern": return target.getJavaRoutesIncludePattern();
         case "jmxenabled":
         case "JmxEnabled": return target.isJmxEnabled();
+        case "jmxmanagementmbeanslevel":
+        case "JmxManagementMBeansLevel": return target.getJmxManagementMBeansLevel();
         case "jmxmanagementnamepattern":
         case "JmxManagementNamePattern": return target.getJmxManagementNamePattern();
         case "jmxmanagementstatisticslevel":
@@ -536,6 +596,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "Lightweight": return target.isLightweight();
         case "loadhealthchecks":
         case "LoadHealthChecks": return target.isLoadHealthChecks();
+        case "loadstatisticsenabled":
+        case "LoadStatisticsEnabled": return target.isLoadStatisticsEnabled();
         case "loadtypeconverters":
         case "LoadTypeConverters": return target.isLoadTypeConverters();
         case "logdebugmaxchars":
@@ -548,10 +610,10 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "MdcLoggingKeysPattern": return target.getMdcLoggingKeysPattern();
         case "messagehistory":
         case "MessageHistory": return target.isMessageHistory();
+        case "modeline":
+        case "Modeline": return target.isModeline();
         case "name":
         case "Name": return target.getName();
-        case "packagescanroutebuilders":
-        case "PackageScanRouteBuilders": return target.getPackageScanRouteBuilders();
         case "producertemplatecachesize":
         case "ProducerTemplateCacheSize": return target.getProducerTemplateCacheSize();
         case "routecontrollerbackoffdelay":
@@ -570,8 +632,6 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "RouteControllerIncludeRoutes": return target.getRouteControllerIncludeRoutes();
         case "routecontrollerinitialdelay":
         case "RouteControllerInitialDelay": return target.getRouteControllerInitialDelay();
-        case "routecontrollerlogginglevel":
-        case "RouteControllerLoggingLevel": return target.getRouteControllerLoggingLevel();
         case "routecontrollersuperviseenabled":
         case "RouteControllerSuperviseEnabled": return target.isRouteControllerSuperviseEnabled();
         case "routecontrollerthreadpoolsize":
@@ -642,6 +702,8 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "StreamCachingSpoolCipher": return target.getStreamCachingSpoolCipher();
         case "streamcachingspooldirectory":
         case "StreamCachingSpoolDirectory": return target.getStreamCachingSpoolDirectory();
+        case "streamcachingspoolenabled":
+        case "StreamCachingSpoolEnabled": return target.isStreamCachingSpoolEnabled();
         case "streamcachingspoolthreshold":
         case "StreamCachingSpoolThreshold": return target.getStreamCachingSpoolThreshold();
         case "streamcachingspoolusedheapmemorylimit":
@@ -654,10 +716,14 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
         case "ThreadNamePattern": return target.getThreadNamePattern();
         case "tracing":
         case "Tracing": return target.isTracing();
+        case "tracingloggingformat":
+        case "TracingLoggingFormat": return target.getTracingLoggingFormat();
         case "tracingpattern":
         case "TracingPattern": return target.getTracingPattern();
         case "tracingstandby":
         case "TracingStandby": return target.isTracingStandby();
+        case "typeconverterstatisticsenabled":
+        case "TypeConverterStatisticsEnabled": return target.isTypeConverterStatisticsEnabled();
         case "usebreadcrumb":
         case "UseBreadcrumb": return target.isUseBreadcrumb();
         case "usedatatype":
@@ -674,7 +740,7 @@ public class MainConfigurationPropertiesConfigurer extends org.apache.camel.supp
     public Object getCollectionValueType(Object target, String name, boolean ignoreCase) {
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "configurations":
-        case "Configurations": return java.lang.Object.class;
+        case "Configurations": return org.apache.camel.CamelConfiguration.class;
         case "globaloptions":
         case "GlobalOptions": return java.lang.String.class;
         case "routesbuilders":

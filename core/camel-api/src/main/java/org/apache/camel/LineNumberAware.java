@@ -42,8 +42,19 @@ public interface LineNumberAware {
     String getLocation();
 
     /**
-     * Sets the location of the entity (such as classname, XML file name, etc.)
+     * Sets the location of the entity (source file name, i.e. foo.java, bar.xml, etc.)
      */
     void setLocation(String location);
+
+    /**
+     * Set the {@link LineNumberAware} if the object is an instance of {@link LineNumberAware}.
+     */
+    static <T> T trySetLineNumberAware(T object, LineNumberAware source) {
+        if (source != null && object instanceof LineNumberAware) {
+            ((LineNumberAware) object).setLineNumber(source.getLineNumber());
+            ((LineNumberAware) object).setLocation(source.getLocation());
+        }
+        return object;
+    }
 
 }

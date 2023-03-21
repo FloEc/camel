@@ -22,12 +22,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.RouteTemplateContext;
@@ -44,6 +44,9 @@ import org.apache.camel.spi.Metadata;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RouteTemplateDefinition extends OptionalIdentifiedDefinition {
 
+    @XmlTransient
+    private Consumer<RouteTemplateContext> configurer;
+
     @XmlElement(name = "templateParameter")
     @Metadata(description = "Adds a template parameter the route template uses")
     private List<RouteTemplateParameterDefinition> templateParameters;
@@ -52,8 +55,6 @@ public class RouteTemplateDefinition extends OptionalIdentifiedDefinition {
     private List<RouteTemplateBeanDefinition> templateBeans;
     @XmlElement(name = "route", required = true)
     private RouteDefinition route = new RouteDefinition();
-    @XmlTransient
-    private Consumer<RouteTemplateContext> configurer;
 
     public List<RouteTemplateParameterDefinition> getTemplateParameters() {
         return templateParameters;
@@ -332,7 +333,8 @@ public class RouteTemplateDefinition extends OptionalIdentifiedDefinition {
         if (templateBeans == null) {
             templateBeans = new ArrayList<>();
         }
-        RouteTemplateBeanDefinition def = new RouteTemplateBeanDefinition(this);
+        RouteTemplateBeanDefinition def = new RouteTemplateBeanDefinition();
+        def.setParent(this);
         def.setName(name);
         templateBeans.add(def);
         return def;
@@ -415,7 +417,8 @@ public class RouteTemplateDefinition extends OptionalIdentifiedDefinition {
         } else {
             copy.setDescription(getDescription());
         }
-
+        copy.setPrecondition(route.getPrecondition());
+        copy.setRouteConfigurationId(route.getRouteConfigurationId());
         return copy;
     }
 

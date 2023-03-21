@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
@@ -67,8 +67,8 @@ public class SpringHttpsRouteTest {
     private Integer port;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        // ensure jsse clients can validate the self signed dummy localhost
+    public void setUp() {
+        // ensure jsse clients can validate the self-signed dummy localhost
         // cert,
         // use the server keystore as the trust store for these tests
         URL trustStoreUrl = Thread.currentThread().getContextClassLoader().getResource("jsse/localhost.p12");
@@ -76,7 +76,7 @@ public class SpringHttpsRouteTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         restoreSystemProperties();
     }
 

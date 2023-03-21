@@ -39,6 +39,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.camel.util.IOHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -83,7 +84,7 @@ public class PrinterPrintTest extends CamelTestSupport {
         return Boolean.getBoolean("java.awt.headless");
     }
 
-    private void sendFile() throws Exception {
+    private void sendFile() {
         template.send("direct:start", new Processor() {
             public void process(Exchange exchange) throws Exception {
                 // Read from an input stream
@@ -104,7 +105,7 @@ public class PrinterPrintTest extends CamelTestSupport {
         });
     }
 
-    private void sendGIF() throws Exception {
+    private void sendGIF() {
         template.send("direct:start", new Processor() {
             public void process(Exchange exchange) throws Exception {
                 // Read from an input stream
@@ -125,7 +126,7 @@ public class PrinterPrintTest extends CamelTestSupport {
         });
     }
 
-    private void sendJPEG() throws Exception {
+    private void sendJPEG() {
         template.send("direct:start", new Processor() {
             public void process(Exchange exchange) throws Exception {
                 // Read from an input stream
@@ -234,7 +235,7 @@ public class PrinterPrintTest extends CamelTestSupport {
 
         int numberOfPrintservicesBefore = PrintServiceLookup.lookupPrintServices(null, null).length;
 
-        // setup javax.print 
+        // setup javax.print
         PrintService ps1 = mock(PrintService.class);
         when(ps1.getName()).thenReturn("printer1");
         when(ps1.isDocFlavorSupported(any(DocFlavor.class))).thenReturn(Boolean.TRUE);
@@ -260,7 +261,7 @@ public class PrinterPrintTest extends CamelTestSupport {
         context.start();
 
         // Are there two different PrintConfigurations?
-        Map<String, Endpoint> epm = context().getEndpointMap();
+        Map<String, Endpoint> epm = context().getEndpointRegistry().getReadOnlyMap();
         assertEquals(4, epm.size(), "Four endpoints");
         Endpoint lp1 = null;
         Endpoint lp2 = null;
@@ -318,7 +319,7 @@ public class PrinterPrintTest extends CamelTestSupport {
      * */
     @Test
     public void testSendingFileToRemotePrinter() throws Exception {
-        // setup javax.print 
+        // setup javax.print
         PrintService ps1 = mock(PrintService.class);
         when(ps1.getName()).thenReturn("printer1");
         when(ps1.isDocFlavorSupported(any(DocFlavor.class))).thenReturn(Boolean.TRUE);
@@ -355,11 +356,11 @@ public class PrinterPrintTest extends CamelTestSupport {
         context.start();
         template.sendBodyAndHeader("direct:start", "Hello Printer", PrinterEndpoint.JOB_NAME, "Test-Job-Name");
         context.stop();
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
-    public void printToMiddleTray() throws Exception {
+    public void printToMiddleTray() {
         PrinterEndpoint endpoint = new PrinterEndpoint();
         PrinterConfiguration configuration = new PrinterConfiguration();
         configuration.setHostname("localhost");
@@ -383,7 +384,7 @@ public class PrinterPrintTest extends CamelTestSupport {
     }
 
     @Test
-    public void printsWithLandscapeOrientation() throws Exception {
+    public void printsWithLandscapeOrientation() {
         PrinterEndpoint endpoint = new PrinterEndpoint();
         PrinterConfiguration configuration = new PrinterConfiguration();
         configuration.setHostname("localhost");

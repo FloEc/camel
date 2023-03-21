@@ -21,7 +21,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.file.remote.BaseServerTestSupport;
-import org.apache.camel.component.file.remote.services.FtpEmbeddedService;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.infra.ftp.services.FtpServiceFactory;
+import org.apache.camel.test.infra.ftp.services.embedded.FtpEmbeddedService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -30,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FtpPollEnrichBridgeErrorHandlerIT extends BaseServerTestSupport {
     @RegisterExtension
-    static FtpEmbeddedService service = new FtpEmbeddedService();
+    static FtpEmbeddedService service = FtpServiceFactory.createEmbeddedService();
 
     // we want to poll enrich from FTP and therefore want to fail fast if
     // something is wrong
@@ -39,8 +41,8 @@ public class FtpPollEnrichBridgeErrorHandlerIT extends BaseServerTestSupport {
     // and turn of auto create as that will pre-login to check if the directory
     // exists
     // and in case of connection error then throw that as an exception
-    private String uri = "ftp://admin@localhost:" + service.getPort() + "/unknown/?password=admin"
-                         + "&maximumReconnectAttempts=0&autoCreate=false&throwExceptionOnConnectFailed=true&bridgeErrorHandler=true";
+    private final String uri = "ftp://admin@localhost:" + service.getPort() + "/unknown/?password=admin"
+                               + "&maximumReconnectAttempts=0&autoCreate=false&throwExceptionOnConnectFailed=true&bridgeErrorHandler=true";
 
     @Test
     public void testPollEnrich() throws Exception {
@@ -49,7 +51,7 @@ public class FtpPollEnrichBridgeErrorHandlerIT extends BaseServerTestSupport {
 
         template.sendBody("seda:start", "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange out = getMockEndpoint("mock:dead").getExchanges().get(0);
         assertNotNull(out);
@@ -59,10 +61,10 @@ public class FtpPollEnrichBridgeErrorHandlerIT extends BaseServerTestSupport {
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 errorHandler(deadLetterChannel("mock:dead"));
 
                 from("seda:start")
@@ -78,7 +80,7 @@ public class FtpPollEnrichBridgeErrorHandlerIT extends BaseServerTestSupport {
         };
     }
 
-    private class MyAggregationStrategy implements AggregationStrategy {
+    private static class MyAggregationStrategy implements AggregationStrategy {
 
         @Override
         public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {

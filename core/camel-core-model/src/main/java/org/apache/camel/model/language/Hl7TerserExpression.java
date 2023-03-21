@@ -16,9 +16,10 @@
  */
 package org.apache.camel.model.language;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.spi.Metadata;
 
@@ -28,7 +29,7 @@ import org.apache.camel.spi.Metadata;
 @Metadata(firstVersion = "2.11.0", label = "language,hl7", title = "HL7 Terser")
 @XmlRootElement(name = "hl7terser")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Hl7TerserExpression extends ExpressionDefinition {
+public class Hl7TerserExpression extends SingleInputTypedExpressionDefinition {
 
     public Hl7TerserExpression() {
     }
@@ -37,8 +38,24 @@ public class Hl7TerserExpression extends ExpressionDefinition {
         super(expression);
     }
 
+    private Hl7TerserExpression(Builder builder) {
+        super(builder);
+    }
+
     @Override
     public String getLanguage() {
         return "hl7terser";
+    }
+
+    /**
+     * {@code Builder} is a specific builder for {@link Hl7TerserExpression}.
+     */
+    @XmlTransient
+    public static class Builder extends AbstractBuilder<Builder, Hl7TerserExpression> {
+
+        @Override
+        public Hl7TerserExpression end() {
+            return new Hl7TerserExpression(this);
+        }
     }
 }

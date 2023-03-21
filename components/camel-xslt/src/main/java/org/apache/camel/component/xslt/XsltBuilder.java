@@ -40,7 +40,6 @@ import javax.xml.transform.stream.StreamSource;
 import org.xml.sax.EntityResolver;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.support.ExchangeHelper;
@@ -95,8 +94,8 @@ public class XsltBuilder implements Processor {
 
         if (isDeleteOutputFile()) {
             // add on completion so we can delete the file when the Exchange is done
-            String fileName = ExchangeHelper.getMandatoryHeader(exchange, Exchange.XSLT_FILE_NAME, String.class);
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new XsltBuilderOnCompletion(fileName));
+            String fileName = ExchangeHelper.getMandatoryHeader(exchange, XsltConstants.XSLT_FILE_NAME, String.class);
+            exchange.getExchangeExtension().addOnCompletion(new XsltBuilderOnCompletion(fileName));
         }
 
         Transformer transformer = getTransformer();

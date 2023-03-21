@@ -16,8 +16,8 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.Folder;
-import javax.mail.Store;
+import jakarta.mail.Folder;
+import jakarta.mail.Store;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -70,9 +70,9 @@ public class MailPollEnrichNoMailTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start")
                         .pollEnrich("pop3://bill@localhost?password=secret&initialDelay=100&delay=100", 0)
                         .to("log:mail", "mock:result");

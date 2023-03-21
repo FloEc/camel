@@ -26,14 +26,12 @@ import java.util.regex.Pattern;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.SSLContextParametersAware;
 import org.apache.camel.TypeConverter;
 import org.apache.camel.component.salesforce.api.SalesforceException;
-import org.apache.camel.component.salesforce.api.dto.AbstractSObjectBase;
+import org.apache.camel.component.salesforce.api.dto.AbstractDTOBase;
 import org.apache.camel.component.salesforce.api.utils.SecurityUtils;
 import org.apache.camel.component.salesforce.internal.OperationName;
-import org.apache.camel.component.salesforce.internal.PayloadFormat;
 import org.apache.camel.component.salesforce.internal.SalesforceSession;
 import org.apache.camel.component.salesforce.internal.client.DefaultRawClient;
 import org.apache.camel.component.salesforce.internal.client.DefaultRestClient;
@@ -82,10 +80,12 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
     public static final String HTTP_PROXY_REALM = "httpProxyRealm";
     public static final String HTTP_CONNECTION_TIMEOUT = "httpConnectionTimeout";
     public static final String HTTP_IDLE_TIMEOUT = "httpIdleTimeout";
+    public static final String HTTP_REQUEST_TIMEOUT = "httpRequestTimeout";
     public static final String HTTP_MAX_CONTENT_LENGTH = "httpMaxContentLength";
     public static final String HTTP_REQUEST_BUFFER_SIZE = "httpRequestBufferSize";
 
     static final int CONNECTION_TIMEOUT = 60000;
+    static final int REQUEST_TIMEOUT = 60000;
     static final int IDLE_TIMEOUT = 10000;
     static final int REQUEST_BUFFER_SIZE = 8192;
 
@@ -173,6 +173,10 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
     @Metadata(description = "Connection timeout used by the HttpClient when connecting to the Salesforce server.",
               label = "common", defaultValue = "" + CONNECTION_TIMEOUT)
     private long httpClientConnectionTimeout = CONNECTION_TIMEOUT;
+
+    @Metadata(description = "Timeout value for HTTP requests.",
+              label = "common", defaultValue = "" + REQUEST_TIMEOUT)
+    private long httpRequestTimeout = REQUEST_TIMEOUT;
 
     @Metadata(description = "Max content length of an HTTP response.", label = "common")
     private Integer httpMaxContentLength;
@@ -282,19 +286,20 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         OperationName operationName = null;
         String topicName = null;
         String apexUrl = null;
-        try {
-            LOG.debug("Creating endpoint for: {}", remaining);
-            if (remaining.startsWith(APEX_CALL_PREFIX)) {
-                // extract APEX URL
-                apexUrl = remaining.substring(APEX_CALL_PREFIX.length());
-                remaining = OperationName.APEX_CALL.value();
+        LOG.debug("Creating endpoint for: {}", remaining);
+        if (remaining.startsWith(APEX_CALL_PREFIX)) {
+            // extract APEX URL
+            apexUrl = remaining.substring(APEX_CALL_PREFIX.length());
+            remaining = OperationName.APEX_CALL.value();
+        } else if (remaining.startsWith(OperationName.SUBSCRIBE.value())) {
+            final String[] parts = remaining.split(":");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("topicName must be supplied for subscribe operation.");
             }
-            operationName = OperationName.fromValue(remaining);
-        } catch (IllegalArgumentException ex) {
-            // if its not an operation name, treat is as topic name for consumer
-            // endpoints
-            topicName = remaining;
+            remaining = parts[0];
+            topicName = parts[1];
         }
+        operationName = OperationName.fromValue(remaining);
 
         // create endpoint config
         if (config == null) {
@@ -335,8 +340,8 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
 
     private Map<String, Class<?>> parsePackages() {
         Map<String, Class<?>> result = new HashMap<>();
-        Set<Class<?>> classes = getCamelContext().adapt(ExtendedCamelContext.class).getPackageScanClassResolver()
-                .findImplementations(AbstractSObjectBase.class, getPackagesAsArray());
+        Set<Class<?>> classes = getCamelContext().getCamelContextExtension().getPackageScanClassResolver()
+                .findImplementations(AbstractDTOBase.class, getPackagesAsArray());
         for (Class<?> aClass : classes) {
             result.put(aClass.getSimpleName(), aClass);
         }
@@ -385,7 +390,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
                         .orElseGet(() -> Optional.ofNullable(retrieveGlobalSslContextParameters())
                                 .orElseGet(() -> new SSLContextParameters()));
 
-                final SslContextFactory sslContextFactory = new SslContextFactory();
+                final SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
                 sslContextFactory.setSslContext(contextParameters.createSSLContext(getCamelContext()));
 
                 httpClient = createHttpClient(this, sslContextFactory, getCamelContext(), workerPoolSize, workerPoolMaxSize);
@@ -625,6 +630,14 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         this.httpClientConnectionTimeout = httpClientConnectionTimeout;
     }
 
+    public long getHttpRequestTimeout() {
+        return httpRequestTimeout;
+    }
+
+    public void setHttpRequestTimeout(long httpRequestTimeout) {
+        this.httpRequestTimeout = httpRequestTimeout;
+    }
+
     public Integer getHttpMaxContentLength() {
         return httpMaxContentLength;
     }
@@ -777,7 +790,6 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
 
     RestClient createRestClientFor(SalesforceEndpointConfig endpointConfig) throws SalesforceException {
         final String version = endpointConfig.getApiVersion();
-        final PayloadFormat format = endpointConfig.getFormat();
 
         return new DefaultRestClient(httpClient, version, session, loginConfig);
     }
@@ -807,7 +819,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         // let's work with a copy so original properties are intact
         PropertyBindingSupport.bindProperties(camelContext, sslContextParameters, new HashMap<>(properties));
 
-        final SslContextFactory sslContextFactory = new SslContextFactory();
+        final SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
         sslContextFactory.setSslContext(sslContextParameters.createSSLContext(camelContext));
 
         final SalesforceHttpClient httpClient
@@ -825,7 +837,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
     }
 
     static SalesforceHttpClient createHttpClient(
-            Object source, final SslContextFactory sslContextFactory, final CamelContext context, int workerPoolSize,
+            Object source, final SslContextFactory.Client sslContextFactory, final CamelContext context, int workerPoolSize,
             int workerPoolMaxSize) {
         SecurityUtils.adaptToIBMCipherNames(sslContextFactory);
 
@@ -857,6 +869,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         final Long httpConnectionTimeout
                 = typeConverter.convertTo(Long.class, httpClientProperties.get(HTTP_CONNECTION_TIMEOUT));
         final Long httpIdleTimeout = typeConverter.convertTo(Long.class, httpClientProperties.get(HTTP_IDLE_TIMEOUT));
+        final Long httpRequestTimeout = typeConverter.convertTo(Long.class, httpClientProperties.get(HTTP_REQUEST_TIMEOUT));
         final Integer maxContentLength
                 = typeConverter.convertTo(Integer.class, httpClientProperties.get(HTTP_MAX_CONTENT_LENGTH));
         Integer requestBufferSize
@@ -891,6 +904,9 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
         }
         if (maxContentLength != null) {
             httpClient.setMaxContentLength(maxContentLength);
+        }
+        if (httpRequestTimeout != null) {
+            httpClient.setTimeout(httpRequestTimeout);
         }
         httpClient.setRequestBufferSize(requestBufferSize);
 
@@ -932,6 +948,7 @@ public class SalesforceComponent extends DefaultComponent implements SSLContextP
             final Map<String, Object> httpClientProperties, final SalesforceComponent salesforce) {
         putValueIfGivenTo(httpClientProperties, HTTP_IDLE_TIMEOUT, salesforce::getHttpClientIdleTimeout);
         putValueIfGivenTo(httpClientProperties, HTTP_CONNECTION_TIMEOUT, salesforce::getHttpClientConnectionTimeout);
+        putValueIfGivenTo(httpClientProperties, HTTP_REQUEST_TIMEOUT, salesforce::getHttpRequestTimeout);
 
         putValueIfGivenTo(httpClientProperties, HTTP_PROXY_HOST, salesforce::getHttpProxyHost);
         putValueIfGivenTo(httpClientProperties, HTTP_PROXY_PORT, salesforce::getHttpProxyPort);

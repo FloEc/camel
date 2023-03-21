@@ -27,16 +27,16 @@ public class TwilioEndpointTest extends AbstractTwilioTestSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
         ecc.getBeanIntrospection().setLoggingLevel(LoggingLevel.INFO);
         return context;
     }
 
     @Test
-    public void testTwilioEndpoint() throws Exception {
+    public void testTwilioEndpoint() {
         // should not use reflection when creating and configuring endpoint
 
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
         long before = ecc.getBeanIntrospection().getInvokedCounter();
 
         TwilioEndpoint te = context.getEndpoint("twilio:account/fetcher?pathSid=123", TwilioEndpoint.class);

@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon Athena SDK v2.
  */
 @Component("aws2-athena")
 public class Athena2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Athena2Component.class);
-
     @Metadata
     private Athena2Configuration configuration = new Athena2Configuration();
 
@@ -43,18 +38,18 @@ public class Athena2Component extends DefaultComponent {
 
     public Athena2Component(CamelContext context) {
         super(context);
-        registerExtension(new Athena2ComponentVerifierExtension());
     }
 
     @Override
     protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
-        Athena2Configuration configuration
+        Athena2Configuration configurationClone
                 = this.configuration != null ? this.configuration.copy() : new Athena2Configuration();
-        Athena2Endpoint endpoint = new Athena2Endpoint(uri, this, configuration);
+        Athena2Endpoint endpoint = new Athena2Endpoint(uri, this, configurationClone);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getAmazonAthenaClient() == null
-                && (configuration.getAccessKey() == null
-                        || configuration.getSecretKey() == null)) {
+        if (Boolean.FALSE.equals(configurationClone.isUseDefaultCredentialsProvider())
+                && configurationClone.getAmazonAthenaClient() == null
+                && (configurationClone.getAccessKey() == null
+                        || configurationClone.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, accessKey/secretKey or amazonAthenaClient must be specified");
         }

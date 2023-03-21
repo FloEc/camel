@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -176,9 +176,8 @@ public interface GoogleStorageComponentBuilderFactory {
         /**
          * Delete objects from the bucket after they have been retrieved. The
          * delete is only performed if the Exchange is committed. If a rollback
-         * occurs, the object is not deleted. &lt;p/&gt; If this option is
-         * false, then the same objects will be retrieve over and over again on
-         * the polls.
+         * occurs, the object is not deleted. If this option is false, then the
+         * same objects will be retrieve over and over again on the polls.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 

@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -50,6 +50,7 @@ public interface PubNubEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
+         * Required: true
          * Group: common
          * 
          * @param uuid the value to set
@@ -57,51 +58,6 @@ public interface PubNubEndpointBuilderFactory {
          */
         default PubNubEndpointConsumerBuilder uuid(String uuid) {
             doSetProperty("uuid", uuid);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default PubNubEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default PubNubEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -252,6 +208,51 @@ public interface PubNubEndpointBuilderFactory {
             return (PubNubEndpointConsumerBuilder) this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedPubNubEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedPubNubEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -368,6 +369,7 @@ public interface PubNubEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
+         * Required: true
          * Group: common
          * 
          * @param uuid the value to set
@@ -378,68 +380,18 @@ public interface PubNubEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default PubNubEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default PubNubEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * The operation to perform. &lt;ul&gt; &lt;li&gt;PUBLISH: Default. Send
-         * a message to all subscribers of a channel. &lt;li&gt;FIRE: allows the
-         * client to send a message to BLOCKS Event Handlers. These messages
-         * will go directly to any Event Handlers registered on the channel.
-         * &lt;li&gt;HERENOW: Obtain information about the current state of a
-         * channel including a list of unique user-ids currently subscribed to
-         * the channel and the total occupancy count. &lt;li&gt;WHERENOW: Obtain
-         * information about the current list of channels to which a uuid is
-         * subscribed to. &lt;li&gt;GETSTATE: Used to get key/value pairs
-         * specific to a subscriber uuid. State information is supplied as a
-         * JSON object of key/value pairs &lt;li&gt;SETSTATE: Used to set
-         * key/value pairs specific to a subscriber uuid &lt;li&gt;GETHISTORY:
-         * Fetches historical messages of a channel.
+         * The operation to perform. PUBLISH: Default. Send a message to all
+         * subscribers of a channel. FIRE: allows the client to send a message
+         * to BLOCKS Event Handlers. These messages will go directly to any
+         * Event Handlers registered on the channel. HERENOW: Obtain information
+         * about the current state of a channel including a list of unique
+         * user-ids currently subscribed to the channel and the total occupancy
+         * count. WHERENOW: Obtain information about the current list of
+         * channels to which a uuid is subscribed to. GETSTATE: Used to get
+         * key/value pairs specific to a subscriber uuid. State information is
+         * supplied as a JSON object of key/value pairs SETSTATE: Used to set
+         * key/value pairs specific to a subscriber uuid GETHISTORY: Fetches
+         * historical messages of a channel.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -569,6 +521,55 @@ public interface PubNubEndpointBuilderFactory {
             return (PubNubEndpointProducerBuilder) this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedPubNubEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedPubNubEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * Reference to a Pubnub client in the registry.
          * 
          * The option is a: &lt;code&gt;com.pubnub.api.PubNub&lt;/code&gt; type.
@@ -616,6 +617,7 @@ public interface PubNubEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
+         * Required: true
          * Group: common
          * 
          * @param uuid the value to set
@@ -784,6 +786,20 @@ public interface PubNubEndpointBuilderFactory {
          * Since: 2.19
          * Maven coordinates: org.apache.camel:camel-pubnub
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default PubNubHeaderNameBuilder pubnub() {
+            return PubNubHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * PubNub (camel-pubnub)
+         * Send and receive messages to/from PubNub data stream network for
+         * connected devices.
+         * 
+         * Category: cloud,iot,messaging
+         * Since: 2.19
+         * Maven coordinates: org.apache.camel:camel-pubnub
+         * 
          * Syntax: <code>pubnub:channel</code>
          * 
          * Path parameter: channel (required)
@@ -816,6 +832,69 @@ public interface PubNubEndpointBuilderFactory {
          */
         default PubNubEndpointBuilder pubnub(String componentName, String path) {
             return PubNubEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the PubNub component.
+     */
+    public static class PubNubHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final PubNubHeaderNameBuilder INSTANCE = new PubNubHeaderNameBuilder();
+
+        /**
+         * The operation to perform.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code PubNubOperation}.
+         */
+        public String pubNubOperation() {
+            return "PubNubOperation";
+        }
+
+        /**
+         * The Timestamp for the event.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code PubNubTimeToken}.
+         */
+        public String pubNubTimeToken() {
+            return "PubNubTimeToken";
+        }
+
+        /**
+         * The channel for which the message belongs.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code PubNubChannel}.
+         */
+        public String pubNubChannel() {
+            return "PubNubChannel";
+        }
+
+        /**
+         * UUID to be used as a device identifier.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code PubNubUUID}.
+         */
+        public String pubNubUUID() {
+            return "PubNubUUID";
         }
     }
     static PubNubEndpointBuilder endpointBuilder(

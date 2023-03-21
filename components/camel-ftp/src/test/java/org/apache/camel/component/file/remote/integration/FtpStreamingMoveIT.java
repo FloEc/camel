@@ -21,11 +21,11 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FtpStreamingMoveIT extends FtpServerTestSupport {
@@ -44,22 +44,22 @@ public class FtpStreamingMoveIT extends FtpServerTestSupport {
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        GenericFile<?> remoteFile = (GenericFile<?>) mock.getExchanges().get(0).getIn().getBody();
-        assertTrue(remoteFile.getBody() instanceof InputStream);
+        InputStream is = mock.getExchanges().get(0).getIn().getBody(InputStream.class);
+        assertNotNull(is);
 
         // give time for consumer to rename file
-        File file = ftpFile("mymove/done/hello.txt").toFile();
+        File file = service.ftpFile("mymove/done/hello.txt").toFile();
         await().atMost(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertTrue(file.exists(), "File should have been renamed"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).routeId("foo").noAutoStartup().to("mock:result");
             }
         };

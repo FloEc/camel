@@ -27,8 +27,8 @@ import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.language.bean.BeanLanguage
 import org.apache.camel.model.ProcessDefinition
 import org.apache.camel.model.ToDefinition
-import org.apache.camel.model.rest.GetVerbDefinition
-import org.apache.camel.model.rest.PostVerbDefinition
+import org.apache.camel.model.rest.GetDefinition
+import org.apache.camel.model.rest.PostDefinition
 import org.apache.camel.processor.FatalFallbackErrorHandler
 import org.apache.camel.support.DefaultHeaderFilterStrategy
 import org.assertj.core.api.Assertions.assertThat
@@ -83,8 +83,8 @@ class KotlinRoutesBuilderLoaderTest {
         with(ctx.restDefinitions.find { it.path == "/my/path" }) {
             assertThat(this?.verbs).hasSize(1)
 
-            with(this?.verbs?.get(0) as GetVerbDefinition) {
-                assertThat(uri).isEqualTo("/get")
+            with(this?.verbs?.get(0) as GetDefinition) {
+                assertThat(path).isEqualTo("/get")
                 assertThat(consumes).isEqualTo("application/json")
                 assertThat(produces).isEqualTo("application/json")
                 assertThat(to).hasFieldOrPropertyWithValue("endpointUri", "direct:get")
@@ -94,8 +94,8 @@ class KotlinRoutesBuilderLoaderTest {
         with(ctx.restDefinitions.find { it.path == "/post" }) {
             assertThat(this?.verbs).hasSize(1)
 
-            with(this?.verbs?.get(0) as PostVerbDefinition) {
-                assertThat(uri).isNull()
+            with(this?.verbs?.get(0) as PostDefinition) {
+                assertThat(path).isNull()
                 assertThat(consumes).isEqualTo("application/json")
                 assertThat(produces).isEqualTo("application/json")
                 assertThat(to).hasFieldOrPropertyWithValue("endpointUri", "direct:post")
@@ -172,7 +172,7 @@ class KotlinRoutesBuilderLoaderTest {
 
         ctx.routesLoader.loadRoutes(res)
 
-        val jackson = ctx.resolveDataFormat("json-jackson") as JacksonDataFormat
+        val jackson = ctx.resolveDataFormat("jackson") as JacksonDataFormat
         assertThat(jackson.unmarshalType).isEqualTo(Map::class.java)
         assertThat(jackson.isPrettyPrint).isTrue()
 

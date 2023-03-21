@@ -65,6 +65,10 @@ public class MDCUnitOfWork extends DefaultUnitOfWork implements Service {
         this.originalCamelContextId = MDC.get(MDC_CAMEL_CONTEXT_ID);
         this.originalTransactionKey = MDC.get(MDC_TRANSACTION_KEY);
 
+        prepareMDC(exchange);
+    }
+
+    protected void prepareMDC(Exchange exchange) {
         // must add exchange and message id in constructor
         MDC.put(MDC_EXCHANGE_ID, exchange.getExchangeId());
         String msgId = exchange.getMessage().getMessageId();
@@ -80,6 +84,10 @@ public class MDCUnitOfWork extends DefaultUnitOfWork implements Service {
         String breadcrumbId = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID, String.class);
         if (breadcrumbId != null) {
             MDC.put(MDC_BREADCRUMB_ID, breadcrumbId);
+        }
+        Route current = getRoute();
+        if (current != null) {
+            MDC.put(MDC_ROUTE_ID, current.getRouteId());
         }
     }
 
@@ -133,12 +141,16 @@ public class MDCUnitOfWork extends DefaultUnitOfWork implements Service {
 
     @Override
     public AsyncCallback beforeProcess(Processor processor, Exchange exchange, AsyncCallback callback) {
+        // prepare MDC before processing
+        prepareMDC(exchange);
         // add optional step id
         String stepId = exchange.getProperty(ExchangePropertyKey.STEP_ID, String.class);
         if (stepId != null) {
             MDC.put(MDC_STEP_ID, stepId);
         }
-        return new MDCCallback(callback, pattern);
+        // return callback with after processing work
+        final AsyncCallback uowCallback = super.beforeProcess(processor, exchange, callback);
+        return new MDCCallback(uowCallback, pattern);
     }
 
     @Override
@@ -148,8 +160,7 @@ public class MDCUnitOfWork extends DefaultUnitOfWork implements Service {
         if (stepId == null) {
             MDC.remove(MDC_STEP_ID);
         }
-
-        // clear to avoid leaking to current thread when
+        // clear MDC to avoid leaking to current thread when
         // the exchange is continued routed asynchronously
         clear();
     }

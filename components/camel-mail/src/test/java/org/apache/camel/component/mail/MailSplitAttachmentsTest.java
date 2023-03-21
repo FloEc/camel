@@ -16,8 +16,8 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -88,13 +88,13 @@ public class MailSplitAttachmentsTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
 
         splitAttachmentsExpression = new SplitAttachmentsExpression();
 
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: e1
                 from("pop3://james@mymailserver.com?password=secret&initialDelay=100&delay=100")
                         .to("log:email")

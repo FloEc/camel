@@ -19,74 +19,67 @@ package org.apache.camel.component.kafka.integration;
 import java.util.Properties;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.kafka.KafkaComponent;
-import org.apache.camel.component.kafka.KafkaConstants;
+import org.apache.camel.component.kafka.integration.common.KafkaAdminUtil;
+import org.apache.camel.component.kafka.integration.common.KafkaTestUtil;
+import org.apache.camel.test.infra.core.CamelContextExtension;
+import org.apache.camel.test.infra.core.DefaultCamelContextExtension;
+import org.apache.camel.test.infra.core.annotations.ContextFixture;
+import org.apache.camel.test.infra.core.annotations.RouteFixture;
+import org.apache.camel.test.infra.core.api.ConfigurableRoute;
 import org.apache.camel.test.infra.kafka.services.KafkaService;
 import org.apache.camel.test.infra.kafka.services.KafkaServiceFactory;
-import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class BaseEmbeddedKafkaTestSupport extends CamelTestSupport {
+public abstract class BaseEmbeddedKafkaTestSupport implements ConfigurableRoute {
+    @Order(1)
     @RegisterExtension
-    public static KafkaService service = KafkaServiceFactory.createService();
+    protected static KafkaService service = KafkaServiceFactory.createSingletonService();
+
+    @Order(2)
+    @RegisterExtension
+    protected static CamelContextExtension contextExtension = new DefaultCamelContextExtension();
 
     protected static AdminClient kafkaAdminClient;
 
-    private static final Logger LOG = LoggerFactory.getLogger(BaseEmbeddedKafkaTestSupport.class);
-
-    @BeforeAll
-    public static void beforeClass() {
-        LOG.info("### Embedded Kafka cluster broker list: " + service.getBootstrapServers());
-        System.setProperty("bootstrapServers", service.getBootstrapServers());
+    @BeforeEach
+    public void beforeClass() {
+        KafkaTestUtil.setServiceProperties(service);
     }
 
     @BeforeEach
     public void setKafkaAdminClient() {
         if (kafkaAdminClient == null) {
-            kafkaAdminClient = createAdminClient();
+            kafkaAdminClient = KafkaAdminUtil.createAdminClient(service);
         }
     }
 
-    protected Properties getDefaultProperties() {
-        LOG.info("Connecting to Kafka {}", service.getBootstrapServers());
-
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, service.getBootstrapServers());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaConstants.KAFKA_DEFAULT_SERIALIZER);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaConstants.KAFKA_DEFAULT_SERIALIZER);
-        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, KafkaConstants.KAFKA_DEFAULT_PARTITIONER);
-        props.put(ProducerConfig.ACKS_CONFIG, "1");
-        return props;
-    }
-
-    @Override
-    protected CamelContext createCamelContext() throws Exception {
-        CamelContext context = super.createCamelContext();
+    @ContextFixture
+    public void configureKafka(CamelContext context) {
         context.getPropertiesComponent().setLocation("ref:prop");
 
         KafkaComponent kafka = new KafkaComponent(context);
         kafka.init();
         kafka.getConfiguration().setBrokers(service.getBootstrapServers());
         context.addComponent("kafka", kafka);
+    }
 
-        return context;
+    @RouteFixture
+    public void createRouteBuilder(CamelContext context) throws Exception {
+        context.addRoutes(createRouteBuilder());
+    }
+
+    protected abstract RouteBuilder createRouteBuilder();
+
+    protected Properties getDefaultProperties() {
+        return KafkaTestUtil.getDefaultProperties(service);
     }
 
     protected static String getBootstrapServers() {
         return service.getBootstrapServers();
-    }
-
-    private static AdminClient createAdminClient() {
-        final Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, service.getBootstrapServers());
-
-        return KafkaAdminClient.create(properties);
     }
 }

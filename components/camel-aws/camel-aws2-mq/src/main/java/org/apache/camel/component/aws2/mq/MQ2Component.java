@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon MQ SDK v2.
  */
 @Component("aws2-mq")
 public class MQ2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MQ2Component.class);
-
     @Metadata
     private MQ2Configuration configuration = new MQ2Configuration();
 
@@ -43,8 +38,6 @@ public class MQ2Component extends DefaultComponent {
 
     public MQ2Component(CamelContext context) {
         super(context);
-
-        registerExtension(new MQ2ComponentVerifierExtension());
     }
 
     @Override
@@ -52,7 +45,7 @@ public class MQ2Component extends DefaultComponent {
         MQ2Configuration configuration = this.configuration != null ? this.configuration.copy() : new MQ2Configuration();
         MQ2Endpoint endpoint = new MQ2Endpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getAmazonMqClient() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider()) && configuration.getAmazonMqClient() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, amazonMQClient or accessKey and secretKey must be specified");

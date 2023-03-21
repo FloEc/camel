@@ -22,9 +22,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.Binder;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.Binder;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,11 +32,18 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.apache.camel.builder.LegacyDeadLetterChannelBuilder;
+import org.apache.camel.builder.LegacyDefaultErrorHandlerBuilder;
+import org.apache.camel.builder.LegacyNoErrorHandlerBuilder;
 import org.apache.camel.core.xml.CamelJMXAgentDefinition;
 import org.apache.camel.core.xml.CamelPropertyPlaceholderDefinition;
 import org.apache.camel.core.xml.CamelRouteControllerDefinition;
 import org.apache.camel.core.xml.CamelStreamCachingStrategyDefinition;
 import org.apache.camel.impl.engine.DefaultCamelContextNameStrategy;
+import org.apache.camel.reifier.errorhandler.ErrorHandlerReifier;
+import org.apache.camel.reifier.errorhandler.LegacyDeadLetterChannelReifier;
+import org.apache.camel.reifier.errorhandler.LegacyDefaultErrorHandlerReifier;
+import org.apache.camel.reifier.errorhandler.LegacyNoErrorHandlerReifier;
 import org.apache.camel.spi.CamelContextNameStrategy;
 import org.apache.camel.spi.NamespaceAware;
 import org.apache.camel.spring.xml.CamelBeanPostProcessor;
@@ -74,6 +81,15 @@ import org.springframework.beans.factory.xml.ParserContext;
  * Camel namespace for the spring XML configuration file.
  */
 public class CamelNamespaceHandler extends NamespaceHandlerSupport {
+
+    static {
+        // legacy camel-spring-xml error-handling using its own model and parsers
+        ErrorHandlerReifier.registerReifier(LegacyDeadLetterChannelBuilder.class, LegacyDeadLetterChannelReifier::new);
+        ErrorHandlerReifier.registerReifier(LegacyDefaultErrorHandlerBuilder.class, LegacyDefaultErrorHandlerReifier::new);
+        ErrorHandlerReifier.registerReifier(LegacyNoErrorHandlerBuilder.class, LegacyNoErrorHandlerReifier::new);
+        // note: spring transaction error handler is registered in camel-spring
+    }
+
     private static final String SPRING_NS = "http://camel.apache.org/schema/spring";
     private static final Logger LOG = LoggerFactory.getLogger(CamelNamespaceHandler.class);
     protected BeanDefinitionParser endpointParser = new EndpointDefinitionParser();
@@ -148,7 +164,7 @@ public class CamelNamespaceHandler extends NamespaceHandlerSupport {
         addBeanDefinitionParser("threadPool", CamelThreadPoolFactoryBean.class, true, true);
         addBeanDefinitionParser("redeliveryPolicyProfile", CamelRedeliveryPolicyFactoryBean.class, true, true);
 
-        // jmx agent, stream caching, hystrix, service call configurations and property placeholder cannot be used outside of the camel context
+        // jmx agent, stream caching, service call configurations and property placeholder cannot be used outside of the camel context
         addBeanDefinitionParser("jmxAgent", CamelJMXAgentDefinition.class, false, false);
         addBeanDefinitionParser("streamCaching", CamelStreamCachingStrategyDefinition.class, false, false);
         addBeanDefinitionParser("propertyPlaceholder", CamelPropertyPlaceholderDefinition.class, false, false);
@@ -203,7 +219,7 @@ public class CamelNamespaceHandler extends NamespaceHandlerSupport {
             doBeforeParse(element);
             super.doParse(element, builder);
 
-            // Note: prefer to use doParse from parent and postProcess; however, parseUsingJaxb requires 
+            // Note: prefer to use doParse from parent and postProcess; however, parseUsingJaxb requires
             // parserContext for no apparent reason.
             Binder<Node> binder;
             try {
@@ -425,6 +441,7 @@ public class CamelNamespaceHandler extends NamespaceHandlerSupport {
                 builder.addPropertyValue("rests", factoryBean.getRests());
                 builder.addPropertyValue("routeConfigurations", factoryBean.getRouteConfigurations());
                 builder.addPropertyValue("routeTemplates", factoryBean.getRouteTemplates());
+                builder.addPropertyValue("templatedRoutes", factoryBean.getTemplatedRoutes());
                 builder.addPropertyValue("routes", factoryBean.getRoutes());
                 builder.addPropertyValue("intercepts", factoryBean.getIntercepts());
                 builder.addPropertyValue("interceptFroms", factoryBean.getInterceptFroms());
@@ -454,8 +471,6 @@ public class CamelNamespaceHandler extends NamespaceHandlerSupport {
                 builder.addPropertyValue("beans", factoryBean.getBeans());
                 builder.addPropertyValue("defaultServiceCallConfiguration", factoryBean.getDefaultServiceCallConfiguration());
                 builder.addPropertyValue("serviceCallConfigurations", factoryBean.getServiceCallConfigurations());
-                builder.addPropertyValue("defaultHystrixConfiguration", factoryBean.getDefaultHystrixConfiguration());
-                builder.addPropertyValue("hystrixConfigurations", factoryBean.getHystrixConfigurations());
                 // add any depends-on
                 addDependsOn(factoryBean, builder);
             }
@@ -739,8 +754,7 @@ public class CamelNamespaceHandler extends NamespaceHandlerSupport {
             } catch (Exception e) {
                 // Do nothing here
             }
-            parserContext.registerBeanComponent(new BeanComponentDefinition(definition, id));
+            parserContext.registerComponent(new BeanComponentDefinition(definition, id));
         }
     }
-
 }

@@ -45,14 +45,14 @@ public class FtpRecursiveDepth2IT extends FtpServerTestSupport {
         template.sendBodyAndHeader("ftp://admin@localhost:{{ftp.server.port}}/depth2/bar/foo?password=admin", "b3",
                 Exchange.FILE_NAME, "b3.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl() + "&minDepth=2&maxDepth=99").convertBodyTo(String.class).to("mock:result");
             }
         };

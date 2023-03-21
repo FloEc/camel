@@ -61,7 +61,7 @@ public class ConcurrentJaxbDataFormatSchemaValidationTest extends CamelTestSuppo
             template.sendBody("seda:marshall", person);
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         LOG.info("Validation of {} messages took {} ms", testCount, System.currentTimeMillis() - start);
 
         String payload = mockMarshall.getExchanges().get(0).getIn().getBody(String.class);
@@ -99,7 +99,7 @@ public class ConcurrentJaxbDataFormatSchemaValidationTest extends CamelTestSuppo
             template.sendBody("seda:unmarshall", xml);
         }
 
-        assertMockEndpointsSatisfied(20, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 20, TimeUnit.SECONDS);
         LOG.info("Validation of {} messages took {} ms", testCount, System.currentTimeMillis() - start);
 
         Person person = mockUnmarshall.getExchanges().get(0).getIn().getBody(Person.class);
@@ -110,12 +110,13 @@ public class ConcurrentJaxbDataFormatSchemaValidationTest extends CamelTestSuppo
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 JaxbDataFormat jaxbDataFormat = new JaxbDataFormat();
                 jaxbDataFormat.setContextPath(Person.class.getPackage().getName());
                 jaxbDataFormat.setSchema("classpath:person.xsd,classpath:address.xsd");
+                jaxbDataFormat.setAccessExternalSchemaProtocols("file");
 
                 from("seda:marshall?concurrentConsumers=" + concurrencyLevel)
                         .marshal(jaxbDataFormat)

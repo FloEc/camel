@@ -28,18 +28,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DumpRoutesTest extends BaseEndpointDslTest {
-
     private static final Logger LOG = LoggerFactory.getLogger(DumpRoutesTest.class);
+    private static final String TEST_DATA_DIR = BaseEndpointDslTest.generateUniquePath(DumpRoutesTest.class);
 
     @Test
     public void testDumpModelAsXml() throws Exception {
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
         String xml = ecc.getModelToXMLDumper().dumpModelAsXml(context, context.getRouteDefinition("myRoute"));
         assertNotNull(xml);
         LOG.info(xml);
 
         assertTrue(xml
-                .contains("file://target/data/files/?delay=2&amp;delete=true&amp;maxMessagesPerPoll=1&amp;timeUnit=SECONDS"));
+                .contains(
+                        "file://" + TEST_DATA_DIR + "?delay=2&amp;delete=true&amp;maxMessagesPerPoll=1&amp;timeUnit=SECONDS"));
         assertTrue(xml.contains("mock://result"));
     }
 
@@ -47,7 +48,7 @@ public class DumpRoutesTest extends BaseEndpointDslTest {
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new EndpointRouteBuilder() {
             public void configure() throws Exception {
-                from(file("target/data/files/").delay(2).timeUnit(TimeUnit.SECONDS).delete(true).maxMessagesPerPoll(1))
+                from(file(TEST_DATA_DIR).delay(2).timeUnit(TimeUnit.SECONDS).delete(true).maxMessagesPerPoll(1))
                         .routeId("myRoute")
                         .convertBodyTo(String.class)
                         .to(mock("result"));

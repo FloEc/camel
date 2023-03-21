@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -41,51 +41,6 @@ public interface QuartzEndpointBuilderFactory {
     public interface QuartzEndpointBuilder extends EndpointConsumerBuilder {
         default AdvancedQuartzEndpointBuilder advanced() {
             return (AdvancedQuartzEndpointBuilder) this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default QuartzEndpointBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default QuartzEndpointBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
         }
         /**
          * Specifies a cron expression to define when to trigger.
@@ -312,36 +267,6 @@ public interface QuartzEndpointBuilderFactory {
             return this;
         }
         /**
-         * Seconds to wait before starting the quartz scheduler.
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Group: scheduler
-         * 
-         * @param startDelayedSeconds the value to set
-         * @return the dsl builder
-         */
-        default QuartzEndpointBuilder startDelayedSeconds(
-                int startDelayedSeconds) {
-            doSetProperty("startDelayedSeconds", startDelayedSeconds);
-            return this;
-        }
-        /**
-         * Seconds to wait before starting the quartz scheduler.
-         * 
-         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Group: scheduler
-         * 
-         * @param startDelayedSeconds the value to set
-         * @return the dsl builder
-         */
-        default QuartzEndpointBuilder startDelayedSeconds(
-                String startDelayedSeconds) {
-            doSetProperty("startDelayedSeconds", startDelayedSeconds);
-            return this;
-        }
-        /**
          * In case of scheduler has already started, we want the trigger start
          * slightly after current time to ensure endpoint is fully started
          * before the job kicks in. Negative value shifts trigger start time in
@@ -387,6 +312,51 @@ public interface QuartzEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default QuartzEndpointBuilder basic() {
             return (QuartzEndpointBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedQuartzEndpointBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedQuartzEndpointBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -490,10 +460,55 @@ public interface QuartzEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether to ignore quartz cannot schedule a trigger because the
+         * trigger will never fire in the future. This can happen when using a
+         * cron trigger that are configured to only run in the past. By default,
+         * Quartz will fail to schedule the trigger and therefore fail to start
+         * the Camel route. You can set this to true which then logs a WARN and
+         * then ignore the problem, meaning that the route will never fire in
+         * the future.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: advanced
+         * 
+         * @param ignoreExpiredNextFireTime the value to set
+         * @return the dsl builder
+         */
+        default AdvancedQuartzEndpointBuilder ignoreExpiredNextFireTime(
+                boolean ignoreExpiredNextFireTime) {
+            doSetProperty("ignoreExpiredNextFireTime", ignoreExpiredNextFireTime);
+            return this;
+        }
+        /**
+         * Whether to ignore quartz cannot schedule a trigger because the
+         * trigger will never fire in the future. This can happen when using a
+         * cron trigger that are configured to only run in the past. By default,
+         * Quartz will fail to schedule the trigger and therefore fail to start
+         * the Camel route. You can set this to true which then logs a WARN and
+         * then ignore the problem, meaning that the route will never fire in
+         * the future.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: advanced
+         * 
+         * @param ignoreExpiredNextFireTime the value to set
+         * @return the dsl builder
+         */
+        default AdvancedQuartzEndpointBuilder ignoreExpiredNextFireTime(
+                String ignoreExpiredNextFireTime) {
+            doSetProperty("ignoreExpiredNextFireTime", ignoreExpiredNextFireTime);
+            return this;
+        }
+        /**
          * To configure additional options on the job.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the jobParameters(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -513,8 +528,8 @@ public interface QuartzEndpointBuilderFactory {
         /**
          * To configure additional options on the job.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the jobParameters(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -562,10 +577,15 @@ public interface QuartzEndpointBuilderFactory {
             return this;
         }
         /**
-         * To configure additional options on the trigger.
+         * To configure additional options on the trigger. The parameter
+         * timeZone is supported if the cron option is present. Otherwise the
+         * parameters repeatInterval and repeatCount are supported. Note: When
+         * using repeatInterval values of 1000 or less, the first few events
+         * after starting the camel context may be fired more rapidly than
+         * expected.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * triggerParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -583,10 +603,15 @@ public interface QuartzEndpointBuilderFactory {
             return this;
         }
         /**
-         * To configure additional options on the trigger.
+         * To configure additional options on the trigger. The parameter
+         * timeZone is supported if the cron option is present. Otherwise the
+         * parameters repeatInterval and repeatCount are supported. Note: When
+         * using repeatInterval values of 1000 or less, the first few events
+         * after starting the camel context may be fired more rapidly than
+         * expected.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * triggerParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).

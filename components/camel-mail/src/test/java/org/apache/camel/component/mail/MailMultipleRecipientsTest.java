@@ -48,7 +48,7 @@ public class MailMultipleRecipientsTest extends CamelTestSupport {
         template.sendBodyAndHeaders("smtp://localhost", "Hello World", headers);
         // END SNIPPET: e1
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -64,10 +64,10 @@ public class MailMultipleRecipientsTest extends CamelTestSupport {
         template.sendBody("smtp://localhost?to=claus@localhost,willem@localhost&cc=james@localhost", "Hello World");
         // END SNIPPET: e2
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
-    private void assertMailbox(String name) throws Exception {
+    private void assertMailbox(String name) {
         MockEndpoint mock = getMockEndpoint("mock:" + name);
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived("Hello World");
@@ -75,9 +75,9 @@ public class MailMultipleRecipientsTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://claus@localhost?initialDelay=100&delay=100").to("mock:claus");
 
                 from("pop3://willem@localhost?initialDelay=100&delay=100").to("mock:willem");

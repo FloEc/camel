@@ -20,11 +20,10 @@ import java.io.InputStream;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FtpSimpleConsumeStreamingWithMultipleFilesIT extends FtpServerTestSupport {
 
@@ -36,7 +35,7 @@ public class FtpSimpleConsumeStreamingWithMultipleFilesIT extends FtpServerTestS
         // create file using regular file
 
         // FTP Server does not support absolute path, so lets simulate it
-        String path = ftpFile("tmp/mytemp").toString();
+        String path = service.ftpFile("tmp/mytemp").toString();
         template.sendBodyAndHeader("file:" + path, expected, Exchange.FILE_NAME, "hello.txt");
         template.sendBodyAndHeader("file:" + path, expected2, Exchange.FILE_NAME, "goodbye.txt");
 
@@ -46,23 +45,23 @@ public class FtpSimpleConsumeStreamingWithMultipleFilesIT extends FtpServerTestS
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        GenericFile<?> remoteFile1 = mock.getExchanges().get(0).getIn().getBody(GenericFile.class);
-        GenericFile<?> remoteFile2 = mock.getExchanges().get(1).getIn().getBody(GenericFile.class);
-        assertTrue(remoteFile1.getBody() instanceof InputStream);
-        assertTrue(remoteFile2.getBody() instanceof InputStream);
+        InputStream remoteFile1 = mock.getExchanges().get(0).getIn().getBody(InputStream.class);
+        assertNotNull(remoteFile1);
+        InputStream remoteFile2 = mock.getExchanges().get(1).getIn().getBody(InputStream.class);
+        assertNotNull(remoteFile2);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("ftp://localhost:{{ftp.server.port}}"
                      + "/tmp/mytemp?username=admin&password=admin&delay=10000&disconnect=true&streamDownload=true&stepwise=false")
-                             .routeId("foo").noAutoStartup()
-                             .to("mock:result");
+                        .routeId("foo").noAutoStartup()
+                        .to("mock:result");
             }
         };
     }

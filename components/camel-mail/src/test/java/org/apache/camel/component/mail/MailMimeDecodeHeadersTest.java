@@ -16,7 +16,7 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.internet.MimeUtility;
+import jakarta.mail.internet.MimeUtility;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -86,9 +86,9 @@ public class MailMimeDecodeHeadersTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:longSubject")
                         .setHeader("subject", constant(longSubject))
                         .to("smtp://plain@localhost", "smtp://decoded@localhost");

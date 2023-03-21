@@ -23,13 +23,13 @@ import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.junit.jupiter.api.Test;
 
-public class TwoServiceWithExcludeTest extends CamelOpenTelemetryTestSupport {
+class TwoServiceWithExcludeTest extends CamelOpenTelemetryTestSupport {
 
     private static SpanTestData[] testdata = {
             new SpanTestData().setLabel("ServiceA server").setUri("direct://ServiceA").setOperation("ServiceA")
     };
 
-    public TwoServiceWithExcludeTest() {
+    TwoServiceWithExcludeTest() {
         super(testdata);
     }
 
@@ -39,17 +39,17 @@ public class TwoServiceWithExcludeTest extends CamelOpenTelemetryTestSupport {
     }
 
     @Test
-    public void testRoute() throws Exception {
+    void testRoute() {
         template.requestBody("direct:ServiceA", "Hello");
 
         verify();
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:ServiceA")
                         .log("ServiceA has been called")
                         .delay(simple("${random(1000,2000)}"))

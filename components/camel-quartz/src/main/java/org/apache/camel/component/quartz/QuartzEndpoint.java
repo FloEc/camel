@@ -16,6 +16,7 @@
  */
 package org.apache.camel.component.quartz;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.quartz.spi.OperableTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +83,8 @@ public class QuartzEndpoint extends DefaultEndpoint {
     private String cron;
     @UriParam
     private boolean stateful;
+    @UriParam(label = "advanced")
+    private boolean ignoreExpiredNextFireTime;
     @UriParam(defaultValue = "true")
     private boolean deleteJob = true;
     @UriParam
@@ -91,8 +95,6 @@ public class QuartzEndpoint extends DefaultEndpoint {
     private boolean recoverableJob;
     @UriParam(label = "scheduler", defaultValue = "500", javaType = "java.time.Duration")
     private long triggerStartDelay = 500;
-    @UriParam(label = "scheduler")
-    private int startDelayedSeconds;
     @UriParam(label = "scheduler", defaultValue = "true")
     private boolean autoStartScheduler = true;
     @UriParam(label = "advanced")
@@ -128,6 +130,22 @@ public class QuartzEndpoint extends DefaultEndpoint {
 
     public boolean isStateful() {
         return stateful;
+    }
+
+    public boolean isIgnoreExpiredNextFireTime() {
+        return ignoreExpiredNextFireTime;
+    }
+
+    /**
+     * Whether to ignore quartz cannot schedule a trigger because the trigger will never fire in the future. This can
+     * happen when using a cron trigger that are configured to only run in the past.
+     *
+     * By default, Quartz will fail to schedule the trigger and therefore fail to start the Camel route. You can set
+     * this to true which then logs a WARN and then ignore the problem, meaning that the route will never fire in the
+     * future.
+     */
+    public void setIgnoreExpiredNextFireTime(boolean ignoreExpiredNextFireTime) {
+        this.ignoreExpiredNextFireTime = ignoreExpiredNextFireTime;
     }
 
     public long getTriggerStartDelay() {
@@ -215,7 +233,12 @@ public class QuartzEndpoint extends DefaultEndpoint {
     }
 
     /**
-     * To configure additional options on the trigger.
+     * To configure additional options on the trigger. The parameter timeZone is supported if the cron option is
+     * present. Otherwise the parameters repeatInterval and repeatCount are supported.
+     * <p>
+     * <b>Note:</b> When using repeatInterval values of 1000 or less, the first few events after starting the camel
+     * context may be fired more rapidly than expected.
+     * </p>
      */
     public void setTriggerParameters(Map<String, Object> triggerParameters) {
         this.triggerParameters = triggerParameters;
@@ -230,17 +253,6 @@ public class QuartzEndpoint extends DefaultEndpoint {
      */
     public void setJobParameters(Map<String, Object> jobParameters) {
         this.jobParameters = jobParameters;
-    }
-
-    public int getStartDelayedSeconds() {
-        return startDelayedSeconds;
-    }
-
-    /**
-     * Seconds to wait before starting the quartz scheduler.
-     */
-    public void setStartDelayedSeconds(int startDelayedSeconds) {
-        this.startDelayedSeconds = startDelayedSeconds;
     }
 
     public boolean isAutoStartScheduler() {
@@ -260,7 +272,7 @@ public class QuartzEndpoint extends DefaultEndpoint {
 
     /**
      * Whether the job name should be prefixed with endpoint id
-     * 
+     *
      * @param prefixJobNameWithEndpointId
      */
     public void setPrefixJobNameWithEndpointId(boolean prefixJobNameWithEndpointId) {
@@ -362,6 +374,7 @@ public class QuartzEndpoint extends DefaultEndpoint {
 
         QuartzHelper.updateJobDataMap(getCamelContext(), jobDetail, getEndpointUri(), isUsingFixedCamelContextName());
 
+        boolean scheduled = true;
         if (triggerExisted) {
             // Reschedule job if trigger settings were changed
             if (hasTriggerChanged(oldTrigger, trigger)) {
@@ -369,8 +382,23 @@ public class QuartzEndpoint extends DefaultEndpoint {
             }
         } else {
             try {
-                // Schedule it now. Remember that scheduler might not be started it, but we can schedule now.
-                scheduler.scheduleJob(jobDetail, trigger);
+                // calculate whether the trigger can be triggered in the future
+                Calendar cal = null;
+                if (trigger.getCalendarName() != null) {
+                    cal = scheduler.getCalendar(trigger.getCalendarName());
+                }
+                OperableTrigger ot = (OperableTrigger) trigger;
+                Date ft = ot.computeFirstFireTime(cal);
+                if (ft == null && ignoreExpiredNextFireTime) {
+                    scheduled = false;
+                    LOG.warn(
+                            "Job {} (cron={}, triggerType={}, jobClass={}) not scheduled, because it will never fire in the future",
+                            trigger.getKey(), cron, trigger.getClass().getSimpleName(),
+                            jobDetail.getJobClass().getSimpleName());
+                } else {
+                    // Schedule it now. Remember that scheduler might not be started it, but we can schedule now.
+                    scheduler.scheduleJob(jobDetail, trigger);
+                }
             } catch (ObjectAlreadyExistsException ex) {
                 // some other VM might may have stored the job & trigger in DB in clustered mode, in the mean time
                 if (!(getComponent().isClustered())) {
@@ -384,10 +412,16 @@ public class QuartzEndpoint extends DefaultEndpoint {
             }
         }
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Job {} (triggerType={}, jobClass={}) is scheduled. Next fire date is {}",
-                    trigger.getKey(), trigger.getClass().getSimpleName(),
-                    jobDetail.getJobClass().getSimpleName(), trigger.getNextFireTime());
+        if (scheduled) {
+            if (LOG.isInfoEnabled()) {
+                Object nextFireTime = trigger.getNextFireTime();
+                if (nextFireTime != null) {
+                    nextFireTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(nextFireTime);
+                }
+                LOG.info("Job {} (cron={}, triggerType={}, jobClass={}) is scheduled. Next fire date is {}",
+                        trigger.getKey(), cron, trigger.getClass().getSimpleName(),
+                        jobDetail.getJobClass().getSimpleName(), nextFireTime);
+            }
         }
 
         // Increase camel job count for this endpoint
@@ -499,8 +533,8 @@ public class QuartzEndpoint extends DefaultEndpoint {
 
             // enrich job map with details
             jobDetail.getJobDataMap().put(QuartzConstants.QUARTZ_TRIGGER_TYPE, "simple");
-            jobDetail.getJobDataMap().put(QuartzConstants.QUARTZ_TRIGGER_SIMPLE_REPEAT_COUNTER, repeat);
-            jobDetail.getJobDataMap().put(QuartzConstants.QUARTZ_TRIGGER_SIMPLE_REPEAT_INTERVAL, interval);
+            jobDetail.getJobDataMap().put(QuartzConstants.QUARTZ_TRIGGER_SIMPLE_REPEAT_COUNTER, String.valueOf(repeat));
+            jobDetail.getJobDataMap().put(QuartzConstants.QUARTZ_TRIGGER_SIMPLE_REPEAT_INTERVAL, String.valueOf(interval));
         }
 
         final Trigger result = triggerBuilder.build();

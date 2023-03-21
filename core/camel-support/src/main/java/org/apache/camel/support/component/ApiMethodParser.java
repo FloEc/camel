@@ -114,7 +114,7 @@ public abstract class ApiMethodParser<T> {
 
     /**
      * Parses the method signatures from {@code getSignatures()}.
-     * 
+     *
      * @return list of Api methods as {@link ApiMethodModel}
      */
     public final List<ApiMethodModel> parse() {
@@ -372,7 +372,6 @@ public abstract class ApiMethodParser<T> {
             return name;
         }
 
-        @Deprecated
         public Class<?> getResultType() {
             return resultType;
         }

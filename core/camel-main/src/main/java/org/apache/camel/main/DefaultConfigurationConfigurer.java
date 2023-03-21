@@ -29,6 +29,8 @@ import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.TypeConverters;
 import org.apache.camel.cloud.ServiceRegistry;
 import org.apache.camel.cluster.CamelClusterService;
+import org.apache.camel.console.DevConsole;
+import org.apache.camel.console.DevConsoleRegistry;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.health.HealthCheckRepository;
 import org.apache.camel.impl.debugger.BacklogTracer;
@@ -41,6 +43,8 @@ import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.ModelLifecycleStrategy;
 import org.apache.camel.spi.AsyncProcessorAwaitManager;
 import org.apache.camel.spi.ClassResolver;
+import org.apache.camel.spi.CliConnectorFactory;
+import org.apache.camel.spi.ContextReloadStrategy;
 import org.apache.camel.spi.Debugger;
 import org.apache.camel.spi.EndpointStrategy;
 import org.apache.camel.spi.EventFactory;
@@ -73,6 +77,7 @@ import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.camel.spi.UnitOfWorkFactory;
 import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.support.ClassicUuidGenerator;
+import org.apache.camel.support.DefaultContextReloadStrategy;
 import org.apache.camel.support.DefaultUuidGenerator;
 import org.apache.camel.support.OffUuidGenerator;
 import org.apache.camel.support.RouteWatcherReloadStrategy;
@@ -81,6 +86,11 @@ import org.apache.camel.support.SimpleUuidGenerator;
 import org.apache.camel.support.jsse.GlobalSSLContextParametersSupplier;
 import org.apache.camel.support.startup.LoggingStartupStepRecorder;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.vault.AwsVaultConfiguration;
+import org.apache.camel.vault.AzureVaultConfiguration;
+import org.apache.camel.vault.GcpVaultConfiguration;
+import org.apache.camel.vault.HashicorpVaultConfiguration;
+import org.apache.camel.vault.VaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +112,7 @@ public final class DefaultConfigurationConfigurer {
      * @param config       the configuration
      */
     public static void configure(CamelContext camelContext, DefaultConfigurationProperties<?> config) throws Exception {
-        ExtendedCamelContext ecc = camelContext.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = camelContext.getCamelContextExtension();
 
         if (config.getStartupRecorder() != null) {
             if ("false".equals(config.getStartupRecorder())) {
@@ -151,6 +161,9 @@ public final class DefaultConfigurationConfigurer {
         if (config.getName() != null) {
             ecc.setName(config.getName());
         }
+        if (config.getDescription() != null) {
+            ecc.setDescription(config.getDescription());
+        }
         if (config.getStartupSummaryLevel() != null) {
             camelContext.setStartupSummaryLevel(config.getStartupSummaryLevel());
         }
@@ -171,6 +184,7 @@ public final class DefaultConfigurationConfigurer {
 
         // stream caching
         camelContext.setStreamCaching(config.isStreamCachingEnabled());
+        camelContext.getStreamCachingStrategy().setSpoolEnabled(config.isStreamCachingSpoolEnabled());
         camelContext.getStreamCachingStrategy().setAnySpoolRules(config.isStreamCachingAnySpoolRules());
         camelContext.getStreamCachingStrategy().setBufferSize(config.getStreamCachingBufferSize());
         camelContext.getStreamCachingStrategy()
@@ -225,7 +239,10 @@ public final class DefaultConfigurationConfigurer {
         camelContext.setUseMDCLogging(config.isUseMdcLogging());
         camelContext.setMDCLoggingKeysPattern(config.getMdcLoggingKeysPattern());
         camelContext.setLoadTypeConverters(config.isLoadTypeConverters());
+        camelContext.setTypeConverterStatisticsEnabled(config.isTypeConverterStatisticsEnabled());
         camelContext.setLoadHealthChecks(config.isLoadHealthChecks());
+        camelContext.setDevConsole(config.isDevConsoleEnabled());
+        camelContext.setModeline(config.isModeline());
         if (config.isRoutesReloadEnabled()) {
             RouteWatcherReloadStrategy reloader = new RouteWatcherReloadStrategy(
                     config.getRoutesReloadDirectory(), config.isRoutesReloadDirectoryRecursive());
@@ -233,14 +250,25 @@ public final class DefaultConfigurationConfigurer {
             reloader.setRemoveAllRoutes(config.isRoutesReloadRemoveAllRoutes());
             camelContext.addService(reloader);
         }
+        if (config.isContextReloadEnabled() && camelContext.hasService(ContextReloadStrategy.class) == null) {
+            ContextReloadStrategy reloader = new DefaultContextReloadStrategy();
+            camelContext.addService(reloader);
+        }
 
         if (camelContext.getManagementStrategy().getManagementAgent() != null) {
             camelContext.getManagementStrategy().getManagementAgent()
                     .setEndpointRuntimeStatisticsEnabled(config.isEndpointRuntimeStatisticsEnabled());
             camelContext.getManagementStrategy().getManagementAgent()
+                    .setLoadStatisticsEnabled(config.isLoadStatisticsEnabled());
+            camelContext.getManagementStrategy().getManagementAgent()
                     .setStatisticsLevel(config.getJmxManagementStatisticsLevel());
             camelContext.getManagementStrategy().getManagementAgent()
+                    .setMBeansLevel(config.getJmxManagementMBeansLevel());
+            camelContext.getManagementStrategy().getManagementAgent()
                     .setManagementNamePattern(config.getJmxManagementNamePattern());
+        }
+        if (config.isCamelEventsTimestampEnabled()) {
+            camelContext.getManagementStrategy().getEventFactory().setTimestampEnabled(true);
         }
 
         // global options
@@ -271,9 +299,11 @@ public final class DefaultConfigurationConfigurer {
         }
 
         camelContext.setBacklogTracing(config.isBacklogTracing());
+        camelContext.setBacklogTracingStandby(config.isBacklogTracingStandby());
         camelContext.setTracing(config.isTracing());
         camelContext.setTracingStandby(config.isTracingStandby());
         camelContext.setTracingPattern(config.getTracingPattern());
+        camelContext.setTracingLoggingFormat(config.getTracingLoggingFormat());
 
         if (config.getThreadNamePattern() != null) {
             camelContext.getExecutorServiceManager().setThreadNamePattern(config.getThreadNamePattern());
@@ -316,26 +346,26 @@ public final class DefaultConfigurationConfigurer {
             }
             src.setUnhealthyOnExhausted(config.isRouteControllerUnhealthyOnExhausted());
         }
-        if (config.getRouteControllerLoggingLevel() != null) {
-            camelContext.getRouteController().setLoggingLevel(config.getRouteControllerLoggingLevel());
-        }
     }
 
     /**
      * Performs additional configuration to lookup beans of Camel types to configure additional configurations on the
      * Camel context.
      * <p/>
-     * Similar code in camel-core-xml module in class org.apache.camel.core.xml.AbstractCamelContextFactoryBean or in
-     * camel-spring-boot module in class org.apache.camel.spring.boot.CamelAutoConfiguration.
+     * Similar code in camel-core-xml module in class org.apache.camel.core.xml.AbstractCamelContextFactoryBean.
      */
     public static void afterConfigure(final CamelContext camelContext) throws Exception {
         final Registry registry = camelContext.getRegistry();
         final ManagementStrategy managementStrategy = camelContext.getManagementStrategy();
-        final ExtendedCamelContext ecc = camelContext.adapt(ExtendedCamelContext.class);
+        final CamelContext ecc = camelContext;
 
         StartupStepRecorder ssr = getSingleBeanOfType(registry, StartupStepRecorder.class);
         if (ssr != null) {
-            ecc.setStartupStepRecorder(ssr);
+            ecc.getCamelContextExtension().setStartupStepRecorder(ssr);
+        }
+        CliConnectorFactory ccf = getSingleBeanOfType(registry, CliConnectorFactory.class);
+        if (ccf != null) {
+            ecc.getCamelContextExtension().setCliConnectorFactory(ccf);
         }
         PropertiesComponent pc = getSingleBeanOfType(registry, PropertiesComponent.class);
         if (pc != null) {
@@ -351,7 +381,7 @@ public final class DefaultConfigurationConfigurer {
         }
         AsyncProcessorAwaitManager apam = getSingleBeanOfType(registry, AsyncProcessorAwaitManager.class);
         if (apam != null) {
-            ecc.setAsyncProcessorAwaitManager(apam);
+            ecc.getCamelContextExtension().setAsyncProcessorAwaitManager(apam);
         }
         ManagementStrategy ms = getSingleBeanOfType(registry, ManagementStrategy.class);
         if (ms != null) {
@@ -367,7 +397,7 @@ public final class DefaultConfigurationConfigurer {
         }
         UnitOfWorkFactory uowf = getSingleBeanOfType(registry, UnitOfWorkFactory.class);
         if (uowf != null) {
-            ecc.setUnitOfWorkFactory(uowf);
+            ecc.getCamelContextExtension().setUnitOfWorkFactory(uowf);
         }
         RuntimeEndpointRegistry rer = getSingleBeanOfType(registry, RuntimeEndpointRegistry.class);
         if (rer != null) {
@@ -375,7 +405,7 @@ public final class DefaultConfigurationConfigurer {
         }
         ModelJAXBContextFactory mjcf = getSingleBeanOfType(registry, ModelJAXBContextFactory.class);
         if (mjcf != null) {
-            ecc.setModelJAXBContextFactory(mjcf);
+            ecc.getCamelContextExtension().setModelJAXBContextFactory(mjcf);
         }
         ClassResolver cr = getSingleBeanOfType(registry, ClassResolver.class);
         if (cr != null) {
@@ -383,7 +413,7 @@ public final class DefaultConfigurationConfigurer {
         }
         FactoryFinderResolver ffr = getSingleBeanOfType(registry, FactoryFinderResolver.class);
         if (ffr != null) {
-            ecc.setFactoryFinderResolver(ffr);
+            ecc.getCamelContextExtension().setFactoryFinderResolver(ffr);
         }
         RouteController rc = getSingleBeanOfType(registry, RouteController.class);
         if (rc != null) {
@@ -403,7 +433,7 @@ public final class DefaultConfigurationConfigurer {
         }
         ProcessorFactory pf = getSingleBeanOfType(registry, ProcessorFactory.class);
         if (pf != null) {
-            ecc.setProcessorFactory(pf);
+            ecc.getCamelContextExtension().setProcessorFactory(pf);
         }
         Debugger debugger = getSingleBeanOfType(registry, Debugger.class);
         if (debugger != null) {
@@ -411,7 +441,7 @@ public final class DefaultConfigurationConfigurer {
         }
         NodeIdFactory nif = getSingleBeanOfType(registry, NodeIdFactory.class);
         if (nif != null) {
-            ecc.setNodeIdFactory(nif);
+            ecc.getCamelContextExtension().setNodeIdFactory(nif);
         }
         MessageHistoryFactory mhf = getSingleBeanOfType(registry, MessageHistoryFactory.class);
         if (mhf != null) {
@@ -419,7 +449,7 @@ public final class DefaultConfigurationConfigurer {
         }
         ReactiveExecutor re = getSingleBeanOfType(registry, ReactiveExecutor.class);
         if (re != null) {
-            ecc.setReactiveExecutor(re);
+            ecc.getCamelContextExtension().setReactiveExecutor(re);
         }
         ShutdownStrategy ss = getSingleBeanOfType(registry, ShutdownStrategy.class);
         if (ss != null) {
@@ -427,7 +457,7 @@ public final class DefaultConfigurationConfigurer {
         }
         ExchangeFactory exf = getSingleBeanOfType(registry, ExchangeFactory.class);
         if (exf != null) {
-            ecc.setExchangeFactory(exf);
+            ecc.getCamelContextExtension().setExchangeFactory(exf);
         }
         Set<TypeConverters> tcs = registry.findByType(TypeConverters.class);
         if (!tcs.isEmpty()) {
@@ -435,7 +465,7 @@ public final class DefaultConfigurationConfigurer {
         }
         Set<EndpointStrategy> ess = registry.findByType(EndpointStrategy.class);
         if (!ess.isEmpty()) {
-            ess.forEach(ecc::registerEndpointCallback);
+            ess.forEach(ecc.getCamelContextExtension()::registerEndpointCallback);
         }
         Set<CamelClusterService> csss = registry.findByType(CamelClusterService.class);
         if (!csss.isEmpty()) {
@@ -452,13 +482,13 @@ public final class DefaultConfigurationConfigurer {
         registerPropertiesForBeanTypesWithCondition(registry, EventNotifier.class, containsEventNotifier.negate(),
                 managementStrategy::addEventNotifier);
         final Predicate<InterceptStrategy> containsInterceptStrategy
-                = camelContext.adapt(ExtendedCamelContext.class).getInterceptStrategies()::contains;
+                = camelContext.getCamelContextExtension().getInterceptStrategies()::contains;
         registerPropertiesForBeanTypesWithCondition(registry, InterceptStrategy.class, containsInterceptStrategy.negate(),
-                camelContext.adapt(ExtendedCamelContext.class)::addInterceptStrategy);
+                camelContext.getCamelContextExtension()::addInterceptStrategy);
         final Predicate<LifecycleStrategy> containsLifecycleStrategy = camelContext.getLifecycleStrategies()::contains;
         registerPropertiesForBeanTypesWithCondition(registry, LifecycleStrategy.class, containsLifecycleStrategy.negate(),
                 camelContext::addLifecycleStrategy);
-        ModelCamelContext mcc = camelContext.adapt(ModelCamelContext.class);
+        ModelCamelContext mcc = (ModelCamelContext) camelContext;
         final Predicate<ModelLifecycleStrategy> containsModelLifecycleStrategy = mcc.getModelLifecycleStrategies()::contains;
         registerPropertiesForBeanTypesWithCondition(registry, ModelLifecycleStrategy.class,
                 containsModelLifecycleStrategy.negate(), mcc::addModelLifecycleStrategy);
@@ -467,9 +497,10 @@ public final class DefaultConfigurationConfigurer {
         Map<String, LogListener> logListeners = registry.findByTypeWithName(LogListener.class);
         if (logListeners != null && !logListeners.isEmpty()) {
             for (LogListener logListener : logListeners.values()) {
-                boolean contains = ecc.getLogListeners() != null && ecc.getLogListeners().contains(logListener);
+                boolean contains = ecc.getCamelContextExtension().getLogListeners() != null
+                        && ecc.getCamelContextExtension().getLogListeners().contains(logListener);
                 if (!contains) {
-                    ecc.addLogListener(logListener);
+                    ecc.getCamelContextExtension().addLogListener(logListener);
                 }
             }
         }
@@ -516,7 +547,46 @@ public final class DefaultConfigurationConfigurer {
                 }
             }
         }
-
+        // dev console
+        DevConsoleRegistry devConsoleRegistry = getSingleBeanOfType(registry, DevConsoleRegistry.class);
+        if (devConsoleRegistry != null) {
+            devConsoleRegistry.setCamelContext(camelContext);
+            LOG.debug("Using DevConsoleRegistry: {}", devConsoleRegistry);
+            camelContext.setExtension(DevConsoleRegistry.class, devConsoleRegistry);
+        } else {
+            // okay attempt to inject this camel context into existing dev console (if any)
+            devConsoleRegistry = DevConsoleRegistry.get(camelContext);
+            if (devConsoleRegistry != null) {
+                devConsoleRegistry.setCamelContext(camelContext);
+            }
+        }
+        if (devConsoleRegistry != null) {
+            Set<DevConsole> consoles = registry.findByType(DevConsole.class);
+            for (DevConsole console : consoles) {
+                devConsoleRegistry.register(console);
+            }
+        }
+        // vaults
+        AwsVaultConfiguration aws = getSingleBeanOfType(registry, AwsVaultConfiguration.class);
+        if (aws != null) {
+            VaultConfiguration vault = camelContext.getVaultConfiguration();
+            vault.setAwsVaultConfiguration(aws);
+        }
+        GcpVaultConfiguration gcp = getSingleBeanOfType(registry, GcpVaultConfiguration.class);
+        if (gcp != null) {
+            VaultConfiguration vault = camelContext.getVaultConfiguration();
+            vault.setGcpVaultConfiguration(gcp);
+        }
+        AzureVaultConfiguration azure = getSingleBeanOfType(registry, AzureVaultConfiguration.class);
+        if (azure != null) {
+            VaultConfiguration vault = camelContext.getVaultConfiguration();
+            vault.setAzureVaultConfiguration(azure);
+        }
+        HashicorpVaultConfiguration hashicorp = getSingleBeanOfType(registry, HashicorpVaultConfiguration.class);
+        if (hashicorp != null) {
+            VaultConfiguration vault = camelContext.getVaultConfiguration();
+            vault.setHashicorpVaultConfiguration(hashicorp);
+        }
         // set the default thread pool profile if defined
         initThreadPoolProfiles(registry, camelContext);
     }

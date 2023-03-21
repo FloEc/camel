@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -144,15 +144,14 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * You can specify a policy for handling long messages: &lt;ul&gt;
-         * &lt;li&gt;ALLOW - the default, long messages are split to 140 bytes
-         * per message &lt;li&gt;TRUNCATE - long messages are split and only the
-         * first fragment will be sent to the SMSC. Some carriers drop
-         * subsequent fragments so this reduces load on the SMPP connection
-         * sending parts of a message that will never be delivered.
-         * &lt;li&gt;REJECT - if a message would need to be split, it is
-         * rejected with an SMPP NegativeResponseException and the reason code
-         * signifying the message is too long.
+         * You can specify a policy for handling long messages: ALLOW - the
+         * default, long messages are split to 140 bytes per message TRUNCATE -
+         * long messages are split and only the first fragment will be sent to
+         * the SMSC. Some carriers drop subsequent fragments so this reduces
+         * load on the SMPP connection sending parts of a message that will
+         * never be delivered. REJECT - if a message would need to be split, it
+         * is rejected with an SMPP NegativeResponseException and the reason
+         * code signifying the message is too long.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.smpp.SmppSplittingPolicy&lt;/code&gt; type.
@@ -169,15 +168,14 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * You can specify a policy for handling long messages: &lt;ul&gt;
-         * &lt;li&gt;ALLOW - the default, long messages are split to 140 bytes
-         * per message &lt;li&gt;TRUNCATE - long messages are split and only the
-         * first fragment will be sent to the SMSC. Some carriers drop
-         * subsequent fragments so this reduces load on the SMPP connection
-         * sending parts of a message that will never be delivered.
-         * &lt;li&gt;REJECT - if a message would need to be split, it is
-         * rejected with an SMPP NegativeResponseException and the reason code
-         * signifying the message is too long.
+         * You can specify a policy for handling long messages: ALLOW - the
+         * default, long messages are split to 140 bytes per message TRUNCATE -
+         * long messages are split and only the first fragment will be sent to
+         * the SMSC. Some carriers drop subsequent fragments so this reduces
+         * load on the SMPP connection sending parts of a message that will
+         * never be delivered. REJECT - if a message would need to be split, it
+         * is rejected with an SMPP NegativeResponseException and the reason
+         * code signifying the message is too long.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.smpp.SmppSplittingPolicy&lt;/code&gt; type.
@@ -226,54 +224,9 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SmppEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SmppEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
          * Defines encoding of data according the SMPP 3.4 specification,
-         * section 5.2.19. &lt;ul&gt; &lt;li&gt;0: SMSC Default Alphabet
-         * &lt;li&gt;4: 8 bit Alphabet &lt;li&gt;8: UCS2 Alphabet.
+         * section 5.2.19. 0: SMSC Default Alphabet 4: 8 bit Alphabet 8: UCS2
+         * Alphabet.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -288,8 +241,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines encoding of data according the SMPP 3.4 specification,
-         * section 5.2.19. &lt;ul&gt; &lt;li&gt;0: SMSC Default Alphabet
-         * &lt;li&gt;4: 8 bit Alphabet &lt;li&gt;8: UCS2 Alphabet.
+         * section 5.2.19. 0: SMSC Default Alphabet 4: 8 bit Alphabet 8: UCS2
+         * Alphabet.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -304,10 +257,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the data coding according the SMPP 3.4 specification, section
-         * 5.2.19. Example data encodings are: &lt;ul&gt; &lt;li&gt;0: SMSC
-         * Default Alphabet &lt;li&gt;3: Latin 1 (ISO-8859-1) &lt;li&gt;4: Octet
-         * unspecified (8-bit binary) &lt;li&gt;8: UCS2 (ISO/IEC-10646)
-         * &lt;li&gt;13: Extended Kanji JIS(X 0212-1990).
+         * 5.2.19. Example data encodings are: 0: SMSC Default Alphabet 3: Latin
+         * 1 (ISO-8859-1) 4: Octet unspecified (8-bit binary) 8: UCS2
+         * (ISO/IEC-10646) 13: Extended Kanji JIS(X 0212-1990).
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -322,10 +274,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the data coding according the SMPP 3.4 specification, section
-         * 5.2.19. Example data encodings are: &lt;ul&gt; &lt;li&gt;0: SMSC
-         * Default Alphabet &lt;li&gt;3: Latin 1 (ISO-8859-1) &lt;li&gt;4: Octet
-         * unspecified (8-bit binary) &lt;li&gt;8: UCS2 (ISO/IEC-10646)
-         * &lt;li&gt;13: Extended Kanji JIS(X 0212-1990).
+         * 5.2.19. Example data encodings are: 0: SMSC Default Alphabet 3: Latin
+         * 1 (ISO-8859-1) 4: Octet unspecified (8-bit binary) 8: UCS2
+         * (ISO/IEC-10646) 13: Extended Kanji JIS(X 0212-1990).
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -438,8 +389,8 @@ public interface SmppEndpointBuilderFactory {
          * These headers will be passed to the proxy server while establishing
          * the connection.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -456,8 +407,8 @@ public interface SmppEndpointBuilderFactory {
          * the connection.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -538,6 +489,51 @@ public interface SmppEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default SmppEndpointConsumerBuilder basic() {
             return (SmppEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSmppEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSmppEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -934,15 +930,14 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * You can specify a policy for handling long messages: &lt;ul&gt;
-         * &lt;li&gt;ALLOW - the default, long messages are split to 140 bytes
-         * per message &lt;li&gt;TRUNCATE - long messages are split and only the
-         * first fragment will be sent to the SMSC. Some carriers drop
-         * subsequent fragments so this reduces load on the SMPP connection
-         * sending parts of a message that will never be delivered.
-         * &lt;li&gt;REJECT - if a message would need to be split, it is
-         * rejected with an SMPP NegativeResponseException and the reason code
-         * signifying the message is too long.
+         * You can specify a policy for handling long messages: ALLOW - the
+         * default, long messages are split to 140 bytes per message TRUNCATE -
+         * long messages are split and only the first fragment will be sent to
+         * the SMSC. Some carriers drop subsequent fragments so this reduces
+         * load on the SMPP connection sending parts of a message that will
+         * never be delivered. REJECT - if a message would need to be split, it
+         * is rejected with an SMPP NegativeResponseException and the reason
+         * code signifying the message is too long.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.smpp.SmppSplittingPolicy&lt;/code&gt; type.
@@ -959,15 +954,14 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * You can specify a policy for handling long messages: &lt;ul&gt;
-         * &lt;li&gt;ALLOW - the default, long messages are split to 140 bytes
-         * per message &lt;li&gt;TRUNCATE - long messages are split and only the
-         * first fragment will be sent to the SMSC. Some carriers drop
-         * subsequent fragments so this reduces load on the SMPP connection
-         * sending parts of a message that will never be delivered.
-         * &lt;li&gt;REJECT - if a message would need to be split, it is
-         * rejected with an SMPP NegativeResponseException and the reason code
-         * signifying the message is too long.
+         * You can specify a policy for handling long messages: ALLOW - the
+         * default, long messages are split to 140 bytes per message TRUNCATE -
+         * long messages are split and only the first fragment will be sent to
+         * the SMSC. Some carriers drop subsequent fragments so this reduces
+         * load on the SMPP connection sending parts of a message that will
+         * never be delivered. REJECT - if a message would need to be split, it
+         * is rejected with an SMPP NegativeResponseException and the reason
+         * code signifying the message is too long.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.smpp.SmppSplittingPolicy&lt;/code&gt; type.
@@ -1018,12 +1012,10 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Defines the type of number (TON) to be used in the SME destination
          * address parameters. Only for SubmitSm, SubmitMulti, CancelSm and
-         * DataSm. The following NPI values are defined: &lt;ul&gt; &lt;li&gt;0:
-         * Unknown &lt;li&gt;1: ISDN (E163/E164) &lt;li&gt;2: Data (X.121)
-         * &lt;li&gt;3: Telex (F.69) &lt;li&gt;6: Land Mobile (E.212)
-         * &lt;li&gt;8: National &lt;li&gt;9: Private &lt;li&gt;10: ERMES
-         * &lt;li&gt;13: Internet (IP) &lt;li&gt;18: WAP Client Id (to be
-         * defined by WAP Forum).
+         * DataSm. The following NPI values are defined: 0: Unknown 1: ISDN
+         * (E163/E164) 2: Data (X.121) 3: Telex (F.69) 6: Land Mobile (E.212) 8:
+         * National 9: Private 10: ERMES 13: Internet (IP) 18: WAP Client Id (to
+         * be defined by WAP Forum).
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1039,12 +1031,10 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Defines the type of number (TON) to be used in the SME destination
          * address parameters. Only for SubmitSm, SubmitMulti, CancelSm and
-         * DataSm. The following NPI values are defined: &lt;ul&gt; &lt;li&gt;0:
-         * Unknown &lt;li&gt;1: ISDN (E163/E164) &lt;li&gt;2: Data (X.121)
-         * &lt;li&gt;3: Telex (F.69) &lt;li&gt;6: Land Mobile (E.212)
-         * &lt;li&gt;8: National &lt;li&gt;9: Private &lt;li&gt;10: ERMES
-         * &lt;li&gt;13: Internet (IP) &lt;li&gt;18: WAP Client Id (to be
-         * defined by WAP Forum).
+         * DataSm. The following NPI values are defined: 0: Unknown 1: ISDN
+         * (E163/E164) 2: Data (X.121) 3: Telex (F.69) 6: Land Mobile (E.212) 8:
+         * National 9: Private 10: ERMES 13: Internet (IP) 18: WAP Client Id (to
+         * be defined by WAP Forum).
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1060,10 +1050,9 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Defines the type of number (TON) to be used in the SME destination
          * address parameters. Only for SubmitSm, SubmitMulti, CancelSm and
-         * DataSm. The following TON values are defined: &lt;ul&gt; &lt;li&gt;0:
-         * Unknown &lt;li&gt;1: International &lt;li&gt;2: National &lt;li&gt;3:
-         * Network Specific &lt;li&gt;4: Subscriber Number &lt;li&gt;5:
-         * Alphanumeric &lt;li&gt;6: Abbreviated.
+         * DataSm. The following TON values are defined: 0: Unknown 1:
+         * International 2: National 3: Network Specific 4: Subscriber Number 5:
+         * Alphanumeric 6: Abbreviated.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1079,10 +1068,9 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Defines the type of number (TON) to be used in the SME destination
          * address parameters. Only for SubmitSm, SubmitMulti, CancelSm and
-         * DataSm. The following TON values are defined: &lt;ul&gt; &lt;li&gt;0:
-         * Unknown &lt;li&gt;1: International &lt;li&gt;2: National &lt;li&gt;3:
-         * Network Specific &lt;li&gt;4: Subscriber Number &lt;li&gt;5:
-         * Alphanumeric &lt;li&gt;6: Abbreviated.
+         * DataSm. The following TON values are defined: 0: Unknown 1:
+         * International 2: National 3: Network Specific 4: Subscriber Number 5:
+         * Alphanumeric 6: Abbreviated.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1137,61 +1125,31 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
+         * Set this on producer in order to benefit from transceiver (TRX)
+         * binding type. So once set, you don't need to define an 'SMTPP
+         * consumer' endpoint anymore. You would set this to a 'Direct consumer'
+         * endpoint instead. DISCALIMER: This feature is only tested with
+         * 'Direct consumer' endpoint. The behavior with any other consumer type
+         * is unknown and not tested.
          * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: false
          * Group: producer
          * 
-         * @param lazyStartProducer the value to set
+         * @param messageReceiverRouteId the value to set
          * @return the dsl builder
          */
-        default SmppEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SmppEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
+        default SmppEndpointProducerBuilder messageReceiverRouteId(
+                String messageReceiverRouteId) {
+            doSetProperty("messageReceiverRouteId", messageReceiverRouteId);
             return this;
         }
         /**
          * Defines the numeric plan indicator (NPI) to be used in the SME. The
-         * following NPI values are defined: &lt;ul&gt; &lt;li&gt;0: Unknown
-         * &lt;li&gt;1: ISDN (E163/E164) &lt;li&gt;2: Data (X.121) &lt;li&gt;3:
-         * Telex (F.69) &lt;li&gt;6: Land Mobile (E.212) &lt;li&gt;8: National
-         * &lt;li&gt;9: Private &lt;li&gt;10: ERMES &lt;li&gt;13: Internet (IP)
-         * &lt;li&gt;18: WAP Client Id (to be defined by WAP Forum).
+         * following NPI values are defined: 0: Unknown 1: ISDN (E163/E164) 2:
+         * Data (X.121) 3: Telex (F.69) 6: Land Mobile (E.212) 8: National 9:
+         * Private 10: ERMES 13: Internet (IP) 18: WAP Client Id (to be defined
+         * by WAP Forum).
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1207,11 +1165,10 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the numeric plan indicator (NPI) to be used in the SME. The
-         * following NPI values are defined: &lt;ul&gt; &lt;li&gt;0: Unknown
-         * &lt;li&gt;1: ISDN (E163/E164) &lt;li&gt;2: Data (X.121) &lt;li&gt;3:
-         * Telex (F.69) &lt;li&gt;6: Land Mobile (E.212) &lt;li&gt;8: National
-         * &lt;li&gt;9: Private &lt;li&gt;10: ERMES &lt;li&gt;13: Internet (IP)
-         * &lt;li&gt;18: WAP Client Id (to be defined by WAP Forum).
+         * following NPI values are defined: 0: Unknown 1: ISDN (E163/E164) 2:
+         * Data (X.121) 3: Telex (F.69) 6: Land Mobile (E.212) 8: National 9:
+         * Private 10: ERMES 13: Internet (IP) 18: WAP Client Id (to be defined
+         * by WAP Forum).
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1228,9 +1185,8 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Allows the originating SME to assign a priority level to the short
          * message. Only for SubmitSm and SubmitMulti. Four Priority Levels are
-         * supported: &lt;ul&gt; &lt;li&gt;0: Level 0 (lowest) priority
-         * &lt;li&gt;1: Level 1 priority &lt;li&gt;2: Level 2 priority
-         * &lt;li&gt;3: Level 3 (highest) priority.
+         * supported: 0: Level 0 (lowest) priority 1: Level 1 priority 2: Level
+         * 2 priority 3: Level 3 (highest) priority.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1246,9 +1202,8 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Allows the originating SME to assign a priority level to the short
          * message. Only for SubmitSm and SubmitMulti. Four Priority Levels are
-         * supported: &lt;ul&gt; &lt;li&gt;0: Level 0 (lowest) priority
-         * &lt;li&gt;1: Level 1 priority &lt;li&gt;2: Level 2 priority
-         * &lt;li&gt;3: Level 3 (highest) priority.
+         * supported: 0: Level 0 (lowest) priority 1: Level 1 priority 2: Level
+         * 2 priority 3: Level 3 (highest) priority.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1291,11 +1246,11 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Is used to request an SMSC delivery receipt and/or SME originated
-         * acknowledgements. The following values are defined: &lt;ul&gt;
-         * &lt;li&gt;0: No SMSC delivery receipt requested. &lt;li&gt;1: SMSC
-         * delivery receipt requested where final delivery outcome is success or
-         * failure. &lt;li&gt;2: SMSC delivery receipt requested where the final
-         * delivery outcome is delivery failure.
+         * acknowledgements. The following values are defined: 0: No SMSC
+         * delivery receipt requested. 1: SMSC delivery receipt requested where
+         * final delivery outcome is success or failure. 2: SMSC delivery
+         * receipt requested where the final delivery outcome is delivery
+         * failure.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1311,11 +1266,11 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Is used to request an SMSC delivery receipt and/or SME originated
-         * acknowledgements. The following values are defined: &lt;ul&gt;
-         * &lt;li&gt;0: No SMSC delivery receipt requested. &lt;li&gt;1: SMSC
-         * delivery receipt requested where final delivery outcome is success or
-         * failure. &lt;li&gt;2: SMSC delivery receipt requested where the final
-         * delivery outcome is delivery failure.
+         * acknowledgements. The following values are defined: 0: No SMSC
+         * delivery receipt requested. 1: SMSC delivery receipt requested where
+         * final delivery outcome is success or failure. 2: SMSC delivery
+         * receipt requested where the final delivery outcome is delivery
+         * failure.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1334,8 +1289,8 @@ public interface SmppEndpointBuilderFactory {
          * that is still pending delivery. The SMSC will replace an existing
          * message provided that the source address, destination address and
          * service type match the same fields in the new message. The following
-         * replace if present flag values are defined: &lt;ul&gt; &lt;li&gt;0:
-         * Don't replace &lt;li&gt;1: Replace.
+         * replace if present flag values are defined: 0: Don't replace 1:
+         * Replace.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1354,8 +1309,8 @@ public interface SmppEndpointBuilderFactory {
          * that is still pending delivery. The SMSC will replace an existing
          * message provided that the source address, destination address and
          * service type match the same fields in the new message. The following
-         * replace if present flag values are defined: &lt;ul&gt; &lt;li&gt;0:
-         * Don't replace &lt;li&gt;1: Replace.
+         * replace if present flag values are defined: 0: Don't replace 1:
+         * Replace.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1372,11 +1327,10 @@ public interface SmppEndpointBuilderFactory {
         /**
          * The service type parameter can be used to indicate the SMS
          * Application service associated with the message. The following
-         * generic service_types are defined: &lt;ul&gt; &lt;li&gt;CMT: Cellular
-         * Messaging &lt;li&gt;CPT: Cellular Paging &lt;li&gt;VMN: Voice Mail
-         * Notification &lt;li&gt;VMA: Voice Mail Alerting &lt;li&gt;WAP:
-         * Wireless Application Protocol &lt;li&gt;USSD: Unstructured
-         * Supplementary Services Data.
+         * generic service_types are defined: CMT: Cellular Messaging CPT:
+         * Cellular Paging VMN: Voice Mail Notification VMA: Voice Mail Alerting
+         * WAP: Wireless Application Protocol USSD: Unstructured Supplementary
+         * Services Data.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1408,11 +1362,9 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Defines the numeric plan indicator (NPI) to be used in the SME
          * originator address parameters. The following NPI values are defined:
-         * &lt;ul&gt; &lt;li&gt;0: Unknown &lt;li&gt;1: ISDN (E163/E164)
-         * &lt;li&gt;2: Data (X.121) &lt;li&gt;3: Telex (F.69) &lt;li&gt;6: Land
-         * Mobile (E.212) &lt;li&gt;8: National &lt;li&gt;9: Private
-         * &lt;li&gt;10: ERMES &lt;li&gt;13: Internet (IP) &lt;li&gt;18: WAP
-         * Client Id (to be defined by WAP Forum).
+         * 0: Unknown 1: ISDN (E163/E164) 2: Data (X.121) 3: Telex (F.69) 6:
+         * Land Mobile (E.212) 8: National 9: Private 10: ERMES 13: Internet
+         * (IP) 18: WAP Client Id (to be defined by WAP Forum).
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1428,11 +1380,9 @@ public interface SmppEndpointBuilderFactory {
         /**
          * Defines the numeric plan indicator (NPI) to be used in the SME
          * originator address parameters. The following NPI values are defined:
-         * &lt;ul&gt; &lt;li&gt;0: Unknown &lt;li&gt;1: ISDN (E163/E164)
-         * &lt;li&gt;2: Data (X.121) &lt;li&gt;3: Telex (F.69) &lt;li&gt;6: Land
-         * Mobile (E.212) &lt;li&gt;8: National &lt;li&gt;9: Private
-         * &lt;li&gt;10: ERMES &lt;li&gt;13: Internet (IP) &lt;li&gt;18: WAP
-         * Client Id (to be defined by WAP Forum).
+         * 0: Unknown 1: ISDN (E163/E164) 2: Data (X.121) 3: Telex (F.69) 6:
+         * Land Mobile (E.212) 8: National 9: Private 10: ERMES 13: Internet
+         * (IP) 18: WAP Client Id (to be defined by WAP Forum).
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1447,10 +1397,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the type of number (TON) to be used in the SME originator
-         * address parameters. The following TON values are defined: &lt;ul&gt;
-         * &lt;li&gt;0: Unknown &lt;li&gt;1: International &lt;li&gt;2: National
-         * &lt;li&gt;3: Network Specific &lt;li&gt;4: Subscriber Number
-         * &lt;li&gt;5: Alphanumeric &lt;li&gt;6: Abbreviated.
+         * address parameters. The following TON values are defined: 0: Unknown
+         * 1: International 2: National 3: Network Specific 4: Subscriber Number
+         * 5: Alphanumeric 6: Abbreviated.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1465,10 +1414,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the type of number (TON) to be used in the SME originator
-         * address parameters. The following TON values are defined: &lt;ul&gt;
-         * &lt;li&gt;0: Unknown &lt;li&gt;1: International &lt;li&gt;2: National
-         * &lt;li&gt;3: Network Specific &lt;li&gt;4: Subscriber Number
-         * &lt;li&gt;5: Alphanumeric &lt;li&gt;6: Abbreviated.
+         * address parameters. The following TON values are defined: 0: Unknown
+         * 1: International 2: National 3: Network Specific 4: Subscriber Number
+         * 5: Alphanumeric 6: Abbreviated.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1483,10 +1431,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the type of number (TON) to be used in the SME. The following
-         * TON values are defined: &lt;ul&gt; &lt;li&gt;0: Unknown &lt;li&gt;1:
-         * International &lt;li&gt;2: National &lt;li&gt;3: Network Specific
-         * &lt;li&gt;4: Subscriber Number &lt;li&gt;5: Alphanumeric &lt;li&gt;6:
-         * Abbreviated.
+         * TON values are defined: 0: Unknown 1: International 2: National 3:
+         * Network Specific 4: Subscriber Number 5: Alphanumeric 6: Abbreviated.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1501,10 +1447,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the type of number (TON) to be used in the SME. The following
-         * TON values are defined: &lt;ul&gt; &lt;li&gt;0: Unknown &lt;li&gt;1:
-         * International &lt;li&gt;2: National &lt;li&gt;3: Network Specific
-         * &lt;li&gt;4: Subscriber Number &lt;li&gt;5: Alphanumeric &lt;li&gt;6:
-         * Abbreviated.
+         * TON values are defined: 0: Unknown 1: International 2: National 3:
+         * Network Specific 4: Subscriber Number 5: Alphanumeric 6: Abbreviated.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1519,8 +1463,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines encoding of data according the SMPP 3.4 specification,
-         * section 5.2.19. &lt;ul&gt; &lt;li&gt;0: SMSC Default Alphabet
-         * &lt;li&gt;4: 8 bit Alphabet &lt;li&gt;8: UCS2 Alphabet.
+         * section 5.2.19. 0: SMSC Default Alphabet 4: 8 bit Alphabet 8: UCS2
+         * Alphabet.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1535,8 +1479,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines encoding of data according the SMPP 3.4 specification,
-         * section 5.2.19. &lt;ul&gt; &lt;li&gt;0: SMSC Default Alphabet
-         * &lt;li&gt;4: 8 bit Alphabet &lt;li&gt;8: UCS2 Alphabet.
+         * section 5.2.19. 0: SMSC Default Alphabet 4: 8 bit Alphabet 8: UCS2
+         * Alphabet.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1551,10 +1495,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the data coding according the SMPP 3.4 specification, section
-         * 5.2.19. Example data encodings are: &lt;ul&gt; &lt;li&gt;0: SMSC
-         * Default Alphabet &lt;li&gt;3: Latin 1 (ISO-8859-1) &lt;li&gt;4: Octet
-         * unspecified (8-bit binary) &lt;li&gt;8: UCS2 (ISO/IEC-10646)
-         * &lt;li&gt;13: Extended Kanji JIS(X 0212-1990).
+         * 5.2.19. Example data encodings are: 0: SMSC Default Alphabet 3: Latin
+         * 1 (ISO-8859-1) 4: Octet unspecified (8-bit binary) 8: UCS2
+         * (ISO/IEC-10646) 13: Extended Kanji JIS(X 0212-1990).
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1569,10 +1512,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the data coding according the SMPP 3.4 specification, section
-         * 5.2.19. Example data encodings are: &lt;ul&gt; &lt;li&gt;0: SMSC
-         * Default Alphabet &lt;li&gt;3: Latin 1 (ISO-8859-1) &lt;li&gt;4: Octet
-         * unspecified (8-bit binary) &lt;li&gt;8: UCS2 (ISO/IEC-10646)
-         * &lt;li&gt;13: Extended Kanji JIS(X 0212-1990).
+         * 5.2.19. Example data encodings are: 0: SMSC Default Alphabet 3: Latin
+         * 1 (ISO-8859-1) 4: Octet unspecified (8-bit binary) 8: UCS2
+         * (ISO/IEC-10646) 13: Extended Kanji JIS(X 0212-1990).
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -1685,8 +1627,8 @@ public interface SmppEndpointBuilderFactory {
          * These headers will be passed to the proxy server while establishing
          * the connection.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -1703,8 +1645,8 @@ public interface SmppEndpointBuilderFactory {
          * the connection.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -1785,6 +1727,55 @@ public interface SmppEndpointBuilderFactory {
                 EndpointProducerBuilder {
         default SmppEndpointProducerBuilder basic() {
             return (SmppEndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSmppEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSmppEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
         /**
          * Defines the interval in milliseconds between the confidence checks.
@@ -2112,15 +2103,14 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * You can specify a policy for handling long messages: &lt;ul&gt;
-         * &lt;li&gt;ALLOW - the default, long messages are split to 140 bytes
-         * per message &lt;li&gt;TRUNCATE - long messages are split and only the
-         * first fragment will be sent to the SMSC. Some carriers drop
-         * subsequent fragments so this reduces load on the SMPP connection
-         * sending parts of a message that will never be delivered.
-         * &lt;li&gt;REJECT - if a message would need to be split, it is
-         * rejected with an SMPP NegativeResponseException and the reason code
-         * signifying the message is too long.
+         * You can specify a policy for handling long messages: ALLOW - the
+         * default, long messages are split to 140 bytes per message TRUNCATE -
+         * long messages are split and only the first fragment will be sent to
+         * the SMSC. Some carriers drop subsequent fragments so this reduces
+         * load on the SMPP connection sending parts of a message that will
+         * never be delivered. REJECT - if a message would need to be split, it
+         * is rejected with an SMPP NegativeResponseException and the reason
+         * code signifying the message is too long.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.smpp.SmppSplittingPolicy&lt;/code&gt; type.
@@ -2137,15 +2127,14 @@ public interface SmppEndpointBuilderFactory {
             return this;
         }
         /**
-         * You can specify a policy for handling long messages: &lt;ul&gt;
-         * &lt;li&gt;ALLOW - the default, long messages are split to 140 bytes
-         * per message &lt;li&gt;TRUNCATE - long messages are split and only the
-         * first fragment will be sent to the SMSC. Some carriers drop
-         * subsequent fragments so this reduces load on the SMPP connection
-         * sending parts of a message that will never be delivered.
-         * &lt;li&gt;REJECT - if a message would need to be split, it is
-         * rejected with an SMPP NegativeResponseException and the reason code
-         * signifying the message is too long.
+         * You can specify a policy for handling long messages: ALLOW - the
+         * default, long messages are split to 140 bytes per message TRUNCATE -
+         * long messages are split and only the first fragment will be sent to
+         * the SMSC. Some carriers drop subsequent fragments so this reduces
+         * load on the SMPP connection sending parts of a message that will
+         * never be delivered. REJECT - if a message would need to be split, it
+         * is rejected with an SMPP NegativeResponseException and the reason
+         * code signifying the message is too long.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.smpp.SmppSplittingPolicy&lt;/code&gt; type.
@@ -2177,8 +2166,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines encoding of data according the SMPP 3.4 specification,
-         * section 5.2.19. &lt;ul&gt; &lt;li&gt;0: SMSC Default Alphabet
-         * &lt;li&gt;4: 8 bit Alphabet &lt;li&gt;8: UCS2 Alphabet.
+         * section 5.2.19. 0: SMSC Default Alphabet 4: 8 bit Alphabet 8: UCS2
+         * Alphabet.
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -2193,8 +2182,8 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines encoding of data according the SMPP 3.4 specification,
-         * section 5.2.19. &lt;ul&gt; &lt;li&gt;0: SMSC Default Alphabet
-         * &lt;li&gt;4: 8 bit Alphabet &lt;li&gt;8: UCS2 Alphabet.
+         * section 5.2.19. 0: SMSC Default Alphabet 4: 8 bit Alphabet 8: UCS2
+         * Alphabet.
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -2209,10 +2198,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the data coding according the SMPP 3.4 specification, section
-         * 5.2.19. Example data encodings are: &lt;ul&gt; &lt;li&gt;0: SMSC
-         * Default Alphabet &lt;li&gt;3: Latin 1 (ISO-8859-1) &lt;li&gt;4: Octet
-         * unspecified (8-bit binary) &lt;li&gt;8: UCS2 (ISO/IEC-10646)
-         * &lt;li&gt;13: Extended Kanji JIS(X 0212-1990).
+         * 5.2.19. Example data encodings are: 0: SMSC Default Alphabet 3: Latin
+         * 1 (ISO-8859-1) 4: Octet unspecified (8-bit binary) 8: UCS2
+         * (ISO/IEC-10646) 13: Extended Kanji JIS(X 0212-1990).
          * 
          * The option is a: &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -2227,10 +2215,9 @@ public interface SmppEndpointBuilderFactory {
         }
         /**
          * Defines the data coding according the SMPP 3.4 specification, section
-         * 5.2.19. Example data encodings are: &lt;ul&gt; &lt;li&gt;0: SMSC
-         * Default Alphabet &lt;li&gt;3: Latin 1 (ISO-8859-1) &lt;li&gt;4: Octet
-         * unspecified (8-bit binary) &lt;li&gt;8: UCS2 (ISO/IEC-10646)
-         * &lt;li&gt;13: Extended Kanji JIS(X 0212-1990).
+         * 5.2.19. Example data encodings are: 0: SMSC Default Alphabet 3: Latin
+         * 1 (ISO-8859-1) 4: Octet unspecified (8-bit binary) 8: UCS2
+         * (ISO/IEC-10646) 13: Extended Kanji JIS(X 0212-1990).
          * 
          * The option will be converted to a &lt;code&gt;byte&lt;/code&gt; type.
          * 
@@ -2341,8 +2328,8 @@ public interface SmppEndpointBuilderFactory {
          * These headers will be passed to the proxy server while establishing
          * the connection.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -2359,8 +2346,8 @@ public interface SmppEndpointBuilderFactory {
          * the connection.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -2668,6 +2655,20 @@ public interface SmppEndpointBuilderFactory {
          * Since: 2.2
          * Maven coordinates: org.apache.camel:camel-smpp
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default SmppHeaderNameBuilder smpp() {
+            return SmppHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * SMPP (camel-smpp)
+         * Send and receive SMS messages using a SMSC (Short Message Service
+         * Center).
+         * 
+         * Category: mobile
+         * Since: 2.2
+         * Maven coordinates: org.apache.camel:camel-smpp
+         * 
          * Syntax: <code>smpp:host:port</code>
          * 
          * Path parameter: host
@@ -2735,6 +2736,699 @@ public interface SmppEndpointBuilderFactory {
          */
         default SmppEndpointBuilder smpps(String path) {
             return SmppEndpointBuilderFactory.endpointBuilder("smpps", path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the SMPP component.
+     */
+    public static class SmppHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final SmppHeaderNameBuilder INSTANCE = new SmppHeaderNameBuilder();
+
+        /**
+         * For SubmitSm, SubmitMulti and ReplaceSm The data coding according to
+         * the SMPP 3.4 specification, section 5.2.19. Use the URI option
+         * alphabet settings above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppAlphabet}.
+         */
+        public String smppAlphabet() {
+            return "SmppAlphabet";
+        }
+
+        /**
+         * The command.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppCommand}.
+         */
+        public String smppCommand() {
+            return "SmppCommand";
+        }
+
+        /**
+         * only for AlertNotification, DeliverSm and DataSm The command id field
+         * identifies the particular SMPP PDU. For the complete list of defined
+         * values see chapter 5.1.2.1 in the smpp specification v3.4.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppCommandId}.
+         */
+        public String smppCommandId() {
+            return "SmppCommandId";
+        }
+
+        /**
+         * only for DataSm The Command status of the message.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppCommandStatus}.
+         */
+        public String smppCommandStatus() {
+            return "SmppCommandStatus";
+        }
+
+        /**
+         * For SubmitSm, SubmitMulti and ReplaceSm The data coding according to
+         * the SMPP 3.4 specification, section 5.2.19. Use the URI option
+         * alphabet settings above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppDataCoding}.
+         */
+        public String smppDataCoding() {
+            return "SmppDataCoding";
+        }
+
+        /**
+         * The splitter.
+         * 
+         * The option is a: {@code org.apache.camel.component.smpp.SmppSplitter}
+         * type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppSplitter}.
+         */
+        public String smppSplitter() {
+            return "SmppSplitter";
+        }
+
+        /**
+         * only for smsc DeliveryReceipt Number of short messages delivered.
+         * This is only relevant where the original message was submitted to a
+         * distribution list.The value is padded with leading zeros if
+         * necessary.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppDelivered}.
+         */
+        public String smppDelivered() {
+            return "SmppDelivered";
+        }
+
+        /**
+         * Producer: only for SubmitSm, SubmitMulti, CancelSm and DataSm Defines
+         * the destination SME address(es). For mobile terminated messages, this
+         * is the directory number of the recipient MS. It must be a List for
+         * SubmitMulti and a String otherwise. Consumer: only for DeliverSm and
+         * DataSm: Defines the destination SME address. For mobile terminated
+         * messages, this is the directory number of the recipient MS.
+         * 
+         * The option is a: {@code List or String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppDestAddr}.
+         */
+        public String smppDestAddr() {
+            return "SmppDestAddr";
+        }
+
+        /**
+         * Producer: only for SubmitSm, SubmitMulti, CancelSm and DataSm Defines
+         * the numeric plan indicator (NPI) to be used in the SME destination
+         * address parameters. Use the URI option sourceAddrNpi values defined
+         * above. Consumer: only for DataSm Defines the numeric plan indicator
+         * (NPI) in the destination address parameters. Use the URI option
+         * sourceAddrNpi values defined above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppDestAddrNpi}.
+         */
+        public String smppDestAddrNpi() {
+            return "SmppDestAddrNpi";
+        }
+
+        /**
+         * Producer: only for SubmitSm, SubmitMulti, CancelSm and DataSm Defines
+         * the type of number (TON) to be used in the SME destination address
+         * parameters. Use the sourceAddrTon URI option values defined above.
+         * Consumer: only for DataSm Defines the type of number (TON) in the
+         * destination address parameters. Use the sourceAddrTon URI option
+         * values defined above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppDestAddrTon}.
+         */
+        public String smppDestAddrTon() {
+            return "SmppDestAddrTon";
+        }
+
+        /**
+         * only for smsc DeliveryReceipt The time and date at which the short
+         * message reached it's final state. The format is as follows:
+         * YYMMDDhhmm.
+         * 
+         * The option is a: {@code Date} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppDoneDate}.
+         */
+        public String smppDoneDate() {
+            return "SmppDoneDate";
+        }
+
+        /**
+         * only for SubmitSm, SubmitMulti and DataSm. Specifies the encoding
+         * (character set name) of the bytes in the message body. If the message
+         * body is a string then this is not relevant because Java Strings are
+         * always Unicode. If the body is a byte array then this header can be
+         * used to indicate that it is ISO-8859-1 or some other value. Default
+         * value is specified by the endpoint configuration parameter
+         * _encoding_.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppEncoding}.
+         */
+        public String smppEncoding() {
+            return "SmppEncoding";
+        }
+
+        /**
+         * Producer: only for SubmitMultiSm The errors which occurred by sending
+         * the short message(s) the form Map (messageID : (destAddr : address,
+         * error : errorCode)). Consumer: only for smsc DeliveryReceipt Where
+         * appropriate this may hold a Network specific error code or an SMSC
+         * error code for the attempted delivery of the message. These errors
+         * are Network or SMSC specific and are not included here.
+         * 
+         * The option is a: {@code String or Map<String, List<Map<String,
+         * Object>>>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppError}.
+         */
+        public String smppError() {
+            return "SmppError";
+        }
+
+        /**
+         * the ASM class.
+         * 
+         * The option is a: {@code org.jsmpp.bean.ESMClass} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppClass}.
+         */
+        public String smppClass() {
+            return "SmppClass";
+        }
+
+        /**
+         * only for AlertNotification Defines the destination ESME address. For
+         * mobile terminated messages, this is the directory number of the
+         * recipient MS.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppEsmeAddr}.
+         */
+        public String smppEsmeAddr() {
+            return "SmppEsmeAddr";
+        }
+
+        /**
+         * only for AlertNotification Defines the numeric plan indicator (NPI)
+         * to be used in the ESME originator address parameters. Use the URI
+         * option sourceAddrNpi values defined above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppEsmeAddrNpi}.
+         */
+        public String smppEsmeAddrNpi() {
+            return "SmppEsmeAddrNpi";
+        }
+
+        /**
+         * only for AlertNotification Defines the type of number (TON) to be
+         * used in the ESME originator address parameters. Use the sourceAddrTon
+         * URI option values defined above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppEsmeAddrTon}.
+         */
+        public String smppEsmeAddrTon() {
+            return "SmppEsmeAddrTon";
+        }
+
+        /**
+         * The final date.
+         * 
+         * The option is a: {@code java.util.Date} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppFinalDate}.
+         */
+        public String smppFinalDate() {
+            return "SmppFinalDate";
+        }
+
+        /**
+         * only for smsc DeliveryReceipt: The final status of the message.
+         * 
+         * The option is a: {@code org.jsmpp.util.DeliveryReceiptState} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppStatus}.
+         */
+        public String smppStatus() {
+            return "SmppStatus";
+        }
+
+        /**
+         * Producer: The id to identify the submitted short message(s) for later
+         * use. In case of a ReplaceSm, QuerySm, CancelSm and DataSm this header
+         * value is a String. In case of a SubmitSm or SubmitMultiSm this header
+         * value is a List. Consumer: only for smsc DeliveryReceipt and DataSm
+         * The message ID allocated to the message by the SMSC when originally
+         * submitted.
+         * 
+         * The option is a: {@code String or List<String>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppId}.
+         */
+        public String smppId() {
+            return "SmppId";
+        }
+
+        /**
+         * The message date.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppMessageState}.
+         */
+        public String smppMessageState() {
+            return "SmppMessageState";
+        }
+
+        /**
+         * Identifies the type of an incoming message: AlertNotification: an
+         * SMSC alert notification, DataSm: an SMSC data short message,
+         * DeliveryReceipt: an SMSC delivery receipt, DeliverSm: an SMSC deliver
+         * short message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppMessageType}.
+         */
+        public String smppMessageType() {
+            return "SmppMessageType";
+        }
+
+        /**
+         * only for SubmitSm and SubmitMulti Allows the originating SME to
+         * assign a priority level to the short message. Use the URI option
+         * priorityFlag settings above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppPriorityFlag}.
+         */
+        public String smppPriorityFlag() {
+            return "SmppPriorityFlag";
+        }
+
+        /**
+         * The protocol id.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppProtocolId}.
+         */
+        public String smppProtocolId() {
+            return "SmppProtocolId";
+        }
+
+        /**
+         * Producer: only for SubmitSm, ReplaceSm, SubmitMulti and DataSm Is
+         * used to request an SMSC delivery receipt and/or SME originated
+         * acknowledgements. Use the URI option registeredDelivery settings
+         * above. Consumer: only for DataSm Is used to request an delivery
+         * receipt and/or SME originated acknowledgements. Same values as in
+         * Producer header list above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppRegisteredDelivery}.
+         */
+        public String smppRegisteredDelivery() {
+            return "SmppRegisteredDelivery";
+        }
+
+        /**
+         * only for SubmitSm, SubmitMulti Is used to request the SMSC delivery
+         * receipt only on the last segment of multi-segment (long) messages.
+         * Use the URI option singleDLR settings above.
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppSingleDLR}.
+         */
+        public String smppSingleDLR() {
+            return "SmppSingleDLR";
+        }
+
+        /**
+         * only for SubmitSm and SubmitMulti The replace if present flag
+         * parameter is used to request the SMSC to replace a previously
+         * submitted message, that is still pending delivery. The SMSC will
+         * replace an existing message provided that the source address,
+         * destination address and service type match the same fields in the new
+         * message. The following values are defined: 0, Don't replace and 1,
+         * Replace.
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppReplaceIfPresentFlag}.
+         */
+        public String smppReplaceIfPresentFlag() {
+            return "SmppReplaceIfPresentFlag";
+        }
+
+        /**
+         * Producer: only for SubmitSm, SubmitMulti and ReplaceSm This parameter
+         * specifies the scheduled time at which the message delivery should be
+         * first attempted. It defines either the absolute date and time or
+         * relative time from the current SMSC time at which delivery of this
+         * message will be attempted by the SMSC. It can be specified in either
+         * absolute time format or relative time format. The encoding of a time
+         * format is specified in chapter 7.1.1. in the smpp specification v3.4.
+         * Consumer: only for DeliverSm: This parameter specifies the scheduled
+         * time at which the message delivery should be first attempted. It
+         * defines either the absolute date and time or relative time from the
+         * current SMSC time at which delivery of this message will be attempted
+         * by the SMSC. It can be specified in either absolute time format or
+         * relative time format. The encoding of a time format is specified in
+         * Section 7.1.1. in the smpp specification v3.4.
+         * 
+         * The option is a: {@code Date} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppScheduleDeliveryTime}.
+         */
+        public String smppScheduleDeliveryTime() {
+            return "SmppScheduleDeliveryTime";
+        }
+
+        /**
+         * only for SubmitSm and SubmitMultiSm The total number of messages
+         * which has been sent.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppSentMessageCount}.
+         */
+        public String smppSentMessageCount() {
+            return "SmppSentMessageCount";
+        }
+
+        /**
+         * only for AlertNotification, DeliverSm and DataSm A sequence number
+         * allows a response PDU to be correlated with a request PDU. The
+         * associated SMPP response PDU must preserve this field.
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppSequenceNumber}.
+         */
+        public String smppSequenceNumber() {
+            return "SmppSequenceNumber";
+        }
+
+        /**
+         * Producer: The service type parameter can be used to indicate the SMS
+         * Application service associated with the message. Use the URI option
+         * serviceType settings above. Consumer: only for DeliverSm and DataSm
+         * The service type parameter indicates the SMS Application service
+         * associated with the message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppServiceType}.
+         */
+        public String smppServiceType() {
+            return "SmppServiceType";
+        }
+
+        /**
+         * Producer: Defines the address of SME (Short Message Entity) which
+         * originated this message. Consumer: Only for AlertNotification,
+         * DeliverSm and DataSm Defines the address of SME (Short Message
+         * Entity) which originated this message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppSourceAddr}.
+         */
+        public String smppSourceAddr() {
+            return "SmppSourceAddr";
+        }
+
+        /**
+         * Producer: Defines the numeric plan indicator (NPI) to be used in the
+         * SME originator address parameters. Use the URI option sourceAddrNpi
+         * values defined above. Consumer: only for AlertNotification and DataSm
+         * Defines the numeric plan indicator (NPI) to be used in the SME
+         * originator address parameters. Use the URI option sourceAddrNpi
+         * values defined above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppSourceAddrNpi}.
+         */
+        public String smppSourceAddrNpi() {
+            return "SmppSourceAddrNpi";
+        }
+
+        /**
+         * Producer: Defines the type of number (TON) to be used in the SME
+         * originator address parameters. Use the sourceAddrTon URI option
+         * values defined above. Consumer: only for AlertNotification and DataSm
+         * Defines the type of number (TON) to be used in the SME originator
+         * address parameters. Use the sourceAddrTon URI option values defined
+         * above.
+         * 
+         * The option is a: {@code Byte} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppSourceAddrTon}.
+         */
+        public String smppSourceAddrTon() {
+            return "SmppSourceAddrTon";
+        }
+
+        /**
+         * only for smsc DeliveryReceipt Number of short messages originally
+         * submitted. This is only relevant when the original message was
+         * submitted to a distribution list.The value is padded with leading
+         * zeros if necessary.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppSubmitted}.
+         */
+        public String smppSubmitted() {
+            return "SmppSubmitted";
+        }
+
+        /**
+         * only for smsc DeliveryReceipt The time and date at which the short
+         * message was submitted. In the case of a message which has been
+         * replaced, this is the date that the original message was replaced.
+         * The format is as follows: YYMMDDhhmm.
+         * 
+         * The option is a: {@code Date} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppSubmitDate}.
+         */
+        public String smppSubmitDate() {
+            return "SmppSubmitDate";
+        }
+
+        /**
+         * The system id.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppSystemId}.
+         */
+        public String smppSystemId() {
+            return "SmppSystemId";
+        }
+
+        /**
+         * The password.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppPassword}.
+         */
+        public String smppPassword() {
+            return "SmppPassword";
+        }
+
+        /**
+         * Producer: only for SubmitSm, SubmitMulti and ReplaceSm The validity
+         * period parameter indicates the SMSC expiration time, after which the
+         * message should be discarded if not delivered to the destination. If
+         * it's provided as Date, it's interpreted as absolute time or relative
+         * time format if you provide it as String as specified in chapter 7.1.1
+         * in the smpp specification v3.4. Consumer: only for DeliverSm The
+         * validity period parameter indicates the SMSC expiration time, after
+         * which the message should be discarded if not delivered to the
+         * destination. It can be defined in absolute time format or relative
+         * time format. The encoding of absolute and relative time format is
+         * specified in Section 7.1.1 in the smpp specification v3.4.
+         * 
+         * The option is a: {@code String or Date} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppValidityPeriod}.
+         */
+        public String smppValidityPeriod() {
+            return "SmppValidityPeriod";
+        }
+
+        /**
+         * The optional parameters by name. Deprecation note: Use
+         * CamelSmppOptionalParameter instead.
+         * 
+         * The option is a: {@code Map<String, Object>} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SmppOptionalParameters}.
+         */
+        public String smppOptionalParameters() {
+            return "SmppOptionalParameters";
+        }
+
+        /**
+         * Producer: only for SubmitSm, SubmitMulti and DataSm The optional
+         * parameter which are send to the SMSC. The value is converted in the
+         * following way: String -
+         * org.jsmpp.bean.OptionalParameter.COctetString, byte -
+         * org.jsmpp.bean.OptionalParameter.OctetString, Byte -
+         * org.jsmpp.bean.OptionalParameter.Byte, Integer -
+         * org.jsmpp.bean.OptionalParameter.Int, Short -
+         * org.jsmpp.bean.OptionalParameter.Short, null -
+         * org.jsmpp.bean.OptionalParameter.Null Consumer: only for DeliverSm
+         * The optional parameters send back by the SMSC. The key is the Short
+         * code for the optional parameter. The value is converted in the
+         * following way: org.jsmpp.bean.OptionalParameter.COctetString -
+         * String, org.jsmpp.bean.OptionalParameter.OctetString - byte,
+         * org.jsmpp.bean.OptionalParameter.Byte - Byte,
+         * org.jsmpp.bean.OptionalParameter.Int - Integer,
+         * org.jsmpp.bean.OptionalParameter.Short - Short,
+         * org.jsmpp.bean.OptionalParameter.Null - null.
+         * 
+         * The option is a: {@code Map<Short, Object>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code SmppOptionalParameter}.
+         */
+        public String smppOptionalParameter() {
+            return "SmppOptionalParameter";
+        }
+
+        /**
+         * only for SubmitSm, SubmitMulti and DataSm. Specifies the policy for
+         * message splitting for this exchange. Possible values are described in
+         * the endpoint configuration parameter _splittingPolicy_.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code SmppSplittingPolicy}.
+         */
+        public String smppSplittingPolicy() {
+            return "SmppSplittingPolicy";
         }
     }
     static SmppEndpointBuilder endpointBuilder(String componentName, String path) {

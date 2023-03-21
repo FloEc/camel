@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 
 public class FtpConsumerDualDoneFileNameIT extends FtpServerTestSupport {
@@ -37,7 +38,7 @@ public class FtpConsumerDualDoneFileNameIT extends FtpServerTestSupport {
         template.sendBodyAndHeader(getFtpUrl() + "&doneFileName=${file:name}.ready", "Bye World", Exchange.FILE_NAME,
                 "bye.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -49,14 +50,14 @@ public class FtpConsumerDualDoneFileNameIT extends FtpServerTestSupport {
         template.sendBodyAndHeader(getFtpUrl(), "Bye World", Exchange.FILE_NAME, "bye.txt");
 
         // give chance to poll 2nd file but it lacks the done file
-        assertMockEndpointsSatisfied(1, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 1, TimeUnit.SECONDS);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl() + "&doneFileName=${file:name}.ready").convertBodyTo(String.class).to("mock:result");
             }
         };

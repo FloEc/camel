@@ -19,29 +19,31 @@ public class EventbridgeEndpointUriFactory extends org.apache.camel.support.comp
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
         Set<String> props = new HashSet<>(16);
-        props.add("proxyProtocol");
-        props.add("secretKey");
-        props.add("uriEndpointOverride");
-        props.add("useDefaultCredentialsProvider");
+        props.add("accessKey");
         props.add("eventPatternFile");
+        props.add("eventbridgeClient");
+        props.add("eventbusNameOrArn");
+        props.add("lazyStartProducer");
+        props.add("operation");
+        props.add("overrideEndpoint");
         props.add("pojoRequest");
         props.add("proxyHost");
-        props.add("trustAllCertificates");
         props.add("proxyPort");
-        props.add("lazyStartProducer");
-        props.add("eventbusNameOrArn");
-        props.add("accessKey");
-        props.add("overrideEndpoint");
-        props.add("eventbridgeClient");
+        props.add("proxyProtocol");
         props.add("region");
-        props.add("operation");
+        props.add("secretKey");
+        props.add("trustAllCertificates");
+        props.add("uriEndpointOverride");
+        props.add("useDefaultCredentialsProvider");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         Set<String> secretProps = new HashSet<>(2);
-        secretProps.add("secretKey");
         secretProps.add("accessKey");
+        secretProps.add("secretKey");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        MULTI_VALUE_PREFIXES = Collections.emptySet();
     }
 
     @Override
@@ -69,6 +71,11 @@ public class EventbridgeEndpointUriFactory extends org.apache.camel.support.comp
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

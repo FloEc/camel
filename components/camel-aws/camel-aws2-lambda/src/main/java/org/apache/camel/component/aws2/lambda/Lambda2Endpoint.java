@@ -22,6 +22,8 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.component.aws2.lambda.client.Lambda2ClientFactory;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.impl.health.ComponentsHealthCheckRepository;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
@@ -34,10 +36,14 @@ import software.amazon.awssdk.services.lambda.LambdaClient;
  * Manage and invoke AWS Lambda functions using AWS SDK version 2.x.
  */
 @UriEndpoint(firstVersion = "3.2.0", scheme = "aws2-lambda", title = "AWS Lambda", syntax = "aws2-lambda:function",
-             producerOnly = true, category = { Category.CLOUD, Category.COMPUTING, Category.SERVERLESS })
+             producerOnly = true, category = { Category.CLOUD, Category.COMPUTING, Category.SERVERLESS },
+             headersClass = Lambda2Constants.class)
 public class Lambda2Endpoint extends DefaultEndpoint {
 
     private LambdaClient awsLambdaClient;
+
+    private ComponentsHealthCheckRepository healthCheckRepository;
+    private Lambda2ClientHealthCheck clientHealthCheck;
 
     @UriPath
     @Metadata(required = true)
@@ -77,10 +83,24 @@ public class Lambda2Endpoint extends DefaultEndpoint {
         awsLambdaClient = configuration.getAwsLambdaClient() != null
                 ? configuration.getAwsLambdaClient()
                 : Lambda2ClientFactory.getLambdaClient(configuration).getLambdaClient();
+
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(getCamelContext(),
+                ComponentsHealthCheckRepository.REPOSITORY_ID, ComponentsHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            // Do not register the health check until we resolve CAMEL-18992
+            // clientHealthCheck = new Lambda2ClientHealthCheck(this, getId());
+            // healthCheckRepository.addHealthCheck(clientHealthCheck);
+        }
     }
 
     @Override
     public void doStop() throws Exception {
+        if (healthCheckRepository != null && clientHealthCheck != null) {
+            healthCheckRepository.removeHealthCheck(clientHealthCheck);
+            clientHealthCheck = null;
+        }
+
         if (ObjectHelper.isEmpty(configuration.getAwsLambdaClient())) {
             if (awsLambdaClient != null) {
                 awsLambdaClient.close();

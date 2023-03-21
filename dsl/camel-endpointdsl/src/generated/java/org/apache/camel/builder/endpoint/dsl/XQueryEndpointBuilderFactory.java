@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -94,8 +94,8 @@ public interface XQueryEndpointBuilderFactory {
          * Allows to control which namespace prefixes to use for a set of
          * namespace mappings.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -112,8 +112,8 @@ public interface XQueryEndpointBuilderFactory {
          * namespace mappings.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -123,6 +123,22 @@ public interface XQueryEndpointBuilderFactory {
         default XQueryEndpointConsumerBuilder namespacePrefixes(
                 String namespacePrefixes) {
             doSetProperty("namespacePrefixes", namespacePrefixes);
+            return this;
+        }
+        /**
+         * To use a Camel Exchange property as the input source instead of
+         * Message body. It has a lower precedent than the name of header if
+         * both are set.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param propertyName the value to set
+         * @return the dsl builder
+         */
+        default XQueryEndpointConsumerBuilder propertyName(String propertyName) {
+            doSetProperty("propertyName", propertyName);
             return this;
         }
         /**
@@ -162,8 +178,7 @@ public interface XQueryEndpointBuilderFactory {
          * What output result to use defined as a class.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -179,8 +194,7 @@ public interface XQueryEndpointBuilderFactory {
          * What output result to use defined as a class.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -222,51 +236,6 @@ public interface XQueryEndpointBuilderFactory {
         default XQueryEndpointConsumerBuilder stripsAllWhiteSpace(
                 String stripsAllWhiteSpace) {
             doSetProperty("stripsAllWhiteSpace", stripsAllWhiteSpace);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default XQueryEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default XQueryEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -644,8 +613,8 @@ public interface XQueryEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -666,8 +635,8 @@ public interface XQueryEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -790,6 +759,51 @@ public interface XQueryEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default XQueryEndpointConsumerBuilder basic() {
             return (XQueryEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedXQueryEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedXQueryEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -934,8 +948,8 @@ public interface XQueryEndpointBuilderFactory {
         /**
          * To set custom Saxon configuration properties.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -951,8 +965,8 @@ public interface XQueryEndpointBuilderFactory {
          * To set custom Saxon configuration properties.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -999,8 +1013,8 @@ public interface XQueryEndpointBuilderFactory {
         /**
          * Additional parameters.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1016,8 +1030,8 @@ public interface XQueryEndpointBuilderFactory {
          * Additional parameters.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1153,8 +1167,8 @@ public interface XQueryEndpointBuilderFactory {
          * Allows to control which namespace prefixes to use for a set of
          * namespace mappings.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1171,8 +1185,8 @@ public interface XQueryEndpointBuilderFactory {
          * namespace mappings.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1182,6 +1196,22 @@ public interface XQueryEndpointBuilderFactory {
         default XQueryEndpointProducerBuilder namespacePrefixes(
                 String namespacePrefixes) {
             doSetProperty("namespacePrefixes", namespacePrefixes);
+            return this;
+        }
+        /**
+         * To use a Camel Exchange property as the input source instead of
+         * Message body. It has a lower precedent than the name of header if
+         * both are set.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param propertyName the value to set
+         * @return the dsl builder
+         */
+        default XQueryEndpointProducerBuilder propertyName(String propertyName) {
+            doSetProperty("propertyName", propertyName);
             return this;
         }
         /**
@@ -1221,8 +1251,7 @@ public interface XQueryEndpointBuilderFactory {
          * What output result to use defined as a class.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1238,8 +1267,7 @@ public interface XQueryEndpointBuilderFactory {
          * What output result to use defined as a class.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1283,6 +1311,17 @@ public interface XQueryEndpointBuilderFactory {
             doSetProperty("stripsAllWhiteSpace", stripsAllWhiteSpace);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the XQuery component.
+     */
+    public interface AdvancedXQueryEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default XQueryEndpointProducerBuilder basic() {
+            return (XQueryEndpointProducerBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -1297,12 +1336,12 @@ public interface XQueryEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default XQueryEndpointProducerBuilder lazyStartProducer(
+        default AdvancedXQueryEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -1322,26 +1361,15 @@ public interface XQueryEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default XQueryEndpointProducerBuilder lazyStartProducer(
+        default AdvancedXQueryEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint producers for the XQuery component.
-     */
-    public interface AdvancedXQueryEndpointProducerBuilder
-            extends
-                EndpointProducerBuilder {
-        default XQueryEndpointProducerBuilder basic() {
-            return (XQueryEndpointProducerBuilder) this;
         }
         /**
          * To use a custom Saxon configuration.
@@ -1378,8 +1406,8 @@ public interface XQueryEndpointBuilderFactory {
         /**
          * To set custom Saxon configuration properties.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1395,8 +1423,8 @@ public interface XQueryEndpointBuilderFactory {
          * To set custom Saxon configuration properties.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1443,8 +1471,8 @@ public interface XQueryEndpointBuilderFactory {
         /**
          * Additional parameters.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1460,8 +1488,8 @@ public interface XQueryEndpointBuilderFactory {
          * Additional parameters.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1598,8 +1626,8 @@ public interface XQueryEndpointBuilderFactory {
          * Allows to control which namespace prefixes to use for a set of
          * namespace mappings.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1616,8 +1644,8 @@ public interface XQueryEndpointBuilderFactory {
          * namespace mappings.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1626,6 +1654,22 @@ public interface XQueryEndpointBuilderFactory {
          */
         default XQueryEndpointBuilder namespacePrefixes(String namespacePrefixes) {
             doSetProperty("namespacePrefixes", namespacePrefixes);
+            return this;
+        }
+        /**
+         * To use a Camel Exchange property as the input source instead of
+         * Message body. It has a lower precedent than the name of header if
+         * both are set.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param propertyName the value to set
+         * @return the dsl builder
+         */
+        default XQueryEndpointBuilder propertyName(String propertyName) {
+            doSetProperty("propertyName", propertyName);
             return this;
         }
         /**
@@ -1665,8 +1709,7 @@ public interface XQueryEndpointBuilderFactory {
          * What output result to use defined as a class.
          * 
          * The option is a:
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1682,8 +1725,7 @@ public interface XQueryEndpointBuilderFactory {
          * What output result to use defined as a class.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.lang.Class&lt;java.lang.Object&gt;&lt;/code&gt;
-         * type.
+         * &lt;code&gt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1773,8 +1815,8 @@ public interface XQueryEndpointBuilderFactory {
         /**
          * To set custom Saxon configuration properties.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1790,8 +1832,8 @@ public interface XQueryEndpointBuilderFactory {
          * To set custom Saxon configuration properties.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1838,8 +1880,8 @@ public interface XQueryEndpointBuilderFactory {
         /**
          * Additional parameters.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1855,8 +1897,8 @@ public interface XQueryEndpointBuilderFactory {
          * Additional parameters.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 

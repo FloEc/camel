@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Store;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.Store;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -68,12 +68,12 @@ public class RawMailMessageTest extends CamelTestSupport {
 
         getMockEndpoint("mock:mail").expectedMessageCount(1);
         template.sendBodyAndHeaders("smtp://davsclaus@apache.org", body, map);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = getMockEndpoint("mock:mail").getReceivedExchanges().get(0);
 
         // START SNIPPET: e1
-        // get access to the raw javax.mail.Message as shown below
+        // get access to the raw jakarta.mail.Message as shown below
         Message javaMailMessage = exchange.getIn(MailMessage.class).getMessage();
         assertNotNull(javaMailMessage);
 
@@ -97,8 +97,9 @@ public class RawMailMessageTest extends CamelTestSupport {
 
         MockEndpoint mock = getMockEndpoint("mock://rawMessage" + type);
         mock.expectedMessageCount(1);
-        mock.expectedBodyReceived().body().isNotNull();
-        assertMockEndpointsSatisfied();
+        mock.message(0).body().isNotNull();
+
+        MockEndpoint.assertIsSatisfied(context);
 
         Message mailMessage = mock.getExchanges().get(0).getIn().getBody(Message.class);
         assertNotNull("mail subject should not be null", mailMessage.getSubject());
@@ -125,8 +126,9 @@ public class RawMailMessageTest extends CamelTestSupport {
 
         MockEndpoint mock = getMockEndpoint("mock://normalMessage" + type);
         mock.expectedMessageCount(1);
-        mock.expectedBodyReceived().body().isNotNull();
-        assertMockEndpointsSatisfied();
+        mock.message(0).body().isNotNull();
+
+        MockEndpoint.assertIsSatisfied(context);
 
         String body = mock.getExchanges().get(0).getIn().getBody(String.class);
         MimeMessage mm = new MimeMessage(null, new ByteArrayInputStream(body.getBytes()));
@@ -157,9 +159,9 @@ public class RawMailMessageTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://davsclaus@apache.org").to("mock:mail");
 
                 from("pop3://jonesRawPop3@localhost?password=secret&initialDelay=100&delay=100&delete=true&mapMailMessage=false")

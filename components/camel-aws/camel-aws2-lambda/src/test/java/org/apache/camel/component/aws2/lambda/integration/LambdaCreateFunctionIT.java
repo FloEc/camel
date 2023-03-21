@@ -64,7 +64,7 @@ public class LambdaCreateFunctionIT extends Aws2LambdaBase {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         CreateFunctionResponse resp = result.getExchanges().get(0).getIn().getBody(CreateFunctionResponse.class);
         assertEquals("GetHelloWithName", resp.functionName());
         assertEquals("Hello with node.js on Lambda", resp.description());
@@ -73,10 +73,10 @@ public class LambdaCreateFunctionIT extends Aws2LambdaBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint = "aws2-lambda://GetHelloWithName?operation=createFunction";
                 from("direct:createFunction").to(awsEndpoint).to("mock:result");
             }

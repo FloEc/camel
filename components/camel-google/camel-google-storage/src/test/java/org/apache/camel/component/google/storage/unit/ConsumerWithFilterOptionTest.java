@@ -38,10 +38,10 @@ public class ConsumerWithFilterOptionTest extends GoogleCloudStorageBaseTest {
     private MockEndpoint consumedObjects;
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
 
                 String endpoint = "google-storage://myCamelBucket?autoCreateBucket=true";
 
@@ -57,8 +57,8 @@ public class ConsumerWithFilterOptionTest extends GoogleCloudStorageBaseTest {
                      + "&deleteAfterRead=true"
                      + "&includeBody=true"
                      + "&filter=.*.csv")
-                             .startupOrder(2)
-                             .to("mock:consumedObjects");
+                        .startupOrder(2)
+                        .to("mock:consumedObjects");
 
             }
         };
@@ -78,7 +78,7 @@ public class ConsumerWithFilterOptionTest extends GoogleCloudStorageBaseTest {
         result.expectedMessageCount(totalNumberOfFiles);
         consumedObjects.expectedMessageCount(numberOfFilteredFiles);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         context.stop();
 
@@ -98,7 +98,7 @@ public class ConsumerWithFilterOptionTest extends GoogleCloudStorageBaseTest {
         result.expectedMessageCount(totalNumberOfFiles);
         consumedObjects.expectedMessageCount(numberOfFilteredFiles);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         context.stop();
 

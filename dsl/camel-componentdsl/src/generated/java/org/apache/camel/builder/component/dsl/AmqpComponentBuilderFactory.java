@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -70,8 +70,8 @@ public interface AmqpComponentBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -79,7 +79,7 @@ public interface AmqpComponentBuilderFactory {
          * @return the dsl builder
          */
         default AmqpComponentBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -141,7 +141,7 @@ public interface AmqpComponentBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -606,6 +606,33 @@ public interface AmqpComponentBuilderFactory {
             return this;
         }
         /**
+         * The consumer type of the reply consumer (when doing request/reply),
+         * which can be one of: Simple, Default, or Custom. The consumer type
+         * determines which Spring JMS listener to use. Default will use
+         * org.springframework.jms.listener.DefaultMessageListenerContainer,
+         * Simple will use
+         * org.springframework.jms.listener.SimpleMessageListenerContainer. When
+         * Custom is specified, the MessageListenerContainerFactory defined by
+         * the messageListenerContainerFactory option will determine what
+         * org.springframework.jms.listener.AbstractMessageListenerContainer to
+         * use.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.jms.ConsumerType&lt;/code&gt;
+         * type.
+         * 
+         * Default: Default
+         * Group: consumer (advanced)
+         * 
+         * @param replyToConsumerType the value to set
+         * @return the dsl builder
+         */
+        default AmqpComponentBuilder replyToConsumerType(
+                org.apache.camel.component.jms.ConsumerType replyToConsumerType) {
+            doSetProperty("replyToConsumerType", replyToConsumerType);
+            return this;
+        }
+        /**
          * Whether a JMS consumer is allowed to send a reply message to the same
          * destination that the consumer is using to consume from. This prevents
          * an endless loop by consuming and sending back the same message to
@@ -659,8 +686,8 @@ public interface AmqpComponentBuilderFactory {
         }
         /**
          * Specifies the delivery mode to be used. Possible values are those
-         * defined by javax.jms.DeliveryMode. NON_PERSISTENT = 1 and PERSISTENT
-         * = 2.
+         * defined by jakarta.jms.DeliveryMode. NON_PERSISTENT = 1 and
+         * PERSISTENT = 2.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
@@ -1316,8 +1343,8 @@ public interface AmqpComponentBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1325,7 +1352,7 @@ public interface AmqpComponentBuilderFactory {
          * @return the dsl builder
          */
         default AmqpComponentBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -1410,7 +1437,7 @@ public interface AmqpComponentBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1426,8 +1453,8 @@ public interface AmqpComponentBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -1445,7 +1472,7 @@ public interface AmqpComponentBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option is a:
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -1462,7 +1489,7 @@ public interface AmqpComponentBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option is a:
@@ -1639,18 +1666,18 @@ public interface AmqpComponentBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1961,7 +1988,7 @@ public interface AmqpComponentBuilderFactory {
                 Object value) {
             switch (name) {
             case "clientId": getOrCreateConfiguration((AMQPComponent) component).setClientId((java.lang.String) value); return true;
-            case "connectionFactory": getOrCreateConfiguration((AMQPComponent) component).setConnectionFactory((javax.jms.ConnectionFactory) value); return true;
+            case "connectionFactory": getOrCreateConfiguration((AMQPComponent) component).setConnectionFactory((jakarta.jms.ConnectionFactory) value); return true;
             case "disableReplyTo": getOrCreateConfiguration((AMQPComponent) component).setDisableReplyTo((boolean) value); return true;
             case "durableSubscriptionName": getOrCreateConfiguration((AMQPComponent) component).setDurableSubscriptionName((java.lang.String) value); return true;
             case "includeAmqpAnnotations": ((AMQPComponent) component).setIncludeAmqpAnnotations((boolean) value); return true;
@@ -1988,6 +2015,7 @@ public interface AmqpComponentBuilderFactory {
             case "eagerLoadingOfProperties": getOrCreateConfiguration((AMQPComponent) component).setEagerLoadingOfProperties((boolean) value); return true;
             case "eagerPoisonBody": getOrCreateConfiguration((AMQPComponent) component).setEagerPoisonBody((java.lang.String) value); return true;
             case "exposeListenerSession": getOrCreateConfiguration((AMQPComponent) component).setExposeListenerSession((boolean) value); return true;
+            case "replyToConsumerType": getOrCreateConfiguration((AMQPComponent) component).setReplyToConsumerType((org.apache.camel.component.jms.ConsumerType) value); return true;
             case "replyToSameDestinationAllowed": getOrCreateConfiguration((AMQPComponent) component).setReplyToSameDestinationAllowed((boolean) value); return true;
             case "taskExecutor": getOrCreateConfiguration((AMQPComponent) component).setTaskExecutor((org.springframework.core.task.TaskExecutor) value); return true;
             case "deliveryDelay": getOrCreateConfiguration((AMQPComponent) component).setDeliveryDelay((long) value); return true;
@@ -2025,7 +2053,7 @@ public interface AmqpComponentBuilderFactory {
             case "configuration": ((AMQPComponent) component).setConfiguration((org.apache.camel.component.jms.JmsConfiguration) value); return true;
             case "destinationResolver": getOrCreateConfiguration((AMQPComponent) component).setDestinationResolver((org.springframework.jms.support.destination.DestinationResolver) value); return true;
             case "errorHandler": getOrCreateConfiguration((AMQPComponent) component).setErrorHandler((org.springframework.util.ErrorHandler) value); return true;
-            case "exceptionListener": getOrCreateConfiguration((AMQPComponent) component).setExceptionListener((javax.jms.ExceptionListener) value); return true;
+            case "exceptionListener": getOrCreateConfiguration((AMQPComponent) component).setExceptionListener((jakarta.jms.ExceptionListener) value); return true;
             case "idleConsumerLimit": getOrCreateConfiguration((AMQPComponent) component).setIdleConsumerLimit((int) value); return true;
             case "idleTaskExecutionLimit": getOrCreateConfiguration((AMQPComponent) component).setIdleTaskExecutionLimit((int) value); return true;
             case "includeAllJMSXProperties": getOrCreateConfiguration((AMQPComponent) component).setIncludeAllJMSXProperties((boolean) value); return true;

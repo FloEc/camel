@@ -30,12 +30,12 @@ public final class Athena2ClientFactory {
 
     /**
      * Return the correct AWS Athena client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               AthenaClient
      */
     public static Athena2InternalClient getAWSAthenaClient(Athena2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new Athena2ClientIAMOptimizedImpl(configuration) : new Athena2ClientStandardImpl(configuration);
     }
 }

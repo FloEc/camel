@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -142,51 +142,6 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default ServerEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default ServerEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
          * Parameter W - Acknowledgment window.
          * 
          * The option is a: &lt;code&gt;short&lt;/code&gt; type.
@@ -220,8 +175,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The common ASDU address size. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The common ASDU address size. May be either SIZE_1 or SIZE_2.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.ASDUAddressType&lt;/code&gt; type.
@@ -237,8 +191,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The common ASDU address size. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The common ASDU address size. May be either SIZE_1 or SIZE_2.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.ASDUAddressType&lt;/code&gt; type.
@@ -254,8 +207,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The cause of transmission type. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The cause of transmission type. May be either SIZE_1 or SIZE_2.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.CauseOfTransmissionType&lt;/code&gt; type.
@@ -271,8 +223,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The cause of transmission type. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The cause of transmission type. May be either SIZE_1 or SIZE_2.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.CauseOfTransmissionType&lt;/code&gt; type.
@@ -288,8 +239,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The information address size. &lt;p&gt; May be either SIZE_1, SIZE_2
-         * or SIZE_3.
+         * The information address size. May be either SIZE_1, SIZE_2 or SIZE_3.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.InformationObjectAddressType&lt;/code&gt; type.
@@ -305,8 +255,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The information address size. &lt;p&gt; May be either SIZE_1, SIZE_2
-         * or SIZE_3.
+         * The information address size. May be either SIZE_1, SIZE_2 or SIZE_3.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.InformationObjectAddressType&lt;/code&gt; type.
@@ -575,7 +524,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The timezone to use. &lt;p&gt; May be any Java time zone string.
+         * The timezone to use. May be any Java time zone string.
          * 
          * The option is a: &lt;code&gt;java.util.TimeZone&lt;/code&gt; type.
          * 
@@ -590,7 +539,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The timezone to use. &lt;p&gt; May be any Java time zone string.
+         * The timezone to use. May be any Java time zone string.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.util.TimeZone&lt;/code&gt; type.
@@ -630,6 +579,51 @@ public interface ServerEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default ServerEndpointConsumerBuilder basic() {
             return (ServerEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServerEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServerEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -810,55 +804,6 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default ServerEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default ServerEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * Parameter W - Acknowledgment window.
          * 
          * The option is a: &lt;code&gt;short&lt;/code&gt; type.
@@ -892,8 +837,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The common ASDU address size. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The common ASDU address size. May be either SIZE_1 or SIZE_2.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.ASDUAddressType&lt;/code&gt; type.
@@ -909,8 +853,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The common ASDU address size. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The common ASDU address size. May be either SIZE_1 or SIZE_2.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.ASDUAddressType&lt;/code&gt; type.
@@ -926,8 +869,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The cause of transmission type. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The cause of transmission type. May be either SIZE_1 or SIZE_2.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.CauseOfTransmissionType&lt;/code&gt; type.
@@ -943,8 +885,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The cause of transmission type. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The cause of transmission type. May be either SIZE_1 or SIZE_2.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.CauseOfTransmissionType&lt;/code&gt; type.
@@ -960,8 +901,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The information address size. &lt;p&gt; May be either SIZE_1, SIZE_2
-         * or SIZE_3.
+         * The information address size. May be either SIZE_1, SIZE_2 or SIZE_3.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.InformationObjectAddressType&lt;/code&gt; type.
@@ -977,8 +917,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The information address size. &lt;p&gt; May be either SIZE_1, SIZE_2
-         * or SIZE_3.
+         * The information address size. May be either SIZE_1, SIZE_2 or SIZE_3.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.InformationObjectAddressType&lt;/code&gt; type.
@@ -1247,7 +1186,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The timezone to use. &lt;p&gt; May be any Java time zone string.
+         * The timezone to use. May be any Java time zone string.
          * 
          * The option is a: &lt;code&gt;java.util.TimeZone&lt;/code&gt; type.
          * 
@@ -1262,7 +1201,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The timezone to use. &lt;p&gt; May be any Java time zone string.
+         * The timezone to use. May be any Java time zone string.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.util.TimeZone&lt;/code&gt; type.
@@ -1302,6 +1241,55 @@ public interface ServerEndpointBuilderFactory {
                 EndpointProducerBuilder {
         default ServerEndpointProducerBuilder basic() {
             return (ServerEndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServerEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServerEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
     }
 
@@ -1440,8 +1428,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The common ASDU address size. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The common ASDU address size. May be either SIZE_1 or SIZE_2.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.ASDUAddressType&lt;/code&gt; type.
@@ -1457,8 +1444,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The common ASDU address size. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The common ASDU address size. May be either SIZE_1 or SIZE_2.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.ASDUAddressType&lt;/code&gt; type.
@@ -1473,8 +1459,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The cause of transmission type. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The cause of transmission type. May be either SIZE_1 or SIZE_2.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.CauseOfTransmissionType&lt;/code&gt; type.
@@ -1490,8 +1475,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The cause of transmission type. &lt;p&gt; May be either SIZE_1 or
-         * SIZE_2.
+         * The cause of transmission type. May be either SIZE_1 or SIZE_2.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.CauseOfTransmissionType&lt;/code&gt; type.
@@ -1507,8 +1491,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The information address size. &lt;p&gt; May be either SIZE_1, SIZE_2
-         * or SIZE_3.
+         * The information address size. May be either SIZE_1, SIZE_2 or SIZE_3.
          * 
          * The option is a:
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.InformationObjectAddressType&lt;/code&gt; type.
@@ -1524,8 +1507,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The information address size. &lt;p&gt; May be either SIZE_1, SIZE_2
-         * or SIZE_3.
+         * The information address size. May be either SIZE_1, SIZE_2 or SIZE_3.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.eclipse.neoscada.protocol.iec60870.InformationObjectAddressType&lt;/code&gt; type.
@@ -1789,7 +1771,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The timezone to use. &lt;p&gt; May be any Java time zone string.
+         * The timezone to use. May be any Java time zone string.
          * 
          * The option is a: &lt;code&gt;java.util.TimeZone&lt;/code&gt; type.
          * 
@@ -1804,7 +1786,7 @@ public interface ServerEndpointBuilderFactory {
             return this;
         }
         /**
-         * The timezone to use. &lt;p&gt; May be any Java time zone string.
+         * The timezone to use. May be any Java time zone string.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.util.TimeZone&lt;/code&gt; type.
@@ -1857,6 +1839,20 @@ public interface ServerEndpointBuilderFactory {
          * Since: 2.20
          * Maven coordinates: org.apache.camel:camel-iec60870
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default ServerHeaderNameBuilder iec60870Server() {
+            return ServerHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * IEC 60870 Server (camel-iec60870)
+         * IEC 60870 supervisory control and data acquisition (SCADA) server
+         * using NeoSCADA implementation.
+         * 
+         * Category: iot
+         * Since: 2.20
+         * Maven coordinates: org.apache.camel:camel-iec60870
+         * 
          * Syntax: <code>iec60870-server:uriPath</code>
          * 
          * Path parameter: uriPath (required)
@@ -1891,6 +1887,98 @@ public interface ServerEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return ServerEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the IEC 60870 Server component.
+     */
+    public static class ServerHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final ServerHeaderNameBuilder INSTANCE = new ServerHeaderNameBuilder();
+
+        /**
+         * The address as ObjectAddress.
+         * 
+         * The option is a: {@code
+         * org.apache.camel.component.iec60870.ObjectAddress} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code address}.
+         */
+        public String address() {
+            return "address";
+        }
+
+        /**
+         * The value.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code value}.
+         */
+        public String value() {
+            return "value";
+        }
+
+        /**
+         * The address as InformationObjectAddress.
+         * 
+         * The option is a: {@code
+         * org.eclipse.neoscada.protocol.iec60870.asdu.types.InformationObjectAddress} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code informationObjectAddress}.
+         */
+        public String informationObjectAddress() {
+            return "informationObjectAddress";
+        }
+
+        /**
+         * The ASDU header.
+         * 
+         * The option is a: {@code
+         * org.eclipse.neoscada.protocol.iec60870.asdu.ASDUHeader} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code asduHeader}.
+         */
+        public String asduHeader() {
+            return "asduHeader";
+        }
+
+        /**
+         * The type.
+         * 
+         * The option is a: {@code byte} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code type}.
+         */
+        public String type() {
+            return "type";
+        }
+
+        /**
+         * Is execute.
+         * 
+         * The option is a: {@code boolean} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code execute}.
+         */
+        public String execute() {
+            return "execute";
         }
     }
     static ServerEndpointBuilder endpointBuilder(

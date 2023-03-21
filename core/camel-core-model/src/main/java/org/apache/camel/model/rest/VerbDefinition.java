@@ -19,106 +19,75 @@ package org.apache.camel.model.rest;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlTransient;
 
-import org.apache.camel.model.Block;
 import org.apache.camel.model.OptionalIdentifiedDefinition;
-import org.apache.camel.model.OutputNode;
-import org.apache.camel.model.ProcessorDefinition;
-import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.ToDefinition;
-import org.apache.camel.model.ToDynamicDefinition;
 import org.apache.camel.spi.Metadata;
 
 /**
- * Rest command
+ * A rest operation (such as GET, POST etc.)
  */
 @Metadata(label = "rest")
-@XmlRootElement(name = "verb")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition> implements Block, OutputNode {
+public abstract class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition> {
 
-    @XmlAttribute
-    private String method;
-
-    @XmlElementRef
-    private List<RestOperationParamDefinition> params = new ArrayList<>();
+    @XmlTransient
+    private RestDefinition rest;
 
     @XmlElementRef
-    private List<RestOperationResponseMsgDefinition> responseMsgs = new ArrayList<>();
-
+    private List<ParamDefinition> params = new ArrayList<>();
+    @XmlElementRef
+    private List<ResponseMessageDefinition> responseMsgs = new ArrayList<>();
     @XmlElementRef
     private List<SecurityDefinition> security = new ArrayList<>();
 
     @XmlAttribute
-    private String uri;
-
+    private String path;
     @XmlAttribute
     private String consumes;
-
     @XmlAttribute
     private String produces;
-
     @XmlAttribute
-    @Metadata(defaultValue = "auto")
-    private String bindingMode;
-
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean")
+    private String disabled;
     @XmlAttribute
-    private String skipBindingOnErrorCode;
-
-    @XmlAttribute
-    private String clientRequestValidation;
-
-    @XmlAttribute
-    private String enableCORS;
-
-    @XmlAttribute
+    @Metadata(label = "advanced")
     private String type;
-
     @XmlTransient
     private Class<?> typeClass;
-
     @XmlAttribute
+    @Metadata(label = "advanced")
     private String outType;
-
     @XmlTransient
     private Class<?> outTypeClass;
-
-    // used by XML DSL to either select a <to>, <toD>, or <route>
-    // so we need to use the common type OptionalIdentifiedDefinition
-    // must select one of them, and hence why they are all set to required =
-    // true, but the XSD is set to only allow one of the element
-    @XmlElements({
-            @XmlElement(required = true, name = "to", type = ToDefinition.class),
-            @XmlElement(required = true, name = "toD", type = ToDynamicDefinition.class),
-            @XmlElement(required = true, name = "route", type = RouteDefinition.class) })
-    private OptionalIdentifiedDefinition<?> toOrRoute;
-
-    // the Java DSL uses the to or route definition directory
-    @XmlTransient
-    private ToDefinition to;
-    @XmlTransient
-    private ToDynamicDefinition toD;
-    @XmlTransient
-    private RouteDefinition route;
-    @XmlTransient
-    private RestDefinition rest;
     @XmlAttribute
-    private String routeId;
+    @Metadata(defaultValue = "off", enums = "off,auto,json,xml,json_xml")
+    private String bindingMode;
     @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
+    private String skipBindingOnErrorCode;
+    @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
+    private String clientRequestValidation;
+    @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
+    private String enableCORS;
+    @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "true")
     private String apiDocs;
     @XmlAttribute
-    private Boolean deprecated;
-
-    @XmlTransient
-    private Boolean usedForGeneratingNodeId = Boolean.FALSE;
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean", defaultValue = "false")
+    private String deprecated;
+    @XmlAttribute
+    private String routeId;
+    @XmlElement(required = true)
+    private ToDefinition to;
 
     @Override
     public String getShortName() {
@@ -127,58 +96,55 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
 
     @Override
     public String getLabel() {
-        if (method != null) {
-            return method;
-        } else {
-            return "verb";
-        }
+        return "verb";
     }
 
-    @Override
-    public void addOutput(ProcessorDefinition<?> processorDefinition) {
-        if (route == null) {
-            route = new RouteDefinition();
-        }
-
-        route.addOutput(processorDefinition);
-    }
-
-    public Boolean getDeprecated() {
-        // default is not to be deprecated
-        return deprecated != null ? deprecated : Boolean.FALSE;
+    public String getDeprecated() {
+        return deprecated;
     }
 
     /**
-     * Sets deprecated flag in openapi
+     * Marks this rest operation as deprecated in OpenApi documentation.
      */
-    public VerbDefinition deprecated() {
-        this.deprecated = Boolean.TRUE;
-        return this;
-    }
-
-    public void setDeprecated(Boolean deprecated) {
+    public void setDeprecated(String deprecated) {
         this.deprecated = deprecated;
     }
 
-    public List<RestOperationParamDefinition> getParams() {
+    public VerbDefinition deprecated() {
+        this.deprecated = "true";
+        return this;
+    }
+
+    public String getRouteId() {
+        return routeId;
+    }
+
+    /**
+     * Sets the id of the route
+     */
+    public void setRouteId(String routeId) {
+        this.routeId = routeId;
+    }
+
+    public List<ParamDefinition> getParams() {
         return params;
     }
 
     /**
      * To specify the REST operation parameters.
      */
-    public void setParams(List<RestOperationParamDefinition> params) {
+    public void setParams(List<ParamDefinition> params) {
         this.params = params;
     }
 
-    public List<RestOperationResponseMsgDefinition> getResponseMsgs() {
+    public List<ResponseMessageDefinition> getResponseMsgs() {
         return responseMsgs;
     }
 
     /**
      * Sets operation response messages.
      */
-    public void setResponseMsgs(List<RestOperationResponseMsgDefinition> responseMsgs) {
+    public void setResponseMsgs(List<ResponseMessageDefinition> responseMsgs) {
         this.responseMsgs = responseMsgs;
     }
 
@@ -193,26 +159,15 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
         this.security = security;
     }
 
-    public String getMethod() {
-        return method;
+    public String getPath() {
+        return path;
     }
 
     /**
-     * The HTTP verb such as GET, POST, DELETE, etc.
+     * The path mapping URIs of this REST operation such as /{id}.
      */
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    /**
-     * Uri template of this REST service such as /{id}.
-     */
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getConsumes() {
@@ -239,6 +194,18 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
         this.produces = produces;
     }
 
+    public String getDisabled() {
+        return disabled;
+    }
+
+    /**
+     * Whether to disable this REST service from the route during build time. Once an REST service has been disabled
+     * then it cannot be enabled later at runtime.
+     */
+    public void setDisabled(String disabled) {
+        this.disabled = disabled;
+    }
+
     public String getBindingMode() {
         return bindingMode;
     }
@@ -246,7 +213,7 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
     /**
      * Sets the binding mode to use. This option will override what may be configured on a parent level
      * <p/>
-     * The default value is auto
+     * The default value is off
      */
     public void setBindingMode(String bindingMode) {
         this.bindingMode = bindingMode;
@@ -349,28 +316,29 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
         this.outTypeClass = outTypeClass;
     }
 
-    public String getRouteId() {
-        return routeId;
-    }
-
-    /**
-     * The route id this rest-dsl is using (read-only)
-     */
-    public void setRouteId(String routeId) {
-        this.routeId = routeId;
-    }
-
     public String getApiDocs() {
         return apiDocs;
     }
 
     /**
-     * Whether to include or exclude the VerbDefinition in API documentation.
+     * Whether to include or exclude this rest operation in API documentation.
      * <p/>
      * The default value is true.
      */
     public void setApiDocs(String apiDocs) {
         this.apiDocs = apiDocs;
+    }
+
+    public ToDefinition getTo() {
+        return to;
+    }
+
+    /**
+     * The Camel endpoint this REST service will call, such as a direct endpoint to link to an existing route that
+     * handles this REST call.
+     */
+    public void setTo(ToDefinition to) {
+        this.to = to;
     }
 
     public RestDefinition getRest() {
@@ -379,64 +347,6 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
 
     public void setRest(RestDefinition rest) {
         this.rest = rest;
-    }
-
-    public RouteDefinition getRoute() {
-        if (route != null) {
-            return route;
-        } else if (toOrRoute instanceof RouteDefinition) {
-            return (RouteDefinition) toOrRoute;
-        } else {
-            return null;
-        }
-    }
-
-    public void setRoute(RouteDefinition route) {
-        this.route = route;
-        this.toOrRoute = route;
-    }
-
-    public ToDefinition getTo() {
-        if (to != null) {
-            return to;
-        } else if (toOrRoute instanceof ToDefinition) {
-            return (ToDefinition) toOrRoute;
-        } else {
-            return null;
-        }
-    }
-
-    public ToDynamicDefinition getToD() {
-        if (toD != null) {
-            return toD;
-        } else if (toOrRoute instanceof ToDynamicDefinition) {
-            return (ToDynamicDefinition) toOrRoute;
-        } else {
-            return null;
-        }
-    }
-
-    public void setTo(ToDefinition to) {
-        this.to = to;
-        this.toD = null;
-        this.toOrRoute = to;
-    }
-
-    public void setToD(ToDynamicDefinition to) {
-        this.to = null;
-        this.toD = to;
-        this.toOrRoute = to;
-    }
-
-    public OptionalIdentifiedDefinition<?> getToOrRoute() {
-        return toOrRoute;
-    }
-
-    /**
-     * To route from this REST service to a Camel endpoint, or an inlined route
-     */
-    public void setToOrRoute(OptionalIdentifiedDefinition<?> toOrRoute) {
-        this.toOrRoute = toOrRoute;
     }
 
     // Fluent API
@@ -490,32 +400,6 @@ public class VerbDefinition extends OptionalIdentifiedDefinition<VerbDefinition>
         return rest.verb(verb, uri);
     }
 
-    public String asVerb() {
-        // we do not want the jaxb model to repeat itself, by outputting <get
-        // method="get">
-        // so we infer the verb from the instance type
-        if (this instanceof GetVerbDefinition) {
-            return "get";
-        } else if (this instanceof PostVerbDefinition) {
-            return "post";
-        } else if (this instanceof PutVerbDefinition) {
-            return "put";
-        } else if (this instanceof PatchVerbDefinition) {
-            return "patch";
-        } else if (this instanceof DeleteVerbDefinition) {
-            return "delete";
-        } else if (this instanceof HeadVerbDefinition) {
-            return "head";
-        } else {
-            return method;
-        }
-    }
+    public abstract String asVerb();
 
-    public Boolean getUsedForGeneratingNodeId() {
-        return usedForGeneratingNodeId;
-    }
-
-    public void setUsedForGeneratingNodeId(Boolean usedForGeneratingNodeId) {
-        this.usedForGeneratingNodeId = usedForGeneratingNodeId;
-    }
 }

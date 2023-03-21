@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -119,10 +119,10 @@ public interface NettyHttpComponentBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -580,12 +580,11 @@ public interface NettyHttpComponentBuilderFactory {
          * concurrent messages on the same channel (aka connection) in netty.
          * When doing this you must have a way to correlate the request and
          * reply messages so you can store the right reply on the inflight Camel
-         * Exchange before its continued routed. &lt;p/&gt; We recommend
-         * extending the TimeoutCorrelationManagerSupport when you build custom
-         * correlation managers. This provides support for timeout and other
-         * complexities you otherwise would need to implement as well.
-         * &lt;p/&gt; See also the &lt;tt&gt;producerPoolEnabled option for more
-         * details.
+         * Exchange before its continued routed. We recommend extending the
+         * TimeoutCorrelationManagerSupport when you build custom correlation
+         * managers. This provides support for timeout and other complexities
+         * you otherwise would need to implement as well. See also the
+         * producerPoolEnabled option for more details.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.netty.NettyCamelStateCorrelationManager&lt;/code&gt; type.
@@ -618,17 +617,36 @@ public interface NettyHttpComponentBuilderFactory {
             return this;
         }
         /**
-         * Whether producer pool is enabled or not. &lt;p&gt; Important: If you
-         * turn this off then a single shared connection is used for the
-         * producer, also if you are doing request/reply. That means there is a
-         * potential issue with interleaved responses if replies comes back
-         * out-of-order. Therefore you need to have a correlation id in both the
-         * request and reply messages so you can properly correlate the replies
-         * to the Camel callback that is responsible for continue processing the
-         * message in Camel. To do this you need to implement
+         * Sets the value for the blockWhenExhausted configuration attribute. It
+         * determines whether to block when the borrowObject() method is invoked
+         * when the pool is exhausted (the maximum number of active objects has
+         * been reached).
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolBlockWhenExhausted the value to set
+         * @return the dsl builder
+         */
+        default NettyHttpComponentBuilder producerPoolBlockWhenExhausted(
+                boolean producerPoolBlockWhenExhausted) {
+            doSetProperty("producerPoolBlockWhenExhausted", producerPoolBlockWhenExhausted);
+            return this;
+        }
+        /**
+         * Whether producer pool is enabled or not. Important: If you turn this
+         * off then a single shared connection is used for the producer, also if
+         * you are doing request/reply. That means there is a potential issue
+         * with interleaved responses if replies comes back out-of-order.
+         * Therefore you need to have a correlation id in both the request and
+         * reply messages so you can properly correlate the replies to the Camel
+         * callback that is responsible for continue processing the message in
+         * Camel. To do this you need to implement
          * NettyCamelStateCorrelationManager as correlation manager and
-         * configure it via the &lt;tt&gt;correlationManager option. &lt;p/&gt;
-         * See also the &lt;tt&gt;correlationManager option for more details.
+         * configure it via the correlationManager option. See also the
+         * correlationManager option for more details.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -641,24 +659,6 @@ public interface NettyHttpComponentBuilderFactory {
         default NettyHttpComponentBuilder producerPoolEnabled(
                 boolean producerPoolEnabled) {
             doSetProperty("producerPoolEnabled", producerPoolEnabled);
-            return this;
-        }
-        /**
-         * Sets the cap on the number of objects that can be allocated by the
-         * pool (checked out to clients, or idle awaiting checkout) at a given
-         * time. Use a negative value for no limit.
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: -1
-         * Group: producer (advanced)
-         * 
-         * @param producerPoolMaxActive the value to set
-         * @return the dsl builder
-         */
-        default NettyHttpComponentBuilder producerPoolMaxActive(
-                int producerPoolMaxActive) {
-            doSetProperty("producerPoolMaxActive", producerPoolMaxActive);
             return this;
         }
         /**
@@ -675,6 +675,43 @@ public interface NettyHttpComponentBuilderFactory {
         default NettyHttpComponentBuilder producerPoolMaxIdle(
                 int producerPoolMaxIdle) {
             doSetProperty("producerPoolMaxIdle", producerPoolMaxIdle);
+            return this;
+        }
+        /**
+         * Sets the cap on the number of objects that can be allocated by the
+         * pool (checked out to clients, or idle awaiting checkout) at a given
+         * time. Use a negative value for no limit.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolMaxTotal the value to set
+         * @return the dsl builder
+         */
+        default NettyHttpComponentBuilder producerPoolMaxTotal(
+                int producerPoolMaxTotal) {
+            doSetProperty("producerPoolMaxTotal", producerPoolMaxTotal);
+            return this;
+        }
+        /**
+         * Sets the maximum duration (value in millis) the borrowObject() method
+         * should block before throwing an exception when the pool is exhausted
+         * and producerPoolBlockWhenExhausted is true. When less than 0, the
+         * borrowObject() method may block indefinitely.
+         * 
+         * The option is a: &lt;code&gt;long&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolMaxWait the value to set
+         * @return the dsl builder
+         */
+        default NettyHttpComponentBuilder producerPoolMaxWait(
+                long producerPoolMaxWait) {
+            doSetProperty("producerPoolMaxWait", producerPoolMaxWait);
             return this;
         }
         /**
@@ -879,8 +916,8 @@ public interface NettyHttpComponentBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1072,16 +1109,14 @@ public interface NettyHttpComponentBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
          * @param decoders the value to set
          * @return the dsl builder
          */
-        default NettyHttpComponentBuilder decoders(
-                java.util.List<io.netty.channel.ChannelHandler> decoders) {
+        default NettyHttpComponentBuilder decoders(java.lang.String decoders) {
             doSetProperty("decoders", decoders);
             return this;
         }
@@ -1109,16 +1144,14 @@ public interface NettyHttpComponentBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
          * @param encoders the value to set
          * @return the dsl builder
          */
-        default NettyHttpComponentBuilder encoders(
-                java.util.List<io.netty.channel.ChannelHandler> encoders) {
+        default NettyHttpComponentBuilder encoders(java.lang.String encoders) {
             doSetProperty("encoders", encoders);
             return this;
         }
@@ -1160,7 +1193,7 @@ public interface NettyHttpComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: TLSv1,TLSv1.1,TLSv1.2
+         * Default: TLSv1.2,TLSv1.3
          * Group: security
          * 
          * @param enabledProtocols the value to set
@@ -1454,9 +1487,11 @@ public interface NettyHttpComponentBuilderFactory {
             case "clientInitializerFactory": getOrCreateConfiguration((NettyHttpComponent) component).setClientInitializerFactory((org.apache.camel.component.netty.ClientInitializerFactory) value); return true;
             case "correlationManager": getOrCreateConfiguration((NettyHttpComponent) component).setCorrelationManager((org.apache.camel.component.netty.NettyCamelStateCorrelationManager) value); return true;
             case "lazyChannelCreation": getOrCreateConfiguration((NettyHttpComponent) component).setLazyChannelCreation((boolean) value); return true;
+            case "producerPoolBlockWhenExhausted": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolBlockWhenExhausted((boolean) value); return true;
             case "producerPoolEnabled": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolEnabled((boolean) value); return true;
-            case "producerPoolMaxActive": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolMaxActive((int) value); return true;
             case "producerPoolMaxIdle": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolMaxIdle((int) value); return true;
+            case "producerPoolMaxTotal": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolMaxTotal((int) value); return true;
+            case "producerPoolMaxWait": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolMaxWait((long) value); return true;
             case "producerPoolMinEvictableIdle": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolMinEvictableIdle((long) value); return true;
             case "producerPoolMinIdle": getOrCreateConfiguration((NettyHttpComponent) component).setProducerPoolMinIdle((int) value); return true;
             case "udpConnectionlessSending": getOrCreateConfiguration((NettyHttpComponent) component).setUdpConnectionlessSending((boolean) value); return true;
@@ -1479,9 +1514,9 @@ public interface NettyHttpComponentBuilderFactory {
             case "allowDefaultCodec": getOrCreateConfiguration((NettyHttpComponent) component).setAllowDefaultCodec((boolean) value); return true;
             case "autoAppendDelimiter": getOrCreateConfiguration((NettyHttpComponent) component).setAutoAppendDelimiter((boolean) value); return true;
             case "decoderMaxLineLength": getOrCreateConfiguration((NettyHttpComponent) component).setDecoderMaxLineLength((int) value); return true;
-            case "decoders": getOrCreateConfiguration((NettyHttpComponent) component).setDecoders((java.util.List) value); return true;
+            case "decoders": getOrCreateConfiguration((NettyHttpComponent) component).setDecoders((java.lang.String) value); return true;
             case "delimiter": getOrCreateConfiguration((NettyHttpComponent) component).setDelimiter((org.apache.camel.component.netty.TextLineDelimiter) value); return true;
-            case "encoders": getOrCreateConfiguration((NettyHttpComponent) component).setEncoders((java.util.List) value); return true;
+            case "encoders": getOrCreateConfiguration((NettyHttpComponent) component).setEncoders((java.lang.String) value); return true;
             case "encoding": getOrCreateConfiguration((NettyHttpComponent) component).setEncoding((java.lang.String) value); return true;
             case "textline": getOrCreateConfiguration((NettyHttpComponent) component).setTextline((boolean) value); return true;
             case "enabledProtocols": getOrCreateConfiguration((NettyHttpComponent) component).setEnabledProtocols((java.lang.String) value); return true;

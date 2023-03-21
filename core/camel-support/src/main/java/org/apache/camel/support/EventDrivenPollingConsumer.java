@@ -26,8 +26,6 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangeTimedOutException;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.IsSingleton;
 import org.apache.camel.PollingConsumerPollingStrategy;
 import org.apache.camel.PooledExchange;
@@ -208,13 +206,12 @@ public class EventDrivenPollingConsumer extends PollingConsumerSupport implement
 
         // if handover we need to do special handover to avoid handing over
         // RestBindingMarshalOnCompletion as it should not be handed over
-        Exchange copy = ExchangeHelper.createCorrelatedCopy(exchange, handover, true,
-                synchronization -> !synchronization.getClass().getName().contains("RestBindingMarshalOnCompletion"));
+        Exchange copy = ExchangeHelper.createCorrelatedCopy(exchange, handover, true);
 
         // we want the copy to have an uow
-        UnitOfWork uow = getEndpoint().getCamelContext().adapt(ExtendedCamelContext.class).getUnitOfWorkFactory()
+        UnitOfWork uow = getEndpoint().getCamelContext().getCamelContextExtension().getUnitOfWorkFactory()
                 .createUnitOfWork(copy);
-        copy.adapt(ExtendedExchange.class).setUnitOfWork(uow);
+        copy.getExchangeExtension().setUnitOfWork(uow);
 
         return copy;
     }

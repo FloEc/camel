@@ -28,13 +28,15 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         map.put("ClientSecret", java.lang.String.class);
         map.put("Content", com.google.api.services.calendar.model.Event.class);
         map.put("ContentChannel", com.google.api.services.calendar.model.Channel.class);
+        map.put("Delegate", java.lang.String.class);
         map.put("Destination", java.lang.String.class);
         map.put("EmailAddress", java.lang.String.class);
         map.put("EventId", java.lang.String.class);
         map.put("MethodName", java.lang.String.class);
         map.put("P12FileName", java.lang.String.class);
         map.put("RefreshToken", java.lang.String.class);
-        map.put("Scopes", java.lang.String.class);
+        map.put("Scopes", java.util.List.class);
+        map.put("ServiceAccountKey", java.lang.String.class);
         map.put("Text", java.lang.String.class);
         map.put("User", java.lang.String.class);
         ALL_OPTIONS = map;
@@ -60,6 +62,8 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         case "Content": target.setContent(property(camelContext, com.google.api.services.calendar.model.Event.class, value)); return true;
         case "contentchannel":
         case "ContentChannel": target.setContentChannel(property(camelContext, com.google.api.services.calendar.model.Channel.class, value)); return true;
+        case "delegate":
+        case "Delegate": target.setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "destination":
         case "Destination": target.setDestination(property(camelContext, java.lang.String.class, value)); return true;
         case "emailaddress":
@@ -73,7 +77,9 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         case "refreshtoken":
         case "RefreshToken": target.setRefreshToken(property(camelContext, java.lang.String.class, value)); return true;
         case "scopes":
-        case "Scopes": target.setScopes(property(camelContext, java.lang.String.class, value)); return true;
+        case "Scopes": target.setScopes(property(camelContext, java.util.List.class, value)); return true;
+        case "serviceaccountkey":
+        case "ServiceAccountKey": target.setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         case "text":
         case "Text": target.setText(property(camelContext, java.lang.String.class, value)); return true;
         case "user":
@@ -106,6 +112,8 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         case "Content": return com.google.api.services.calendar.model.Event.class;
         case "contentchannel":
         case "ContentChannel": return com.google.api.services.calendar.model.Channel.class;
+        case "delegate":
+        case "Delegate": return java.lang.String.class;
         case "destination":
         case "Destination": return java.lang.String.class;
         case "emailaddress":
@@ -119,7 +127,9 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         case "refreshtoken":
         case "RefreshToken": return java.lang.String.class;
         case "scopes":
-        case "Scopes": return java.lang.String.class;
+        case "Scopes": return java.util.List.class;
+        case "serviceaccountkey":
+        case "ServiceAccountKey": return java.lang.String.class;
         case "text":
         case "Text": return java.lang.String.class;
         case "user":
@@ -148,6 +158,8 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         case "Content": return target.getContent();
         case "contentchannel":
         case "ContentChannel": return target.getContentChannel();
+        case "delegate":
+        case "Delegate": return target.getDelegate();
         case "destination":
         case "Destination": return target.getDestination();
         case "emailaddress":
@@ -162,10 +174,21 @@ public class CalendarEventsEndpointConfigurationConfigurer extends org.apache.ca
         case "RefreshToken": return target.getRefreshToken();
         case "scopes":
         case "Scopes": return target.getScopes();
+        case "serviceaccountkey":
+        case "ServiceAccountKey": return target.getServiceAccountKey();
         case "text":
         case "Text": return target.getText();
         case "user":
         case "User": return target.getUser();
+        default: return null;
+        }
+    }
+
+    @Override
+    public Object getCollectionValueType(Object target, String name, boolean ignoreCase) {
+        switch (ignoreCase ? name.toLowerCase() : name) {
+        case "scopes":
+        case "Scopes": return java.lang.String.class;
         default: return null;
         }
     }

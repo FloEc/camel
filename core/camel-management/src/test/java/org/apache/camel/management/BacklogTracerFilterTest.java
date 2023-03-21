@@ -23,8 +23,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.api.management.mbean.BacklogTracerEventMessage;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.spi.BacklogTracerEventMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -70,11 +70,12 @@ public class BacklogTracerFilterTest extends ManagementTestSupport {
                 = (List<BacklogTracerEventMessage>) mbeanServer.invoke(on, "dumpAllTracedMessages", null, null);
 
         assertNotNull(events);
-        assertEquals(3, events.size());
+        assertEquals(4, events.size());
 
         BacklogTracerEventMessage event = events.get(0);
         assertEquals(null, event.getToNode());
-        assertEquals("    <message exchangeId=\"" + exchanges.get(1).getExchangeId() + "\">\n"
+        assertEquals("    <message exchangeId=\"" + exchanges.get(1).getExchangeId()
+                     + "\" exchangePattern=\"InOnly\" exchangeType=\"org.apache.camel.support.DefaultExchange\" messageType=\"org.apache.camel.support.DefaultMessage\">\n"
                      + "      <headers>\n"
                      + "        <header key=\"foo\" type=\"java.lang.Integer\">123</header>\n"
                      + "      </headers>\n"
@@ -84,7 +85,8 @@ public class BacklogTracerFilterTest extends ManagementTestSupport {
 
         BacklogTracerEventMessage event1 = events.get(1);
         assertEquals("foo", event1.getToNode());
-        assertEquals("    <message exchangeId=\"" + exchanges.get(1).getExchangeId() + "\">\n"
+        assertEquals("    <message exchangeId=\"" + exchanges.get(1).getExchangeId()
+                     + "\" exchangePattern=\"InOnly\" exchangeType=\"org.apache.camel.support.DefaultExchange\" messageType=\"org.apache.camel.support.DefaultMessage\">\n"
                      + "      <headers>\n"
                      + "        <header key=\"foo\" type=\"java.lang.Integer\">123</header>\n"
                      + "      </headers>\n"
@@ -94,7 +96,8 @@ public class BacklogTracerFilterTest extends ManagementTestSupport {
 
         BacklogTracerEventMessage event2 = events.get(2);
         assertEquals("bar", event2.getToNode());
-        assertEquals("    <message exchangeId=\"" + exchanges.get(1).getExchangeId() + "\">\n"
+        assertEquals("    <message exchangeId=\"" + exchanges.get(1).getExchangeId()
+                     + "\" exchangePattern=\"InOnly\" exchangeType=\"org.apache.camel.support.DefaultExchange\" messageType=\"org.apache.camel.support.DefaultMessage\">\n"
                      + "      <headers>\n"
                      + "        <header key=\"foo\" type=\"java.lang.Integer\">123</header>\n"
                      + "      </headers>\n"
@@ -109,7 +112,7 @@ public class BacklogTracerFilterTest extends ManagementTestSupport {
             @Override
             public void configure() throws Exception {
                 context.setUseBreadcrumb(false);
-                context.setBacklogTracing(true);
+                context.setBacklogTracingStandby(true);
 
                 from("direct:start")
                         .to("mock:foo").id("foo")

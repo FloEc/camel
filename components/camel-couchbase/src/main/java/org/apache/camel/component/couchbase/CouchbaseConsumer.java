@@ -26,16 +26,20 @@ import com.couchbase.client.java.view.ViewResult;
 import com.couchbase.client.java.view.ViewRow;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.resume.ResumeAware;
+import org.apache.camel.resume.ResumeStrategy;
 import org.apache.camel.support.DefaultScheduledPollConsumer;
+import org.apache.camel.support.resume.ResumeStrategyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.camel.component.couchbase.CouchbaseConstants.COUCHBASE_RESUME_ACTION;
 import static org.apache.camel.component.couchbase.CouchbaseConstants.HEADER_DESIGN_DOCUMENT_NAME;
 import static org.apache.camel.component.couchbase.CouchbaseConstants.HEADER_ID;
 import static org.apache.camel.component.couchbase.CouchbaseConstants.HEADER_KEY;
 import static org.apache.camel.component.couchbase.CouchbaseConstants.HEADER_VIEWNAME;
 
-public class CouchbaseConsumer extends DefaultScheduledPollConsumer {
+public class CouchbaseConsumer extends DefaultScheduledPollConsumer implements ResumeAware<ResumeStrategy> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConsumer.class);
 
@@ -43,6 +47,8 @@ public class CouchbaseConsumer extends DefaultScheduledPollConsumer {
     private final Bucket bucket;
     private final Collection collection;
     private ViewOptions viewOptions;
+
+    private ResumeStrategy resumeStrategy;
 
     public CouchbaseConsumer(CouchbaseEndpoint endpoint, Bucket client, Processor processor) {
         super(endpoint, processor);
@@ -90,6 +96,8 @@ public class CouchbaseConsumer extends DefaultScheduledPollConsumer {
     @Override
     protected void doStart() throws Exception {
         super.doStart();
+
+        ResumeStrategyHelper.resume(getEndpoint().getCamelContext(), this, resumeStrategy, COUCHBASE_RESUME_ACTION);
     }
 
     @Override
@@ -169,5 +177,15 @@ public class CouchbaseConsumer extends DefaultScheduledPollConsumer {
             LOG.trace("View Name = {}", viewName);
         }
 
+    }
+
+    @Override
+    public ResumeStrategy getResumeStrategy() {
+        return resumeStrategy;
+    }
+
+    @Override
+    public void setResumeStrategy(ResumeStrategy resumeStrategy) {
+        this.resumeStrategy = resumeStrategy;
     }
 }

@@ -58,15 +58,18 @@ public abstract class DefaultEndpoint extends ServiceSupport implements Endpoint
     @Metadata(label = "advanced", defaultValue = "true",
               description = "Whether autowiring is enabled. This is used for automatic autowiring options (the option must be marked as autowired)"
                             + " by looking up in the registry to find if there is a single instance of matching type, which then gets configured on the component."
-                            + " This can be used for automatic configuring JDBC data sources, JMS connection factories, AWS Clients, etc.")
+                            + " This can be used for automatic configuring JDBC data sources, JMS connection factories, AWS Clients, etc."
+                            + " Important: If a component has the same option defined on both component and endpoint level, then disabling"
+                            + " autowiring on endpoint level would not affect that the component will still be autowired, and therefore the endpoint"
+                            + " will be configured with option from the component level. In other words turning off autowiring would then require to turn it off on the component level.")
     private boolean autowiredEnabled = true;
-    @UriParam(label = "producer",
+    @UriParam(label = "producer,advanced",
               description = "Whether the producer should be started lazy (on the first message). By starting lazy you can use this to allow CamelContext and routes to startup"
                             + " in situations where a producer may otherwise fail during starting and cause the route to fail being started. By deferring this startup to be lazy then"
                             + " the startup failure can be handled during routing messages via Camel's routing error handlers. Beware that when the first message is processed"
                             + " then creating and starting the producer may take a little time and prolong the total processing time of the processing.")
     private boolean lazyStartProducer;
-    @UriParam(label = "consumer",
+    @UriParam(label = "consumer,advanced",
               description = "Allows for bridging the consumer to the Camel routing Error Handler, which mean any exceptions occurred while"
                             + " the consumer is trying to pickup incoming messages, or the likes, will now be processed as a message and handled by the routing Error Handler."
                             + " By default the consumer will use the org.apache.camel.spi.ExceptionHandler to deal with exceptions, that will be logged at WARN or ERROR level and ignored.")
@@ -90,7 +93,7 @@ public abstract class DefaultEndpoint extends ServiceSupport implements Endpoint
     /**
      * Constructs a fully-initialized DefaultEndpoint instance. This is the preferred method of constructing an object
      * from Java code (as opposed to Spring beans, etc.).
-     * 
+     *
      * @param endpointUri the full URI used to create this endpoint
      * @param component   the component that created this endpoint
      */
@@ -266,7 +269,10 @@ public abstract class DefaultEndpoint extends ServiceSupport implements Endpoint
      * Whether autowiring is enabled. This is used for automatic autowiring options (the option must be marked as
      * autowired) by looking up in the registry to find if there is a single instance of matching type, which then gets
      * configured on the component. This can be used for automatic configuring JDBC data sources, JMS connection
-     * factories, AWS Clients, etc.
+     * factories, AWS Clients, etc. Important: If a component has the same option defined on both component and endpoint
+     * level, then disabling autowiring on endpoint level would not affect that the component will still be autowired,
+     * and therefore the endpoint will be configured with option from the component level. In other words turning off
+     * autowiring would then require to turn it off on the component level.
      */
     public void setAutowiredEnabled(boolean autowiredEnabled) {
         this.autowiredEnabled = autowiredEnabled;
@@ -410,7 +416,10 @@ public abstract class DefaultEndpoint extends ServiceSupport implements Endpoint
             configurer = ((PropertyConfigurerAware) bean).getPropertyConfigurer(bean);
         }
         // use configurer and ignore case as end users may type an option name with mixed case
-        PropertyBindingSupport.build().withConfigurer(configurer).withIgnoreCase(true).bind(camelContext, bean, parameters);
+        PropertyBindingSupport.build().withConfigurer(configurer).withIgnoreCase(true)
+                // if the endpoint is lenient then use optional
+                .withOptional(isLenientProperties())
+                .bind(camelContext, bean, parameters);
     }
 
     /**
@@ -484,7 +493,7 @@ public abstract class DefaultEndpoint extends ServiceSupport implements Endpoint
     protected void doInit() throws Exception {
         ObjectHelper.notNull(getCamelContext(), "camelContext");
 
-        if (autowiredEnabled && getComponent() != null) {
+        if (autowiredEnabled && getComponent() != null && getComponent().isAutowiredEnabled()) {
             PropertyConfigurer configurer = getComponent().getEndpointPropertyConfigurer();
             if (configurer instanceof PropertyConfigurerGetter) {
                 PropertyConfigurerGetter getter = (PropertyConfigurerGetter) configurer;

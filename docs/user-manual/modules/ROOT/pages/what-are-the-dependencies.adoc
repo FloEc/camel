@@ -2,12 +2,15 @@
 
 == Java support
 
-- Camel 2 supports JDK 8
-- Camel 3 supports JDK 8 or 11
+- Camel 2 requires JDK 8
+- Camel 3 requires JDK 8 and supports JDK 11
+- Camel 3.15.0+ requires JDK 11
+- Camel 3.17.0+ requires JDK 11 and supports JDK 17
+- Camel 4.0.0+ requires JDK 17
 
 == Camel JAR Dependencies
 
-Camel core itself is lightweight, and only requires the `sl4j-api` logging API jar.
+Camel core itself is lightweight, and only requires the `slf4j-api` logging API jar.
 
 == Components
 

@@ -16,9 +16,6 @@
  */
 package org.apache.camel.component.google.calendar;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.google.api.services.calendar.Calendar;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
@@ -54,18 +51,18 @@ public class GoogleCalendarComponent
 
     public Calendar getClient(GoogleCalendarConfiguration config) {
         if (client == null) {
-
-            List<String> list = null;
-            if (config.getScopes() != null) {
-                String[] arr = config.getScopes().split(",");
-                list = Arrays.asList(arr);
+            if (config.getClientId() != null && !config.getClientId().isBlank()
+                    && config.getClientSecret() != null && !config.getClientSecret().isBlank()) {
+                client = getClientFactory().makeClient(config.getClientId(), config.getClientSecret(), config.getScopes(),
+                        config.getApplicationName(), config.getRefreshToken(),
+                        config.getAccessToken(), config.getEmailAddress(), config.getP12FileName(), config.getUser());
+            } else if (config.getServiceAccountKey() != null && !config.getServiceAccountKey().isBlank()) {
+                client = getClientFactory().makeClient(getCamelContext(), config.getServiceAccountKey(), config.getScopes(),
+                        config.getApplicationName(), config.getDelegate());
+            } else {
+                throw new IllegalArgumentException(
+                        "(clientId and clientSecret) or serviceAccountKey are required to create Google Calendar client");
             }
-
-            client = getClientFactory().makeClient(config.getClientId(),
-                    config.getClientSecret(), list,
-                    config.getApplicationName(), config.getRefreshToken(),
-                    config.getAccessToken(), config.getEmailAddress(),
-                    config.getP12FileName(), config.getUser());
         }
         return client;
     }

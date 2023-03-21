@@ -67,8 +67,14 @@ public class AmazonSQSClientMock implements SqsClient {
     private Map<String, CreateQueueRequest> queues = new LinkedHashMap<>();
     private Map<String, ScheduledFuture<?>> inFlight = new LinkedHashMap<>();
     private ScheduledExecutorService scheduler;
+    private String queueName;
+    private boolean verifyQueueUrl;
 
     public AmazonSQSClientMock() {
+    }
+
+    public AmazonSQSClientMock(String queueName) {
+        this.queueName = queueName;
     }
 
     @Override
@@ -80,8 +86,12 @@ public class AmazonSQSClientMock implements SqsClient {
     public ListQueuesResponse listQueues(ListQueuesRequest request) {
         ListQueuesResponse.Builder result = ListQueuesResponse.builder();
         List<String> queues = new ArrayList<>();
-        queues.add("queue1");
-        queues.add("queue2");
+        if (queueName != null) {
+            queues.add("/" + queueName);
+        } else {
+            queues.add("/queue1");
+            queues.add("/queue2");
+        }
         result.queueUrls(queues);
         return result.build();
     }
@@ -97,6 +107,9 @@ public class AmazonSQSClientMock implements SqsClient {
 
     @Override
     public SendMessageResponse sendMessage(SendMessageRequest sendMessageRequest) {
+        if (verifyQueueUrl && sendMessageRequest.queueUrl() == null) {
+            throw new RuntimeException("QueueUrl can not be null.");
+        }
         Message.Builder message = Message.builder();
         message.body(sendMessageRequest.messageBody());
         message.md5OfBody("6a1559560f67c5e7a7d5d838bf0272ee");
@@ -187,12 +200,18 @@ public class AmazonSQSClientMock implements SqsClient {
 
     @Override
     public PurgeQueueResponse purgeQueue(PurgeQueueRequest purgeQueueRequest) {
+        if (purgeQueueRequest.queueUrl() == null) {
+            throw SqsException.builder().message("Queue name must be specified.").build();
+        }
         return PurgeQueueResponse.builder().build();
     }
 
     @Override
     public DeleteQueueResponse deleteQueue(DeleteQueueRequest deleteQueueRequest)
             throws AwsServiceException, SdkClientException, SqsException {
+        if (deleteQueueRequest.queueUrl() == null) {
+            throw SqsException.builder().message("Queue name must be specified.").build();
+        }
         return DeleteQueueResponse.builder().build();
     }
 
@@ -256,5 +275,13 @@ public class AmazonSQSClientMock implements SqsClient {
         return GetQueueUrlResponse.builder()
                 .queueUrl("https://queue.amazonaws.com/queue/camel-836")
                 .build();
+    }
+
+    public void setVerifyQueueUrl(boolean verifyQueueUrl) {
+        this.verifyQueueUrl = verifyQueueUrl;
+    }
+
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
     }
 }

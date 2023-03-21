@@ -27,6 +27,9 @@ import org.apache.camel.RouteConfigurationsBuilder;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.spi.CamelBeanPostProcessor;
+import org.apache.camel.spi.ModelineFactory;
+import org.apache.camel.spi.Resource;
+import org.apache.camel.spi.RoutesLoader;
 import org.apache.camel.support.OrderedComparator;
 import org.apache.camel.util.StopWatch;
 import org.apache.camel.util.TimeUtils;
@@ -42,7 +45,7 @@ public class RoutesConfigurer {
     private RoutesCollector routesCollector;
     private CamelBeanPostProcessor beanPostProcessor;
     private List<RoutesBuilder> routesBuilders;
-    private String packageScanRouteBuilders;
+    private String basePackageScan;
     private String routesBuilderClasses;
     private String javaRoutesExcludePattern;
     private String javaRoutesIncludePattern;
@@ -57,12 +60,12 @@ public class RoutesConfigurer {
         this.routesBuilders = routesBuilders;
     }
 
-    public String getPackageScanRouteBuilders() {
-        return packageScanRouteBuilders;
+    public String getBasePackageScan() {
+        return basePackageScan;
     }
 
-    public void setPackageScanRouteBuilders(String packageScanRouteBuilders) {
-        this.packageScanRouteBuilders = packageScanRouteBuilders;
+    public void setBasePackageScan(String basePackageScan) {
+        this.basePackageScan = basePackageScan;
     }
 
     public String getRoutesBuilderClasses() {
@@ -148,9 +151,9 @@ public class RoutesConfigurer {
             }
         }
 
-        if (getPackageScanRouteBuilders() != null) {
-            String[] pkgs = getPackageScanRouteBuilders().split(",");
-            Set<Class<?>> set = camelContext.adapt(ExtendedCamelContext.class)
+        if (getBasePackageScan() != null) {
+            String[] pkgs = getBasePackageScan().split(",");
+            Set<Class<?>> set = camelContext.getCamelContextExtension()
                     .getPackageScanClassResolver()
                     .findImplementations(RoutesBuilder.class, pkgs);
             for (Class<?> routeClazz : set) {
@@ -189,7 +192,7 @@ public class RoutesConfigurer {
 
                 if (LOG.isDebugEnabled() && !routesFromDirectory.isEmpty()) {
                     LOG.debug("Loaded {} additional RoutesBuilder from: {} (took {})", routesFromDirectory.size(),
-                            getRoutesIncludePattern(), TimeUtils.printDuration(watch.taken()));
+                            getRoutesIncludePattern(), TimeUtils.printDuration(watch.taken(), true));
                 }
             } catch (Exception e) {
                 throw RuntimeCamelException.wrapRuntimeException(e);
@@ -207,13 +210,6 @@ public class RoutesConfigurer {
 
         // add the discovered routes
         addDiscoveredRoutes(camelContext, routes);
-
-        // then discover and add templates
-        Set<ConfigureRouteTemplates> set = camelContext.getRegistry().findByType(ConfigureRouteTemplates.class);
-        for (ConfigureRouteTemplates crt : set) {
-            LOG.debug("Configuring route templates via: {}", crt);
-            crt.configure(camelContext);
-        }
     }
 
     private void addDiscoveredRoutes(CamelContext camelContext, List<RoutesBuilder> routes) throws Exception {
@@ -233,5 +229,53 @@ public class RoutesConfigurer {
             LOG.debug("Adding routes into CamelContext from RoutesBuilder: {}", builder);
             camelContext.addRoutes(builder);
         }
+        // then add templated routes last
+        for (RoutesBuilder builder : routes) {
+            LOG.debug("Adding templated routes into CamelContext from RoutesBuilder: {}", builder);
+            camelContext.addTemplatedRoutes(builder);
+        }
     }
+
+    /**
+     * Discover routes and rests from directories and scan for modeline present in their source code, which is then
+     * parsed using {@link ModelineFactory}.
+     *
+     * @param camelContext the Camel context
+     */
+    public void configureModeline(CamelContext camelContext) throws Exception {
+        if (getRoutesCollector() == null) {
+            return;
+        }
+
+        Collection<Resource> resources;
+        try {
+            LOG.debug("RoutesCollectorEnabled: {}", getRoutesCollector());
+
+            // we can only scan for modeline for routes that we can load from directory as modelines
+            // are comments in the source files
+            resources = getRoutesCollector().findRouteResourcesFromDirectory(
+                    camelContext,
+                    getRoutesExcludePattern(),
+                    getRoutesIncludePattern());
+
+        } catch (Exception e) {
+            throw RuntimeCamelException.wrapRuntimeException(e);
+        }
+
+        ExtendedCamelContext ecc = camelContext.getCamelContextExtension();
+        ModelineFactory factory = ecc.getModelineFactory();
+
+        for (Resource resource : resources) {
+            LOG.debug("Parsing modeline: {}", resource);
+            factory.parseModeline(resource);
+        }
+        // the resource may also have additional configurations which we need to detect via pre-parsing
+        for (Resource resource : resources) {
+            LOG.debug("Pre-parsing: {}", resource);
+            RoutesLoader loader = camelContext.getCamelContextExtension().getRoutesLoader();
+            loader.preParseRoute(resource);
+        }
+
+    }
+
 }

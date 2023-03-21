@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component.mina;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.camel.BindToRegistry;
 import org.apache.camel.ResolveEndpointFailedException;
 import org.apache.camel.builder.RouteBuilder;
@@ -39,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class MinaVMCustomCodecTest extends BaseMinaTest {
 
     @BindToRegistry("myCodec")
-    private MyCodec codec1 = new MyCodec();
+    private final MyCodec codec1 = new MyCodec();
 
     @Test
     public void testMyCodec() throws Exception {
@@ -72,7 +74,7 @@ public class MinaVMCustomCodecTest extends BaseMinaTest {
         endpoint.expectedBodiesReceived(body);
 
         template.sendBody(myUri, body);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -84,10 +86,10 @@ public class MinaVMCustomCodecTest extends BaseMinaTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
 
-            public void configure() throws Exception {
+            public void configure() {
                 from(String.format("mina:vm://localhost:%1$s?sync=true&codec=#myCodec", getPort()))
                         .transform(constant("Bye World")).to("mock:result");
             }
@@ -97,18 +99,18 @@ public class MinaVMCustomCodecTest extends BaseMinaTest {
     private static class MyCodec implements ProtocolCodecFactory {
 
         @Override
-        public ProtocolEncoder getEncoder(IoSession is) throws Exception {
+        public ProtocolEncoder getEncoder(IoSession is) {
             return new ProtocolEncoder() {
 
                 public void encode(IoSession ioSession, Object message, ProtocolEncoderOutput out) throws Exception {
                     IoBuffer bb = IoBuffer.allocate(32).setAutoExpand(true);
                     String s = (String) message;
-                    bb.put(s.getBytes("US-ASCII"));
+                    bb.put(s.getBytes(StandardCharsets.US_ASCII));
                     bb.flip();
                     out.write(bb);
                 }
 
-                public void dispose(IoSession ioSession) throws Exception {
+                public void dispose(IoSession ioSession) {
                     // do nothing
                 }
             };
@@ -116,14 +118,14 @@ public class MinaVMCustomCodecTest extends BaseMinaTest {
         }
 
         @Override
-        public ProtocolDecoder getDecoder(IoSession is) throws Exception {
+        public ProtocolDecoder getDecoder(IoSession is) {
             return new CumulativeProtocolDecoder() {
 
                 protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
                     if (in.remaining() > 0) {
                         byte[] buf = new byte[in.remaining()];
                         in.get(buf);
-                        out.write(new String(buf, "US-ASCII"));
+                        out.write(new String(buf, StandardCharsets.US_ASCII));
                         return true;
                     } else {
                         return false;

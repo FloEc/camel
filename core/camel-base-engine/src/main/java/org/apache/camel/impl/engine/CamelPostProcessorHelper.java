@@ -16,6 +16,7 @@
  */
 package org.apache.camel.impl.engine;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -23,6 +24,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.camel.BeanConfigInject;
+import org.apache.camel.BeanInject;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.Consume;
@@ -30,7 +33,6 @@ import org.apache.camel.Consumer;
 import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.DelegateEndpoint;
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.FluentProducerTemplate;
 import org.apache.camel.IsSingleton;
 import org.apache.camel.MultipleConsumersSupport;
@@ -38,12 +40,15 @@ import org.apache.camel.NoSuchBeanException;
 import org.apache.camel.PollingConsumer;
 import org.apache.camel.Producer;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.PropertyInject;
 import org.apache.camel.ProxyInstantiationException;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.Service;
+import org.apache.camel.TypeConverter;
 import org.apache.camel.spi.BeanProxyFactory;
 import org.apache.camel.spi.PropertiesComponent;
 import org.apache.camel.spi.PropertyConfigurer;
+import org.apache.camel.spi.Registry;
 import org.apache.camel.support.CamelContextHelper;
 import org.apache.camel.support.PropertyBindingSupport;
 import org.apache.camel.support.service.ServiceHelper;
@@ -51,8 +56,10 @@ import org.apache.camel.util.ObjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.camel.support.ObjectHelper.invokeMethod;
+
 /**
- * A helper class for Camel based injector or bean post processing hooks.
+ * A helper class for Camel based injector or bean post-processing hooks.
  */
 public class CamelPostProcessorHelper implements CamelContextAware {
 
@@ -81,8 +88,7 @@ public class CamelPostProcessorHelper implements CamelContextAware {
         Consume consume = method.getAnnotation(Consume.class);
         if (consume != null) {
             LOG.debug("Creating a consumer for: {}", consume);
-            String uri = consume.value().isEmpty() ? consume.uri() : consume.value();
-            subscribeMethod(method, bean, beanName, uri, consume.property(), consume.predicate());
+            subscribeMethod(method, bean, beanName, consume.value(), consume.property(), consume.predicate());
         }
     }
 
@@ -184,11 +190,11 @@ public class CamelPostProcessorHelper implements CamelContextAware {
         // 2. then the getter with Endpoint as postfix
         // 3. then if start with on then try step 1 and 2 again, but omit the on prefix
         try {
-            Object value = getCamelContext().adapt(ExtendedCamelContext.class).getBeanIntrospection().getOrElseProperty(bean,
+            Object value = getCamelContext().getCamelContextExtension().getBeanIntrospection().getOrElseProperty(bean,
                     propertyName, null, false);
             if (value == null) {
                 // try endpoint as postfix
-                value = getCamelContext().adapt(ExtendedCamelContext.class).getBeanIntrospection().getOrElseProperty(bean,
+                value = getCamelContext().getCamelContextExtension().getBeanIntrospection().getOrElseProperty(bean,
                         propertyName + "Endpoint", null, false);
             }
             if (value == null && propertyName.startsWith("on")) {
@@ -248,7 +254,7 @@ public class CamelPostProcessorHelper implements CamelContextAware {
                     try {
                         // use proxy service
                         BeanProxyFactory factory
-                                = endpoint.getCamelContext().adapt(ExtendedCamelContext.class).getBeanProxyFactory();
+                                = endpoint.getCamelContext().getCamelContextExtension().getBeanProxyFactory();
                         return factory.createProxy(endpoint, binding, type);
                     } catch (Exception e) {
                         throw createProxyInstantiationRuntimeException(type, endpoint, e);
@@ -302,8 +308,35 @@ public class CamelPostProcessorHelper implements CamelContextAware {
             if (getCamelContext() != null && type.isAssignableFrom(getCamelContext().getClass())) {
                 return getCamelContext();
             }
-            Set<?> found = getCamelContext().getRegistry().findByType(type);
+            Set<?> found = getCamelContext() != null ? getCamelContext().getRegistry().findByType(type) : null;
             if (found == null || found.isEmpty()) {
+                // this may be a common type so lets check this first
+                if (getCamelContext() != null && type.isAssignableFrom(Registry.class)) {
+                    return getCamelContext().getRegistry();
+                }
+                if (getCamelContext() != null && type.isAssignableFrom(TypeConverter.class)) {
+                    return getCamelContext().getTypeConverter();
+                }
+                // for templates then create a new instance and let camel manage its lifecycle
+                Service answer = null;
+                if (getCamelContext() != null && type.isAssignableFrom(FluentProducerTemplate.class)) {
+                    answer = getCamelContext().createFluentProducerTemplate();
+                }
+                if (getCamelContext() != null && type.isAssignableFrom(ProducerTemplate.class)) {
+                    answer = getCamelContext().createProducerTemplate();
+                }
+                if (getCamelContext() != null && type.isAssignableFrom(ConsumerTemplate.class)) {
+                    answer = getCamelContext().createConsumerTemplate();
+                }
+                if (answer != null) {
+                    // lets make camel context manage its lifecycle
+                    try {
+                        getCamelContext().addService(answer);
+                    } catch (Exception e) {
+                        throw RuntimeCamelException.wrapRuntimeException(e);
+                    }
+                    return answer;
+                }
                 throw new NoSuchBeanException(name, type.getName());
             } else if (found.size() > 1) {
                 throw new NoSuchBeanException(
@@ -318,7 +351,7 @@ public class CamelPostProcessorHelper implements CamelContextAware {
     }
 
     public Object getInjectionBeanConfigValue(Class<?> type, String name) {
-        ExtendedCamelContext ecc = (ExtendedCamelContext) getCamelContext();
+        CamelContext ecc = getCamelContext();
 
         // is it a map or properties
         boolean mapType = false;
@@ -385,7 +418,7 @@ public class CamelPostProcessorHelper implements CamelContextAware {
         String[] names = new String[] {
                 type.getName() + "-configurer", type.getSimpleName() + "-configurer", rootKey + "-configurer" };
         for (String n : names) {
-            configurer = ecc.getConfigurerResolver().resolvePropertyConfigurer(n, ecc);
+            configurer = ecc.getCamelContextExtension().getConfigurerResolver().resolvePropertyConfigurer(n, ecc);
             if (configurer != null) {
                 break;
             }
@@ -400,6 +433,86 @@ public class CamelPostProcessorHelper implements CamelContextAware {
                 .bind();
 
         return bean;
+    }
+
+    public Object getInjectionBeanMethodValue(
+            CamelContext context,
+            Method method, Object bean, String beanName) {
+        Class<?> returnType = method.getReturnType();
+        if (returnType == Void.TYPE) {
+            throw new IllegalArgumentException(
+                    "@BindToRegistry on class: " + method.getDeclaringClass()
+                                               + " method: " + method.getName() + " with void return type is not allowed");
+        }
+
+        Object value;
+        Object[] parameters = bindToRegistryParameterMapping(context, method);
+        if (parameters != null) {
+            value = invokeMethod(method, bean, parameters);
+        } else {
+            value = invokeMethod(method, bean);
+        }
+        return value;
+    }
+
+    private Object[] bindToRegistryParameterMapping(CamelContext context, Method method) {
+        if (method.getParameterCount() == 0) {
+            return null;
+        }
+
+        // map each parameter if possible
+        Object[] parameters = new Object[method.getParameterCount()];
+        for (int i = 0; i < method.getParameterCount(); i++) {
+            Class<?> type = method.getParameterTypes()[i];
+            if (type.isAssignableFrom(CamelContext.class)) {
+                parameters[i] = context;
+            } else if (type.isAssignableFrom(Registry.class)) {
+                parameters[i] = context.getRegistry();
+            } else if (type.isAssignableFrom(TypeConverter.class)) {
+                parameters[i] = context.getTypeConverter();
+            } else {
+                // we also support @BeanInject and @PropertyInject annotations
+                Annotation[] anns = method.getParameterAnnotations()[i];
+                if (anns.length == 1) {
+                    // we dont assume there are multiple annotations on the same parameter so grab first
+                    Annotation ann = anns[0];
+                    if (ann.annotationType() == PropertyInject.class) {
+                        PropertyInject pi = (PropertyInject) ann;
+                        Object result = getInjectionPropertyValue(type, pi.value(), pi.defaultValue(),
+                                null, null, null);
+                        parameters[i] = result;
+                    } else if (ann.annotationType() == BeanConfigInject.class) {
+                        BeanConfigInject pi = (BeanConfigInject) ann;
+                        Object result = getInjectionBeanConfigValue(type, pi.value());
+                        parameters[i] = result;
+                    } else if (ann.annotationType() == BeanInject.class) {
+                        BeanInject bi = (BeanInject) ann;
+                        Object result = getInjectionBeanValue(type, bi.value());
+                        parameters[i] = result;
+                    }
+                } else {
+                    // okay attempt to default to singleton instances from the registry
+                    Set<?> instances = context.getRegistry().findByType(type);
+                    if (instances.size() == 1) {
+                        parameters[i] = instances.iterator().next();
+                    } else if (instances.size() > 1) {
+                        // there are multiple instances of the same type, so barf
+                        throw new IllegalArgumentException(
+                                "Multiple beans of the same type: " + type
+                                                           + " exists in the Camel registry. Specify the bean name on @BeanInject to bind to a single bean, at the method: "
+                                                           + method);
+                    }
+                }
+            }
+
+            // each parameter must be mapped
+            if (parameters[i] == null) {
+                int pos = i + 1;
+                throw new IllegalArgumentException("@BindToProperty cannot bind parameter #" + pos + " on method: " + method);
+            }
+        }
+
+        return parameters;
     }
 
     /**
@@ -477,7 +590,7 @@ public class CamelPostProcessorHelper implements CamelContextAware {
      */
     protected Producer createInjectionProducer(Endpoint endpoint, Object bean, String beanName) {
         try {
-            return endpoint.getCamelContext().adapt(ExtendedCamelContext.class).getDeferServiceFactory()
+            return endpoint.getCamelContext().getCamelContextExtension().getDeferServiceFactory()
                     .createProducer(endpoint);
         } catch (Exception e) {
             throw RuntimeCamelException.wrapRuntimeCamelException(e);

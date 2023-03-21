@@ -19,6 +19,7 @@ package org.apache.camel.component.azure.storage.datalake;
 import java.util.Map;
 import java.util.Set;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.identity.ClientSecretCredential;
 import com.azure.storage.common.StorageSharedKeyCredential;
 import org.apache.camel.CamelContext;
@@ -27,13 +28,9 @@ import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
 import org.apache.camel.util.ObjectHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component("azure-storage-datalake")
 public class DataLakeComponent extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DataLakeComponent.class);
 
     @Metadata(description = "configuration object for datalake")
     private DataLakeConfiguration configuration = new DataLakeConfiguration();
@@ -71,7 +68,6 @@ public class DataLakeComponent extends DefaultComponent {
         setProperties(endpoint, parameters);
 
         setCredentialsFromRegistry(configuration);
-        validateConfiguration(configuration);
 
         return endpoint;
     }
@@ -90,23 +86,18 @@ public class DataLakeComponent extends DefaultComponent {
                     = getCamelContext().getRegistry().findByType(StorageSharedKeyCredential.class);
             final Set<ClientSecretCredential> clientSecretCredentials
                     = getCamelContext().getRegistry().findByType(ClientSecretCredential.class);
+            final Set<AzureSasCredential> sasCredentials
+                    = getCamelContext().getRegistry().findByType(AzureSasCredential.class);
 
             if (storageSharedKeyCredentials.size() == 1) {
                 configuration.setSharedKeyCredential(storageSharedKeyCredentials.stream().findFirst().get());
             }
-
             if (clientSecretCredentials.size() == 1) {
                 configuration.setClientSecretCredential(clientSecretCredentials.stream().findFirst().get());
             }
-
+            if (sasCredentials.size() == 1) {
+                configuration.setSasCredential(sasCredentials.stream().findFirst().get());
+            }
         }
     }
-
-    private void validateConfiguration(final DataLakeConfiguration config) {
-        if (config.getServiceClient() == null && config.getClientSecretCredential() == null
-                && config.getSharedKeyCredential() == null) {
-            throw new IllegalArgumentException("client or credentials must be specified");
-        }
-    }
-
 }

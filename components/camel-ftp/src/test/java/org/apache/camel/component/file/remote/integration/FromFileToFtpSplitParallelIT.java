@@ -16,58 +16,91 @@
  */
 package org.apache.camel.component.file.remote.integration;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.ThreadPoolProfileBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.ThreadPoolProfile;
-import org.apache.camel.util.IOHelper;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class FromFileToFtpSplitParallelIT extends FtpServerTestSupport {
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-    private static final int SIZE = 5000;
+@Tag("not-parallel")
+@Disabled("Disabled due to CAMEL-18998")
+class FromFileToFtpSplitParallelIT extends FtpServerTestSupport {
+    private static final Logger LOG = LoggerFactory.getLogger(FromFileToFtpSplitParallelIT.class);
+
+    private static final int SIZE = 5_000;
+    private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/tmp2/big?password=admin";
     }
 
     @Test
-    public void testSplit() throws Exception {
-        // create big file
-        FileOutputStream fos = new FileOutputStream(testDirectory() + "/bigdata.txt");
-        for (int i = 0; i < SIZE; i++) {
-            String line = "ABCDEFGHIJKLMNOPQRSTUVWXYZ-" + i + "\n";
-            fos.write(line.getBytes(StandardCharsets.UTF_8));
-        }
-        IOHelper.close(fos);
-
+    void testSplit() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
+        mock.setResultWaitTime(TimeUnit.MINUTES.toMillis(5));
 
-        context.getRouteController().startAllRoutes();
+        assertDoesNotThrow(() -> context.getRouteController().startAllRoutes(),
+                "The split parallel route should start without exceptions");
 
-        assertMockEndpointsSatisfied(1, TimeUnit.MINUTES);
+        mock.assertIsSatisfied();
+    }
 
-        // use memory profiler
-        // Thread.sleep(99999999);
+    @BeforeEach
+    public void createBigFile() throws FileNotFoundException {
+        Assumptions.assumeTrue(AVAILABLE_PROCESSORS > 1,
+                "Skipping test because this system may not have enough resources to run it");
+
+        // create big file
+        try (PrintWriter writer = new PrintWriter(
+                new FileOutputStream(testDirectory.toString() + "/bigdata.txt"), true, StandardCharsets.UTF_8)) {
+            for (int i = 0; i < SIZE; i++) {
+                writer.printf("ABCDEFGHIJKLMNOPQRSTUVWXYZ%d%n", i);
+            }
+        }
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
+                final int poolSize = AVAILABLE_PROCESSORS / 2;
+
+                LOG.info(
+                        "Setting up the max pool size to the number of available processors: {}. Pool size will be set to half of that: {}",
+                        AVAILABLE_PROCESSORS, poolSize);
+
                 ThreadPoolProfile tpp
-                        = new ThreadPoolProfileBuilder("ftp-pool").poolSize(5).maxPoolSize(10).maxQueueSize(1000).build();
+                        = new ThreadPoolProfileBuilder("ftp-pool")
+                                .poolSize(poolSize)
+                                .maxPoolSize(AVAILABLE_PROCESSORS)
+                                .maxQueueSize(1_000)
+                                .build();
                 context.getExecutorServiceManager().registerThreadPoolProfile(tpp);
 
-                onException().maximumRedeliveries(5).redeliveryDelay(1000);
+                onException().maximumRedeliveries(5).redeliveryDelay(1_000);
 
-                from(fileUri()).noAutoStartup().routeId("foo")
-                    .split(body().tokenize("\n")).executorServiceRef("ftp-pool")
+                fromF("file:%s", testDirectory).noAutoStartup().routeId("foo")
+                    .split(body().tokenize("\n")).executorService("ftp-pool")
                         .to(getFtpUrl())
                         .to("log:line?groupSize=100")
                     .end()

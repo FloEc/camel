@@ -16,11 +16,15 @@
  */
 package org.apache.camel.component.file.remote.integration;
 
+import java.nio.file.Path;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -29,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
  * Unit test to test keepLastModified option.
  */
 public class FromFtpKeepLastModifiedIT extends FtpServerTestSupport {
+
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/keep?password=admin&binary=false&noop=true";
@@ -45,21 +52,21 @@ public class FromFtpKeepLastModifiedIT extends FtpServerTestSupport {
     public void testKeepLastModified() throws Exception {
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from(getFtpUrl()).delay(3000).to(fileUri("?keepLastModified=true"), "mock:result");
+            public void configure() {
+                from(getFtpUrl()).delay(3000).to(TestSupport.fileUri(testDirectory, "?keepLastModified=true"), "mock:result");
             }
         });
         context.start();
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedFileExists(testFile("hello.txt"));
+        mock.expectedFileExists(testDirectory.resolve("hello.txt"));
         mock.message(0).header(Exchange.FILE_LAST_MODIFIED).isNotNull();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         long t1 = mock.getReceivedExchanges().get(0).getIn().getHeader(Exchange.FILE_LAST_MODIFIED, long.class);
-        long t2 = testFile("hello.txt").toFile().lastModified();
+        long t2 = testDirectory.resolve("hello.txt").toFile().lastModified();
 
         assertEquals(t1, t2, "Timestamp should have been kept");
     }
@@ -68,21 +75,21 @@ public class FromFtpKeepLastModifiedIT extends FtpServerTestSupport {
     public void testDoNotKeepLastModified() throws Exception {
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from(getFtpUrl()).delay(3000).to(fileUri("?keepLastModified=false"), "mock:result");
+            public void configure() {
+                from(getFtpUrl()).delay(3000).to(TestSupport.fileUri(testDirectory, "?keepLastModified=false"), "mock:result");
             }
         });
         context.start();
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedFileExists(testFile("hello.txt"));
+        mock.expectedFileExists(testDirectory.resolve("hello.txt"));
         mock.message(0).header(Exchange.FILE_LAST_MODIFIED).isNotNull();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         long t1 = mock.getReceivedExchanges().get(0).getIn().getHeader(Exchange.FILE_LAST_MODIFIED, long.class);
-        long t2 = testFile("hello.txt").toFile().lastModified();
+        long t2 = testDirectory.resolve("hello.txt").toFile().lastModified();
 
         assertNotSame(t1, t2, "Timestamp should NOT have been kept");
     }
@@ -91,21 +98,21 @@ public class FromFtpKeepLastModifiedIT extends FtpServerTestSupport {
     public void testDoNotKeepLastModifiedIsDefault() throws Exception {
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from(getFtpUrl()).delay(3000).to(fileUri(), "mock:result");
+            public void configure() {
+                from(getFtpUrl()).delay(3000).to(TestSupport.fileUri(testDirectory), "mock:result");
             }
         });
         context.start();
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedFileExists(testFile("hello.txt"));
+        mock.expectedFileExists(testDirectory.resolve("hello.txt"));
         mock.message(0).header(Exchange.FILE_LAST_MODIFIED).isNotNull();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         long t1 = mock.getReceivedExchanges().get(0).getIn().getHeader(Exchange.FILE_LAST_MODIFIED, long.class);
-        long t2 = testFile("hello.txt").toFile().lastModified();
+        long t2 = testDirectory.resolve("hello.txt").toFile().lastModified();
 
         assertNotSame(t1, t2, "Timestamp should NOT have been kept");
     }

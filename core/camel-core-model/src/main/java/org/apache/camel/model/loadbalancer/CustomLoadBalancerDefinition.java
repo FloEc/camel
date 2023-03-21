@@ -16,11 +16,11 @@
  */
 package org.apache.camel.model.loadbalancer;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.model.LoadBalancerDefinition;
 import org.apache.camel.processor.loadbalancer.LoadBalancer;
@@ -36,6 +36,7 @@ public class CustomLoadBalancerDefinition extends LoadBalancerDefinition {
 
     @XmlTransient
     private LoadBalancer loadBalancer;
+
     @XmlAttribute(required = true)
     private String ref;
 

@@ -27,7 +27,7 @@ public class JpaComponentConfigurer extends PropertyConfigurerSupport implements
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": target.setBridgeErrorHandler(property(camelContext, boolean.class, value)); return true;
         case "entitymanagerfactory":
-        case "entityManagerFactory": target.setEntityManagerFactory(property(camelContext, javax.persistence.EntityManagerFactory.class, value)); return true;
+        case "entityManagerFactory": target.setEntityManagerFactory(property(camelContext, jakarta.persistence.EntityManagerFactory.class, value)); return true;
         case "jointransaction":
         case "joinTransaction": target.setJoinTransaction(property(camelContext, boolean.class, value)); return true;
         case "lazystartproducer":
@@ -36,6 +36,8 @@ public class JpaComponentConfigurer extends PropertyConfigurerSupport implements
         case "sharedEntityManager": target.setSharedEntityManager(property(camelContext, boolean.class, value)); return true;
         case "transactionmanager":
         case "transactionManager": target.setTransactionManager(property(camelContext, org.springframework.transaction.PlatformTransactionManager.class, value)); return true;
+        case "transactionstrategy":
+        case "transactionStrategy": target.setTransactionStrategy(property(camelContext, org.apache.camel.component.jpa.TransactionStrategy.class, value)); return true;
         default: return false;
         }
     }
@@ -49,7 +51,7 @@ public class JpaComponentConfigurer extends PropertyConfigurerSupport implements
         case "bridgeerrorhandler":
         case "bridgeErrorHandler": return boolean.class;
         case "entitymanagerfactory":
-        case "entityManagerFactory": return javax.persistence.EntityManagerFactory.class;
+        case "entityManagerFactory": return jakarta.persistence.EntityManagerFactory.class;
         case "jointransaction":
         case "joinTransaction": return boolean.class;
         case "lazystartproducer":
@@ -58,6 +60,8 @@ public class JpaComponentConfigurer extends PropertyConfigurerSupport implements
         case "sharedEntityManager": return boolean.class;
         case "transactionmanager":
         case "transactionManager": return org.springframework.transaction.PlatformTransactionManager.class;
+        case "transactionstrategy":
+        case "transactionStrategy": return org.apache.camel.component.jpa.TransactionStrategy.class;
         default: return null;
         }
     }
@@ -81,6 +85,8 @@ public class JpaComponentConfigurer extends PropertyConfigurerSupport implements
         case "sharedEntityManager": return target.isSharedEntityManager();
         case "transactionmanager":
         case "transactionManager": return target.getTransactionManager();
+        case "transactionstrategy":
+        case "transactionStrategy": return target.getTransactionStrategy();
         default: return null;
         }
     }

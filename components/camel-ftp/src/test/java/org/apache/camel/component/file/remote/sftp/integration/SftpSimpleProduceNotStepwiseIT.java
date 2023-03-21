@@ -25,11 +25,11 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpSimpleProduceNotStepwiseIT extends SftpServerTestSupport {
 
     @Test
-    public void testSftpSimpleProduce() throws Exception {
+    public void testSftpSimpleProduce() {
         template.sendBodyAndHeader(
                 "sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}"
                                    + "?username=admin&password=admin&stepwise=false",
@@ -42,7 +42,7 @@ public class SftpSimpleProduceNotStepwiseIT extends SftpServerTestSupport {
     }
 
     @Test
-    public void testSftpSimpleSubPathProduce() throws Exception {
+    public void testSftpSimpleSubPathProduce() {
         template.sendBodyAndHeader(
                 "sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}"
                                    + "/mysub?username=admin&password=admin&stepwise=false",
@@ -55,7 +55,7 @@ public class SftpSimpleProduceNotStepwiseIT extends SftpServerTestSupport {
     }
 
     @Test
-    public void testSftpSimpleTwoSubPathProduce() throws Exception {
+    public void testSftpSimpleTwoSubPathProduce() {
         template.sendBodyAndHeader("sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}"
                                    + "/mysub/myother?username=admin&password=admin&stepwise=false",
                 "Farewell World",

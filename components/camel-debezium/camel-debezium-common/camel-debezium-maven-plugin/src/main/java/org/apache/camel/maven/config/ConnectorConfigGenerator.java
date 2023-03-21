@@ -23,7 +23,7 @@ import java.util.Set;
 import io.debezium.config.CommonConnectorConfig;
 import io.debezium.config.Configuration;
 import io.debezium.config.Field;
-import io.debezium.relational.history.FileDatabaseHistory;
+import io.debezium.storage.file.history.FileSchemaHistory;
 import org.apache.camel.component.debezium.configuration.ConfigurationValidation;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.UriParam;
@@ -68,17 +68,17 @@ public final class ConnectorConfigGenerator {
     }
 
     public static ConnectorConfigGenerator create(
-            final SourceConnector connector, final Class<?> dbzConfigClass, final Map<String, Object> overridenDefaultValues) {
-        return create(connector, dbzConfigClass, Collections.emptySet(), overridenDefaultValues);
+            final SourceConnector connector, final Class<?> dbzConfigClass, final Map<String, Object> overriddenDefaultValues) {
+        return create(connector, dbzConfigClass, Collections.emptySet(), overriddenDefaultValues);
     }
 
     public static ConnectorConfigGenerator create(
             final SourceConnector connector, final Class<?> dbzConfigClass, final Set<String> requiredFields,
-            final Map<String, Object> overridenDefaultValues) {
+            final Map<String, Object> overriddenDefaultValues) {
         ObjectHelper.notNull(connector, "connector");
         ObjectHelper.notNull(dbzConfigClass, "dbzConfigClass");
         ObjectHelper.notNull(requiredFields, "requiredFields");
-        ObjectHelper.notNull(overridenDefaultValues, "overridenDefaultValues");
+        ObjectHelper.notNull(overriddenDefaultValues, "overriddenDefaultValues");
 
         // check if config class is correct
         if (!isConfigClassValid(dbzConfigClass)) {
@@ -88,13 +88,13 @@ public final class ConnectorConfigGenerator {
 
         final ConfigDef configDef = connector.config();
         // add additional fields
-        Field.group(configDef, "additionalFields", FileDatabaseHistory.FILE_PATH);
+        Field.group(configDef, "additionalFields", FileSchemaHistory.FILE_PATH);
         // get the name of the connector from the configClass
         final String connectorName = dbzConfigClass.getSimpleName().replace(CONNECTOR_SUFFIX, "");
 
         return new ConnectorConfigGenerator(
                 connector, ConnectorConfigFieldsFactory.createConnectorFieldsAsMap(configDef, dbzConfigClass, requiredFields,
-                        overridenDefaultValues),
+                        overriddenDefaultValues),
                 connectorName);
     }
 
@@ -194,7 +194,7 @@ public final class ConnectorConfigGenerator {
                         annotation.setLiteralValue("defaultValue",
                                 String.format("\"%s\"", ConnectorConfigGeneratorUtils.toTimeAsString(defaultValueAsLong)));
                     } else {
-                        annotation.setLiteralValue("defaultValue", String.format("\"%s\"", fieldConfig.getDefaultValue()));
+                        annotation.setLiteralValue("defaultValue", fieldConfig.getDefaultValueAsStringLiteral());
                     }
                 }
 

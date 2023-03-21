@@ -20,6 +20,7 @@ import org.apache.camel.dsl.yaml.common.YamlDeserializationContext;
 import org.apache.camel.dsl.yaml.common.YamlDeserializerBase;
 import org.apache.camel.dsl.yaml.common.YamlDeserializerResolver;
 import org.apache.camel.dsl.yaml.common.exception.UnsupportedFieldException;
+import org.apache.camel.model.DescriptionDefinition;
 import org.apache.camel.model.FromDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.spi.annotations.YamlIn;
@@ -36,8 +37,18 @@ import org.snakeyaml.engine.v2.nodes.NodeTuple;
           order = YamlDeserializerResolver.ORDER_DEFAULT,
           properties = {
                   @YamlProperty(name = "id", type = "string"),
+                  @YamlProperty(name = "description", type = "string"),
                   @YamlProperty(name = "group", type = "string"),
+                  @YamlProperty(name = "node-prefix-id", type = "string"),
+                  @YamlProperty(name = "precondition", type = "string"),
                   @YamlProperty(name = "route-configuration-id", type = "string"),
+                  @YamlProperty(name = "auto-startup", type = "boolean"),
+                  @YamlProperty(name = "route-policy", type = "string"),
+                  @YamlProperty(name = "startup-order", type = "number"),
+                  @YamlProperty(name = "stream-caching", type = "boolean"),
+                  @YamlProperty(name = "message-history", type = "boolean"),
+                  @YamlProperty(name = "log-mask", type = "boolean"),
+                  @YamlProperty(name = "trace", type = "boolean"),
                   @YamlProperty(name = "from", type = "object:org.apache.camel.model.FromDefinition", required = true)
           })
 public class RouteDefinitionDeserializer extends YamlDeserializerBase<RouteDefinition> {
@@ -65,11 +76,49 @@ public class RouteDefinitionDeserializer extends YamlDeserializerBase<RouteDefin
                 case "id":
                     target.setId(asText(val));
                     break;
+                case "description":
+                    target.setDescription(new DescriptionDefinition(asText(val)));
+                    break;
+                case "precondition":
+                    target.setPrecondition(asText(val));
+                    break;
                 case "group":
                     target.setGroup(asText(val));
                     break;
+                case "nodePrefixId":
+                case "node-prefix-id":
+                    target.setNodePrefixId(asText(val));
+                    break;
+                case "routeConfigurationId":
                 case "route-configuration-id":
                     target.setRouteConfigurationId(asText(val));
+                    break;
+                case "autoStartup":
+                case "auto-startup":
+                    target.setAutoStartup(asText(val));
+                    break;
+                case "routePolicy":
+                case "route-policy":
+                    target.setRoutePolicyRef(asText(val));
+                    break;
+                case "startupOrder":
+                case "startup-order":
+                    target.setStartupOrder(asInt(val));
+                    break;
+                case "streamCaching":
+                case "stream-caching":
+                    target.setStreamCache(asText(val));
+                    break;
+                case "logMask":
+                case "log-mask":
+                    target.setLogMask(asText(val));
+                    break;
+                case "messageHistory":
+                case "message-history":
+                    target.setMessageHistory(asText(val));
+                    break;
+                case "trace":
+                    target.setTrace(asText(val));
                     break;
                 case "from":
                     val.setProperty(RouteDefinition.class.getName(), target);

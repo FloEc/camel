@@ -23,7 +23,8 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         map.put("applicationName", java.lang.String.class);
         map.put("clientId", java.lang.String.class);
         map.put("configuration", org.apache.camel.component.google.calendar.GoogleCalendarConfiguration.class);
-        map.put("scopes", java.lang.String.class);
+        map.put("delegate", java.lang.String.class);
+        map.put("scopes", java.util.List.class);
         map.put("bridgeErrorHandler", boolean.class);
         map.put("lazyStartProducer", boolean.class);
         map.put("autowiredEnabled", boolean.class);
@@ -33,6 +34,7 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         map.put("emailAddress", java.lang.String.class);
         map.put("p12FileName", java.lang.String.class);
         map.put("refreshToken", java.lang.String.class);
+        map.put("serviceAccountKey", java.lang.String.class);
         map.put("user", java.lang.String.class);
         ALL_OPTIONS = map;
     }
@@ -63,6 +65,7 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         case "clientsecret":
         case "clientSecret": getOrCreateConfiguration(target).setClientSecret(property(camelContext, java.lang.String.class, value)); return true;
         case "configuration": target.setConfiguration(property(camelContext, org.apache.camel.component.google.calendar.GoogleCalendarConfiguration.class, value)); return true;
+        case "delegate": getOrCreateConfiguration(target).setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "emailaddress":
         case "emailAddress": getOrCreateConfiguration(target).setEmailAddress(property(camelContext, java.lang.String.class, value)); return true;
         case "lazystartproducer":
@@ -71,7 +74,9 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         case "p12FileName": getOrCreateConfiguration(target).setP12FileName(property(camelContext, java.lang.String.class, value)); return true;
         case "refreshtoken":
         case "refreshToken": getOrCreateConfiguration(target).setRefreshToken(property(camelContext, java.lang.String.class, value)); return true;
-        case "scopes": getOrCreateConfiguration(target).setScopes(property(camelContext, java.lang.String.class, value)); return true;
+        case "scopes": getOrCreateConfiguration(target).setScopes(property(camelContext, java.util.List.class, value)); return true;
+        case "serviceaccountkey":
+        case "serviceAccountKey": getOrCreateConfiguration(target).setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         case "user": getOrCreateConfiguration(target).setUser(property(camelContext, java.lang.String.class, value)); return true;
         default: return false;
         }
@@ -100,6 +105,7 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         case "clientsecret":
         case "clientSecret": return java.lang.String.class;
         case "configuration": return org.apache.camel.component.google.calendar.GoogleCalendarConfiguration.class;
+        case "delegate": return java.lang.String.class;
         case "emailaddress":
         case "emailAddress": return java.lang.String.class;
         case "lazystartproducer":
@@ -108,7 +114,9 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         case "p12FileName": return java.lang.String.class;
         case "refreshtoken":
         case "refreshToken": return java.lang.String.class;
-        case "scopes": return java.lang.String.class;
+        case "scopes": return java.util.List.class;
+        case "serviceaccountkey":
+        case "serviceAccountKey": return java.lang.String.class;
         case "user": return java.lang.String.class;
         default: return null;
         }
@@ -133,6 +141,7 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         case "clientsecret":
         case "clientSecret": return getOrCreateConfiguration(target).getClientSecret();
         case "configuration": return target.getConfiguration();
+        case "delegate": return getOrCreateConfiguration(target).getDelegate();
         case "emailaddress":
         case "emailAddress": return getOrCreateConfiguration(target).getEmailAddress();
         case "lazystartproducer":
@@ -142,7 +151,17 @@ public class GoogleCalendarComponentConfigurer extends PropertyConfigurerSupport
         case "refreshtoken":
         case "refreshToken": return getOrCreateConfiguration(target).getRefreshToken();
         case "scopes": return getOrCreateConfiguration(target).getScopes();
+        case "serviceaccountkey":
+        case "serviceAccountKey": return getOrCreateConfiguration(target).getServiceAccountKey();
         case "user": return getOrCreateConfiguration(target).getUser();
+        default: return null;
+        }
+    }
+
+    @Override
+    public Object getCollectionValueType(Object target, String name, boolean ignoreCase) {
+        switch (ignoreCase ? name.toLowerCase() : name) {
+        case "scopes": return java.lang.String.class;
         default: return null;
         }
     }

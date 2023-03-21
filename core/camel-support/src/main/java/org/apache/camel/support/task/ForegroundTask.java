@@ -36,13 +36,26 @@ public class ForegroundTask implements BlockingTask {
      * A builder helper for building new foreground tasks
      */
     public static class ForegroundTaskBuilder extends AbstractTaskBuilder<ForegroundTask> {
+        private String name;
         private IterationBudget budget;
 
         /**
+         * Sets the name of the task
+         *
+         * @param  name the name
+         * @return      an instance of this builder
+         */
+        public ForegroundTaskBuilder withName(String name) {
+            this.name = name;
+
+            return this;
+        }
+
+        /**
          * Sets an iteration budget for the task (i.e.: the task will not run more than the given number of iterations)
-         * 
+         *
          * @param  budget the budget
-         * @return        an instance of the this builder
+         * @return        an instance of this builder
          */
         public ForegroundTaskBuilder withBudget(IterationBudget budget) {
             this.budget = budget;
@@ -52,7 +65,7 @@ public class ForegroundTask implements BlockingTask {
 
         @Override
         public ForegroundTask build() {
-            return new ForegroundTask(budget, getName());
+            return new ForegroundTask(budget, name != null ? name : getName());
         }
     }
 
@@ -65,36 +78,6 @@ public class ForegroundTask implements BlockingTask {
     ForegroundTask(IterationBudget budget, String name) {
         this.budget = budget;
         this.name = name;
-    }
-
-    @Override
-    public <T> boolean run(Predicate<T> predicate, T payload) {
-        boolean completed = false;
-        try {
-            if (budget.initialDelay() > 0) {
-                Thread.sleep(budget.initialDelay());
-            }
-
-            while (budget.next()) {
-                if (predicate.test(payload)) {
-                    LOG.debug("Task {} is complete after {} iterations and it is ready to continue",
-                            name, budget.iteration());
-                    completed = true;
-                    break;
-                }
-
-                if (budget.canContinue()) {
-                    Thread.sleep(budget.interval());
-                }
-            }
-        } catch (InterruptedException e) {
-            LOG.warn("Interrupted {} while waiting for the repeatable task to finish", name);
-            Thread.currentThread().interrupt();
-        } finally {
-            elapsed = budget.elapsed();
-        }
-
-        return completed;
     }
 
     @Override
@@ -131,7 +114,7 @@ public class ForegroundTask implements BlockingTask {
 
     /**
      * Run a task until it produces a result
-     * 
+     *
      * @param  supplier  the supplier of the result
      * @param  predicate a predicate to test if the result is acceptable
      * @param  <T>       the type for the result

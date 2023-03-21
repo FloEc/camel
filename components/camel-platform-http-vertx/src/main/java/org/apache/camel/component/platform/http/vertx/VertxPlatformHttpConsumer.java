@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -33,8 +33,10 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.FileUpload;
+import io.vertx.ext.web.RequestBody;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.impl.RouteImpl;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
@@ -64,6 +66,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
 
     private final List<Handler<RoutingContext>> handlers;
     private final String fileNameExtWhitelist;
+    private final boolean muteExceptions;
     private Set<Method> methods;
     private String path;
     private Route route;
@@ -77,6 +80,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
         this.handlers = handlers;
         this.fileNameExtWhitelist
                 = endpoint.getFileNameExtWhitelist() == null ? null : endpoint.getFileNameExtWhitelist().toLowerCase(Locale.US);
+        this.muteExceptions = endpoint.isMuteException();
     }
 
     @Override
@@ -98,15 +102,25 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
 
         final Route newRoute = router.route(path);
 
+        if (getEndpoint().getCamelContext().getRestConfiguration().isEnableCORS() && getEndpoint().getConsumes() != null) {
+            ((RouteImpl) newRoute).setEmptyBodyPermittedWithConsumes(true);
+        }
+
         if (!methods.equals(Method.getAll())) {
             methods.forEach(m -> newRoute.method(HttpMethod.valueOf(m.name())));
         }
 
         if (getEndpoint().getConsumes() != null) {
-            newRoute.consumes(getEndpoint().getConsumes());
+            //comma separated contentTypes has to be registered one by one
+            for (String c : getEndpoint().getConsumes().split(",")) {
+                newRoute.consumes(c);
+            }
         }
         if (getEndpoint().getProduces() != null) {
-            newRoute.produces(getEndpoint().getProduces());
+            //comma separated contentTypes has to be registered one by one
+            for (String p : getEndpoint().getProduces().split(",")) {
+                newRoute.produces(p);
+            }
         }
 
         newRoute.handler(router.bodyHandler());
@@ -153,7 +167,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
         return PATH_PARAMETER_PATTERN.matcher(path).replaceAll(":$1");
     }
 
-    private void handleRequest(RoutingContext ctx) {
+    protected void handleRequest(RoutingContext ctx) {
         final Vertx vertx = ctx.vertx();
         final Exchange exchange = toExchange(ctx);
 
@@ -165,7 +179,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
         // for the rest dsl, then the following code may result in a blocking operation that could
         // block Vert.x event-loop for too long if the target service takes long to respond, as
         // example in case the service is a knative service scaled to zero that could take some time
-        // to be come available:
+        // to become available:
         //
         //     rest("/results")
         //         .get("/{id}")
@@ -173,6 +187,13 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
         //             .removeHeaders("*", "CamelHttpPath")
         //             .to("rest:get:?bridgeEndpoint=true");
         //
+
+        if (getEndpoint().isHttpProxy()) {
+            exchange.getExchangeExtension().setStreamCacheDisabled(true);
+            final MultiMap httpHeaders = ctx.request().headers();
+            exchange.getMessage().setHeader(Exchange.HTTP_HOST, httpHeaders.get("Host"));
+            exchange.getMessage().removeHeader("Proxy-Connection");
+        }
         vertx.executeBlocking(
                 promise -> {
                     try {
@@ -183,11 +204,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
                     }
 
                     getAsyncProcessor().process(exchange, c -> {
-                        if (!exchange.isFailed()) {
-                            promise.complete();
-                        } else {
-                            promise.fail(exchange.getException());
-                        }
+                        promise.complete();
                     });
                 },
                 false,
@@ -196,7 +213,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
                     try {
                         if (result.succeeded()) {
                             try {
-                                writeResponse(ctx, exchange, getEndpoint().getHeaderFilterStrategy());
+                                writeResponse(ctx, exchange, getEndpoint().getHeaderFilterStrategy(), muteExceptions);
                             } catch (Exception e) {
                                 failure = e;
                             }
@@ -217,7 +234,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
                 });
     }
 
-    private Exchange toExchange(RoutingContext ctx) {
+    protected Exchange toExchange(RoutingContext ctx) {
         final Exchange exchange = createExchange(false);
         exchange.setPattern(ExchangePattern.InOut);
 
@@ -236,7 +253,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
         return exchange;
     }
 
-    private Message toCamelMessage(RoutingContext ctx, Exchange exchange) {
+    protected Message toCamelMessage(RoutingContext ctx, Exchange exchange) {
         final Message result = exchange.getIn();
 
         final HeaderFilterStrategy headerFilterStrategy = getEndpoint().getHeaderFilterStrategy();
@@ -264,14 +281,10 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
                 populateAttachments(ctx.fileUploads(), result);
             }
         } else {
-            Method m = Method.valueOf(ctx.request().method().name());
-            if (m.canHaveBody()) {
-                final Buffer body = ctx.getBody();
-                if (body != null) {
-                    result.setBody(body);
-                } else {
-                    result.setBody(null);
-                }
+            final RequestBody requestBody = ctx.body();
+            final Buffer body = requestBody.buffer();
+            if (body != null) {
+                result.setBody(body);
             } else {
                 result.setBody(null);
             }
@@ -279,7 +292,7 @@ public class VertxPlatformHttpConsumer extends DefaultConsumer {
         return result;
     }
 
-    private void populateAttachments(Set<FileUpload> uploads, Message message) {
+    protected void populateAttachments(List<FileUpload> uploads, Message message) {
         for (FileUpload upload : uploads) {
             final String name = upload.name();
             final String fileName = upload.fileName();

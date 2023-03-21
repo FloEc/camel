@@ -20,33 +20,27 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-public class QuartzStopRouteTest extends BaseQuartzTest {
+class QuartzStopRouteTest extends BaseQuartzTest {
 
     @Test
-    public void testQuartzSuspend() throws Exception {
+    void testQuartzSuspend() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);
 
-        assertMockEndpointsSatisfied();
+        mock.assertIsSatisfied();
 
         context.getRouteController().stopRoute("foo");
 
-        int size = mock.getReceivedCounter();
-        assertEquals(1, size, "Should not schedule when stopped");
-
-        resetMocks();
-
+        mock.reset();
         mock.expectedMessageCount(0);
         mock.assertIsSatisfied(3000);
 
-        resetMocks();
+        mock.reset();
         mock.expectedMinimumMessageCount(1);
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        mock.assertIsSatisfied();
     }
 
     @Override

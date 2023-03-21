@@ -26,7 +26,6 @@ import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
 import org.apache.camel.model.CircuitBreakerDefinition;
@@ -37,6 +36,7 @@ import org.apache.camel.reifier.ProcessorReifier;
 import org.apache.camel.spi.BeanIntrospection;
 import org.apache.camel.spi.ExtendedPropertyConfigurerGetter;
 import org.apache.camel.spi.PropertyConfigurer;
+import org.apache.camel.support.CamelContextHelper;
 import org.apache.camel.support.PropertyBindingSupport;
 import org.apache.camel.util.function.Suppliers;
 
@@ -63,12 +63,18 @@ public class ResilienceReifier extends ProcessorReifier<CircuitBreakerDefinition
         CircuitBreakerConfig cbConfig = configureCircuitBreaker(config);
         BulkheadConfig bhConfig = configureBulkHead(config);
         TimeLimiterConfig tlConfig = configureTimeLimiter(config);
+        boolean throwExceptionWhenHalfOpenOrOpenState = false;
+        Boolean b = CamelContextHelper.parseBoolean(camelContext, config.getThrowExceptionWhenHalfOpenOrOpenState());
+        if (b != null) {
+            throwExceptionWhenHalfOpenOrOpenState = b;
+        }
 
-        ResilienceProcessor answer = new ResilienceProcessor(cbConfig, bhConfig, tlConfig, processor, fallback);
+        ResilienceProcessor answer = new ResilienceProcessor(
+                cbConfig, bhConfig, tlConfig, processor, fallback, throwExceptionWhenHalfOpenOrOpenState);
         configureTimeoutExecutorService(answer, config);
         // using any existing circuit breakers?
-        if (config.getCircuitBreakerRef() != null) {
-            CircuitBreaker cb = mandatoryLookup(parseString(config.getCircuitBreakerRef()), CircuitBreaker.class);
+        if (config.getCircuitBreaker() != null) {
+            CircuitBreaker cb = mandatoryLookup(parseString(config.getCircuitBreaker()), CircuitBreaker.class);
             answer.setCircuitBreaker(cb);
         }
         return answer;
@@ -150,10 +156,10 @@ public class ResilienceReifier extends ProcessorReifier<CircuitBreakerDefinition
             return;
         }
 
-        if (config.getTimeoutExecutorServiceRef() != null) {
-            String ref = config.getTimeoutExecutorServiceRef();
+        if (config.getTimeoutExecutorService() != null) {
+            String ref = config.getTimeoutExecutorService();
             boolean shutdownThreadPool = false;
-            ExecutorService executorService = lookup(ref, ExecutorService.class);
+            ExecutorService executorService = lookupByNameAndType(ref, ExecutorService.class);
             if (executorService == null) {
                 executorService = lookupExecutorServiceRef("CircuitBreaker", definition, ref);
                 shutdownThreadPool = true;
@@ -170,7 +176,7 @@ public class ResilienceReifier extends ProcessorReifier<CircuitBreakerDefinition
     Resilience4jConfigurationDefinition buildResilience4jConfiguration() throws Exception {
         Map<String, Object> properties = new HashMap<>();
 
-        final PropertyConfigurer configurer = camelContext.adapt(ExtendedCamelContext.class)
+        final PropertyConfigurer configurer = camelContext.getCamelContextExtension()
                 .getConfigurerResolver()
                 .resolvePropertyConfigurer(Resilience4jConfigurationDefinition.class.getName(), camelContext);
 
@@ -178,14 +184,14 @@ public class ResilienceReifier extends ProcessorReifier<CircuitBreakerDefinition
         // camel context takes the precedence over those in the registry
         loadProperties(properties, Suppliers.firstNotNull(
                 () -> camelContext.getExtension(Model.class).getResilience4jConfiguration(null),
-                () -> lookup(ResilienceConstants.DEFAULT_RESILIENCE_CONFIGURATION_ID,
+                () -> lookupByNameAndType(ResilienceConstants.DEFAULT_RESILIENCE_CONFIGURATION_ID,
                         Resilience4jConfigurationDefinition.class)),
                 configurer);
 
         // Extract properties from referenced configuration, the one configured
         // on camel context takes the precedence over those in the registry
-        if (definition.getConfigurationRef() != null) {
-            final String ref = parseString(definition.getConfigurationRef());
+        if (definition.getConfiguration() != null) {
+            final String ref = parseString(definition.getConfiguration());
 
             loadProperties(properties, Suppliers.firstNotNull(
                     () -> camelContext.getExtension(Model.class).getResilience4jConfiguration(ref),
@@ -209,7 +215,7 @@ public class ResilienceReifier extends ProcessorReifier<CircuitBreakerDefinition
     }
 
     private void loadProperties(Map<String, Object> properties, Optional<?> optional, PropertyConfigurer configurer) {
-        BeanIntrospection beanIntrospection = camelContext.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        BeanIntrospection beanIntrospection = camelContext.getCamelContextExtension().getBeanIntrospection();
         optional.ifPresent(bean -> {
             if (configurer instanceof ExtendedPropertyConfigurerGetter) {
                 ExtendedPropertyConfigurerGetter getter = (ExtendedPropertyConfigurerGetter) configurer;

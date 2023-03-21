@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AdditionalMailPropertiesTest extends CamelTestSupport {
 
     @Test
-    public void testAdditionalMailProperties() throws Exception {
+    public void testAdditionalMailProperties() {
         // clear mailbox
         Mailbox.clearAll();
 
@@ -55,14 +55,14 @@ public class AdditionalMailPropertiesTest extends CamelTestSupport {
         mock.expectedBodiesReceived("Hello james how are you?");
         mock.expectedHeaderReceived("subject", "Hello");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://james@localhost?mail.pop3.forgettopheaders=true&initialDelay=100&delay=100").to("mock:result");
             }
         };

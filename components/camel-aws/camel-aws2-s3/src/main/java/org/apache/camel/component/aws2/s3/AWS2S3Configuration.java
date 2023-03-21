@@ -42,9 +42,9 @@ public class AWS2S3Configuration implements Cloneable {
     private String secretKey;
     @UriParam(label = "consumer")
     private String fileName;
-    @UriParam(label = "consumer")
+    @UriParam
     private String prefix;
-    @UriParam(label = "consumer")
+    @UriParam
     private String delimiter;
     @UriParam(label = "consumer")
     private String doneFileName;
@@ -67,7 +67,7 @@ public class AWS2S3Configuration implements Cloneable {
     @UriParam(label = "producer")
     private boolean multiPartUpload;
     @UriParam(label = "producer", defaultValue = "" + 25 * 1024 * 1024)
-    private long partSize = 25 * 1024 * 1024;
+    private long partSize = (long) 25 * 1024 * 1024;
     @UriParam
     private String policy;
     @UriParam(label = "producer")
@@ -102,8 +102,14 @@ public class AWS2S3Configuration implements Cloneable {
     private String customerKeyMD5;
     @UriParam(label = "common,advanced")
     private String customerAlgorithm;
+    @UriParam(label = "producer,advanced", defaultValue = "false")
+    private boolean useSSES3;
     @UriParam(defaultValue = "false")
     private boolean useDefaultCredentialsProvider;
+    @UriParam(defaultValue = "false")
+    private boolean useProfileCredentialsProvider;
+    @UriParam
+    private String profileCredentialsName;
     @UriParam(label = "producer")
     private String keyName;
     @UriParam(defaultValue = "false")
@@ -513,8 +519,7 @@ public class AWS2S3Configuration implements Cloneable {
     }
 
     /**
-     * Set whether the S3 client should expect to load credentials through a default credentials provider or to expect
-     * static credentials to be passed in.
+     * Set whether the S3 client should expect to load credentials through a default credentials provider.
      */
     public void setUseDefaultCredentialsProvider(Boolean useDefaultCredentialsProvider) {
         this.useDefaultCredentialsProvider = useDefaultCredentialsProvider;
@@ -522,6 +527,17 @@ public class AWS2S3Configuration implements Cloneable {
 
     public Boolean isUseDefaultCredentialsProvider() {
         return useDefaultCredentialsProvider;
+    }
+
+    /**
+     * Set whether the S3 client should expect to load credentials through a profile credentials provider.
+     */
+    public void setUseProfileCredentialsProvider(boolean useProfileCredentialsProvider) {
+        this.useProfileCredentialsProvider = useProfileCredentialsProvider;
+    }
+
+    public boolean isUseProfileCredentialsProvider() {
+        return useProfileCredentialsProvider;
     }
 
     public boolean isAutoCreateBucket() {
@@ -667,6 +683,28 @@ public class AWS2S3Configuration implements Cloneable {
      */
     public void setRestartingPolicy(AWSS3RestartingPolicyEnum restartingPolicy) {
         this.restartingPolicy = restartingPolicy;
+    }
+
+    public boolean isUseSSES3() {
+        return useSSES3;
+    }
+
+    /**
+     * Define if SSE S3 must be used or not
+     */
+    public void setUseSSES3(boolean useSSES3) {
+        this.useSSES3 = useSSES3;
+    }
+
+    public String getProfileCredentialsName() {
+        return profileCredentialsName;
+    }
+
+    /**
+     * If using a profile credentials provider this parameter will set the profile name
+     */
+    public void setProfileCredentialsName(String profileCredentialsName) {
+        this.profileCredentialsName = profileCredentialsName;
     }
 
     public AWS2S3Configuration copy() {

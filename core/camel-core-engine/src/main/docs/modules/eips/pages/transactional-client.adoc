@@ -19,14 +19,12 @@ a 3rd-party JTA transaction manager can be embedded and used.
 
 In Camel transactions are supported by JMS messaging components:
 
-- xref:ROOT:activemq-component.adoc[ActiveMQ]
 - xref:ROOT:jms-component.adoc[JMS]
 - xref:ROOT:sjms-component.adoc[Simple JMS]
 - xref:ROOT:sjms2-component.adoc[Simple JMS 2.x]
 
 And all the SQL database components, such as:
 
-- xref:ROOT:elsql-component.adoc[ElSQL]
 - xref:ROOT:jdbc-component.adoc[JDBC]
 - xref:ROOT:jpa-component.adoc[JPA]
 - xref:ROOT:sql-component.adoc[SQL]
@@ -74,13 +72,13 @@ and the latter as global transactions
 If you only have a single resource (such as one database, or one messaging system) then
 transactions can be simpler to orchestrate by the transaction manager. This is known as local transactions.
 
-The previous two examples above are both using a single resource, and are therefore using local transactions.
-When using local transactions and Spring Transactions, then you can use the dedicated transaction manager for the resource type:
+When using local transactions with Spring Transactions, then you can use the dedicated transaction manager
+for the resource type such as:
 
 - org.springframework.jdbc.datasource.DataSourceTransactionManager
 - org.springframework.jms.connection.JmsTransactionManager
 
-TIP: Consult the spring documentation for more local transaction managers.
+TIP: Consult the Spring documentation for more local transaction managers.
 
 ==== Global Transactions
 
@@ -333,8 +331,13 @@ it is based on a
 https://github.com/apache/camel/tree/main/components/camel-jms/src/test/java/org/apache/camel/component/jms/tx/TransactionMinimalConfigurationTest.java[unit test]
 the destination is a mock endpoint.
 
+[NOTE]
+====
+The following steps use the ActiveMQ component which is not yet supported on Camel 4.
+====
+
 First we configure the standard Spring XML to declare a JMS connection
-factory, a JMS transaction manager and our xref:ROOT:activemq-component.adoc[ActiveMQ] component that we
+factory, a JMS transaction manager and our ActiveMQ component that we
 use in our routing.
 
 [source,xml]

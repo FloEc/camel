@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -123,7 +123,7 @@ public interface CometdComponentBuilderFactory {
          * incoming and outgoing requests.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.cometd.bayeux.server.BayeuxServer.Extension&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.cometd.bayeux.server.BayeuxServer.Extension&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 

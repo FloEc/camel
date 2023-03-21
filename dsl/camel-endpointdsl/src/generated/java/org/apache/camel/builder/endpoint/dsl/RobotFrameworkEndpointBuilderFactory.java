@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -159,7 +159,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Creates combined statistics based on tags. Use the format tags:title
-         * List&lt;String&gt;.
+         * List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -207,8 +207,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Tests that have the given tags are considered critical.
-         * List&lt;String&gt;.
+         * Tests that have the given tags are considered critical. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -302,7 +301,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by tags. List&lt;String&gt;.
+         * Selects the tests cases by tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -349,7 +348,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by tags. List&lt;String&gt;.
+         * Selects the tests cases by tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -378,8 +377,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Sets multiple listeners for monitoring tests execution. Use the
-         * format ListenerWithArgs:arg1:arg2 or simply ListenerWithoutArgs
-         * List&lt;String&gt;.
+         * format ListenerWithArgs:arg1:arg2 or simply ListenerWithoutArgs List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -451,7 +449,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Sets free metadata for the top level tests suites. comma seperated
-         * list of string resulting as List&lt;String&gt;.
+         * list of string resulting as List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -466,9 +464,9 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Using ANSI colors in console. Normally colors work in unixes but not
-         * in Windows. Default is 'on'. &lt;ul&gt; &lt;li&gt;'on' - use colors
-         * in unixes but not in Windows &lt;li&gt;'off' - never use colors
-         * &lt;li&gt;'force' - always use colors (also in Windows).
+         * in Windows. Default is 'on'. 'on' - use colors in unixes but not in
+         * Windows 'off' - never use colors 'force' - always use colors (also in
+         * Windows).
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -513,7 +511,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Tests that have the given tags are not critical. List&lt;String&gt;.
+         * Tests that have the given tags are not critical. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -830,7 +828,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests suites by name. List&lt;String&gt;.
+         * Selects the tests suites by name. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -875,7 +873,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Adds documentation to the specified tags. List&lt;String&gt;.
+         * Adds documentation to the specified tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -889,7 +887,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the tags(s) to all executed tests cases. List&lt;String&gt;.
+         * Sets the tags(s) to all executed tests cases. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -904,7 +902,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Excludes these tags from the Statistics by Tag and Test Details by
-         * Tag tables in outputs. List&lt;String&gt;.
+         * Tag tables in outputs. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -920,7 +918,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Includes only these tags in the Statistics by Tag and Test Details by
-         * Tag tables in outputs. List&lt;String&gt;.
+         * Tag tables in outputs. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -936,7 +934,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Adds external links to the Statistics by Tag table in outputs. Use
-         * the format pattern:link:title List&lt;String&gt;.
+         * the format pattern:link:title List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -951,7 +949,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by name. List&lt;String&gt;.
+         * Selects the tests cases by name. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -998,8 +996,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets variables using variables files. Use the format path:args
-         * List&lt;String&gt;.
+         * Sets variables using variables files. Use the format path:args List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1014,8 +1011,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets individual variables. Use the format name:value
-         * List&lt;String&gt;.
+         * Sets individual variables. Use the format name:value List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1095,51 +1091,6 @@ public interface RobotFrameworkEndpointBuilderFactory {
          */
         default RobotFrameworkEndpointConsumerBuilder xunitFile(String xunitFile) {
             doSetProperty("xunitFile", xunitFile);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default RobotFrameworkEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default RobotFrameworkEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -1521,8 +1472,8 @@ public interface RobotFrameworkEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -1543,8 +1494,8 @@ public interface RobotFrameworkEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -1670,6 +1621,51 @@ public interface RobotFrameworkEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default RobotFrameworkEndpointConsumerBuilder basic() {
             return (RobotFrameworkEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedRobotFrameworkEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedRobotFrameworkEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1905,7 +1901,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Creates combined statistics based on tags. Use the format tags:title
-         * List&lt;String&gt;.
+         * List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1953,8 +1949,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Tests that have the given tags are considered critical.
-         * List&lt;String&gt;.
+         * Tests that have the given tags are considered critical. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2048,7 +2043,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by tags. List&lt;String&gt;.
+         * Selects the tests cases by tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2095,7 +2090,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by tags. List&lt;String&gt;.
+         * Selects the tests cases by tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2124,8 +2119,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Sets multiple listeners for monitoring tests execution. Use the
-         * format ListenerWithArgs:arg1:arg2 or simply ListenerWithoutArgs
-         * List&lt;String&gt;.
+         * format ListenerWithArgs:arg1:arg2 or simply ListenerWithoutArgs List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2197,7 +2191,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Sets free metadata for the top level tests suites. comma seperated
-         * list of string resulting as List&lt;String&gt;.
+         * list of string resulting as List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2212,9 +2206,9 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Using ANSI colors in console. Normally colors work in unixes but not
-         * in Windows. Default is 'on'. &lt;ul&gt; &lt;li&gt;'on' - use colors
-         * in unixes but not in Windows &lt;li&gt;'off' - never use colors
-         * &lt;li&gt;'force' - always use colors (also in Windows).
+         * in Windows. Default is 'on'. 'on' - use colors in unixes but not in
+         * Windows 'off' - never use colors 'force' - always use colors (also in
+         * Windows).
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2259,7 +2253,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Tests that have the given tags are not critical. List&lt;String&gt;.
+         * Tests that have the given tags are not critical. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2576,7 +2570,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests suites by name. List&lt;String&gt;.
+         * Selects the tests suites by name. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2621,7 +2615,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Adds documentation to the specified tags. List&lt;String&gt;.
+         * Adds documentation to the specified tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2635,7 +2629,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the tags(s) to all executed tests cases. List&lt;String&gt;.
+         * Sets the tags(s) to all executed tests cases. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2650,7 +2644,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Excludes these tags from the Statistics by Tag and Test Details by
-         * Tag tables in outputs. List&lt;String&gt;.
+         * Tag tables in outputs. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2666,7 +2660,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Includes only these tags in the Statistics by Tag and Test Details by
-         * Tag tables in outputs. List&lt;String&gt;.
+         * Tag tables in outputs. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2682,7 +2676,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Adds external links to the Statistics by Tag table in outputs. Use
-         * the format pattern:link:title List&lt;String&gt;.
+         * the format pattern:link:title List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2697,7 +2691,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by name. List&lt;String&gt;.
+         * Selects the tests cases by name. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2744,8 +2738,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets variables using variables files. Use the format path:args
-         * List&lt;String&gt;.
+         * Sets variables using variables files. Use the format path:args List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2760,8 +2753,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets individual variables. Use the format name:value
-         * List&lt;String&gt;.
+         * Sets individual variables. Use the format name:value List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2843,6 +2835,18 @@ public interface RobotFrameworkEndpointBuilderFactory {
             doSetProperty("xunitFile", xunitFile);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the Robot Framework
+     * component.
+     */
+    public interface AdvancedRobotFrameworkEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default RobotFrameworkEndpointProducerBuilder basic() {
+            return (RobotFrameworkEndpointProducerBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -2857,12 +2861,12 @@ public interface RobotFrameworkEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default RobotFrameworkEndpointProducerBuilder lazyStartProducer(
+        default AdvancedRobotFrameworkEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -2882,27 +2886,15 @@ public interface RobotFrameworkEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default RobotFrameworkEndpointProducerBuilder lazyStartProducer(
+        default AdvancedRobotFrameworkEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint producers for the Robot Framework
-     * component.
-     */
-    public interface AdvancedRobotFrameworkEndpointProducerBuilder
-            extends
-                EndpointProducerBuilder {
-        default RobotFrameworkEndpointProducerBuilder basic() {
-            return (RobotFrameworkEndpointProducerBuilder) this;
         }
     }
 
@@ -3030,7 +3022,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Creates combined statistics based on tags. Use the format tags:title
-         * List&lt;String&gt;.
+         * List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3076,8 +3068,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Tests that have the given tags are considered critical.
-         * List&lt;String&gt;.
+         * Tests that have the given tags are considered critical. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3169,7 +3160,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by tags. List&lt;String&gt;.
+         * Selects the tests cases by tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3215,7 +3206,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by tags. List&lt;String&gt;.
+         * Selects the tests cases by tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3244,8 +3235,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Sets multiple listeners for monitoring tests execution. Use the
-         * format ListenerWithArgs:arg1:arg2 or simply ListenerWithoutArgs
-         * List&lt;String&gt;.
+         * format ListenerWithArgs:arg1:arg2 or simply ListenerWithoutArgs List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3317,7 +3307,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Sets free metadata for the top level tests suites. comma seperated
-         * list of string resulting as List&lt;String&gt;.
+         * list of string resulting as List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3332,9 +3322,9 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Using ANSI colors in console. Normally colors work in unixes but not
-         * in Windows. Default is 'on'. &lt;ul&gt; &lt;li&gt;'on' - use colors
-         * in unixes but not in Windows &lt;li&gt;'off' - never use colors
-         * &lt;li&gt;'force' - always use colors (also in Windows).
+         * in Windows. Default is 'on'. 'on' - use colors in unixes but not in
+         * Windows 'off' - never use colors 'force' - always use colors (also in
+         * Windows).
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3377,7 +3367,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Tests that have the given tags are not critical. List&lt;String&gt;.
+         * Tests that have the given tags are not critical. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3690,7 +3680,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests suites by name. List&lt;String&gt;.
+         * Selects the tests suites by name. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3734,7 +3724,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Adds documentation to the specified tags. List&lt;String&gt;.
+         * Adds documentation to the specified tags. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3748,7 +3738,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the tags(s) to all executed tests cases. List&lt;String&gt;.
+         * Sets the tags(s) to all executed tests cases. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3763,7 +3753,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Excludes these tags from the Statistics by Tag and Test Details by
-         * Tag tables in outputs. List&lt;String&gt;.
+         * Tag tables in outputs. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3779,7 +3769,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Includes only these tags in the Statistics by Tag and Test Details by
-         * Tag tables in outputs. List&lt;String&gt;.
+         * Tag tables in outputs. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3795,7 +3785,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
         }
         /**
          * Adds external links to the Statistics by Tag table in outputs. Use
-         * the format pattern:link:title List&lt;String&gt;.
+         * the format pattern:link:title List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3809,7 +3799,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Selects the tests cases by name. List&lt;String&gt;.
+         * Selects the tests cases by name. List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3856,8 +3846,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets variables using variables files. Use the format path:args
-         * List&lt;String&gt;.
+         * Sets variables using variables files. Use the format path:args List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3871,8 +3860,7 @@ public interface RobotFrameworkEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets individual variables. Use the format name:value
-         * List&lt;String&gt;.
+         * Sets individual variables. Use the format name:value List.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3976,6 +3964,19 @@ public interface RobotFrameworkEndpointBuilderFactory {
          * Since: 3.0
          * Maven coordinates: org.apache.camel:camel-robotframework
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default RobotFrameworkHeaderNameBuilder robotframework() {
+            return RobotFrameworkHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Robot Framework (camel-robotframework)
+         * Pass camel exchanges to acceptence test written in Robot DSL.
+         * 
+         * Category: testing
+         * Since: 3.0
+         * Maven coordinates: org.apache.camel:camel-robotframework
+         * 
          * Syntax: <code>robotframework:resourceUri</code>
          * 
          * Path parameter: resourceUri (required)
@@ -4019,6 +4020,56 @@ public interface RobotFrameworkEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return RobotFrameworkEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Robot Framework component.
+     */
+    public static class RobotFrameworkHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final RobotFrameworkHeaderNameBuilder INSTANCE = new RobotFrameworkHeaderNameBuilder();
+
+        /**
+         * The robot variables.
+         * 
+         * The option is a: {@code List<String>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code RobotVariables}.
+         */
+        public String robotVariables() {
+            return "RobotVariables";
+        }
+
+        /**
+         * The return code.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code RobotReturnCode}.
+         */
+        public String robotReturnCode() {
+            return "RobotReturnCode";
+        }
+
+        /**
+         * The new resource URI.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code RobotResourceUri}.
+         */
+        public String robotResourceUri() {
+            return "RobotResourceUri";
         }
     }
     static RobotFrameworkEndpointBuilder endpointBuilder(

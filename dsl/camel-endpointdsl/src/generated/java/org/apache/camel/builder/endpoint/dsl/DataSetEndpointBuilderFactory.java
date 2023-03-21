@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -44,13 +44,14 @@ public interface DataSetEndpointBuilderFactory {
             return (AdvancedDataSetEndpointConsumerBuilder) this;
         }
         /**
-         * Controls the behaviour of the CamelDataSetIndex header. For
-         * Consumers: - off =&gt; the header will not be set - strict/lenient
-         * =&gt; the header will be set For Producers: - off =&gt; the header
-         * value will not be verified, and will not be set if it is not present
-         * = strict =&gt; the header value must be present and will be verified
-         * = lenient =&gt; the header value will be verified if it is present,
-         * and will be set if it is not present.
+         * Controls the behaviour of the CamelDataSetIndex header. off
+         * (consumer) the header will not be set. strict (consumer) the header
+         * will be set. lenient (consumer) the header will be set. off
+         * (producer) the header value will not be verified, and will not be set
+         * if it is not present. strict (producer) the header value must be
+         * present and will be verified. lenient (producer) the header value
+         * will be verified if it is present, and will be set if it is not
+         * present.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -62,51 +63,6 @@ public interface DataSetEndpointBuilderFactory {
          */
         default DataSetEndpointConsumerBuilder dataSetIndex(String dataSetIndex) {
             doSetProperty("dataSetIndex", dataSetIndex);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default DataSetEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default DataSetEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -245,6 +201,51 @@ public interface DataSetEndpointBuilderFactory {
             return (DataSetEndpointConsumerBuilder) this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedDataSetEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedDataSetEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -326,13 +327,14 @@ public interface DataSetEndpointBuilderFactory {
             return (AdvancedDataSetEndpointProducerBuilder) this;
         }
         /**
-         * Controls the behaviour of the CamelDataSetIndex header. For
-         * Consumers: - off =&gt; the header will not be set - strict/lenient
-         * =&gt; the header will be set For Producers: - off =&gt; the header
-         * value will not be verified, and will not be set if it is not present
-         * = strict =&gt; the header value must be present and will be verified
-         * = lenient =&gt; the header value will be verified if it is present,
-         * and will be set if it is not present.
+         * Controls the behaviour of the CamelDataSetIndex header. off
+         * (consumer) the header will not be set. strict (consumer) the header
+         * will be set. lenient (consumer) the header will be set. off
+         * (producer) the header value will not be verified, and will not be set
+         * if it is not present. strict (producer) the header value must be
+         * present and will be verified. lenient (producer) the header value
+         * will be verified if it is present, and will be set if it is not
+         * present.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -348,13 +350,13 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Sets a grace period after which the mock endpoint will re-assert to
-         * ensure the preliminary assertion is still valid. &lt;p/&gt; This is
-         * used for example to assert that &lt;b&gt;exactly a number of messages
-         * arrives. For example if expectedMessageCount(int) was set to 5, then
-         * the assertion is satisfied when 5 or more message arrives. To ensure
-         * that exactly 5 messages arrives, then you would need to wait a little
-         * period to ensure no further message arrives. This is what you can use
-         * this method for. &lt;p/&gt; By default this period is disabled.
+         * ensure the preliminary assertion is still valid. This is used for
+         * example to assert that exactly a number of messages arrives. For
+         * example if expected count was set to 5, then the assertion is
+         * satisfied when 5 or more message arrives. To ensure that exactly 5
+         * messages arrives, then you would need to wait a little period to
+         * ensure no further message arrives. This is what you can use this
+         * method for. By default this period is disabled.
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -369,13 +371,13 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Sets a grace period after which the mock endpoint will re-assert to
-         * ensure the preliminary assertion is still valid. &lt;p/&gt; This is
-         * used for example to assert that &lt;b&gt;exactly a number of messages
-         * arrives. For example if expectedMessageCount(int) was set to 5, then
-         * the assertion is satisfied when 5 or more message arrives. To ensure
-         * that exactly 5 messages arrives, then you would need to wait a little
-         * period to ensure no further message arrives. This is what you can use
-         * this method for. &lt;p/&gt; By default this period is disabled.
+         * ensure the preliminary assertion is still valid. This is used for
+         * example to assert that exactly a number of messages arrives. For
+         * example if expected count was set to 5, then the assertion is
+         * satisfied when 5 or more message arrives. To ensure that exactly 5
+         * messages arrives, then you would need to wait a little period to
+         * ensure no further message arrives. This is what you can use this
+         * method for. By default this period is disabled.
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -422,13 +424,17 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Specifies the expected number of message exchanges that should be
-         * received by this endpoint. &lt;p/&gt; &lt;b&gt;Beware: If you want to
-         * expect that &lt;tt&gt;0 messages, then take extra care, as
-         * &lt;tt&gt;0 matches when the tests starts, so you need to set a
-         * assert period time to let the test run for a while to make sure there
-         * are still no messages arrived; for that use setAssertPeriod(long). An
-         * alternative is to use n'th message arrives to this mock endpoint,
-         * then see also the setAssertPeriod(long) method for further details.
+         * received by this endpoint. Beware: If you want to expect that 0
+         * messages, then take extra care, as 0 matches when the tests starts,
+         * so you need to set a assert period time to let the test run for a
+         * while to make sure there are still no messages arrived; for that use
+         * setAssertPeriod(long). An alternative is to use NotifyBuilder, and
+         * use the notifier to know when Camel is done routing some messages,
+         * before you call the assertIsSatisfied() method on the mocks. This
+         * allows you to not use a fixed assert period, to speedup testing
+         * times. If you want to assert that exactly n'th message arrives to
+         * this mock endpoint, then see also the setAssertPeriod(long) method
+         * for further details.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -444,13 +450,17 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Specifies the expected number of message exchanges that should be
-         * received by this endpoint. &lt;p/&gt; &lt;b&gt;Beware: If you want to
-         * expect that &lt;tt&gt;0 messages, then take extra care, as
-         * &lt;tt&gt;0 matches when the tests starts, so you need to set a
-         * assert period time to let the test run for a while to make sure there
-         * are still no messages arrived; for that use setAssertPeriod(long). An
-         * alternative is to use n'th message arrives to this mock endpoint,
-         * then see also the setAssertPeriod(long) method for further details.
+         * received by this endpoint. Beware: If you want to expect that 0
+         * messages, then take extra care, as 0 matches when the tests starts,
+         * so you need to set a assert period time to let the test run for a
+         * while to make sure there are still no messages arrived; for that use
+         * setAssertPeriod(long). An alternative is to use NotifyBuilder, and
+         * use the notifier to know when Camel is done routing some messages,
+         * before you call the assertIsSatisfied() method on the mocks. This
+         * allows you to not use a fixed assert period, to speedup testing
+         * times. If you want to assert that exactly n'th message arrives to
+         * this mock endpoint, then see also the setAssertPeriod(long) method
+         * for further details.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -469,8 +479,8 @@ public interface DataSetEndpointBuilderFactory {
          * Sets whether assertIsSatisfied() should fail fast at the first
          * detected failed expectation while it may otherwise wait for all
          * expected messages to arrive before performing expectations
-         * verifications. Is by default &lt;tt&gt;true. Set to &lt;tt&gt;false
-         * to use behavior as in Camel 2.x.
+         * verifications. Is by default true. Set to false to use behavior as in
+         * Camel 2.x.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -488,8 +498,8 @@ public interface DataSetEndpointBuilderFactory {
          * Sets whether assertIsSatisfied() should fail fast at the first
          * detected failed expectation while it may otherwise wait for all
          * expected messages to arrive before performing expectations
-         * verifications. Is by default &lt;tt&gt;true. Set to &lt;tt&gt;false
-         * to use behavior as in Camel 2.x.
+         * verifications. Is by default true. Set to false to use behavior as in
+         * Camel 2.x.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -505,59 +515,10 @@ public interface DataSetEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default DataSetEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default DataSetEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * To turn on logging when the mock receives an incoming message.
-         * &lt;p/&gt; This will log only one time at INFO level for the incoming
-         * message. For more detailed logging then set the logger to DEBUG level
-         * for the org.apache.camel.component.mock.MockEndpoint class.
+         * To turn on logging when the mock receives an incoming message. This
+         * will log only one time at INFO level for the incoming message. For
+         * more detailed logging then set the logger to DEBUG level for the
+         * org.apache.camel.component.mock.MockEndpoint class.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -572,10 +533,10 @@ public interface DataSetEndpointBuilderFactory {
             return this;
         }
         /**
-         * To turn on logging when the mock receives an incoming message.
-         * &lt;p/&gt; This will log only one time at INFO level for the incoming
-         * message. For more detailed logging then set the logger to DEBUG level
-         * for the org.apache.camel.component.mock.MockEndpoint class.
+         * To turn on logging when the mock receives an incoming message. This
+         * will log only one time at INFO level for the incoming message. For
+         * more detailed logging then set the logger to DEBUG level for the
+         * org.apache.camel.component.mock.MockEndpoint class.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -686,20 +647,19 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Specifies to only retain the first n'th number of received Exchanges.
-         * &lt;p/&gt; This is used when testing with big data, to reduce memory
-         * consumption by not storing copies of every Exchange this mock
-         * endpoint receives. &lt;p/&gt; &lt;b&gt;Important: When using this
-         * limitation, then the getReceivedCounter() will still return the
-         * actual number of received Exchanges. For example if we have received
-         * 5000 Exchanges, and have configured to only retain the first 10
-         * Exchanges, then the getReceivedCounter() will still return
-         * &lt;tt&gt;5000 but there is only the first 10 Exchanges in the
-         * getExchanges() and getReceivedExchanges() methods. &lt;p/&gt; When
-         * using this method, then some of the other expectation methods is not
+         * This is used when testing with big data, to reduce memory consumption
+         * by not storing copies of every Exchange this mock endpoint receives.
+         * Important: When using this limitation, then the getReceivedCounter()
+         * will still return the actual number of received Exchanges. For
+         * example if we have received 5000 Exchanges, and have configured to
+         * only retain the first 10 Exchanges, then the getReceivedCounter()
+         * will still return 5000 but there is only the first 10 Exchanges in
+         * the getExchanges() and getReceivedExchanges() methods. When using
+         * this method, then some of the other expectation methods is not
          * supported, for example the expectedBodiesReceived(Object...) sets a
-         * expectation on the first number of bodies received. &lt;p/&gt; You
-         * can configure both setRetainFirst(int) and setRetainLast(int)
-         * methods, to limit both the first and last received.
+         * expectation on the first number of bodies received. You can configure
+         * both setRetainFirst(int) and setRetainLast(int) methods, to limit
+         * both the first and last received.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -715,20 +675,19 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Specifies to only retain the first n'th number of received Exchanges.
-         * &lt;p/&gt; This is used when testing with big data, to reduce memory
-         * consumption by not storing copies of every Exchange this mock
-         * endpoint receives. &lt;p/&gt; &lt;b&gt;Important: When using this
-         * limitation, then the getReceivedCounter() will still return the
-         * actual number of received Exchanges. For example if we have received
-         * 5000 Exchanges, and have configured to only retain the first 10
-         * Exchanges, then the getReceivedCounter() will still return
-         * &lt;tt&gt;5000 but there is only the first 10 Exchanges in the
-         * getExchanges() and getReceivedExchanges() methods. &lt;p/&gt; When
-         * using this method, then some of the other expectation methods is not
+         * This is used when testing with big data, to reduce memory consumption
+         * by not storing copies of every Exchange this mock endpoint receives.
+         * Important: When using this limitation, then the getReceivedCounter()
+         * will still return the actual number of received Exchanges. For
+         * example if we have received 5000 Exchanges, and have configured to
+         * only retain the first 10 Exchanges, then the getReceivedCounter()
+         * will still return 5000 but there is only the first 10 Exchanges in
+         * the getExchanges() and getReceivedExchanges() methods. When using
+         * this method, then some of the other expectation methods is not
          * supported, for example the expectedBodiesReceived(Object...) sets a
-         * expectation on the first number of bodies received. &lt;p/&gt; You
-         * can configure both setRetainFirst(int) and setRetainLast(int)
-         * methods, to limit both the first and last received.
+         * expectation on the first number of bodies received. You can configure
+         * both setRetainFirst(int) and setRetainLast(int) methods, to limit
+         * both the first and last received.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -744,20 +703,19 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Specifies to only retain the last n'th number of received Exchanges.
-         * &lt;p/&gt; This is used when testing with big data, to reduce memory
-         * consumption by not storing copies of every Exchange this mock
-         * endpoint receives. &lt;p/&gt; &lt;b&gt;Important: When using this
-         * limitation, then the getReceivedCounter() will still return the
-         * actual number of received Exchanges. For example if we have received
-         * 5000 Exchanges, and have configured to only retain the last 20
-         * Exchanges, then the getReceivedCounter() will still return
-         * &lt;tt&gt;5000 but there is only the last 20 Exchanges in the
-         * getExchanges() and getReceivedExchanges() methods. &lt;p/&gt; When
-         * using this method, then some of the other expectation methods is not
-         * supported, for example the expectedBodiesReceived(Object...) sets a
-         * expectation on the first number of bodies received. &lt;p/&gt; You
-         * can configure both setRetainFirst(int) and setRetainLast(int)
-         * methods, to limit both the first and last received.
+         * This is used when testing with big data, to reduce memory consumption
+         * by not storing copies of every Exchange this mock endpoint receives.
+         * Important: When using this limitation, then the getReceivedCounter()
+         * will still return the actual number of received Exchanges. For
+         * example if we have received 5000 Exchanges, and have configured to
+         * only retain the last 20 Exchanges, then the getReceivedCounter() will
+         * still return 5000 but there is only the last 20 Exchanges in the
+         * getExchanges() and getReceivedExchanges() methods. When using this
+         * method, then some of the other expectation methods is not supported,
+         * for example the expectedBodiesReceived(Object...) sets a expectation
+         * on the first number of bodies received. You can configure both
+         * setRetainFirst(int) and setRetainLast(int) methods, to limit both the
+         * first and last received.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -773,20 +731,19 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Specifies to only retain the last n'th number of received Exchanges.
-         * &lt;p/&gt; This is used when testing with big data, to reduce memory
-         * consumption by not storing copies of every Exchange this mock
-         * endpoint receives. &lt;p/&gt; &lt;b&gt;Important: When using this
-         * limitation, then the getReceivedCounter() will still return the
-         * actual number of received Exchanges. For example if we have received
-         * 5000 Exchanges, and have configured to only retain the last 20
-         * Exchanges, then the getReceivedCounter() will still return
-         * &lt;tt&gt;5000 but there is only the last 20 Exchanges in the
-         * getExchanges() and getReceivedExchanges() methods. &lt;p/&gt; When
-         * using this method, then some of the other expectation methods is not
-         * supported, for example the expectedBodiesReceived(Object...) sets a
-         * expectation on the first number of bodies received. &lt;p/&gt; You
-         * can configure both setRetainFirst(int) and setRetainLast(int)
-         * methods, to limit both the first and last received.
+         * This is used when testing with big data, to reduce memory consumption
+         * by not storing copies of every Exchange this mock endpoint receives.
+         * Important: When using this limitation, then the getReceivedCounter()
+         * will still return the actual number of received Exchanges. For
+         * example if we have received 5000 Exchanges, and have configured to
+         * only retain the last 20 Exchanges, then the getReceivedCounter() will
+         * still return 5000 but there is only the last 20 Exchanges in the
+         * getExchanges() and getReceivedExchanges() methods. When using this
+         * method, then some of the other expectation methods is not supported,
+         * for example the expectedBodiesReceived(Object...) sets a expectation
+         * on the first number of bodies received. You can configure both
+         * setRetainFirst(int) and setRetainLast(int) methods, to limit both the
+         * first and last received.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -845,8 +802,7 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Sets whether to make a deep copy of the incoming Exchange when
-         * received at this mock endpoint. &lt;p/&gt; Is by default
-         * &lt;tt&gt;true.
+         * received at this mock endpoint. Is by default true.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -863,8 +819,7 @@ public interface DataSetEndpointBuilderFactory {
         }
         /**
          * Sets whether to make a deep copy of the incoming Exchange when
-         * received at this mock endpoint. &lt;p/&gt; Is by default
-         * &lt;tt&gt;true.
+         * received at this mock endpoint. Is by default true.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -880,6 +835,55 @@ public interface DataSetEndpointBuilderFactory {
             doSetProperty("copyOnExchange", copyOnExchange);
             return this;
         }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedDataSetEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedDataSetEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
     }
 
     /**
@@ -893,13 +897,14 @@ public interface DataSetEndpointBuilderFactory {
             return (AdvancedDataSetEndpointBuilder) this;
         }
         /**
-         * Controls the behaviour of the CamelDataSetIndex header. For
-         * Consumers: - off =&gt; the header will not be set - strict/lenient
-         * =&gt; the header will be set For Producers: - off =&gt; the header
-         * value will not be verified, and will not be set if it is not present
-         * = strict =&gt; the header value must be present and will be verified
-         * = lenient =&gt; the header value will be verified if it is present,
-         * and will be set if it is not present.
+         * Controls the behaviour of the CamelDataSetIndex header. off
+         * (consumer) the header will not be set. strict (consumer) the header
+         * will be set. lenient (consumer) the header will be set. off
+         * (producer) the header value will not be verified, and will not be set
+         * if it is not present. strict (producer) the header value must be
+         * present and will be verified. lenient (producer) the header value
+         * will be verified if it is present, and will be set if it is not
+         * present.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -928,6 +933,19 @@ public interface DataSetEndpointBuilderFactory {
     }
 
     public interface DataSetBuilders {
+        /**
+         * Dataset (camel-dataset)
+         * Provide data for load and soak testing of your Camel application.
+         * 
+         * Category: core,testing
+         * Since: 1.3
+         * Maven coordinates: org.apache.camel:camel-dataset
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default DataSetHeaderNameBuilder dataset() {
+            return DataSetHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Dataset (camel-dataset)
          * Provide data for load and soak testing of your Camel application.
@@ -967,6 +985,30 @@ public interface DataSetEndpointBuilderFactory {
          */
         default DataSetEndpointBuilder dataset(String componentName, String path) {
             return DataSetEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Dataset component.
+     */
+    public static class DataSetHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final DataSetHeaderNameBuilder INSTANCE = new DataSetHeaderNameBuilder();
+
+        /**
+         * The dataset index.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code DataSetIndex}.
+         */
+        public String dataSetIndex() {
+            return "DataSetIndex";
         }
     }
     static DataSetEndpointBuilder endpointBuilder(

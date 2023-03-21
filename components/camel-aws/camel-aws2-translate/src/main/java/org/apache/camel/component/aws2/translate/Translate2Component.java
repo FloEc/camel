@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon Translate SDK v2.
  */
 @Component("aws2-translate")
 public class Translate2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Translate2Component.class);
-
     @Metadata
     private Translate2Configuration configuration = new Translate2Configuration();
 
@@ -43,8 +38,6 @@ public class Translate2Component extends DefaultComponent {
 
     public Translate2Component(CamelContext context) {
         super(context);
-
-        registerExtension(new Translate2ComponentVerifierExtension());
     }
 
     @Override
@@ -54,7 +47,7 @@ public class Translate2Component extends DefaultComponent {
 
         Translate2Endpoint endpoint = new Translate2Endpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getTranslateClient() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider()) && configuration.getTranslateClient() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, Amazon translate client or accessKey and secretKey must be specified");

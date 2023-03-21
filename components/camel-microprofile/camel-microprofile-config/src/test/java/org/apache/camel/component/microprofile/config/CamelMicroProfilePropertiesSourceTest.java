@@ -23,6 +23,7 @@ import io.smallrye.config.SmallRyeConfigBuilder;
 import org.apache.camel.CamelContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.PropertiesComponent;
 import org.apache.camel.spi.PropertiesSource;
 import org.apache.camel.spi.Registry;
@@ -44,6 +45,7 @@ public class CamelMicroProfilePropertiesSourceTest extends CamelTestSupport {
         prop.put("start", "direct:start");
         prop.put("hi", "World");
         prop.put("my-mock", "result");
+        prop.put("empty", "");
 
         // create PMC config source and register it so we can use it for testing
         PropertiesConfigSource pcs = new PropertiesConfigSource(prop, "my-smallrye-config");
@@ -62,7 +64,7 @@ public class CamelMicroProfilePropertiesSourceTest extends CamelTestSupport {
     }
 
     @Override
-    protected void bindToRegistry(Registry registry) throws Exception {
+    protected void bindToRegistry(Registry registry) {
         Properties prop = new Properties();
         prop.put("who", "Camel");
 
@@ -80,17 +82,18 @@ public class CamelMicroProfilePropertiesSourceTest extends CamelTestSupport {
     }
 
     @Test
-    public void testLoadAll() throws Exception {
+    public void testLoadAll() {
         PropertiesComponent pc = context.getPropertiesComponent();
         Properties properties = pc.loadProperties();
 
         Assertions.assertThat(properties.get("start")).isEqualTo("direct:start");
         Assertions.assertThat(properties.get("hi")).isEqualTo("World");
         Assertions.assertThat(properties.get("my-mock")).isEqualTo("result");
+        Assertions.assertThat(properties.get("empty")).isNull();
     }
 
     @Test
-    public void testLoadFiltered() throws Exception {
+    public void testLoadFiltered() {
         PropertiesComponent pc = context.getPropertiesComponent();
         Properties properties = pc.loadProperties(k -> k.length() > 2);
 
@@ -105,14 +108,14 @@ public class CamelMicroProfilePropertiesSourceTest extends CamelTestSupport {
 
         template.sendBody("direct:start", context.resolvePropertyPlaceholders("Hello {{hi}} from {{who}}"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("{{start}}")
                         .to("mock:{{my-mock}}");
             }

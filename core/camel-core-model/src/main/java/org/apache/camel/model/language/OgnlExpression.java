@@ -16,9 +16,10 @@
  */
 package org.apache.camel.model.language;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.spi.Metadata;
 
@@ -28,7 +29,7 @@ import org.apache.camel.spi.Metadata;
 @Metadata(firstVersion = "1.1.0", label = "language,java", title = "OGNL")
 @XmlRootElement(name = "ognl")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OgnlExpression extends ExpressionDefinition {
+public class OgnlExpression extends TypedExpressionDefinition {
 
     public OgnlExpression() {
     }
@@ -37,8 +38,24 @@ public class OgnlExpression extends ExpressionDefinition {
         super(expression);
     }
 
+    private OgnlExpression(Builder builder) {
+        super(builder);
+    }
+
     @Override
     public String getLanguage() {
         return "ognl";
+    }
+
+    /**
+     * {@code Builder} is a specific builder for {@link OgnlExpression}.
+     */
+    @XmlTransient
+    public static class Builder extends AbstractBuilder<Builder, OgnlExpression> {
+
+        @Override
+        public OgnlExpression end() {
+            return new OgnlExpression(this);
+        }
     }
 }

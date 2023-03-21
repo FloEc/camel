@@ -33,12 +33,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Store and retrieve objects from Google Cloud Storage Service using the google-cloud-storage library.
- * 
+ *
  * Google Storage Endpoint definition represents a bucket within the storage and contains configuration to customize the
  * behavior of Consumer and Producer.
  */
 @UriEndpoint(firstVersion = "3.9.0", scheme = "google-storage", title = "Google Storage", syntax = "google-storage:bucketName",
-             category = { Category.CLOUD })
+             category = { Category.CLOUD }, headersClass = GoogleCloudStorageConstants.class)
 public class GoogleCloudStorageEndpoint extends ScheduledPollEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCloudStorageEndpoint.class);

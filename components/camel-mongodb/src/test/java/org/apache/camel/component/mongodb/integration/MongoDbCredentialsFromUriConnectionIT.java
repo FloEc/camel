@@ -17,38 +17,61 @@
 
 package org.apache.camel.component.mongodb.integration;
 
-import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mongodb.MongoDbConstants;
-import org.apache.camel.impl.DefaultCamelContext;
+import org.bson.Document;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // Test class performs the same tests as DBOperationsIT but with modified URIs
 public class MongoDbCredentialsFromUriConnectionIT extends MongoDbOperationsIT {
+
+    protected static final String AUTH_SOURCE_USER = "auth-source-user";
+    protected static final String AUTH_SOURCE_PASSWORD = "auth-source-password";
 
     @Override
     public void doPreSetup() throws Exception {
         // create user in db
         super.doPreSetup();
         createAuthorizationUser();
+        createAuthorizationUser(dbName, AUTH_SOURCE_USER, AUTH_SOURCE_PASSWORD);
+    }
+
+    @BeforeEach
+    void checkDocuments() {
+        Assumptions.assumeTrue(0 == testCollection.countDocuments(), "The collection should have no documents");
+    }
+
+    @Test
+    public void testCountOperationAuthUser() {
+        Object result = template.requestBody("direct:testAuthSource", "irrelevantBody");
+        assertTrue(result instanceof Long, "Result is not of type Long");
+        assertEquals(0L, result, "Test collection should not contain any records");
+
+        // Insert a record and test that the endpoint now returns 1
+        testCollection.insertOne(Document.parse("{a:60}"));
+        result = template.requestBody("direct:testAuthSource", "irrelevantBody");
+        assertTrue(result instanceof Long, "Result is not of type Long");
+        assertEquals(1L, result, "Test collection should contain 1 record");
+        testCollection.deleteOne(new Document());
     }
 
     @Override
-    protected CamelContext createCamelContext() throws Exception {
-        //This is necessary to avoid creating connection bean for the mongodb component and test credentials instead
-        @SuppressWarnings("deprecation")
-        CamelContext ctx = new DefaultCamelContext();
-        ctx.getPropertiesComponent().setLocation("classpath:mongodb.test.properties");
-        return ctx;
-    }
-
-    @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
 
                 String uriHostnameOnly = String.format("mongodb:mongo?hosts=%s&", service.getConnectionAddress());
                 //connecting with credentials for created user
                 String uriWithCredentials = String.format("%susername=%s&password=%s&", uriHostnameOnly, USER, PASSWORD);
+
+                String uriWithAuthSource = String.format(
+                        "%susername=%s&password=%s&authSource=%s&",
+                        uriHostnameOnly, AUTH_SOURCE_USER, AUTH_SOURCE_PASSWORD, dbName);
 
                 from("direct:count").to(
                         uriHostnameOnly + "database={{mongodb.testDb}}&collection={{mongodb.testCollection}}&operation=count&dynamicity=true");
@@ -80,7 +103,9 @@ public class MongoDbCredentialsFromUriConnectionIT extends MongoDbOperationsIT {
                 from("direct:getColStats").to(
                         uriWithCredentials + "database={{mongodb.testDb}}&collection={{mongodb.testCollection}}&operation=getColStats");
                 from("direct:command").to(uriWithCredentials + "database={{mongodb.testDb}}&operation=command");
-
+                from("direct:testAuthSource")
+                        .to(uriWithAuthSource
+                            + "database={{mongodb.testDb}}&collection={{mongodb.testCollection}}&operation=count&dynamicity=true");
             }
         };
     }

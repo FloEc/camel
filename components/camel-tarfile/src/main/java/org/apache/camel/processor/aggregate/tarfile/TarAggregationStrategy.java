@@ -26,7 +26,6 @@ import java.nio.file.Files;
 
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.WrappedFile;
 import org.apache.camel.component.file.FileConsumer;
 import org.apache.camel.component.file.GenericFile;
@@ -153,7 +152,7 @@ public class TarAggregationStrategy implements AggregationStrategy {
                 throw new GenericFileOperationFailedException(e.getMessage(), e);
             }
             answer = newExchange;
-            answer.adapt(ExtendedExchange.class).addOnCompletion(new DeleteTarFileOnCompletion(tarFile));
+            answer.getExchangeExtension().addOnCompletion(new DeleteTarFileOnCompletion(tarFile));
         } else {
             tarFile = oldExchange.getIn().getBody(File.class);
         }
@@ -172,9 +171,6 @@ public class TarAggregationStrategy implements AggregationStrategy {
                             ? newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)
                             : newExchange.getIn().getMessageId();
                     addFileToTar(tarFile, appendFile, this.preserveFolderStructure ? entryName : null);
-                    GenericFile<File> genericFile = FileConsumer.asGenericFile(
-                            tarFile.getParent(), tarFile, Charset.defaultCharset().toString(), false);
-                    genericFile.bindToExchange(answer);
                 }
             } catch (Exception e) {
                 throw new GenericFileOperationFailedException(e.getMessage(), e);
@@ -189,15 +185,23 @@ public class TarAggregationStrategy implements AggregationStrategy {
                             ? newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)
                             : newExchange.getIn().getMessageId();
                     addEntryToTar(tarFile, entryName, buffer, buffer.length);
-                    GenericFile<File> genericFile = FileConsumer.asGenericFile(
-                            tarFile.getParent(), tarFile, Charset.defaultCharset().toString(), false);
-                    genericFile.bindToExchange(answer);
                 }
             } catch (Exception e) {
                 throw new GenericFileOperationFailedException(e.getMessage(), e);
             }
         }
+        GenericFile<File> genericFile = FileConsumer.asGenericFile(
+                tarFile.getParent(), tarFile, Charset.defaultCharset().toString(), false);
+        genericFile.bindToExchange(answer);
         return answer;
+    }
+
+    @Override
+    public void onCompletion(Exchange exchange, Exchange inputExchange) {
+        // this aggregation strategy added onCompletion which we should handover when we are complete
+        if (inputExchange != null) {
+            exchange.getExchangeExtension().handoverCompletions(inputExchange);
+        }
     }
 
     private void addFileToTar(File source, File file, String fileName) throws IOException, ArchiveException {

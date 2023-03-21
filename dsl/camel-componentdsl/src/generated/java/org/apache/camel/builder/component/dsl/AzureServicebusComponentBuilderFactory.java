@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -225,7 +225,7 @@ public interface AzureServicebusComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.time.Duration&lt;/code&gt; type.
          * 
-         * Default: 5min
+         * Default: 5m
          * Group: consumer
          * 
          * @param maxAutoLockRenewDuration the value to set
@@ -265,7 +265,6 @@ public interface AzureServicebusComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
-         * Default: 0
          * Group: consumer
          * 
          * @param prefetchCount the value to set
@@ -276,8 +275,8 @@ public interface AzureServicebusComponentBuilderFactory {
             return this;
         }
         /**
-         * Sets the receiverAsyncClient in order to consume messages in the
-         * Consumer.
+         * Sets the receiverAsyncClient in order to consume messages by the
+         * consumer.
          * 
          * The option is a:
          * &lt;code&gt;com.azure.messaging.servicebus.ServiceBusReceiverAsyncClient&lt;/code&gt; type.
@@ -327,7 +326,9 @@ public interface AzureServicebusComponentBuilderFactory {
         }
         /**
          * Sets the name of the subscription in the topic to listen to.
-         * topicOrQueueName and serviceBusType=topic must also be set.
+         * topicOrQueueName and serviceBusType=topic must also be set. This
+         * property is required if serviceBusType=topic and the consumer is in
+         * use.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -469,6 +470,39 @@ public interface AzureServicebusComponentBuilderFactory {
             doSetProperty("connectionString", connectionString);
             return this;
         }
+        /**
+         * Fully Qualified Namespace of the service bus.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param fullyQualifiedNamespace the value to set
+         * @return the dsl builder
+         */
+        default AzureServicebusComponentBuilder fullyQualifiedNamespace(
+                java.lang.String fullyQualifiedNamespace) {
+            doSetProperty("fullyQualifiedNamespace", fullyQualifiedNamespace);
+            return this;
+        }
+        /**
+         * A TokenCredential for Azure AD authentication, implemented in
+         * com.azure.identity.
+         * 
+         * The option is a:
+         * &lt;code&gt;com.azure.core.credential.TokenCredential&lt;/code&gt;
+         * type.
+         * 
+         * Group: security
+         * 
+         * @param tokenCredential the value to set
+         * @return the dsl builder
+         */
+        default AzureServicebusComponentBuilder tokenCredential(
+                com.azure.core.credential.TokenCredential tokenCredential) {
+            doSetProperty("tokenCredential", tokenCredential);
+            return this;
+        }
     }
 
     class AzureServicebusComponentBuilderImpl
@@ -516,6 +550,8 @@ public interface AzureServicebusComponentBuilderFactory {
             case "serviceBusTransactionContext": getOrCreateConfiguration((ServiceBusComponent) component).setServiceBusTransactionContext((com.azure.messaging.servicebus.ServiceBusTransactionContext) value); return true;
             case "autowiredEnabled": ((ServiceBusComponent) component).setAutowiredEnabled((boolean) value); return true;
             case "connectionString": getOrCreateConfiguration((ServiceBusComponent) component).setConnectionString((java.lang.String) value); return true;
+            case "fullyQualifiedNamespace": getOrCreateConfiguration((ServiceBusComponent) component).setFullyQualifiedNamespace((java.lang.String) value); return true;
+            case "tokenCredential": getOrCreateConfiguration((ServiceBusComponent) component).setTokenCredential((com.azure.core.credential.TokenCredential) value); return true;
             default: return false;
             }
         }

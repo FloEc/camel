@@ -72,24 +72,9 @@ You have the possibility of avoiding the usage of explicit static credentials, b
 
 For more information about this you can look at https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html[AWS credentials documentation]
 
-=== Message headers evaluated by the SNS producer
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsSnsSubject` |`String` |The Amazon SNS message subject. If not set, the subject from the
-`SnsConfiguration` is used.
-|=======================================================================
-
-=== Message headers set by the SNS producer
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelAwsSnsMessageId` |`String` |The Amazon SNS message ID.
-|=======================================================================
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 === Advanced AmazonSNS configuration
 
@@ -129,7 +114,7 @@ from("aws2-sqs://test-camel?amazonSQSClient=#amazonSQSClient&delay=50&maxMessage
 
 == Topic Autocreation
 
-With the option `autoCreateTopic` users are able to avoid the autocreation of an SNS Topic in case it doesn't exist. The default for this option is `true`.
+With the option `autoCreateTopic` users are able to avoid the autocreation of an SNS Topic in case it doesn't exist. The default for this option is `false`.
 If set to false any operation on a not-existent topic in AWS won't be successful and an error will be returned.
 
 == SNS FIFO

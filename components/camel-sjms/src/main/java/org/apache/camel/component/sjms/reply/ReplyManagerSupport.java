@@ -21,16 +21,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangeTimedOutException;
 import org.apache.camel.component.sjms.MessageListenerContainer;
+import org.apache.camel.component.sjms.SjmsConstants;
 import org.apache.camel.component.sjms.SjmsEndpoint;
 import org.apache.camel.component.sjms.SjmsMessage;
 import org.apache.camel.component.sjms.jms.JmsMessageHelper;
@@ -166,7 +167,7 @@ public abstract class ReplyManagerSupport extends ServiceSupport implements Repl
                     Session session = holder.getSession();
                     SjmsMessage response = new SjmsMessage(exchange, message, session, endpoint.getBinding());
                     // the JmsBinding is designed to be "pull-based": it will populate the Camel message on demand
-                    // therefore, we link Exchange and OUT message before continuing, so that the JmsBinding has full access 
+                    // therefore, we link Exchange and OUT message before continuing, so that the JmsBinding has full access
                     // to everything it may need, and can populate headers, properties, etc. accordingly (solves CAMEL-6218).
                     exchange.setOut(response);
                     Object body = response.getBody();
@@ -183,7 +184,7 @@ public abstract class ReplyManagerSupport extends ServiceSupport implements Repl
                     // restore correlation id in case the remote server messed with it
                     if (holder.getOriginalCorrelationId() != null) {
                         JmsMessageHelper.setCorrelationId(message, holder.getOriginalCorrelationId());
-                        exchange.getOut().setHeader("JMSCorrelationID", holder.getOriginalCorrelationId());
+                        exchange.getOut().setHeader(SjmsConstants.JMS_CORRELATION_ID, holder.getOriginalCorrelationId());
                     }
                 }
             } finally {

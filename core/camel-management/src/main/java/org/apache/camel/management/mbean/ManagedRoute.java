@@ -18,12 +18,14 @@ package org.apache.camel.management.mbean;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.AttributeValueExp;
@@ -72,8 +74,10 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
     protected final String description;
     protected final String configurationId;
     protected final String sourceLocation;
+    protected final String sourceLocationShort;
     protected final CamelContext context;
     private final LoadTriplet load = new LoadTriplet();
+    private final LoadThroughput thp = new LoadThroughput();
     private final String jmxDomain;
 
     public ManagedRoute(CamelContext context, Route route) {
@@ -81,7 +85,8 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
         this.context = context;
         this.description = route.getDescription();
         this.configurationId = route.getConfigurationId();
-        this.sourceLocation = route.getSourceResource() != null ? route.getSourceResource().getLocation() : null;
+        this.sourceLocation = route.getSourceLocation();
+        this.sourceLocationShort = route.getSourceLocationShort();
         this.jmxDomain = context.getManagementStrategy().getManagementAgent().getMBeanObjectDomainName();
     }
 
@@ -148,6 +153,11 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
     @Override
     public String getSourceLocation() {
         return sourceLocation;
+    }
+
+    @Override
+    public String getSourceLocationShort() {
+        return sourceLocationShort;
     }
 
     @Override
@@ -269,8 +279,20 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
     }
 
     @Override
+    public String getThroughput() {
+        double d = thp.getThroughput();
+        if (Double.isNaN(d)) {
+            // empty string if load statistics is disabled
+            return "";
+        } else {
+            return String.format("%.2f", d);
+        }
+    }
+
+    @Override
     public void onTimer() {
         load.update(getInflightExchanges());
+        thp.update(getExchangesTotal());
     }
 
     @Override
@@ -287,6 +309,15 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
             throw new IllegalArgumentException("CamelContext is not started");
         }
         context.getRouteController().stopRoute(getRouteId());
+    }
+
+    @Override
+    public void stopAndFail() throws Exception {
+        if (!context.getStatus().isStarted()) {
+            throw new IllegalArgumentException("CamelContext is not started");
+        }
+        Throwable cause = new RejectedExecutionException("Route " + getRouteId() + " is forced stopped and marked as failed");
+        context.getRouteController().stopRoute(getRouteId(), cause);
     }
 
     @Override
@@ -365,7 +396,7 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
         String id = route.getId();
         RouteDefinition def = context.getExtension(Model.class).getRouteDefinition(id);
         if (def != null) {
-            ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+            ExtendedCamelContext ecc = context.getCamelContextExtension();
             return ecc.getModelToXMLDumper().dumpModelAsXml(context, def, resolvePlaceholders, resolveDelegateEndpoints);
         }
 
@@ -557,7 +588,7 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
             processors.sort(new OrderProcessorMBeans());
 
             // grab route consumer
-            RouteDefinition rd = context.adapt(ModelCamelContext.class).getRouteDefinition(route.getRouteId());
+            RouteDefinition rd = ((ModelCamelContext) context).getRouteDefinition(route.getRouteId());
             if (rd != null) {
                 String id = rd.getRouteId();
                 int line = rd.getInput().getLineNumber();
@@ -586,6 +617,8 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
     @Override
     public void reset(boolean includeProcessors) throws Exception {
         reset();
+        load.reset();
+        thp.reset();
 
         // and now reset all processors for this route
         if (includeProcessors) {
@@ -679,6 +712,30 @@ public class ManagedRoute extends ManagedPerformanceCounter implements TimerList
                 }
             };
         }
+    }
+
+    @Override
+    public Collection<String> processorIds() throws Exception {
+        List<String> ids = new ArrayList<>();
+
+        MBeanServer server = getContext().getManagementStrategy().getManagementAgent().getMBeanServer();
+        if (server != null) {
+            String prefix = getContext().getManagementStrategy().getManagementAgent().getIncludeHostName() ? "*/" : "";
+            // gather all the processors for this CamelContext, which requires JMX
+            ObjectName query = ObjectName
+                    .getInstance(jmxDomain + ":context=" + prefix + getContext().getManagementName() + ",type=processors,*");
+            Set<ObjectName> names = server.queryNames(query, null);
+            for (ObjectName on : names) {
+                ManagedProcessorMBean processor
+                        = context.getManagementStrategy().getManagementAgent().newProxyClient(on, ManagedProcessorMBean.class);
+                // the processor must belong to this route
+                if (getRouteId().equals(processor.getRouteId())) {
+                    ids.add(processor.getProcessorId());
+                }
+            }
+        }
+
+        return ids;
     }
 
     private Integer getInflightExchanges() {

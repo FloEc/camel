@@ -61,6 +61,11 @@ public class GoogleSheetsStreamConfiguration implements Cloneable {
     private String majorDimension = "ROWS";
     @UriParam(enums = "FORMATTED_VALUE,UNFORMATTED_VALUE,FORMULA", defaultValue = "FORMATTED_VALUE")
     private String valueRenderOption = "FORMATTED_VALUE";
+    /* Service account */
+    @UriParam(label = "security")
+    private String serviceAccountKey;
+    @UriParam
+    private String delegate;
 
     public String getClientId() {
         return clientId;
@@ -208,6 +213,30 @@ public class GoogleSheetsStreamConfiguration implements Cloneable {
      */
     public void setSplitResults(boolean splitResults) {
         this.splitResults = splitResults;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    /**
+     * Sets "*.json" file with credentials for Service account
+     *
+     * @param serviceAccountKey String file, classpath, or http url
+     */
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
+    }
+
+    public String getDelegate() {
+        return delegate;
+    }
+
+    /**
+     * Delegate for wide-domain service account
+     */
+    public void setDelegate(String delegate) {
+        this.delegate = delegate;
     }
 
     // *************************************************

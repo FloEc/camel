@@ -129,6 +129,20 @@ public class XMLConverterHelper {
                     XMLConstants.FEATURE_SECURE_PROCESSING, true, e.getMessage());
         }
         try {
+            // Set secure processing
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        } catch (ParserConfigurationException e) {
+            LOG.warn("DocumentBuilderFactory doesn't support the feature {} with value {}, due to {}.",
+                    "http://apache.org/xml/features/disallow-doctype-decl", true, e.getMessage());
+        }
+        try {
+            // disable DOCTYPE declaration
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", Boolean.TRUE);
+        } catch (ParserConfigurationException e) {
+            LOG.warn("DocumentBuilderFactory doesn't support the feature {} with value {}, due to {}.",
+                    "http://apache.org/xml/features/disallow-doctype-decl", true, e.getMessage(), e);
+        }
+        try {
             // Disable the external-general-entities by default
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
         } catch (ParserConfigurationException e) {
@@ -140,7 +154,7 @@ public class XMLConverterHelper {
             Class<?> smClass = ObjectHelper.loadClass("org.apache.xerces.util.SecurityManager");
             if (smClass != null) {
                 Object sm = smClass.getDeclaredConstructor().newInstance();
-                // Here we just use the default setting of the SeurityManager
+                // Here we just use the default setting of the SecurityManager
                 factory.setAttribute("http://apache.org/xml/properties/security-manager", sm);
             }
         } catch (Exception e) {
@@ -179,6 +193,9 @@ public class XMLConverterHelper {
             LOG.warn("TransformerFactory doesn't support the feature {} with value {}, due to {}.",
                     javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, "true", e.getMessage(), e);
         }
+        LOG.debug("Configuring TransformerFactory to not allow access to external DTD/Stylesheet");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         factory.setErrorListener(new XmlErrorListener());
         configureSaxonTransformerFactory(factory);
         return factory;

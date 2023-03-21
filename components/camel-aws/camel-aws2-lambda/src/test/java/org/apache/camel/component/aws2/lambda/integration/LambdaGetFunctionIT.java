@@ -66,12 +66,12 @@ public class LambdaGetFunctionIT extends Aws2LambdaBase {
 
         template.send("direct:getFunction", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
 
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         GetFunctionResponse resp = result.getExchanges().get(0).getIn().getBody(GetFunctionResponse.class);
         assertEquals("GetHelloWithName", resp.configuration().functionName());
         assertEquals("Hello with node.js on Lambda", resp.configuration().description());
@@ -80,10 +80,10 @@ public class LambdaGetFunctionIT extends Aws2LambdaBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint = "aws2-lambda://GetHelloWithName?operation=createFunction";
                 String getFunction = "aws2-lambda://GetHelloWithName?operation=getFunction";
                 from("direct:createFunction").to(awsEndpoint);

@@ -18,6 +18,7 @@ package org.apache.camel.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -31,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class URISupportTest {
 
@@ -254,7 +255,7 @@ public class URISupportTest {
     public void testSanitizeAccessToken() throws Exception {
         String out1 = URISupport
                 .sanitizeUri("google-sheets-stream://spreadsheets?accessToken=MY_TOKEN&clientId=foo&clientSecret=MY_SECRET");
-        assertEquals("google-sheets-stream://spreadsheets?accessToken=xxxxxx&clientId=foo&clientSecret=xxxxxx", out1);
+        assertEquals("google-sheets-stream://spreadsheets?accessToken=xxxxxx&clientId=xxxxxx&clientSecret=xxxxxx", out1);
     }
 
     @Test
@@ -301,7 +302,7 @@ public class URISupportTest {
     public void testSanitizeUriWithRawPassword() {
         String uri1 = "http://foo?username=me&password=RAW(me#@123)&foo=bar";
         String uri2 = "http://foo?username=me&password=RAW{me#@123}&foo=bar";
-        String expected = "http://foo?username=me&password=xxxxxx&foo=bar";
+        String expected = "http://foo?username=xxxxxx&password=xxxxxx&foo=bar";
         assertEquals(expected, URISupport.sanitizeUri(uri1));
         assertEquals(expected, URISupport.sanitizeUri(uri2));
     }
@@ -310,9 +311,21 @@ public class URISupportTest {
     public void testSanitizeUriRawUnsafePassword() {
         String uri1 = "sftp://localhost/target?password=RAW(beforeAmp&afterAmp)&username=jrandom";
         String uri2 = "sftp://localhost/target?password=RAW{beforeAmp&afterAmp}&username=jrandom";
-        String expected = "sftp://localhost/target?password=xxxxxx&username=jrandom";
+        String expected = "sftp://localhost/target?password=xxxxxx&username=xxxxxx";
         assertEquals(expected, URISupport.sanitizeUri(uri1));
         assertEquals(expected, URISupport.sanitizeUri(uri2));
+    }
+
+    @Test
+    public void testSanitizeUriWithRawPasswordAndSimpleExpression() {
+        String uriPlain
+                = "http://foo?username=me&password=RAW(me#@123)&foo=bar&port=21&tempFileName=${file:name.noext}.tmp&anotherOption=true";
+        String uriCurly
+                = "http://foo?username=me&password=RAW{me#@123}&foo=bar&port=21&tempFileName=${file:name.noext}.tmp&anotherOption=true";
+        String expected
+                = "http://foo?username=xxxxxx&password=xxxxxx&foo=bar&port=21&tempFileName=${file:name.noext}.tmp&anotherOption=true";
+        assertEquals(expected, URISupport.sanitizeUri(uriPlain));
+        assertEquals(expected, URISupport.sanitizeUri(uriCurly));
     }
 
     @Test
@@ -413,12 +426,9 @@ public class URISupportTest {
 
     @Test
     public void testParseQueryLenient() throws Exception {
-        try {
-            URISupport.parseQuery("password=secret&serviceName=somechat&", false, false);
-            fail("Should have thrown exception");
-        } catch (URISyntaxException e) {
-            // expected
-        }
+        assertThrows(URISyntaxException.class,
+                () -> URISupport.parseQuery("password=secret&serviceName=somechat&", false, false),
+                "Should have thrown a URISyntaxException");
 
         Map<String, Object> map = URISupport.parseQuery("password=secret&serviceName=somechat&", false, true);
         assertEquals(2, map.size());
@@ -588,6 +598,18 @@ public class URISupportTest {
         map.put("param1", "%2B447777111222");
         q = URISupport.createQueryString(map);
         assertEquals("param1=%252B447777111222", q);
+    }
+
+    @Test
+    public void testBuildMultiValueQuery() throws Exception {
+        List<Object> list = new ArrayList<>();
+        assertEquals("", URISupport.buildMultiValueQuery("id", list));
+        list = List.of("hello");
+        assertEquals("id=hello", URISupport.buildMultiValueQuery("id", list));
+        list = List.of(1, 2, 3);
+        assertEquals("id=1&id=2&id=3", URISupport.buildMultiValueQuery("id", list));
+        list = List.of("foo", "bar", 3, true, "baz");
+        assertEquals("hey=foo&hey=bar&hey=3&hey=true&hey=baz", URISupport.buildMultiValueQuery("hey", list));
     }
 
 }

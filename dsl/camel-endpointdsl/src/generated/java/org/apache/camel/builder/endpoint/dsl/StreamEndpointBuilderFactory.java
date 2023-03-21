@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -72,51 +72,6 @@ public interface StreamEndpointBuilderFactory {
          */
         default StreamEndpointConsumerBuilder fileName(String fileName) {
             doSetProperty("fileName", fileName);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default StreamEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default StreamEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -216,6 +171,37 @@ public interface StreamEndpointBuilderFactory {
             return this;
         }
         /**
+         * When using stream:http format, this option specifies optional http
+         * headers, such as Accept: application/json. Multiple headers can be
+         * separated by comma.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param httpHeaders the value to set
+         * @return the dsl builder
+         */
+        default StreamEndpointConsumerBuilder httpHeaders(String httpHeaders) {
+            doSetProperty("httpHeaders", httpHeaders);
+            return this;
+        }
+        /**
+         * When using stream:http format, this option specifies the http url to
+         * stream from.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param httpUrl the value to set
+         * @return the dsl builder
+         */
+        default StreamEndpointConsumerBuilder httpUrl(String httpUrl) {
+            doSetProperty("httpUrl", httpUrl);
+            return this;
+        }
+        /**
          * Initial delay in milliseconds before showing the message prompt. This
          * delay occurs only once. Can be used during system startup to avoid
          * message prompts being written while other logging is done to the
@@ -297,9 +283,44 @@ public interface StreamEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether to read the input stream in line mode (terminate by line
+         * breaks). Setting this to false, will instead read the entire stream
+         * until EOL.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: consumer
+         * 
+         * @param readLine the value to set
+         * @return the dsl builder
+         */
+        default StreamEndpointConsumerBuilder readLine(boolean readLine) {
+            doSetProperty("readLine", readLine);
+            return this;
+        }
+        /**
+         * Whether to read the input stream in line mode (terminate by line
+         * breaks). Setting this to false, will instead read the entire stream
+         * until EOL.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: true
+         * Group: consumer
+         * 
+         * @param readLine the value to set
+         * @return the dsl builder
+         */
+        default StreamEndpointConsumerBuilder readLine(String readLine) {
+            doSetProperty("readLine", readLine);
+            return this;
+        }
+        /**
          * Will retry opening the stream if it's overwritten, somewhat like tail
-         * --retry &lt;p/&gt; If reading from files then you should also enable
-         * the fileWatcher option, to make it work reliable.
+         * --retry If reading from files then you should also enable the
+         * fileWatcher option, to make it work reliable.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -315,8 +336,8 @@ public interface StreamEndpointBuilderFactory {
         }
         /**
          * Will retry opening the stream if it's overwritten, somewhat like tail
-         * --retry &lt;p/&gt; If reading from files then you should also enable
-         * the fileWatcher option, to make it work reliable.
+         * --retry If reading from files then you should also enable the
+         * fileWatcher option, to make it work reliable.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -404,6 +425,51 @@ public interface StreamEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default StreamEndpointConsumerBuilder basic() {
             return (StreamEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedStreamEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedStreamEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -558,6 +624,38 @@ public interface StreamEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether to append a new line character at end of output.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: producer
+         * 
+         * @param appendNewLine the value to set
+         * @return the dsl builder
+         */
+        default StreamEndpointProducerBuilder appendNewLine(
+                boolean appendNewLine) {
+            doSetProperty("appendNewLine", appendNewLine);
+            return this;
+        }
+        /**
+         * Whether to append a new line character at end of output.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: true
+         * Group: producer
+         * 
+         * @param appendNewLine the value to set
+         * @return the dsl builder
+         */
+        default StreamEndpointProducerBuilder appendNewLine(String appendNewLine) {
+            doSetProperty("appendNewLine", appendNewLine);
+            return this;
+        }
+        /**
          * Number of messages to process before closing stream on Producer side.
          * Never close stream by default (only when Producer is stopped). If
          * more messages are sent, the stream is reopened for another
@@ -657,6 +755,17 @@ public interface StreamEndpointBuilderFactory {
             doSetProperty("delay", delay);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the Stream component.
+     */
+    public interface AdvancedStreamEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default StreamEndpointProducerBuilder basic() {
+            return (StreamEndpointProducerBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -671,12 +780,12 @@ public interface StreamEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default StreamEndpointProducerBuilder lazyStartProducer(
+        default AdvancedStreamEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -696,26 +805,15 @@ public interface StreamEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default StreamEndpointProducerBuilder lazyStartProducer(
+        default AdvancedStreamEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint producers for the Stream component.
-     */
-    public interface AdvancedStreamEndpointProducerBuilder
-            extends
-                EndpointProducerBuilder {
-        default StreamEndpointProducerBuilder basic() {
-            return (StreamEndpointProducerBuilder) this;
         }
         /**
          * Sets the read timeout to a specified timeout, in milliseconds. A
@@ -861,12 +959,26 @@ public interface StreamEndpointBuilderFactory {
          * Since: 1.3
          * Maven coordinates: org.apache.camel:camel-stream
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default StreamHeaderNameBuilder stream() {
+            return StreamHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Stream (camel-stream)
+         * Read from system-in and write to system-out and system-err streams.
+         * 
+         * Category: file,system
+         * Since: 1.3
+         * Maven coordinates: org.apache.camel:camel-stream
+         * 
          * Syntax: <code>stream:kind</code>
          * 
          * Path parameter: kind (required)
-         * Kind of stream to use such as System.in or System.out.
-         * There are 5 enums and the value can be one of: in, out, err, header,
-         * file
+         * Kind of stream to use such as System.in, System.out, a file, or a
+         * http url.
+         * There are 6 enums and the value can be one of: in, out, err, header,
+         * file, http
          * 
          * @param path kind
          * @return the dsl builder
@@ -885,9 +997,10 @@ public interface StreamEndpointBuilderFactory {
          * Syntax: <code>stream:kind</code>
          * 
          * Path parameter: kind (required)
-         * Kind of stream to use such as System.in or System.out.
-         * There are 5 enums and the value can be one of: in, out, err, header,
-         * file
+         * Kind of stream to use such as System.in, System.out, a file, or a
+         * http url.
+         * There are 6 enums and the value can be one of: in, out, err, header,
+         * file, http
          * 
          * @param componentName to use a custom component name for the endpoint
          * instead of the default name
@@ -896,6 +1009,43 @@ public interface StreamEndpointBuilderFactory {
          */
         default StreamEndpointBuilder stream(String componentName, String path) {
             return StreamEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Stream component.
+     */
+    public static class StreamHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final StreamHeaderNameBuilder INSTANCE = new StreamHeaderNameBuilder();
+
+        /**
+         * The index.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code StreamIndex}.
+         */
+        public String streamIndex() {
+            return "StreamIndex";
+        }
+
+        /**
+         * Is complete.
+         * 
+         * The option is a: {@code boolean} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code StreamComplete}.
+         */
+        public String streamComplete() {
+            return "StreamComplete";
         }
     }
     static StreamEndpointBuilder endpointBuilder(

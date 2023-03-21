@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -101,10 +101,9 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of authentication for connection. &lt;p&gt; Types of
-         * Authentication: &lt;ul&gt; &lt;li&gt;STANDARD_AUTHENTICATION - OAuth
-         * 2.0 (3-legged) &lt;li&gt;SERVER_AUTHENTICATION - OAuth 2.0 with JSON
-         * Web Tokens.
+         * The type of authentication for connection. Types of Authentication:
+         * STANDARD_AUTHENTICATION - OAuth 2.0 (3-legged) SERVER_AUTHENTICATION
+         * - OAuth 2.0 with JSON Web Tokens.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -321,8 +320,8 @@ public interface BoxEndpointBuilderFactory {
         /**
          * Custom HTTP params for settings like proxy host.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -338,8 +337,8 @@ public interface BoxEndpointBuilderFactory {
          * Custom HTTP params for settings like proxy host.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -383,9 +382,8 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of encryption algorithm for JWT. &lt;p&gt; Supported
-         * Algorithms: &lt;ul&gt; &lt;li&gt;RSA_SHA_256 &lt;li&gt;RSA_SHA_384
-         * &lt;li&gt;RSA_SHA_512.
+         * The type of encryption algorithm for JWT. Supported Algorithms:
+         * RSA_SHA_256 RSA_SHA_384 RSA_SHA_512.
          * 
          * The option is a:
          * &lt;code&gt;com.box.sdk.EncryptionAlgorithm&lt;/code&gt; type.
@@ -402,9 +400,8 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of encryption algorithm for JWT. &lt;p&gt; Supported
-         * Algorithms: &lt;ul&gt; &lt;li&gt;RSA_SHA_256 &lt;li&gt;RSA_SHA_384
-         * &lt;li&gt;RSA_SHA_512.
+         * The type of encryption algorithm for JWT. Supported Algorithms:
+         * RSA_SHA_256 RSA_SHA_384 RSA_SHA_512.
          * 
          * The option will be converted to a
          * &lt;code&gt;com.box.sdk.EncryptionAlgorithm&lt;/code&gt; type.
@@ -520,59 +517,9 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default BoxEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default BoxEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * The type of authentication for connection. &lt;p&gt; Types of
-         * Authentication: &lt;ul&gt; &lt;li&gt;STANDARD_AUTHENTICATION - OAuth
-         * 2.0 (3-legged) &lt;li&gt;SERVER_AUTHENTICATION - OAuth 2.0 with JSON
-         * Web Tokens.
+         * The type of authentication for connection. Types of Authentication:
+         * STANDARD_AUTHENTICATION - OAuth 2.0 (3-legged) SERVER_AUTHENTICATION
+         * - OAuth 2.0 with JSON Web Tokens.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -717,10 +664,59 @@ public interface BoxEndpointBuilderFactory {
             return (BoxEndpointProducerBuilder) this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedBoxEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedBoxEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * Custom HTTP params for settings like proxy host.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -736,8 +732,8 @@ public interface BoxEndpointBuilderFactory {
          * Custom HTTP params for settings like proxy host.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -781,9 +777,8 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of encryption algorithm for JWT. &lt;p&gt; Supported
-         * Algorithms: &lt;ul&gt; &lt;li&gt;RSA_SHA_256 &lt;li&gt;RSA_SHA_384
-         * &lt;li&gt;RSA_SHA_512.
+         * The type of encryption algorithm for JWT. Supported Algorithms:
+         * RSA_SHA_256 RSA_SHA_384 RSA_SHA_512.
          * 
          * The option is a:
          * &lt;code&gt;com.box.sdk.EncryptionAlgorithm&lt;/code&gt; type.
@@ -800,9 +795,8 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of encryption algorithm for JWT. &lt;p&gt; Supported
-         * Algorithms: &lt;ul&gt; &lt;li&gt;RSA_SHA_256 &lt;li&gt;RSA_SHA_384
-         * &lt;li&gt;RSA_SHA_512.
+         * The type of encryption algorithm for JWT. Supported Algorithms:
+         * RSA_SHA_256 RSA_SHA_384 RSA_SHA_512.
          * 
          * The option will be converted to a
          * &lt;code&gt;com.box.sdk.EncryptionAlgorithm&lt;/code&gt; type.
@@ -919,10 +913,9 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of authentication for connection. &lt;p&gt; Types of
-         * Authentication: &lt;ul&gt; &lt;li&gt;STANDARD_AUTHENTICATION - OAuth
-         * 2.0 (3-legged) &lt;li&gt;SERVER_AUTHENTICATION - OAuth 2.0 with JSON
-         * Web Tokens.
+         * The type of authentication for connection. Types of Authentication:
+         * STANDARD_AUTHENTICATION - OAuth 2.0 (3-legged) SERVER_AUTHENTICATION
+         * - OAuth 2.0 with JSON Web Tokens.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1068,8 +1061,8 @@ public interface BoxEndpointBuilderFactory {
         /**
          * Custom HTTP params for settings like proxy host.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1085,8 +1078,8 @@ public interface BoxEndpointBuilderFactory {
          * Custom HTTP params for settings like proxy host.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1130,9 +1123,8 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of encryption algorithm for JWT. &lt;p&gt; Supported
-         * Algorithms: &lt;ul&gt; &lt;li&gt;RSA_SHA_256 &lt;li&gt;RSA_SHA_384
-         * &lt;li&gt;RSA_SHA_512.
+         * The type of encryption algorithm for JWT. Supported Algorithms:
+         * RSA_SHA_256 RSA_SHA_384 RSA_SHA_512.
          * 
          * The option is a:
          * &lt;code&gt;com.box.sdk.EncryptionAlgorithm&lt;/code&gt; type.
@@ -1149,9 +1141,8 @@ public interface BoxEndpointBuilderFactory {
             return this;
         }
         /**
-         * The type of encryption algorithm for JWT. &lt;p&gt; Supported
-         * Algorithms: &lt;ul&gt; &lt;li&gt;RSA_SHA_256 &lt;li&gt;RSA_SHA_384
-         * &lt;li&gt;RSA_SHA_512.
+         * The type of encryption algorithm for JWT. Supported Algorithms:
+         * RSA_SHA_256 RSA_SHA_384 RSA_SHA_512.
          * 
          * The option will be converted to a
          * &lt;code&gt;com.box.sdk.EncryptionAlgorithm&lt;/code&gt; type.

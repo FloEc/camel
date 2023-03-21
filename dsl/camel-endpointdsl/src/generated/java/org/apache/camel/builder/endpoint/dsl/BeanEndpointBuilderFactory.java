@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -41,37 +41,6 @@ public interface BeanEndpointBuilderFactory {
     public interface BeanEndpointBuilder extends EndpointProducerBuilder {
         default AdvancedBeanEndpointBuilder advanced() {
             return (AdvancedBeanEndpointBuilder) this;
-        }
-        /**
-         * Use scope option instead.
-         * 
-         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
-         * 
-         * Group: common
-         * 
-         * @param cache the value to set
-         * @return the dsl builder
-         */
-        @Deprecated
-        default BeanEndpointBuilder cache(Boolean cache) {
-            doSetProperty("cache", cache);
-            return this;
-        }
-        /**
-         * Use scope option instead.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
-         * 
-         * Group: common
-         * 
-         * @param cache the value to set
-         * @return the dsl builder
-         */
-        @Deprecated
-        default BeanEndpointBuilder cache(String cache) {
-            doSetProperty("cache", cache);
-            return this;
         }
         /**
          * Sets the name of the method to invoke on the bean.
@@ -145,6 +114,17 @@ public interface BeanEndpointBuilderFactory {
             doSetProperty("scope", scope);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint for the Bean component.
+     */
+    public interface AdvancedBeanEndpointBuilder
+            extends
+                EndpointProducerBuilder {
+        default BeanEndpointBuilder basic() {
+            return (BeanEndpointBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -159,12 +139,13 @@ public interface BeanEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default BeanEndpointBuilder lazyStartProducer(boolean lazyStartProducer) {
+        default AdvancedBeanEndpointBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
@@ -183,31 +164,21 @@ public interface BeanEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default BeanEndpointBuilder lazyStartProducer(String lazyStartProducer) {
+        default AdvancedBeanEndpointBuilder lazyStartProducer(
+                String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint for the Bean component.
-     */
-    public interface AdvancedBeanEndpointBuilder
-            extends
-                EndpointProducerBuilder {
-        default BeanEndpointBuilder basic() {
-            return (BeanEndpointBuilder) this;
         }
         /**
          * Used for configuring additional properties on the bean.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the parameters(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -225,8 +196,8 @@ public interface BeanEndpointBuilderFactory {
         /**
          * Used for configuring additional properties on the bean.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the parameters(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -243,6 +214,19 @@ public interface BeanEndpointBuilderFactory {
     }
 
     public interface BeanBuilders {
+        /**
+         * Bean (camel-bean)
+         * Invoke methods of Java beans stored in Camel registry.
+         * 
+         * Category: core,java
+         * Since: 1.0
+         * Maven coordinates: org.apache.camel:camel-bean
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default BeanHeaderNameBuilder bean() {
+            return BeanHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Bean (camel-bean)
          * Invoke methods of Java beans stored in Camel registry.
@@ -282,6 +266,30 @@ public interface BeanEndpointBuilderFactory {
          */
         default BeanEndpointBuilder bean(String componentName, String path) {
             return BeanEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Bean component.
+     */
+    public static class BeanHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final BeanHeaderNameBuilder INSTANCE = new BeanHeaderNameBuilder();
+
+        /**
+         * The name of the method to invoke.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code BeanMethodName}.
+         */
+        public String beanMethodName() {
+            return "BeanMethodName";
         }
     }
     static BeanEndpointBuilder endpointBuilder(String componentName, String path) {

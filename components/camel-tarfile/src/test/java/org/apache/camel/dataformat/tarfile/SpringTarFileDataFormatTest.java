@@ -49,11 +49,11 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBody("direct:tar", TEXT);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
         assertEquals(exchange.getIn().getMessageId() + ".tar", exchange.getIn().getHeader(FILE_NAME));
-        assertArrayEquals(getTaredText(exchange.getIn().getMessageId()), (byte[]) exchange.getIn().getBody());
+        assertArrayEquals(getTaredText(exchange.getIn().getMessageId()), exchange.getIn().getBody(byte[].class));
     }
 
     @Test
@@ -64,10 +64,10 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBodyAndHeader("direct:tar", TEXT, FILE_NAME, "poem.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
-        assertArrayEquals(getTaredText("poem.txt"), (byte[]) exchange.getIn().getBody());
+        assertArrayEquals(getTaredText("poem.txt"), exchange.getIn().getBody(byte[].class));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBody("direct:untar", getTaredText("file"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -87,11 +87,11 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBody("direct:tarAndUntar", TEXT);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Exchange exchange = mock.getReceivedExchanges().get(0);
         assertEquals(exchange.getIn().getMessageId(), exchange.getIn().getHeader(FILE_NAME));
-        assertArrayEquals(TEXT.getBytes(UTF_8), (byte[]) exchange.getIn().getBody());
+        assertArrayEquals(TEXT.getBytes(UTF_8), exchange.getIn().getBody(byte[].class));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBody("direct:tarToFile", TEXT);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // use builder to ensure the exchange is fully done before we check for file exists
         assertTrue(notify.matches(5, TimeUnit.SECONDS));
@@ -146,7 +146,7 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBodyAndHeader("direct:dslTar", TEXT, FILE_NAME, "poem.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class SpringTarFileDataFormatTest extends CamelSpringTestSupport {
 
         template.sendBody("direct:dslUntar", getTaredText("test.txt"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override

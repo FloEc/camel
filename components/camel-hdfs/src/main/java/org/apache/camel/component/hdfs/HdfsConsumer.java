@@ -30,7 +30,6 @@ import javax.security.auth.login.Configuration;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.RuntimeCamelException;
@@ -184,15 +183,15 @@ public final class HdfsConsumer extends ScheduledPollConsumer {
         try {
             Message message = exchange.getIn();
             String fileName = StringUtils.substringAfterLast(hdfsFile.getActualPath(), "/");
-            message.setHeader(Exchange.FILE_NAME, fileName);
-            message.setHeader(Exchange.FILE_NAME_CONSUMED, fileName);
-            message.setHeader("CamelFileAbsolutePath", hdfsFile.getActualPath());
+            message.setHeader(HdfsConstants.FILE_NAME, fileName);
+            message.setHeader(HdfsConstants.FILE_NAME_CONSUMED, fileName);
+            message.setHeader(HdfsConstants.FILE_ABSOLUTE_PATH, hdfsFile.getActualPath());
             if (key.getValue() != null) {
-                message.setHeader(HdfsHeader.KEY.name(), key.getValue());
+                message.setHeader(HdfsConstants.KEY, key.getValue());
             }
 
             if (hdfsFile.getNumOfReadBytes() >= 0) {
-                message.setHeader(Exchange.FILE_LENGTH, hdfsFile.getNumOfReadBytes());
+                message.setHeader(HdfsConstants.FILE_LENGTH, hdfsFile.getNumOfReadBytes());
             }
 
             message.setBody(value.getValue());
@@ -251,7 +250,7 @@ public final class HdfsConsumer extends ScheduledPollConsumer {
 
     protected void updateNewExchange(Exchange exchange, int index, HdfsInputStream hdfsFile) {
         // do not share unit of work
-        exchange.adapt(ExtendedExchange.class).setUnitOfWork(null);
+        exchange.getExchangeExtension().setUnitOfWork(null);
 
         exchange.setProperty(ExchangePropertyKey.SPLIT_INDEX, index);
 

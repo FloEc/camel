@@ -23,34 +23,37 @@ import java.time.Duration;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpStreamCacheFileResponseTest extends BaseJettyTest {
+    @TempDir
+    File testDirectory;
 
     private String body = "12345678901234567890123456789012345678901234567890";
     private String body2 = "Bye " + body;
 
     @Test
-    public void testStreamCacheToFileShouldBeDeletedInCaseOfResponse() throws Exception {
+    public void testStreamCacheToFileShouldBeDeletedInCaseOfResponse() {
         String out = template.requestBody("http://localhost:{{port}}/myserver", body, String.class);
         assertEquals(body2, out);
 
-        File dir = testDirectory().toFile();
         await()
                 .atMost(Duration.ofSeconds(1))
-                .untilAsserted(() -> assertEquals(0, dir.list().length, "There should be no files"));
+                .untilAsserted(() -> assertEquals(0, testDirectory.list().length, "There should be no files"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // enable stream caching and use a low threshold so its forced
                 // to write to file
-                context.getStreamCachingStrategy().setSpoolDirectory(testDirectory().toFile());
+                context.getStreamCachingStrategy().setSpoolEnabled(true);
+                context.getStreamCachingStrategy().setSpoolDirectory(testDirectory);
                 context.getStreamCachingStrategy().setSpoolThreshold(16);
                 context.setStreamCaching(true);
 

@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -141,13 +141,13 @@ public interface FtpEndpointBuilderFactory {
          * original file has been written. The done file will be empty. This
          * option configures what file name to use. Either you can specify a
          * fixed name. Or you can use dynamic placeholders. The done file will
-         * always be written in the same folder as the original file.&lt;p/&gt;
-         * Consumer: If provided, Camel will only consume files if a done file
-         * exists. This option configures what file name to use. Either you can
-         * specify a fixed name. Or you can use dynamic placeholders.The done
-         * file is always expected in the same folder as the original
-         * file.&lt;p/&gt; Only ${file.name} and ${file.name.next} is supported
-         * as dynamic placeholders.
+         * always be written in the same folder as the original file. Consumer:
+         * If provided, Camel will only consume files if a done file exists.
+         * This option configures what file name to use. Either you can specify
+         * a fixed name. Or you can use dynamic placeholders.The done file is
+         * always expected in the same folder as the original file. Only
+         * ${file.name} and ${file.name.next} is supported as dynamic
+         * placeholders.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -190,8 +190,7 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets passive mode connections.&lt;br/&gt; Default is active mode
-         * connections.
+         * Sets passive mode connections. Default is active mode connections.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -206,8 +205,7 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets passive mode connections.&lt;br/&gt; Default is active mode
-         * connections.
+         * Sets passive mode connections. Default is active mode connections.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -223,8 +221,8 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the path separator to be used. &lt;p/&gt; UNIX = Uses unix style
-         * path separator Windows = Uses windows style path separator Auto = (is
+         * Sets the path separator to be used. UNIX = Uses unix style path
+         * separator Windows = Uses windows style path separator Auto = (is
          * default) Use existing path separator in file name.
          * 
          * The option is a:
@@ -242,8 +240,8 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the path separator to be used. &lt;p/&gt; UNIX = Uses unix style
-         * path separator Windows = Uses windows style path separator Auto = (is
+         * Sets the path separator to be used. UNIX = Uses unix style path
+         * separator Windows = Uses windows style path separator Auto = (is
          * default) Use existing path separator in file name.
          * 
          * The option will be converted to a
@@ -364,51 +362,6 @@ public interface FtpEndpointBuilderFactory {
         default FtpEndpointConsumerBuilder transferLoggingVerbose(
                 String transferLoggingVerbose) {
             doSetProperty("transferLoggingVerbose", transferLoggingVerbose);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default FtpEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default FtpEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -589,10 +542,9 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Configures whether resume download is enabled. This must be supported
          * by the FTP server (almost all FTP servers support it). In addition
-         * the options &lt;tt&gt;localWorkDirectory must be configured so
-         * downloaded files are stored in a local directory, and the option
-         * &lt;tt&gt;binary must be enabled, which is required to support
-         * resuming of downloads.
+         * the options localWorkDirectory must be configured so downloaded files
+         * are stored in a local directory, and the option binary must be
+         * enabled, which is required to support resuming of downloads.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -609,10 +561,9 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Configures whether resume download is enabled. This must be supported
          * by the FTP server (almost all FTP servers support it). In addition
-         * the options &lt;tt&gt;localWorkDirectory must be configured so
-         * downloaded files are stored in a local directory, and the option
-         * &lt;tt&gt;binary must be enabled, which is required to support
-         * resuming of downloads.
+         * the options localWorkDirectory must be configured so downloaded files
+         * are stored in a local directory, and the option binary must be
+         * enabled, which is required to support resuming of downloads.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -812,10 +763,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Is used to exclude files, if filename matches the regex pattern
-         * (matching is case in-sensitive). &lt;p/&gt; Notice if you use symbols
-         * such as plus sign and others you would need to configure this using
-         * the RAW() syntax if configuring this as an endpoint uri. See more
-         * details at.
+         * (matching is case in-sensitive). Notice if you use symbols such as
+         * plus sign and others you would need to configure this using the RAW()
+         * syntax if configuring this as an endpoint uri. See more details at
+         * configuring endpoint uris.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -854,7 +805,7 @@ public interface FtpEndpointBuilderFactory {
          * files if filter returns false in its accept() method.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.component.file.GenericFileFilter&lt;org.apache.commons.net.ftp.FTPFile&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.file.GenericFileFilter&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&lt;/code&gt; type.
          * 
          * Group: filter
          * 
@@ -872,7 +823,7 @@ public interface FtpEndpointBuilderFactory {
          * files if filter returns false in its accept() method.
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.file.GenericFileFilter&lt;org.apache.commons.net.ftp.FTPFile&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.file.GenericFileFilter&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&lt;/code&gt; type.
          * 
          * Group: filter
          * 
@@ -902,7 +853,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Filters the file based on Simple language. For example to filter on
-         * file size, you can use ${file:size} &gt; 5000.
+         * file size, you can use ${file:size} 5000.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1009,10 +960,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Is used to include files, if filename matches the regex pattern
-         * (matching is case in-sensitive). &lt;p/&gt; Notice if you use symbols
-         * such as plus sign and others you would need to configure this using
-         * the RAW() syntax if configuring this as an endpoint uri. See more
-         * details at.
+         * (matching is case in-sensitive). Notice if you use symbols such as
+         * plus sign and others you would need to configure this using the RAW()
+         * syntax if configuring this as an endpoint uri. See more details at
+         * configuring endpoint uris.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1177,7 +1128,7 @@ public interface FtpEndpointBuilderFactory {
          * implementation.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.component.file.GenericFileExclusiveReadLockStrategy&lt;org.apache.commons.net.ftp.FTPFile&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.file.GenericFileExclusiveReadLockStrategy&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&lt;/code&gt; type.
          * 
          * Group: lock
          * 
@@ -1195,7 +1146,7 @@ public interface FtpEndpointBuilderFactory {
          * implementation.
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.file.GenericFileExclusiveReadLockStrategy&lt;org.apache.commons.net.ftp.FTPFile&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.file.GenericFileExclusiveReadLockStrategy&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&lt;/code&gt; type.
          * 
          * Group: lock
          * 
@@ -1211,43 +1162,41 @@ public interface FtpEndpointBuilderFactory {
          * Used by consumer, to only poll the files if it has exclusive
          * read-lock on the file (i.e. the file is not in-progress or being
          * written). Camel will wait until the file lock is granted. This option
-         * provides the build in strategies:&lt;p/&gt; - none - No read lock is
-         * in use&lt;p/&gt; - markerFile - Camel creates a marker file
-         * (fileName.camelLock) and then holds a lock on it. This option is not
-         * available for the FTP component&lt;p/&gt; - changed - Changed is
-         * using file length/modification timestamp to detect whether the file
-         * is currently being copied or not. Will at least use 1 sec to
-         * determine this, so this option cannot consume files as fast as the
-         * others, but can be more reliable as the JDK IO API cannot always
-         * determine whether a file is currently being used by another process.
-         * The option readLockCheckInterval can be used to set the check
-         * frequency.&lt;p/&gt; - fileLock - is for using
+         * provides the build in strategies: - none - No read lock is in use -
+         * markerFile - Camel creates a marker file (fileName.camelLock) and
+         * then holds a lock on it. This option is not available for the FTP
+         * component - changed - Changed is using file length/modification
+         * timestamp to detect whether the file is currently being copied or
+         * not. Will at least use 1 sec to determine this, so this option cannot
+         * consume files as fast as the others, but can be more reliable as the
+         * JDK IO API cannot always determine whether a file is currently being
+         * used by another process. The option readLockCheckInterval can be used
+         * to set the check frequency. - fileLock - is for using
          * java.nio.channels.FileLock. This option is not avail for Windows OS
          * and the FTP component. This approach should be avoided when accessing
          * a remote file system via a mount/share unless that file system
-         * supports distributed file locks.&lt;p/&gt; - rename - rename is for
-         * using a try to rename the file as a test if we can get exclusive
-         * read-lock.&lt;p/&gt; - idempotent - (only for file component)
-         * idempotent is for using a idempotentRepository as the read-lock. This
-         * allows to use read locks that supports clustering if the idempotent
-         * repository implementation supports that.&lt;p/&gt; -
-         * idempotent-changed - (only for file component) idempotent-changed is
-         * for using a idempotentRepository and changed as the combined
-         * read-lock. This allows to use read locks that supports clustering if
-         * the idempotent repository implementation supports that.&lt;p/&gt; -
-         * idempotent-rename - (only for file component) idempotent-rename is
+         * supports distributed file locks. - rename - rename is for using a try
+         * to rename the file as a test if we can get exclusive read-lock. -
+         * idempotent - (only for file component) idempotent is for using a
+         * idempotentRepository as the read-lock. This allows to use read locks
+         * that supports clustering if the idempotent repository implementation
+         * supports that. - idempotent-changed - (only for file component)
+         * idempotent-changed is for using a idempotentRepository and changed as
+         * the combined read-lock. This allows to use read locks that supports
+         * clustering if the idempotent repository implementation supports that.
+         * - idempotent-rename - (only for file component) idempotent-rename is
          * for using a idempotentRepository and rename as the combined
          * read-lock. This allows to use read locks that supports clustering if
-         * the idempotent repository implementation supports
-         * that.&lt;p/&gt;Notice: The various read locks is not all suited to
-         * work in clustered mode, where concurrent consumers on different nodes
-         * is competing for the same files on a shared file system. The
-         * markerFile using a close to atomic operation to create the empty
-         * marker file, but its not guaranteed to work in a cluster. The
-         * fileLock may work better but then the file system need to support
-         * distributed file locks, and so on. Using the idempotent read lock can
-         * support clustering if the idempotent repository supports clustering,
-         * such as Hazelcast Component or Infinispan.
+         * the idempotent repository implementation supports that.Notice: The
+         * various read locks is not all suited to work in clustered mode, where
+         * concurrent consumers on different nodes is competing for the same
+         * files on a shared file system. The markerFile using a close to atomic
+         * operation to create the empty marker file, but its not guaranteed to
+         * work in a cluster. The fileLock may work better but then the file
+         * system need to support distributed file locks, and so on. Using the
+         * idempotent read lock can support clustering if the idempotent
+         * repository supports clustering, such as Hazelcast Component or
+         * Infinispan.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1267,12 +1216,12 @@ public interface FtpEndpointBuilderFactory {
          * read lock. For example when using the changed read lock, you can set
          * a higher interval period to cater for slow writes. The default of 1
          * sec. may be too fast if the producer is very slow writing the file.
-         * &lt;p/&gt;Notice: For FTP the default readLockCheckInterval is 5000.
-         * &lt;p/&gt; The readLockTimeout value must be higher than
-         * readLockCheckInterval, but a rule of thumb is to have a timeout that
-         * is at least 2 or more times higher than the readLockCheckInterval.
-         * This is needed to ensure that amble time is allowed for the read lock
-         * process to try to grab the lock before the timeout was hit.
+         * Notice: For FTP the default readLockCheckInterval is 5000. The
+         * readLockTimeout value must be higher than readLockCheckInterval, but
+         * a rule of thumb is to have a timeout that is at least 2 or more times
+         * higher than the readLockCheckInterval. This is needed to ensure that
+         * amble time is allowed for the read lock process to try to grab the
+         * lock before the timeout was hit.
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -1293,12 +1242,12 @@ public interface FtpEndpointBuilderFactory {
          * read lock. For example when using the changed read lock, you can set
          * a higher interval period to cater for slow writes. The default of 1
          * sec. may be too fast if the producer is very slow writing the file.
-         * &lt;p/&gt;Notice: For FTP the default readLockCheckInterval is 5000.
-         * &lt;p/&gt; The readLockTimeout value must be higher than
-         * readLockCheckInterval, but a rule of thumb is to have a timeout that
-         * is at least 2 or more times higher than the readLockCheckInterval.
-         * This is needed to ensure that amble time is allowed for the read lock
-         * process to try to grab the lock before the timeout was hit.
+         * Notice: For FTP the default readLockCheckInterval is 5000. The
+         * readLockTimeout value must be higher than readLockCheckInterval, but
+         * a rule of thumb is to have a timeout that is at least 2 or more times
+         * higher than the readLockCheckInterval. This is needed to ensure that
+         * amble time is allowed for the read lock process to try to grab the
+         * lock before the timeout was hit.
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -1316,11 +1265,11 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Whether or not read lock with marker files should upon startup delete
          * any orphan read lock files, which may have been left on the file
-         * system, if Camel was not properly shutdown (such as a JVM crash).
-         * &lt;p/&gt; If turning this option to &lt;tt&gt;false then any
-         * orphaned lock file will cause Camel to not attempt to pickup that
-         * file, this could also be due another node is concurrently reading
-         * files from the same shared directory.
+         * system, if Camel was not properly shutdown (such as a JVM crash). If
+         * turning this option to false then any orphaned lock file will cause
+         * Camel to not attempt to pickup that file, this could also be due
+         * another node is concurrently reading files from the same shared
+         * directory.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1338,11 +1287,11 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Whether or not read lock with marker files should upon startup delete
          * any orphan read lock files, which may have been left on the file
-         * system, if Camel was not properly shutdown (such as a JVM crash).
-         * &lt;p/&gt; If turning this option to &lt;tt&gt;false then any
-         * orphaned lock file will cause Camel to not attempt to pickup that
-         * file, this could also be due another node is concurrently reading
-         * files from the same shared directory.
+         * system, if Camel was not properly shutdown (such as a JVM crash). If
+         * turning this option to false then any orphaned lock file will cause
+         * Camel to not attempt to pickup that file, this could also be due
+         * another node is concurrently reading files from the same shared
+         * directory.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1525,13 +1474,12 @@ public interface FtpEndpointBuilderFactory {
          * This option is applied only for readLock=idempotent. It allows to
          * specify whether to remove the file name entry from the idempotent
          * repository when processing the file is succeeded and a commit
-         * happens. &lt;p/&gt; By default the file is not removed which ensures
-         * that any race-condition do not occur so another active node may
-         * attempt to grab the file. Instead the idempotent repository may
-         * support eviction strategies that you can configure to evict the file
-         * name entry after X minutes - this ensures no problems with race
-         * conditions. &lt;p/&gt; See more details at the
-         * readLockIdempotentReleaseDelay option.
+         * happens. By default the file is not removed which ensures that any
+         * race-condition do not occur so another active node may attempt to
+         * grab the file. Instead the idempotent repository may support eviction
+         * strategies that you can configure to evict the file name entry after
+         * X minutes - this ensures no problems with race conditions. See more
+         * details at the readLockIdempotentReleaseDelay option.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1550,13 +1498,12 @@ public interface FtpEndpointBuilderFactory {
          * This option is applied only for readLock=idempotent. It allows to
          * specify whether to remove the file name entry from the idempotent
          * repository when processing the file is succeeded and a commit
-         * happens. &lt;p/&gt; By default the file is not removed which ensures
-         * that any race-condition do not occur so another active node may
-         * attempt to grab the file. Instead the idempotent repository may
-         * support eviction strategies that you can configure to evict the file
-         * name entry after X minutes - this ensures no problems with race
-         * conditions. &lt;p/&gt; See more details at the
-         * readLockIdempotentReleaseDelay option.
+         * happens. By default the file is not removed which ensures that any
+         * race-condition do not occur so another active node may attempt to
+         * grab the file. Instead the idempotent repository may support eviction
+         * strategies that you can configure to evict the file name entry after
+         * X minutes - this ensures no problems with race conditions. See more
+         * details at the readLockIdempotentReleaseDelay option.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1619,13 +1566,13 @@ public interface FtpEndpointBuilderFactory {
          * triggered, then Camel will skip the file. At next poll Camel, will
          * try the file again, and this time maybe the read-lock could be
          * granted. Use a value of 0 or lower to indicate forever. Currently
-         * fileLock, changed and rename support the timeout. &lt;p/&gt; Notice:
-         * For FTP the default readLockTimeout value is 20000 instead of 10000.
-         * &lt;p/&gt; The readLockTimeout value must be higher than
-         * readLockCheckInterval, but a rule of thumb is to have a timeout that
-         * is at least 2 or more times higher than the readLockCheckInterval.
-         * This is needed to ensure that amble time is allowed for the read lock
-         * process to try to grab the lock before the timeout was hit.
+         * fileLock, changed and rename support the timeout. Notice: For FTP the
+         * default readLockTimeout value is 20000 instead of 10000. The
+         * readLockTimeout value must be higher than readLockCheckInterval, but
+         * a rule of thumb is to have a timeout that is at least 2 or more times
+         * higher than the readLockCheckInterval. This is needed to ensure that
+         * amble time is allowed for the read lock process to try to grab the
+         * lock before the timeout was hit.
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -1645,13 +1592,13 @@ public interface FtpEndpointBuilderFactory {
          * triggered, then Camel will skip the file. At next poll Camel, will
          * try the file again, and this time maybe the read-lock could be
          * granted. Use a value of 0 or lower to indicate forever. Currently
-         * fileLock, changed and rename support the timeout. &lt;p/&gt; Notice:
-         * For FTP the default readLockTimeout value is 20000 instead of 10000.
-         * &lt;p/&gt; The readLockTimeout value must be higher than
-         * readLockCheckInterval, but a rule of thumb is to have a timeout that
-         * is at least 2 or more times higher than the readLockCheckInterval.
-         * This is needed to ensure that amble time is allowed for the read lock
-         * process to try to grab the lock before the timeout was hit.
+         * fileLock, changed and rename support the timeout. Notice: For FTP the
+         * default readLockTimeout value is 20000 instead of 10000. The
+         * readLockTimeout value must be higher than readLockCheckInterval, but
+         * a rule of thumb is to have a timeout that is at least 2 or more times
+         * higher than the readLockCheckInterval. This is needed to ensure that
+         * amble time is allowed for the read lock process to try to grab the
+         * lock before the timeout was hit.
          * 
          * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -2006,8 +1953,8 @@ public interface FtpEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -2028,8 +1975,8 @@ public interface FtpEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -2229,11 +2176,10 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Pluggable sorter as a
-         * java.util.Comparator&lt;org.apache.camel.component.file.GenericFile&gt; class.
+         * Pluggable sorter as a java.util.Comparator class.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.Comparator&lt;org.apache.camel.component.file.GenericFile&lt;org.apache.commons.net.ftp.FTPFile&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Comparator&amp;lt;org.apache.camel.component.file.GenericFile&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: sort
          * 
@@ -2246,11 +2192,10 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Pluggable sorter as a
-         * java.util.Comparator&lt;org.apache.camel.component.file.GenericFile&gt; class.
+         * Pluggable sorter as a java.util.Comparator class.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Comparator&lt;org.apache.camel.component.file.GenericFile&lt;org.apache.commons.net.ftp.FTPFile&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Comparator&amp;lt;org.apache.camel.component.file.GenericFile&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: sort
          * 
@@ -2317,6 +2262,51 @@ public interface FtpEndpointBuilderFactory {
         default AdvancedFtpEndpointConsumerBuilder fastExistsCheck(
                 String fastExistsCheck) {
             doSetProperty("fastExistsCheck", fastExistsCheck);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedFtpEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedFtpEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -2472,9 +2462,9 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Whether to ignore when (trying to list files in directories or when
          * downloading a file), which does not exist or due to permission error.
-         * &lt;p/&gt; By default when a directory or file does not exists or
-         * insufficient permission, then an exception is thrown. Setting this
-         * option to &lt;tt&gt;true allows to ignore that instead.
+         * By default when a directory or file does not exists or insufficient
+         * permission, then an exception is thrown. Setting this option to true
+         * allows to ignore that instead.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -2492,9 +2482,9 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Whether to ignore when (trying to list files in directories or when
          * downloading a file), which does not exist or due to permission error.
-         * &lt;p/&gt; By default when a directory or file does not exists or
-         * insufficient permission, then an exception is thrown. Setting this
-         * option to &lt;tt&gt;true allows to ignore that instead.
+         * By default when a directory or file does not exists or insufficient
+         * permission, then an exception is thrown. Setting this option to true
+         * allows to ignore that instead.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -2653,7 +2643,7 @@ public interface FtpEndpointBuilderFactory {
          * then the readLock option does not apply.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.component.file.GenericFileProcessStrategy&lt;org.apache.commons.net.ftp.FTPFile&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.file.GenericFileProcessStrategy&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer (advanced)
          * 
@@ -2674,7 +2664,7 @@ public interface FtpEndpointBuilderFactory {
          * then the readLock option does not apply.
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.file.GenericFileProcessStrategy&lt;org.apache.commons.net.ftp.FTPFile&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.file.GenericFileProcessStrategy&amp;lt;org.apache.commons.net.ftp.FTPFile&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer (advanced)
          * 
@@ -2687,14 +2677,13 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether to allow using LIST command when downloading a file.
-         * &lt;p/&gt; Default is &lt;tt&gt;true. In some use cases you may want
-         * to download a specific file and are not allowed to use the LIST
-         * command, and therefore you can set this option to &lt;tt&gt;false.
-         * Notice when using this option, then the specific file to download
-         * does &lt;b&gt;not include meta-data information such as file size,
-         * timestamp, permissions etc, because those information is only
-         * possible to retrieve when LIST command is in use.
+         * Whether to allow using LIST command when downloading a file. Default
+         * is true. In some use cases you may want to download a specific file
+         * and are not allowed to use the LIST command, and therefore you can
+         * set this option to false. Notice when using this option, then the
+         * specific file to download does not include meta-data information such
+         * as file size, timestamp, permissions etc, because those information
+         * is only possible to retrieve when LIST command is in use.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -2709,14 +2698,13 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether to allow using LIST command when downloading a file.
-         * &lt;p/&gt; Default is &lt;tt&gt;true. In some use cases you may want
-         * to download a specific file and are not allowed to use the LIST
-         * command, and therefore you can set this option to &lt;tt&gt;false.
-         * Notice when using this option, then the specific file to download
-         * does &lt;b&gt;not include meta-data information such as file size,
-         * timestamp, permissions etc, because those information is only
-         * possible to retrieve when LIST command is in use.
+         * Whether to allow using LIST command when downloading a file. Default
+         * is true. In some use cases you may want to download a specific file
+         * and are not allowed to use the LIST command, and therefore you can
+         * set this option to false. Notice when using this option, then the
+         * specific file to download does not include meta-data information such
+         * as file size, timestamp, permissions etc, because those information
+         * is only possible to retrieve when LIST command is in use.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -2819,7 +2807,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets the connect timeout for waiting for a connection to be
-         * established &lt;p/&gt; Used by both FTPClient and JSCH.
+         * established Used by both FTPClient and JSCH.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -2836,7 +2824,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets the connect timeout for waiting for a connection to be
-         * established &lt;p/&gt; Used by both FTPClient and JSCH.
+         * established Used by both FTPClient and JSCH.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -2922,8 +2910,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClientConfig.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientConfigParameters(String, Object) method to add a value (call
          * the method multiple times to set more values).
@@ -2944,8 +2932,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClientConfig.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientConfigParameters(String, Object) method to add a value (call
          * the method multiple times to set more values).
@@ -2964,8 +2952,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClient.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -2986,8 +2974,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClient.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -3070,8 +3058,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets optional site command(s) to be executed after successful login.
-         * &lt;p/&gt; Multiple site commands can be separated using a new line
-         * character.
+         * Multiple site commands can be separated using a new line character.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3124,10 +3111,10 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Sets whether we should stepwise change directories while traversing
          * file structures when downloading files, or as well when uploading a
-         * file to a directory. &lt;p/&gt; You can disable this if you for
-         * example are in a situation where you cannot change directory on the
-         * FTP server due security reasons. Stepwise cannot be used together
-         * with streamDownload.
+         * file to a directory. You can disable this if you for example are in a
+         * situation where you cannot change directory on the FTP server due
+         * security reasons. Stepwise cannot be used together with
+         * streamDownload.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -3144,10 +3131,10 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Sets whether we should stepwise change directories while traversing
          * file structures when downloading files, or as well when uploading a
-         * file to a directory. &lt;p/&gt; You can disable this if you for
-         * example are in a situation where you cannot change directory on the
-         * FTP server due security reasons. Stepwise cannot be used together
-         * with streamDownload.
+         * file to a directory. You can disable this if you for example are in a
+         * situation where you cannot change directory on the FTP server due
+         * security reasons. Stepwise cannot be used together with
+         * streamDownload.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -3163,44 +3150,11 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets whether synchronous processing should be strictly used.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: advanced
-         * 
-         * @param synchronous the value to set
-         * @return the dsl builder
-         */
-        default AdvancedFtpEndpointConsumerBuilder synchronous(
-                boolean synchronous) {
-            doSetProperty("synchronous", synchronous);
-            return this;
-        }
-        /**
-         * Sets whether synchronous processing should be strictly used.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: advanced
-         * 
-         * @param synchronous the value to set
-         * @return the dsl builder
-         */
-        default AdvancedFtpEndpointConsumerBuilder synchronous(
-                String synchronous) {
-            doSetProperty("synchronous", synchronous);
-            return this;
-        }
-        /**
          * Should an exception be thrown if connection failed (exhausted)By
-         * default exception is not thrown and a &lt;tt&gt;WARN is logged. You
-         * can use this to enable exception being thrown and handle the thrown
-         * exception from the org.apache.camel.spi.PollingConsumerPollStrategy
-         * rollback method.
+         * default exception is not thrown and a WARN is logged. You can use
+         * this to enable exception being thrown and handle the thrown exception
+         * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
+         * method.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -3217,10 +3171,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Should an exception be thrown if connection failed (exhausted)By
-         * default exception is not thrown and a &lt;tt&gt;WARN is logged. You
-         * can use this to enable exception being thrown and handle the thrown
-         * exception from the org.apache.camel.spi.PollingConsumerPollStrategy
-         * rollback method.
+         * default exception is not thrown and a WARN is logged. You can use
+         * this to enable exception being thrown and handle the thrown exception
+         * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
+         * method.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -3374,13 +3328,13 @@ public interface FtpEndpointBuilderFactory {
          * original file has been written. The done file will be empty. This
          * option configures what file name to use. Either you can specify a
          * fixed name. Or you can use dynamic placeholders. The done file will
-         * always be written in the same folder as the original file.&lt;p/&gt;
-         * Consumer: If provided, Camel will only consume files if a done file
-         * exists. This option configures what file name to use. Either you can
-         * specify a fixed name. Or you can use dynamic placeholders.The done
-         * file is always expected in the same folder as the original
-         * file.&lt;p/&gt; Only ${file.name} and ${file.name.next} is supported
-         * as dynamic placeholders.
+         * always be written in the same folder as the original file. Consumer:
+         * If provided, Camel will only consume files if a done file exists.
+         * This option configures what file name to use. Either you can specify
+         * a fixed name. Or you can use dynamic placeholders.The done file is
+         * always expected in the same folder as the original file. Only
+         * ${file.name} and ${file.name.next} is supported as dynamic
+         * placeholders.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3423,8 +3377,7 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets passive mode connections.&lt;br/&gt; Default is active mode
-         * connections.
+         * Sets passive mode connections. Default is active mode connections.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -3439,8 +3392,7 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets passive mode connections.&lt;br/&gt; Default is active mode
-         * connections.
+         * Sets passive mode connections. Default is active mode connections.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -3456,8 +3408,8 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the path separator to be used. &lt;p/&gt; UNIX = Uses unix style
-         * path separator Windows = Uses windows style path separator Auto = (is
+         * Sets the path separator to be used. UNIX = Uses unix style path
+         * separator Windows = Uses windows style path separator Auto = (is
          * default) Use existing path separator in file name.
          * 
          * The option is a:
@@ -3475,8 +3427,8 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the path separator to be used. &lt;p/&gt; UNIX = Uses unix style
-         * path separator Windows = Uses windows style path separator Auto = (is
+         * Sets the path separator to be used. UNIX = Uses unix style path
+         * separator Windows = Uses windows style path separator Auto = (is
          * default) Use existing path separator in file name.
          * 
          * The option will be converted to a
@@ -3601,21 +3553,20 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * What to do if a file already exists with the same name. Override,
-         * which is the default, replaces the existing file.&lt;p/&gt; - Append
-         * - adds content to the existing file.&lt;p/&gt; - Fail - throws a
+         * which is the default, replaces the existing file. - Append - adds
+         * content to the existing file. - Fail - throws a
          * GenericFileOperationException, indicating that there is already an
-         * existing file.&lt;p/&gt; - Ignore - silently ignores the problem and
-         * does not override the existing file, but assumes everything is
-         * okay.&lt;p/&gt; - Move - option requires to use the moveExisting
-         * option to be configured as well. The option eagerDeleteTargetFile can
-         * be used to control what to do if an moving the file, and there exists
-         * already an existing file, otherwise causing the move operation to
-         * fail. The Move option will move any existing files, before writing
-         * the target file.&lt;p/&gt; - TryRename is only applicable if
-         * tempFileName option is in use. This allows to try renaming the file
-         * from the temporary name to the actual name, without doing any exists
-         * check. This check may be faster on some file systems and especially
-         * FTP servers.
+         * existing file. - Ignore - silently ignores the problem and does not
+         * override the existing file, but assumes everything is okay. - Move -
+         * option requires to use the moveExisting option to be configured as
+         * well. The option eagerDeleteTargetFile can be used to control what to
+         * do if an moving the file, and there exists already an existing file,
+         * otherwise causing the move operation to fail. The Move option will
+         * move any existing files, before writing the target file. - TryRename
+         * is only applicable if tempFileName option is in use. This allows to
+         * try renaming the file from the temporary name to the actual name,
+         * without doing any exists check. This check may be faster on some file
+         * systems and especially FTP servers.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.file.GenericFileExist&lt;/code&gt; type.
@@ -3633,21 +3584,20 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * What to do if a file already exists with the same name. Override,
-         * which is the default, replaces the existing file.&lt;p/&gt; - Append
-         * - adds content to the existing file.&lt;p/&gt; - Fail - throws a
+         * which is the default, replaces the existing file. - Append - adds
+         * content to the existing file. - Fail - throws a
          * GenericFileOperationException, indicating that there is already an
-         * existing file.&lt;p/&gt; - Ignore - silently ignores the problem and
-         * does not override the existing file, but assumes everything is
-         * okay.&lt;p/&gt; - Move - option requires to use the moveExisting
-         * option to be configured as well. The option eagerDeleteTargetFile can
-         * be used to control what to do if an moving the file, and there exists
-         * already an existing file, otherwise causing the move operation to
-         * fail. The Move option will move any existing files, before writing
-         * the target file.&lt;p/&gt; - TryRename is only applicable if
-         * tempFileName option is in use. This allows to try renaming the file
-         * from the temporary name to the actual name, without doing any exists
-         * check. This check may be faster on some file systems and especially
-         * FTP servers.
+         * existing file. - Ignore - silently ignores the problem and does not
+         * override the existing file, but assumes everything is okay. - Move -
+         * option requires to use the moveExisting option to be configured as
+         * well. The option eagerDeleteTargetFile can be used to control what to
+         * do if an moving the file, and there exists already an existing file,
+         * otherwise causing the move operation to fail. The Move option will
+         * move any existing files, before writing the target file. - TryRename
+         * is only applicable if tempFileName option is in use. This allows to
+         * try renaming the file from the temporary name to the actual name,
+         * without doing any exists check. This check may be faster on some file
+         * systems and especially FTP servers.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.file.GenericFileExist&lt;/code&gt; type.
@@ -3744,55 +3694,6 @@ public interface FtpEndpointBuilderFactory {
         default FtpEndpointProducerBuilder jailStartingDirectory(
                 String jailStartingDirectory) {
             doSetProperty("jailStartingDirectory", jailStartingDirectory);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default FtpEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default FtpEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -4109,7 +4010,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Will keep the last modified timestamp from the source file (if any).
-         * Will use the Exchange.FILE_LAST_MODIFIED header to located the
+         * Will use the FileConstants.FILE_LAST_MODIFIED header to located the
          * timestamp. This header can contain either a java.util.Date or long
          * with the timestamp. If the timestamp exists and the option is enabled
          * it will set this timestamp on the written file. Note: This option
@@ -4131,7 +4032,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Will keep the last modified timestamp from the source file (if any).
-         * Will use the Exchange.FILE_LAST_MODIFIED header to located the
+         * Will use the FileConstants.FILE_LAST_MODIFIED header to located the
          * timestamp. This header can contain either a java.util.Date or long
          * with the timestamp. If the timestamp exists and the option is enabled
          * it will set this timestamp on the written file. Note: This option
@@ -4150,6 +4051,55 @@ public interface FtpEndpointBuilderFactory {
         default AdvancedFtpEndpointProducerBuilder keepLastModified(
                 String keepLastModified) {
             doSetProperty("keepLastModified", keepLastModified);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedFtpEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedFtpEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -4190,10 +4140,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Whether to send a noop command as a pre-write check before uploading
-         * files to the FTP server. &lt;p/&gt; This is enabled by default as a
-         * validation of the connection is still valid, which allows to silently
-         * re-connect to be able to upload the file. However if this causes
-         * problems, you can turn this option off.
+         * files to the FTP server. This is enabled by default as a validation
+         * of the connection is still valid, which allows to silently re-connect
+         * to be able to upload the file. However if this causes problems, you
+         * can turn this option off.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -4209,10 +4159,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Whether to send a noop command as a pre-write check before uploading
-         * files to the FTP server. &lt;p/&gt; This is enabled by default as a
-         * validation of the connection is still valid, which allows to silently
-         * re-connect to be able to upload the file. However if this causes
-         * problems, you can turn this option off.
+         * files to the FTP server. This is enabled by default as a validation
+         * of the connection is still valid, which allows to silently re-connect
+         * to be able to upload the file. However if this causes problems, you
+         * can turn this option off.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -4315,7 +4265,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets the connect timeout for waiting for a connection to be
-         * established &lt;p/&gt; Used by both FTPClient and JSCH.
+         * established Used by both FTPClient and JSCH.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -4332,7 +4282,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets the connect timeout for waiting for a connection to be
-         * established &lt;p/&gt; Used by both FTPClient and JSCH.
+         * established Used by both FTPClient and JSCH.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -4418,8 +4368,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClientConfig.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientConfigParameters(String, Object) method to add a value (call
          * the method multiple times to set more values).
@@ -4440,8 +4390,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClientConfig.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientConfigParameters(String, Object) method to add a value (call
          * the method multiple times to set more values).
@@ -4460,8 +4410,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClient.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -4482,8 +4432,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClient.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -4566,8 +4516,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets optional site command(s) to be executed after successful login.
-         * &lt;p/&gt; Multiple site commands can be separated using a new line
-         * character.
+         * Multiple site commands can be separated using a new line character.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4620,10 +4569,10 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Sets whether we should stepwise change directories while traversing
          * file structures when downloading files, or as well when uploading a
-         * file to a directory. &lt;p/&gt; You can disable this if you for
-         * example are in a situation where you cannot change directory on the
-         * FTP server due security reasons. Stepwise cannot be used together
-         * with streamDownload.
+         * file to a directory. You can disable this if you for example are in a
+         * situation where you cannot change directory on the FTP server due
+         * security reasons. Stepwise cannot be used together with
+         * streamDownload.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -4640,10 +4589,10 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Sets whether we should stepwise change directories while traversing
          * file structures when downloading files, or as well when uploading a
-         * file to a directory. &lt;p/&gt; You can disable this if you for
-         * example are in a situation where you cannot change directory on the
-         * FTP server due security reasons. Stepwise cannot be used together
-         * with streamDownload.
+         * file to a directory. You can disable this if you for example are in a
+         * situation where you cannot change directory on the FTP server due
+         * security reasons. Stepwise cannot be used together with
+         * streamDownload.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -4659,44 +4608,11 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets whether synchronous processing should be strictly used.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: advanced
-         * 
-         * @param synchronous the value to set
-         * @return the dsl builder
-         */
-        default AdvancedFtpEndpointProducerBuilder synchronous(
-                boolean synchronous) {
-            doSetProperty("synchronous", synchronous);
-            return this;
-        }
-        /**
-         * Sets whether synchronous processing should be strictly used.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: advanced
-         * 
-         * @param synchronous the value to set
-         * @return the dsl builder
-         */
-        default AdvancedFtpEndpointProducerBuilder synchronous(
-                String synchronous) {
-            doSetProperty("synchronous", synchronous);
-            return this;
-        }
-        /**
          * Should an exception be thrown if connection failed (exhausted)By
-         * default exception is not thrown and a &lt;tt&gt;WARN is logged. You
-         * can use this to enable exception being thrown and handle the thrown
-         * exception from the org.apache.camel.spi.PollingConsumerPollStrategy
-         * rollback method.
+         * default exception is not thrown and a WARN is logged. You can use
+         * this to enable exception being thrown and handle the thrown exception
+         * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
+         * method.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -4713,10 +4629,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Should an exception be thrown if connection failed (exhausted)By
-         * default exception is not thrown and a &lt;tt&gt;WARN is logged. You
-         * can use this to enable exception being thrown and handle the thrown
-         * exception from the org.apache.camel.spi.PollingConsumerPollStrategy
-         * rollback method.
+         * default exception is not thrown and a WARN is logged. You can use
+         * this to enable exception being thrown and handle the thrown exception
+         * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
+         * method.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -4871,13 +4787,13 @@ public interface FtpEndpointBuilderFactory {
          * original file has been written. The done file will be empty. This
          * option configures what file name to use. Either you can specify a
          * fixed name. Or you can use dynamic placeholders. The done file will
-         * always be written in the same folder as the original file.&lt;p/&gt;
-         * Consumer: If provided, Camel will only consume files if a done file
-         * exists. This option configures what file name to use. Either you can
-         * specify a fixed name. Or you can use dynamic placeholders.The done
-         * file is always expected in the same folder as the original
-         * file.&lt;p/&gt; Only ${file.name} and ${file.name.next} is supported
-         * as dynamic placeholders.
+         * always be written in the same folder as the original file. Consumer:
+         * If provided, Camel will only consume files if a done file exists.
+         * This option configures what file name to use. Either you can specify
+         * a fixed name. Or you can use dynamic placeholders.The done file is
+         * always expected in the same folder as the original file. Only
+         * ${file.name} and ${file.name.next} is supported as dynamic
+         * placeholders.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4920,8 +4836,7 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets passive mode connections.&lt;br/&gt; Default is active mode
-         * connections.
+         * Sets passive mode connections. Default is active mode connections.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -4936,8 +4851,7 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets passive mode connections.&lt;br/&gt; Default is active mode
-         * connections.
+         * Sets passive mode connections. Default is active mode connections.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -4953,8 +4867,8 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the path separator to be used. &lt;p/&gt; UNIX = Uses unix style
-         * path separator Windows = Uses windows style path separator Auto = (is
+         * Sets the path separator to be used. UNIX = Uses unix style path
+         * separator Windows = Uses windows style path separator Auto = (is
          * default) Use existing path separator in file name.
          * 
          * The option is a:
@@ -4972,8 +4886,8 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets the path separator to be used. &lt;p/&gt; UNIX = Uses unix style
-         * path separator Windows = Uses windows style path separator Auto = (is
+         * Sets the path separator to be used. UNIX = Uses unix style path
+         * separator Windows = Uses windows style path separator Auto = (is
          * default) Use existing path separator in file name.
          * 
          * The option will be converted to a
@@ -5285,7 +5199,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets the connect timeout for waiting for a connection to be
-         * established &lt;p/&gt; Used by both FTPClient and JSCH.
+         * established Used by both FTPClient and JSCH.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -5301,7 +5215,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets the connect timeout for waiting for a connection to be
-         * established &lt;p/&gt; Used by both FTPClient and JSCH.
+         * established Used by both FTPClient and JSCH.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -5386,8 +5300,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClientConfig.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientConfigParameters(String, Object) method to add a value (call
          * the method multiple times to set more values).
@@ -5408,8 +5322,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClientConfig.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientConfigParameters(String, Object) method to add a value (call
          * the method multiple times to set more values).
@@ -5427,8 +5341,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClient.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -5449,8 +5363,8 @@ public interface FtpEndpointBuilderFactory {
          * Used by FtpComponent to provide additional parameters for the
          * FTPClient.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * ftpClientParameters(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -5530,8 +5444,7 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Sets optional site command(s) to be executed after successful login.
-         * &lt;p/&gt; Multiple site commands can be separated using a new line
-         * character.
+         * Multiple site commands can be separated using a new line character.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -5583,10 +5496,10 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Sets whether we should stepwise change directories while traversing
          * file structures when downloading files, or as well when uploading a
-         * file to a directory. &lt;p/&gt; You can disable this if you for
-         * example are in a situation where you cannot change directory on the
-         * FTP server due security reasons. Stepwise cannot be used together
-         * with streamDownload.
+         * file to a directory. You can disable this if you for example are in a
+         * situation where you cannot change directory on the FTP server due
+         * security reasons. Stepwise cannot be used together with
+         * streamDownload.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -5603,10 +5516,10 @@ public interface FtpEndpointBuilderFactory {
         /**
          * Sets whether we should stepwise change directories while traversing
          * file structures when downloading files, or as well when uploading a
-         * file to a directory. &lt;p/&gt; You can disable this if you for
-         * example are in a situation where you cannot change directory on the
-         * FTP server due security reasons. Stepwise cannot be used together
-         * with streamDownload.
+         * file to a directory. You can disable this if you for example are in a
+         * situation where you cannot change directory on the FTP server due
+         * security reasons. Stepwise cannot be used together with
+         * streamDownload.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -5622,42 +5535,11 @@ public interface FtpEndpointBuilderFactory {
             return this;
         }
         /**
-         * Sets whether synchronous processing should be strictly used.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: advanced
-         * 
-         * @param synchronous the value to set
-         * @return the dsl builder
-         */
-        default AdvancedFtpEndpointBuilder synchronous(boolean synchronous) {
-            doSetProperty("synchronous", synchronous);
-            return this;
-        }
-        /**
-         * Sets whether synchronous processing should be strictly used.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: advanced
-         * 
-         * @param synchronous the value to set
-         * @return the dsl builder
-         */
-        default AdvancedFtpEndpointBuilder synchronous(String synchronous) {
-            doSetProperty("synchronous", synchronous);
-            return this;
-        }
-        /**
          * Should an exception be thrown if connection failed (exhausted)By
-         * default exception is not thrown and a &lt;tt&gt;WARN is logged. You
-         * can use this to enable exception being thrown and handle the thrown
-         * exception from the org.apache.camel.spi.PollingConsumerPollStrategy
-         * rollback method.
+         * default exception is not thrown and a WARN is logged. You can use
+         * this to enable exception being thrown and handle the thrown exception
+         * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
+         * method.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -5674,10 +5556,10 @@ public interface FtpEndpointBuilderFactory {
         }
         /**
          * Should an exception be thrown if connection failed (exhausted)By
-         * default exception is not thrown and a &lt;tt&gt;WARN is logged. You
-         * can use this to enable exception being thrown and handle the thrown
-         * exception from the org.apache.camel.spi.PollingConsumerPollStrategy
-         * rollback method.
+         * default exception is not thrown and a WARN is logged. You can use
+         * this to enable exception being thrown and handle the thrown exception
+         * from the org.apache.camel.spi.PollingConsumerPollStrategy rollback
+         * method.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -5734,6 +5616,19 @@ public interface FtpEndpointBuilderFactory {
          * Since: 1.1
          * Maven coordinates: org.apache.camel:camel-ftp
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default FtpHeaderNameBuilder ftp() {
+            return FtpHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * FTP (camel-ftp)
+         * Upload and download files to/from FTP servers.
+         * 
+         * Category: file
+         * Since: 1.1
+         * Maven coordinates: org.apache.camel:camel-ftp
+         * 
          * Syntax: <code>ftp:host:port/directoryName</code>
          * 
          * Path parameter: host (required)
@@ -5777,6 +5672,150 @@ public interface FtpEndpointBuilderFactory {
          */
         default FtpEndpointBuilder ftp(String componentName, String path) {
             return FtpEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the FTP component.
+     */
+    public static class FtpHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final FtpHeaderNameBuilder INSTANCE = new FtpHeaderNameBuilder();
+
+        /**
+         * A long value containing the file size.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileLength}.
+         */
+        public String fileLength() {
+            return "FileLength";
+        }
+
+        /**
+         * A Long value containing the last modified timestamp of the file.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileLastModified}.
+         */
+        public String fileLastModified() {
+            return "FileLastModified";
+        }
+
+        /**
+         * Specifies the output file name (relative to the endpoint directory)
+         * to be used for the output message when sending to the endpoint. If
+         * this is not present and no expression either, then a generated
+         * message ID is used as the filename instead.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FileName}.
+         */
+        public String fileName() {
+            return "FileName";
+        }
+
+        /**
+         * Only the file name (the name with no leading paths).
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FileNameOnly}.
+         */
+        public String fileNameOnly() {
+            return "FileNameOnly";
+        }
+
+        /**
+         * The parent path.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FileParent}.
+         */
+        public String fileParent() {
+            return "FileParent";
+        }
+
+        /**
+         * The remote file input stream.
+         * 
+         * The option is a: {@code java.io.InputStream} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code RemoteFileInputStream}.
+         */
+        public String remoteFileInputStream() {
+            return "RemoteFileInputStream";
+        }
+
+        /**
+         * Path to the local work file, if local work directory is used.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FileLocalWorkPath}.
+         */
+        public String fileLocalWorkPath() {
+            return "FileLocalWorkPath";
+        }
+
+        /**
+         * The FTP client reply code.
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FtpReplyCode}.
+         */
+        public String ftpReplyCode() {
+            return "FtpReplyCode";
+        }
+
+        /**
+         * The FTP client reply string.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FtpReplyString}.
+         */
+        public String ftpReplyString() {
+            return "FtpReplyString";
+        }
+
+        /**
+         * The remote hostname.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code FileHost}.
+         */
+        public String fileHost() {
+            return "FileHost";
         }
     }
     static FtpEndpointBuilder endpointBuilder(String componentName, String path) {

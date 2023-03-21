@@ -41,7 +41,7 @@ import org.apache.camel.spi.UriParams;
 public class SalesforceEndpointConfig implements Cloneable {
 
     // default API version
-    public static final String DEFAULT_VERSION = "53.0";
+    public static final String DEFAULT_VERSION = "56.0";
 
     // general parameter
     public static final String API_VERSION = "apiVersion";
@@ -59,6 +59,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     public static final String SOBJECT_BLOB_FIELD_NAME = "sObjectBlobFieldName";
     public static final String SOBJECT_CLASS = "sObjectClass";
     public static final String SOBJECT_QUERY = "sObjectQuery";
+    public static final String STREAM_QUERY_RESULT = "streamQueryResult";
     public static final String SOBJECT_SEARCH = "sObjectSearch";
     public static final String APEX_METHOD = "apexMethod";
     public static final String APEX_URL = "apexUrl";
@@ -138,6 +139,8 @@ public class SalesforceEndpointConfig implements Cloneable {
     private String sObjectClass;
     @UriParam(displayName = "SObject Query")
     private String sObjectQuery;
+    @UriParam(displayName = "Stream query result", defaultValue = "false")
+    private Boolean streamQueryResult = false;
     @UriParam(displayName = "SObject Search")
     private String sObjectSearch;
     @UriParam
@@ -387,6 +390,18 @@ public class SalesforceEndpointConfig implements Cloneable {
         return sObjectSearch;
     }
 
+    public Boolean getStreamQueryResult() {
+        return streamQueryResult;
+    }
+
+    /**
+     * If true, streams SOQL query result and transparently handles subsequent requests if there are multiple pages.
+     * Otherwise, results are returned one page at a time.
+     */
+    public void setStreamQueryResult(Boolean streamQueryResult) {
+        this.streamQueryResult = streamQueryResult;
+    }
+
     /**
      * Salesforce SOSL search string
      */
@@ -630,7 +645,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     }
 
     /**
-     * Notify for create operation, defaults to false (API version >= 29.0)
+     * Notify for create operation, defaults to false (API version &gt;= 29.0)
      */
     public void setNotifyForOperationCreate(Boolean notifyForOperationCreate) {
         this.notifyForOperationCreate = notifyForOperationCreate;
@@ -641,7 +656,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     }
 
     /**
-     * Notify for update operation, defaults to false (API version >= 29.0)
+     * Notify for update operation, defaults to false (API version &gt;= 29.0)
      */
     public void setNotifyForOperationUpdate(Boolean notifyForOperationUpdate) {
         this.notifyForOperationUpdate = notifyForOperationUpdate;
@@ -652,7 +667,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     }
 
     /**
-     * Notify for delete operation, defaults to false (API version >= 29.0)
+     * Notify for delete operation, defaults to false (API version &gt;= 29.0)
      */
     public void setNotifyForOperationDelete(Boolean notifyForOperationDelete) {
         this.notifyForOperationDelete = notifyForOperationDelete;
@@ -663,7 +678,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     }
 
     /**
-     * Notify for un-delete operation, defaults to false (API version >= 29.0)
+     * Notify for un-delete operation, defaults to false (API version &gt;= 29.0)
      */
     public void setNotifyForOperationUndelete(Boolean notifyForOperationUndelete) {
         this.notifyForOperationUndelete = notifyForOperationUndelete;
@@ -771,6 +786,7 @@ public class SalesforceEndpointConfig implements Cloneable {
         valueMap.put(SOBJECT_EXT_ID_VALUE, sObjectIdValue);
         valueMap.put(SOBJECT_CLASS, sObjectClass);
         valueMap.put(SOBJECT_QUERY, sObjectQuery);
+        valueMap.put(STREAM_QUERY_RESULT, streamQueryResult);
         valueMap.put(SOBJECT_SEARCH, sObjectSearch);
         valueMap.put(APEX_METHOD, apexMethod);
         valueMap.put(APEX_URL, apexUrl);
@@ -814,7 +830,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
     /**
      * Default replayId setting if no value is found in {@link #initialReplayIdMap}
-     * 
+     *
      * @param defaultReplayId
      */
     public void setDefaultReplayId(Long defaultReplayId) {
@@ -849,7 +865,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
     /**
      * Limit on number of returned records. Applicable to some of the API, check the Salesforce documentation.
-     * 
+     *
      * @param limit
      */
     public void setLimit(final Integer limit) {
@@ -1038,7 +1054,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
     /**
      * The portion of the endpoint URL after the domain name. E.g., " + "'/services/data/v52.0/sobjects/Account/'
-     * 
+     *
      * @param rawPath the path
      */
     public void setRawPath(String rawPath) {
@@ -1051,7 +1067,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
     /**
      * HTTP method to use for the Raw operation
-     * 
+     *
      * @param rawMethod http method
      */
     public void setRawMethod(String rawMethod) {
@@ -1065,7 +1081,7 @@ public class SalesforceEndpointConfig implements Cloneable {
     /**
      * Comma separated list of message headers to include as query parameters for Raw operation. Do not url-encode
      * values as this will be done automatically.
-     * 
+     *
      * @param rawQueryParameters
      */
     public void setRawQueryParameters(String rawQueryParameters) {
@@ -1078,7 +1094,7 @@ public class SalesforceEndpointConfig implements Cloneable {
 
     /**
      * Comma separated list of message headers to include as HTTP parameters for Raw operation.
-     * 
+     *
      * @param
      */
     public void setRawHttpHeaders(String rawHttpHeaders) {

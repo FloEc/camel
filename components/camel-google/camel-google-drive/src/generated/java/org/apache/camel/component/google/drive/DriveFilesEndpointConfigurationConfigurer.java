@@ -27,12 +27,14 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         map.put("ClientSecret", java.lang.String.class);
         map.put("Content", com.google.api.services.drive.model.File.class);
         map.put("ContentChannel", com.google.api.services.drive.model.Channel.class);
+        map.put("Delegate", java.lang.String.class);
         map.put("FileId", java.lang.String.class);
         map.put("MediaContent", com.google.api.client.http.AbstractInputStreamContent.class);
         map.put("MethodName", java.lang.String.class);
         map.put("MimeType", java.lang.String.class);
         map.put("RefreshToken", java.lang.String.class);
         map.put("Scopes", java.util.List.class);
+        map.put("ServiceAccountKey", java.lang.String.class);
         ALL_OPTIONS = map;
     }
 
@@ -54,6 +56,8 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         case "Content": target.setContent(property(camelContext, com.google.api.services.drive.model.File.class, value)); return true;
         case "contentchannel":
         case "ContentChannel": target.setContentChannel(property(camelContext, com.google.api.services.drive.model.Channel.class, value)); return true;
+        case "delegate":
+        case "Delegate": target.setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "fileid":
         case "FileId": target.setFileId(property(camelContext, java.lang.String.class, value)); return true;
         case "mediacontent":
@@ -66,6 +70,8 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         case "RefreshToken": target.setRefreshToken(property(camelContext, java.lang.String.class, value)); return true;
         case "scopes":
         case "Scopes": target.setScopes(property(camelContext, java.util.List.class, value)); return true;
+        case "serviceaccountkey":
+        case "ServiceAccountKey": target.setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         default: return false;
         }
     }
@@ -92,6 +98,8 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         case "Content": return com.google.api.services.drive.model.File.class;
         case "contentchannel":
         case "ContentChannel": return com.google.api.services.drive.model.Channel.class;
+        case "delegate":
+        case "Delegate": return java.lang.String.class;
         case "fileid":
         case "FileId": return java.lang.String.class;
         case "mediacontent":
@@ -104,6 +112,8 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         case "RefreshToken": return java.lang.String.class;
         case "scopes":
         case "Scopes": return java.util.List.class;
+        case "serviceaccountkey":
+        case "ServiceAccountKey": return java.lang.String.class;
         default: return null;
         }
     }
@@ -126,6 +136,8 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         case "Content": return target.getContent();
         case "contentchannel":
         case "ContentChannel": return target.getContentChannel();
+        case "delegate":
+        case "Delegate": return target.getDelegate();
         case "fileid":
         case "FileId": return target.getFileId();
         case "mediacontent":
@@ -138,6 +150,8 @@ public class DriveFilesEndpointConfigurationConfigurer extends org.apache.camel.
         case "RefreshToken": return target.getRefreshToken();
         case "scopes":
         case "Scopes": return target.getScopes();
+        case "serviceaccountkey":
+        case "ServiceAccountKey": return target.getServiceAccountKey();
         default: return null;
         }
     }

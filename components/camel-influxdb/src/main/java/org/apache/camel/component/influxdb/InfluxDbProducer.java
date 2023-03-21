@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 public class InfluxDbProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(InfluxDbProducer.class);
-    private static final String CREATE_DATABASE = "CREATE DATABASE ";
-    private static final String SHOW_DATABASES = "SHOW DATABASES";
 
     InfluxDbEndpoint endpoint;
     InfluxDB connection;
@@ -63,7 +61,7 @@ public class InfluxDbProducer extends DefaultProducer {
                 doInsert(exchange, dataBaseName, retentionPolicy);
                 break;
             case InfluxDbOperations.QUERY:
-                doQuery(exchange, dataBaseName, retentionPolicy);
+                doQuery(exchange, dataBaseName);
                 break;
             case InfluxDbOperations.PING:
                 doPing(exchange);
@@ -77,7 +75,9 @@ public class InfluxDbProducer extends DefaultProducer {
         if (!endpoint.isBatch()) {
             Point p = exchange.getIn().getMandatoryBody(Point.class);
             try {
-                LOG.debug("Writing point {}", p.lineProtocol());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Writing point {}", p.lineProtocol());
+                }
                 connection.write(dataBaseName, retentionPolicy, p);
             } catch (Exception ex) {
                 exchange.setException(new CamelInfluxDbException(ex));
@@ -85,7 +85,9 @@ public class InfluxDbProducer extends DefaultProducer {
         } else {
             BatchPoints batchPoints = exchange.getIn().getMandatoryBody(BatchPoints.class);
             try {
-                LOG.debug("Writing BatchPoints {}", batchPoints.lineProtocol());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Writing BatchPoints {}", batchPoints.lineProtocol());
+                }
                 connection.write(batchPoints);
             } catch (Exception ex) {
                 exchange.setException(new CamelInfluxDbException(ex));
@@ -93,7 +95,7 @@ public class InfluxDbProducer extends DefaultProducer {
         }
     }
 
-    private void doQuery(Exchange exchange, String dataBaseName, String retentionPolicy) {
+    private void doQuery(Exchange exchange, String dataBaseName) {
         String query = calculateQuery(exchange);
         Query influxdbQuery = new Query(query, dataBaseName);
         QueryResult resultSet = connection.query(influxdbQuery);

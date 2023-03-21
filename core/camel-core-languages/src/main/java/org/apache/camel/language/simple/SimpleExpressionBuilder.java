@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -38,9 +37,14 @@ import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.spi.ClassResolver;
 import org.apache.camel.spi.ExchangeFormatter;
 import org.apache.camel.spi.Language;
+import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.support.CamelContextHelper;
+import org.apache.camel.support.ClassicUuidGenerator;
+import org.apache.camel.support.DefaultUuidGenerator;
 import org.apache.camel.support.ExpressionAdapter;
 import org.apache.camel.support.MessageHelper;
+import org.apache.camel.support.ShortUuidGenerator;
+import org.apache.camel.support.SimpleUuidGenerator;
 import org.apache.camel.support.builder.ExpressionBuilder;
 import org.apache.camel.support.processor.DefaultExchangeFormatter;
 import org.apache.camel.util.FileUtil;
@@ -98,10 +102,8 @@ public final class SimpleExpressionBuilder {
 
             private ExchangeFormatter getOrCreateExchangeFormatter(CamelContext camelContext) {
                 if (formatter == null) {
-                    Set<ExchangeFormatter> formatters = camelContext.getRegistry().findByType(ExchangeFormatter.class);
-                    if (formatters != null && formatters.size() == 1) {
-                        formatter = formatters.iterator().next();
-                    } else {
+                    formatter = camelContext.getRegistry().findSingleByType(ExchangeFormatter.class);
+                    if (formatter == null) {
                         // setup exchange formatter to be used for message history dump
                         DefaultExchangeFormatter def = new DefaultExchangeFormatter();
                         def.setShowExchangeId(true);
@@ -184,6 +186,37 @@ public final class SimpleExpressionBuilder {
     }
 
     /**
+     * Joins together the values from the expression
+     */
+    public static Expression joinExpression(final String expression, final String separator, final String prefix) {
+        return new ExpressionAdapter() {
+            private Expression exp;
+
+            @Override
+            public void init(CamelContext context) {
+                exp = context.resolveLanguage("simple").createExpression(expression);
+                exp.init(context);
+                exp = ExpressionBuilder.joinExpression(exp, separator, prefix);
+                exp.init(context);
+            }
+
+            @Override
+            public Object evaluate(Exchange exchange) {
+                return exp.evaluate(exchange, Object.class);
+            }
+
+            @Override
+            public String toString() {
+                if (prefix != null) {
+                    return "join(" + expression + "," + separator + "," + prefix + ")";
+                } else {
+                    return "join(" + expression + "," + separator + ")";
+                }
+            }
+        };
+    }
+
+    /**
      * Returns a random number between min and max (exclusive)
      */
     public static Expression randomExpression(final String min, final String max) {
@@ -237,6 +270,46 @@ public final class SimpleExpressionBuilder {
             @Override
             public String toString() {
                 return "random(" + min + "," + max + ")";
+            }
+        };
+    }
+
+    /**
+     * Returns a uuid string based on the given generator (default, classic, short, simple)
+     */
+    public static Expression uuidExpression(final String generator) {
+        return new ExpressionAdapter() {
+
+            UuidGenerator uuid;
+
+            @Override
+            public Object evaluate(Exchange exchange) {
+                return uuid.generateUuid();
+            }
+
+            @Override
+            public void init(CamelContext context) {
+                if ("classic".equalsIgnoreCase(generator)) {
+                    uuid = new ClassicUuidGenerator();
+                } else if ("short".equals(generator)) {
+                    uuid = new ShortUuidGenerator();
+                } else if ("simple".equals(generator)) {
+                    uuid = new SimpleUuidGenerator();
+                } else if (generator == null || "default".equals(generator)) {
+                    uuid = new DefaultUuidGenerator();
+                } else {
+                    // lookup custom generator
+                    uuid = CamelContextHelper.mandatoryLookup(context, generator, UuidGenerator.class);
+                }
+            }
+
+            @Override
+            public String toString() {
+                if (generator != null) {
+                    return "uuid(" + generator + ")";
+                } else {
+                    return "uuid";
+                }
             }
         };
     }
@@ -484,7 +557,10 @@ public final class SimpleExpressionBuilder {
                     } else if (obj instanceof Long) {
                         date = new Date((Long) obj);
                     } else {
-                        throw new IllegalArgumentException("Cannot find Date/long object at command: " + command);
+                        date = exchange.getContext().getTypeConverter().tryConvertTo(Date.class, exchange, obj);
+                        if (date == null) {
+                            throw new IllegalArgumentException("Cannot find Date/long object at command: " + command);
+                        }
                     }
                 } else if (command.startsWith("exchangeProperty.")) {
                     String key = command.substring(command.lastIndexOf('.') + 1);
@@ -494,7 +570,10 @@ public final class SimpleExpressionBuilder {
                     } else if (obj instanceof Long) {
                         date = new Date((Long) obj);
                     } else {
-                        throw new IllegalArgumentException("Cannot find Date/long object at command: " + command);
+                        date = exchange.getContext().getTypeConverter().tryConvertTo(Date.class, exchange, obj);
+                        if (date == null) {
+                            throw new IllegalArgumentException("Cannot find Date/long object at command: " + command);
+                        }
                     }
                 } else if ("file".equals(command)) {
                     Long num = exchange.getIn().getHeader(Exchange.FILE_LAST_MODIFIED, Long.class);

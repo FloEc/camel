@@ -30,12 +30,12 @@ public final class Cw2ClientFactory {
 
     /**
      * Return the correct AWS Cloud Watch client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               CloudWatchClient
      */
     public static Cw2InternalClient getCloudWatchClient(Cw2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new Cw2ClientIAMOptimizedImpl(configuration) : new Cw2ClientStandardImpl(configuration);
     }
 }

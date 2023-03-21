@@ -19,19 +19,18 @@ package org.apache.camel.model;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.BeanScope;
@@ -57,17 +56,20 @@ import org.apache.camel.model.language.ConstantExpression;
 import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.model.language.LanguageExpression;
 import org.apache.camel.model.language.SimpleExpression;
-import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.processor.loadbalancer.LoadBalancer;
+import org.apache.camel.resume.ConsumerListener;
+import org.apache.camel.resume.ResumeStrategy;
 import org.apache.camel.spi.AsEndpointUri;
 import org.apache.camel.spi.AsPredicate;
 import org.apache.camel.spi.DataFormat;
 import org.apache.camel.spi.IdempotentRepository;
 import org.apache.camel.spi.InterceptStrategy;
+import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.Policy;
+import org.apache.camel.spi.Resource;
+import org.apache.camel.spi.ResourceAware;
 import org.apache.camel.support.ExpressionAdapter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base class for processor types that most XML types extend.
@@ -78,12 +80,13 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
         implements Block {
     @XmlTransient
     private static final AtomicInteger COUNTER = new AtomicInteger();
-    @XmlTransient
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    @XmlAttribute
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean")
+    protected String disabled;
     @XmlAttribute
     protected Boolean inheritErrorHandler;
     @XmlTransient
-    private final LinkedList<Block> blocks = new LinkedList<>();
+    private final Deque<Block> blocks = new LinkedList<>();
     @XmlTransient
     private ProcessorDefinition<?> parent;
     @XmlTransient
@@ -177,14 +180,6 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
                 }
             }
         }
-        if (context != null && (context.isSourceLocationEnabled() || context.isDebugging() || context.isTracing())) {
-            // we want to capture source location:line for every output
-            ProcessorDefinitionHelper.prepareSourceLocation(output);
-            if (log.isDebugEnabled()) {
-                log.debug("{} located in {}:{}", output.getShortName(), output.getLocation(),
-                        output.getLineNumber());
-            }
-        }
 
         // inject context
         CamelContextAware.trySetCamelContext(output, context);
@@ -213,6 +208,12 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
         output.setParent(this);
         configureChild(output);
         getOutputs().add(output);
+
+        if (context != null && (context.isSourceLocationEnabled() || context.isDebugging() || context.isTracing())) {
+            // we want to capture source location:line for every output
+            Resource resource = this instanceof ResourceAware ? ((ResourceAware) this).getResource() : null;
+            ProcessorDefinitionHelper.prepareSourceLocation(resource, output);
+        }
     }
 
     public void clearOutput() {
@@ -368,6 +369,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      *
      * @return the builder
      */
+    @Deprecated
     public ServiceCallDefinition serviceCall() {
         ServiceCallDefinition answer = new ServiceCallDefinition();
         addOutput(answer);
@@ -380,6 +382,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @param  name the service name
      * @return      the builder
      */
+    @Deprecated
     public Type serviceCall(String name) {
         ServiceCallDefinition answer = new ServiceCallDefinition();
         answer.setName(name);
@@ -394,6 +397,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @param  uri  the endpoint uri to use for calling the service
      * @return      the builder
      */
+    @Deprecated
     public Type serviceCall(String name, @AsEndpointUri String uri) {
         ServiceCallDefinition answer = new ServiceCallDefinition();
         answer.setName(name);
@@ -498,20 +502,6 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @param  endpoints list of endpoints to send to
      * @return           the builder
      */
-    @Deprecated
-    public Type to(Iterable<Endpoint> endpoints) {
-        for (Endpoint endpoint : endpoints) {
-            addOutput(new ToDefinition(endpoint));
-        }
-        return asType();
-    }
-
-    /**
-     * Sends the exchange to a list of endpoints
-     *
-     * @param  endpoints list of endpoints to send to
-     * @return           the builder
-     */
     public Type to(@AsEndpointUri EndpointProducerBuilder... endpoints) {
         for (EndpointProducerBuilder endpoint : endpoints) {
             addOutput(new ToDefinition(endpoint));
@@ -553,21 +543,6 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
 
     /**
      * Sends the exchange to a list of endpoints
-     *
-     * @param  pattern   the pattern to use for the message exchanges
-     * @param  endpoints list of endpoints to send to
-     * @return           the builder
-     */
-    @Deprecated
-    public Type to(ExchangePattern pattern, Iterable<Endpoint> endpoints) {
-        for (Endpoint endpoint : endpoints) {
-            addOutput(new ToDefinition(endpoint, pattern));
-        }
-        return asType();
-    }
-
-    /**
-     * Sends the exchange to a list of endpoints
      * <p/>
      * Notice the existing MEP is preserved
      *
@@ -583,8 +558,8 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     }
 
     /**
-     * <a href= "http://camel.apache.org/exchange-pattern.html">ExchangePattern:</a> set the {@link ExchangePattern}
-     * into the {@link Exchange}.
+     * <a href="http://camel.apache.org/exchange-pattern.html">ExchangePattern:</a> set the {@link ExchangePattern} into
+     * the {@link Exchange}.
      * <p/>
      * The pattern set on the {@link Exchange} will be changed from this point going foward.
      *
@@ -597,153 +572,17 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     }
 
     /**
-     * Sends the message to the given endpoint using an <a href="http://camel.apache.org/event-message.html">Event
-     * Message</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOnly exchange pattern</a>
+     * <a href="http://camel.apache.org/exchange-pattern.html">ExchangePattern:</a> set the {@link ExchangePattern} into
+     * the {@link Exchange}.
      * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
+     * The pattern set on the {@link Exchange} will be changed from this point going foward.
      *
-     * @param      uri The endpoint uri which is used for sending the exchange
-     * @return         the builder
-     * @deprecated     use to where you can specify the exchange pattern as well
+     * @param  exchangePattern the exchange pattern
+     * @return                 the builder
      */
-    @Deprecated
-    public Type inOnly(@AsEndpointUri String uri) {
-        return to(ExchangePattern.InOnly, uri);
-    }
-
-    /**
-     * Sends the message to the given endpoint using an <a href="http://camel.apache.org/event-message.html">Event
-     * Message</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOnly exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      endpoint The endpoint which is used for sending the exchange
-     * @return              the builder
-     * @deprecated          use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOnly(Endpoint endpoint) {
-        return to(ExchangePattern.InOnly, endpoint);
-    }
-
-    /**
-     * Sends the message to the given endpoints using an <a href="http://camel.apache.org/event-message.html">Event
-     * Message</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOnly exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      uris list of endpoints to send to
-     * @return          the builder
-     * @deprecated      use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOnly(@AsEndpointUri String... uris) {
-        return to(ExchangePattern.InOnly, uris);
-    }
-
-    /**
-     * Sends the message to the given endpoints using an <a href="http://camel.apache.org/event-message.html">Event
-     * Message</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOnly exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      endpoints list of endpoints to send to
-     * @return               the builder
-     * @deprecated           use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOnly(@AsEndpointUri Endpoint... endpoints) {
-        return to(ExchangePattern.InOnly, endpoints);
-    }
-
-    /**
-     * Sends the message to the given endpoints using an <a href="http://camel.apache.org/event-message.html">Event
-     * Message</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOnly exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      endpoints list of endpoints to send to
-     * @return               the builder
-     * @deprecated           use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOnly(Iterable<Endpoint> endpoints) {
-        return to(ExchangePattern.InOnly, endpoints);
-    }
-
-    /**
-     * Sends the message to the given endpoint using an <a href="http://camel.apache.org/request-reply.html">Request
-     * Reply</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOut exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      uri The endpoint uri which is used for sending the exchange
-     * @return         the builder
-     * @deprecated     use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOut(@AsEndpointUri String uri) {
-        return to(ExchangePattern.InOut, uri);
-    }
-
-    /**
-     * Sends the message to the given endpoint using an <a href="http://camel.apache.org/request-reply.html">Request
-     * Reply</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOut exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      endpoint The endpoint which is used for sending the exchange
-     * @return              the builder
-     * @deprecated          use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOut(Endpoint endpoint) {
-        return to(ExchangePattern.InOut, endpoint);
-    }
-
-    /**
-     * Sends the message to the given endpoints using an <a href="http://camel.apache.org/request-reply.html">Request
-     * Reply</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOut exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      uris list of endpoints to send to
-     * @return          the builder
-     * @deprecated      use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOut(@AsEndpointUri String... uris) {
-        return to(ExchangePattern.InOut, uris);
-    }
-
-    /**
-     * Sends the message to the given endpoints using an <a href="http://camel.apache.org/request-reply.html">Request
-     * Reply</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOut exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      endpoints list of endpoints to send to
-     * @return               the builder
-     * @deprecated           use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOut(Endpoint... endpoints) {
-        return to(ExchangePattern.InOut, endpoints);
-    }
-
-    /**
-     * Sends the message to the given endpoints using an <a href="http://camel.apache.org/request-reply.html">Request
-     * Reply</a> or <a href="http://camel.apache.org/exchange-pattern.html">InOut exchange pattern</a>
-     * <p/>
-     * Notice the existing MEP is restored after the message has been sent to the given endpoint.
-     *
-     * @param      endpoints list of endpoints to send to
-     * @return               the builder
-     * @deprecated           use to where you can specify the exchange pattern as well
-     */
-    @Deprecated
-    public Type inOut(Iterable<Endpoint> endpoints) {
-        return to(ExchangePattern.InOut, endpoints);
+    public Type setExchangePattern(String exchangePattern) {
+        addOutput(new SetExchangePatternDefinition(exchangePattern));
+        return asType();
     }
 
     /**
@@ -841,6 +680,72 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
             DescriptionDefinition desc = new DescriptionDefinition();
             desc.setText(description);
             route.setDescription(desc);
+        }
+
+        return asType();
+    }
+
+    /**
+     * Sets a prefix to use for all node ids (not route id).
+     *
+     * @param  prefixId the prefix
+     * @return          the builder
+     */
+    public Type nodePrefixId(String prefixId) {
+        ProcessorDefinition<?> def = this;
+
+        RouteDefinition route = ProcessorDefinitionHelper.getRoute(def);
+        if (route != null) {
+            route.setNodePrefixId(prefixId);
+        }
+
+        return asType();
+    }
+
+    /**
+     * Disables this EIP from the route during build time. Once an EIP has been disabled then it cannot be enabled later
+     * at runtime.
+     */
+    public Type disabled() {
+        return disabled("true");
+    }
+
+    /**
+     * Whether to disable this EIP from the route during build time. Once an EIP has been disabled then it cannot be
+     * enabled later at runtime.
+     */
+    public Type disabled(boolean disabled) {
+        return disabled(disabled ? "true" : "false");
+    }
+
+    /**
+     * Whether to disable this EIP from the route during build time. Once an EIP has been disabled then it cannot be
+     * enabled later at runtime.
+     */
+    public Type disabled(String disabled) {
+        if (this instanceof OutputNode && getOutputs().isEmpty()) {
+            // set id on this
+            setDisabled(disabled);
+        } else {
+
+            // set it on last output as this is what the user means to do
+            // for Block(s) with non empty getOutputs() the id probably refers
+            // to the last definition in the current Block
+            List<ProcessorDefinition<?>> outputs = getOutputs();
+            if (!blocks.isEmpty()) {
+                if (blocks.getLast() instanceof ProcessorDefinition) {
+                    ProcessorDefinition<?> block = (ProcessorDefinition<?>) blocks.getLast();
+                    if (!block.getOutputs().isEmpty()) {
+                        outputs = block.getOutputs();
+                    }
+                }
+            }
+            if (!getOutputs().isEmpty()) {
+                outputs.get(outputs.size() - 1).setDisabled(disabled);
+            } else {
+                // the output could be empty
+                setDisabled(disabled);
+            }
         }
 
         return asType();
@@ -955,24 +860,6 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
         PipelineDefinition answer = new PipelineDefinition();
         addOutput(answer);
         answer.to(endpoints);
-        return asType();
-    }
-
-    /**
-     * <a href="https://camel.apache.org/components/latest/eips/pipeline-eip.html">Pipes and Filters EIP:</a> Creates a
-     * {@link org.apache.camel.processor.Pipeline} of the list of endpoints so that the message will get processed by
-     * each endpoint in turn and for request/response the output of one endpoint will be the input of the next endpoint
-     *
-     * @param  endpoints list of endpoints
-     * @return           the builder
-     */
-    @Deprecated
-    public Type pipeline(Collection<Endpoint> endpoints) {
-        PipelineDefinition answer = new PipelineDefinition();
-        for (Endpoint endpoint : endpoints) {
-            answer.addOutput(new ToDefinition(endpoint));
-        }
-        addOutput(answer);
         return asType();
     }
 
@@ -1116,22 +1003,6 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     }
 
     /**
-     * Ends the current block and returns back to the {@link org.apache.camel.model.rest.RestDefinition rest()} DSL.
-     *
-     * @return the builder
-     */
-    public RestDefinition endRest() {
-        ProcessorDefinition<?> def = this;
-
-        RouteDefinition route = ProcessorDefinitionHelper.getRoute(def);
-        if (route != null) {
-            return route.getRestDefinition();
-        }
-
-        throw new IllegalArgumentException("Cannot find RouteDefinition to allow endRest");
-    }
-
-    /**
      * Ends the current block and returns back to the {@link TryDefinition doTry()} DSL.
      *
      * @return the builder
@@ -1149,6 +1020,24 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
         // okay end this and get back to the try
         def = end();
         return (TryDefinition) def;
+    }
+
+    /**
+     * Ends the current block and returns back to the {@link CatchDefinition doCatch()} DSL.
+     *
+     * @return the builder
+     */
+    public CatchDefinition endDoCatch() {
+        ProcessorDefinition<?> def = this;
+
+        // are we already a doCatch?
+        if (def instanceof CatchDefinition) {
+            return (CatchDefinition) def;
+        }
+
+        // okay end this and get back to the try
+        def = end();
+        return (CatchDefinition) def;
     }
 
     /**
@@ -1301,8 +1190,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     /**
      * Creates a Circuit Breaker EIP.
      * <p/>
-     * This requires having an implementation on the classpath such as camel-hystrix, or
-     * camel-microprofile-fault-tolerance.
+     * This requires having an implementation on the classpath such as camel-microprofile-fault-tolerance.
      *
      * @return the builder
      */
@@ -1624,7 +1512,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @return the builder
      */
     public SamplingDefinition sample() {
-        return sample(1, TimeUnit.SECONDS);
+        return sample(Duration.ofSeconds(1));
     }
 
     /**
@@ -1647,11 +1535,10 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * which only a single exchange is allowed to pass through. All other exchanges will be stopped.
      *
      * @param  samplePeriod this is the sample interval, only one exchange is allowed through in this interval
-     * @param  unit         this is the units for the samplePeriod e.g. Seconds
      * @return              the builder
      */
-    public SamplingDefinition sample(long samplePeriod, TimeUnit unit) {
-        SamplingDefinition answer = new SamplingDefinition(samplePeriod, unit);
+    public SamplingDefinition sample(String samplePeriod) {
+        SamplingDefinition answer = new SamplingDefinition(samplePeriod);
         addOutput(answer);
         return answer;
     }
@@ -2948,7 +2835,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * <pre>
      * {@code
      * fom("direct:start")
-     *     .enrichWith("direct:resource")
+     *         .enrichWith("direct:resource")
      *         .body(String.class, (o, n) -> n + o);
      * }
      * </pre>
@@ -2996,7 +2883,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * <pre>
      * {@code
      * fom("direct:start")
-     *     .enrichWith("direct:resource")
+     *         .enrichWith("direct:resource")
      *         .body(String.class, (o, n) -> n + o);
      * }
      * </pre>
@@ -3008,7 +2895,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @see                org.apache.camel.processor.Enricher
      */
     public EnrichClause<ProcessorDefinition<Type>> enrichWith(@AsEndpointUri EndpointProducerBuilder resourceUri) {
-        return enrichWith(resourceUri.getUri());
+        return enrichWith(resourceUri.getRawUri());
     }
 
     /**
@@ -3112,7 +2999,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
             @AsEndpointUri EndpointProducerBuilder resourceUri, AggregationStrategy aggregationStrategy,
             boolean aggregateOnException, boolean shareUnitOfWork) {
         EnrichDefinition answer = new EnrichDefinition();
-        answer.setExpression(new SimpleExpression(resourceUri.getUri()));
+        answer.setExpression(new SimpleExpression(resourceUri.getRawUri()));
         answer.setAggregationStrategy(aggregationStrategy);
         answer.setAggregateOnException(Boolean.toString(aggregateOnException));
         answer.setShareUnitOfWork(Boolean.toString(shareUnitOfWork));
@@ -3236,7 +3123,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @see                org.apache.camel.processor.PollEnricher
      */
     public Type pollEnrich(EndpointConsumerBuilder resourceUri) {
-        return pollEnrich(new SimpleExpression(resourceUri.getUri()), -1, (String) null, false);
+        return pollEnrich(new SimpleExpression(resourceUri.getRawUri()), -1, (String) null, false);
     }
 
     /**
@@ -3461,7 +3348,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     public Type pollEnrich(
             @AsEndpointUri EndpointConsumerBuilder resourceUri, long timeout, AggregationStrategy aggregationStrategy,
             boolean aggregateOnException) {
-        return pollEnrich(new SimpleExpression(resourceUri.getUri()), timeout, aggregationStrategy, aggregateOnException);
+        return pollEnrich(new SimpleExpression(resourceUri.getRawUri()), timeout, aggregationStrategy, aggregateOnException);
     }
 
     /**
@@ -3488,7 +3375,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
     public Type pollEnrich(
             @AsEndpointUri EndpointConsumerBuilder resourceUri, long timeout, String aggregationStrategyRef,
             boolean aggregateOnException) {
-        return pollEnrich(new SimpleExpression(resourceUri.getUri()), timeout, aggregationStrategyRef, aggregateOnException);
+        return pollEnrich(new SimpleExpression(resourceUri.getRawUri()), timeout, aggregationStrategyRef, aggregateOnException);
     }
 
     /**
@@ -3538,7 +3425,7 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
         PollEnrichDefinition pollEnrich = new PollEnrichDefinition();
         pollEnrich.setExpression(expression);
         pollEnrich.setTimeout(Long.toString(timeout));
-        pollEnrich.setAggregationStrategyRef(aggregationStrategyRef);
+        pollEnrich.setAggregationStrategy(aggregationStrategyRef);
         pollEnrich.setAggregateOnException(Boolean.toString(aggregateOnException));
         addOutput(pollEnrich);
         return asType();
@@ -3649,7 +3536,20 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @return                the builder
      */
     public Type unmarshal(DataFormatDefinition dataFormatType) {
-        addOutput(new UnmarshalDefinition(dataFormatType));
+        return unmarshal(dataFormatType, false);
+    }
+
+    /**
+     * <a href="http://camel.apache.org/data-format.html">DataFormat:</a> Unmarshals the in body using the specified
+     * {@link DataFormat} and sets the output on the out message body.
+     *
+     * @param  dataFormatType the dataformat
+     * @param  allowNullBody  {@code true} if {@code null} is allowed as value of a body to unmarshall, {@code false}
+     *                        otherwise
+     * @return                the builder
+     */
+    public Type unmarshal(DataFormatDefinition dataFormatType, boolean allowNullBody) {
+        addOutput(new UnmarshalDefinition(dataFormatType).allowNullBody(allowNullBody));
         return asType();
     }
 
@@ -3661,7 +3561,20 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @return            the builder
      */
     public Type unmarshal(DataFormat dataFormat) {
-        return unmarshal(new DataFormatDefinition(dataFormat));
+        return unmarshal(dataFormat, false);
+    }
+
+    /**
+     * <a href="http://camel.apache.org/data-format.html">DataFormat:</a> Unmarshals the in body using the specified
+     * {@link DataFormat} and sets the output on the out message body.
+     *
+     * @param  dataFormat    the dataformat
+     * @param  allowNullBody {@code true} if {@code null} is allowed as value of a body to unmarshall, {@code false}
+     *                       otherwise
+     * @return               the builder
+     */
+    public Type unmarshal(DataFormat dataFormat, boolean allowNullBody) {
+        return unmarshal(new DataFormatDefinition(dataFormat), allowNullBody);
     }
 
     /**
@@ -3673,7 +3586,19 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
      * @return             the builder
      */
     public Type unmarshal(String dataTypeRef) {
-        return unmarshal(new CustomDataFormat(dataTypeRef));
+        return unmarshal(dataTypeRef, false);
+    }
+
+    /**
+     * <a href="http://camel.apache.org/data-format.html">DataFormat:</a> Unmarshals the in body using the specified
+     * {@link DataFormat} reference in the {@link org.apache.camel.spi.Registry} and sets the output on the out message
+     * body.
+     *
+     * @param  dataTypeRef reference to a {@link DataFormat} to lookup in the registry
+     * @return             the builder
+     */
+    public Type unmarshal(String dataTypeRef, boolean allowNullBody) {
+        return unmarshal(new CustomDataFormat(dataTypeRef), allowNullBody);
     }
 
     /**
@@ -3753,6 +3678,103 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
         return (Type) this;
     }
 
+    /**
+     * This defines the route as resumable, which allows the route to work with the endpoints and components to manage
+     * the state of consumers and resume upon restart.
+     *
+     * @return the builder
+     */
+    public ResumableDefinition resumable() {
+        ResumableDefinition answer = new ResumableDefinition();
+        addOutput(answer);
+        return answer;
+    }
+
+    /**
+     * This defines the route as resumable, which allows the route to work with the endpoints and components to manage
+     * the state of consumers and resume upon restart.
+     *
+     * @param  resumeStrategy the resume strategy
+     * @return                the builder
+     */
+    public Type resumable(ResumeStrategy resumeStrategy) {
+        ResumableDefinition answer = new ResumableDefinition();
+        answer.setResumeStrategy(resumeStrategy);
+        addOutput(answer);
+        return asType();
+    }
+
+    /**
+     * This defines the route as resumable, which allows the route to work with the endpoints and components to manage
+     * the state of consumers and resume upon restart.
+     *
+     * @param  resumeStrategy the resume strategy
+     * @return                the builder
+     */
+    public Type resumable(String resumeStrategy) {
+        ResumableDefinition answer = new ResumableDefinition();
+        answer.setResumeStrategy(resumeStrategy);
+        addOutput(answer);
+        return asType();
+    }
+
+    /**
+     * This enables pausable consumers, which allows the consumer to pause work until a certain condition allows it to
+     * resume operation
+     *
+     * @return the builder
+     */
+    public PausableDefinition pausable() {
+        PausableDefinition answer = new PausableDefinition();
+        addOutput(answer);
+        return answer;
+    }
+
+    /**
+     * This enables pausable consumers, which allows the consumer to pause work until a certain condition allows it to
+     * resume operation
+     *
+     * @param  consumerListener the consumer listener to use for consumer events
+     * @return                  the builder
+     */
+    public Type pausable(ConsumerListener consumerListener, java.util.function.Predicate<?> untilCheck) {
+        PausableDefinition answer = new PausableDefinition();
+        answer.setConsumerListener(consumerListener);
+        answer.setUntilCheck(untilCheck);
+        addOutput(answer);
+        return asType();
+    }
+
+    /**
+     * This enables pausable consumers, which allows the consumer to pause work until a certain condition allows it to
+     * resume operation
+     *
+     * @param  consumerListenerRef the resume strategy
+     * @return                     the builder
+     */
+    public Type pausable(String consumerListenerRef, java.util.function.Predicate<?> untilCheck) {
+        PausableDefinition answer = new PausableDefinition();
+        answer.setConsumerListener(consumerListenerRef);
+        answer.setUntilCheck(untilCheck);
+        addOutput(answer);
+        return asType();
+    }
+
+    /**
+     * This enables pausable consumers, which allows the consumer to pause work until a certain condition allows it to
+     * resume operation
+     *
+     * @param  consumerListenerRef the resume strategy
+     * @return                     the builder
+     */
+    public Type pausable(String consumerListenerRef, String untilCheck) {
+        PausableDefinition answer = new PausableDefinition();
+        answer.setConsumerListener(consumerListenerRef);
+        answer.setUntilCheck(untilCheck);
+        addOutput(answer);
+        return asType();
+    }
+
     // Properties
     // -------------------------------------------------------------------------
 
@@ -3787,6 +3809,14 @@ public abstract class ProcessorDefinition<Type extends ProcessorDefinition<Type>
 
     public void setInheritErrorHandler(Boolean inheritErrorHandler) {
         this.inheritErrorHandler = inheritErrorHandler;
+    }
+
+    public String getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(String disabled) {
+        this.disabled = disabled;
     }
 
     /**

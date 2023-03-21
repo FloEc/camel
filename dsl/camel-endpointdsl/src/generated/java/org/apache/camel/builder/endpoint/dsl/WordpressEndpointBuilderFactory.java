@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -62,8 +62,8 @@ public interface WordpressEndpointBuilderFactory {
         /**
          * The criteria to use with complex searches.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the criteria(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -83,8 +83,8 @@ public interface WordpressEndpointBuilderFactory {
         /**
          * The criteria to use with complex searches.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the criteria(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -236,6 +236,17 @@ public interface WordpressEndpointBuilderFactory {
             doSetProperty("user", user);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint consumers for the Wordpress component.
+     */
+    public interface AdvancedWordpressEndpointConsumerBuilder
+            extends
+                EndpointConsumerBuilder {
+        default WordpressEndpointConsumerBuilder basic() {
+            return (WordpressEndpointConsumerBuilder) this;
+        }
         /**
          * Allows for bridging the consumer to the Camel routing Error Handler,
          * which mean any exceptions occurred while the consumer is trying to
@@ -248,12 +259,12 @@ public interface WordpressEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: consumer (advanced)
          * 
          * @param bridgeErrorHandler the value to set
          * @return the dsl builder
          */
-        default WordpressEndpointConsumerBuilder bridgeErrorHandler(
+        default AdvancedWordpressEndpointConsumerBuilder bridgeErrorHandler(
                 boolean bridgeErrorHandler) {
             doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
@@ -271,26 +282,15 @@ public interface WordpressEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: consumer (advanced)
          * 
          * @param bridgeErrorHandler the value to set
          * @return the dsl builder
          */
-        default WordpressEndpointConsumerBuilder bridgeErrorHandler(
+        default AdvancedWordpressEndpointConsumerBuilder bridgeErrorHandler(
                 String bridgeErrorHandler) {
             doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint consumers for the Wordpress component.
-     */
-    public interface AdvancedWordpressEndpointConsumerBuilder
-            extends
-                EndpointConsumerBuilder {
-        default WordpressEndpointConsumerBuilder basic() {
-            return (WordpressEndpointConsumerBuilder) this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -391,8 +391,8 @@ public interface WordpressEndpointBuilderFactory {
         /**
          * The criteria to use with complex searches.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the criteria(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -412,8 +412,8 @@ public interface WordpressEndpointBuilderFactory {
         /**
          * The criteria to use with complex searches.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the criteria(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -565,6 +565,17 @@ public interface WordpressEndpointBuilderFactory {
             doSetProperty("user", user);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the Wordpress component.
+     */
+    public interface AdvancedWordpressEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default WordpressEndpointProducerBuilder basic() {
+            return (WordpressEndpointProducerBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -579,12 +590,12 @@ public interface WordpressEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default WordpressEndpointProducerBuilder lazyStartProducer(
+        default AdvancedWordpressEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -604,26 +615,15 @@ public interface WordpressEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default WordpressEndpointProducerBuilder lazyStartProducer(
+        default AdvancedWordpressEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint producers for the Wordpress component.
-     */
-    public interface AdvancedWordpressEndpointProducerBuilder
-            extends
-                EndpointProducerBuilder {
-        default WordpressEndpointProducerBuilder basic() {
-            return (WordpressEndpointProducerBuilder) this;
         }
     }
 
@@ -655,8 +655,8 @@ public interface WordpressEndpointBuilderFactory {
         /**
          * The criteria to use with complex searches.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the criteria(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -674,8 +674,8 @@ public interface WordpressEndpointBuilderFactory {
         /**
          * The criteria to use with complex searches.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the criteria(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).

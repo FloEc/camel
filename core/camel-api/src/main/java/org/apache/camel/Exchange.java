@@ -100,6 +100,11 @@ public interface Exchange {
     String COOKIE_HANDLER = "CamelCookieHandler";
     String CORRELATION_ID = "CamelCorrelationId";
 
+    // The schema of the message payload
+    String CONTENT_SCHEMA = "CamelContentSchema";
+    // The schema type of the message payload (json schema, avro, etc)
+    String CONTENT_SCHEMA_TYPE = "CamelContentSchemaType";
+
     String DATASET_INDEX = "CamelDataSetIndex";
     String DEFAULT_CHARSET_PROPERTY = "org.apache.camel.default.charset";
     String DESTINATION_OVERRIDE_URL = "CamelDestinationOverrideUrl";
@@ -111,12 +116,14 @@ public interface Exchange {
     String EXCEPTION_CAUGHT = "CamelExceptionCaught";
     String EXCEPTION_HANDLED = "CamelExceptionHandled";
     String EVALUATE_EXPRESSION_RESULT = "CamelEvaluateExpressionResult";
-    String ERRORHANDLER_CIRCUIT_DETECTED = "CamelFErrorHandlerCircuitDetected";
+    String ERRORHANDLER_BRIDGE = "CamelErrorHandlerBridge";
+    String ERRORHANDLER_CIRCUIT_DETECTED = "CamelErrorHandlerCircuitDetected";
     @Deprecated
     String ERRORHANDLER_HANDLED = "CamelErrorHandlerHandled";
     @Deprecated
     String EXTERNAL_REDELIVERED = "CamelExternalRedelivered";
 
+    @Deprecated
     String FAILURE_HANDLED = "CamelFailureHandled";
     String FAILURE_ENDPOINT = "CamelFailureEndpoint";
     String FAILURE_ROUTE_ID = "CamelFailureRouteId";
@@ -193,6 +200,7 @@ public interface Exchange {
 
     String ON_COMPLETION = "CamelOnCompletion";
     String ON_COMPLETION_ROUTE_IDS = "CamelOnCompletionRouteIds";
+    String OFFSET = "CamelOffset";
     String OVERRULE_FILE_NAME = "CamelOverruleFileName";
 
     String PARENT_UNIT_OF_WORK = "CamelParentUnitOfWork";
@@ -218,9 +226,11 @@ public interface Exchange {
     String REUSE_SCRIPT_ENGINE = "CamelReuseScripteEngine";
     String COMPILE_SCRIPT = "CamelCompileScript";
 
+    @Deprecated
     String SAXPARSER_FACTORY = "CamelSAXParserFactory";
 
     String SCHEDULER_POLLED_MESSAGES = "CamelSchedulerPolledMessages";
+    @Deprecated
     String SOAP_ACTION = "CamelSoapAction";
     String SKIP_GZIP_ENCODING = "CamelSkipGzipEncoding";
     String SKIP_WWW_FORM_URLENCODED = "CamelSkipWwwFormUrlEncoding";
@@ -241,33 +251,20 @@ public interface Exchange {
     String TRACE_EVENT_NODE_ID = "CamelTraceEventNodeId";
     String TRACE_EVENT_TIMESTAMP = "CamelTraceEventTimestamp";
     String TRACE_EVENT_EXCHANGE = "CamelTraceEventExchange";
+    @Deprecated
     String TRACING_HEADER_FORMAT = "CamelTracingHeaderFormat";
+    @Deprecated
     String TRACING_OUTPUT_FORMAT = "CamelTracingOutputFormat";
+    String TRANSACTION_CONTEXT_DATA = "CamelTransactionContextData";
     String TRY_ROUTE_BLOCK = "TryRouteBlock";
     String TRANSFER_ENCODING = "Transfer-Encoding";
 
     String UNIT_OF_WORK_EXHAUSTED = "CamelUnitOfWorkExhausted";
 
-    /**
-     * @deprecated UNIT_OF_WORK_PROCESS_SYNC is not in use and will be removed in future Camel release
-     */
-    @Deprecated
-    String UNIT_OF_WORK_PROCESS_SYNC = "CamelUnitOfWorkProcessSync";
-
     String XSLT_FILE_NAME = "CamelXsltFileName";
     String XSLT_ERROR = "CamelXsltError";
     String XSLT_FATAL_ERROR = "CamelXsltFatalError";
     String XSLT_WARNING = "CamelXsltWarning";
-
-    /**
-     * Adapts this {@link org.apache.camel.Exchange} to the specialized type.
-     * <p/>
-     * For example to adapt to <tt>ExtendedExchange</tt>.
-     *
-     * @param  type the type to adapt to
-     * @return      this {@link org.apache.camel.Exchange} adapted to the given type
-     */
-    <T extends Exchange> T adapt(Class<T> type);
 
     /**
      * Returns the {@link ExchangePattern} (MEP) of this exchange.
@@ -340,17 +337,6 @@ public interface Exchange {
     Object getProperty(String name);
 
     /**
-     * Returns a property associated with this exchange by name
-     *
-     * @param  name         the name of the property
-     * @param  defaultValue the default value to return if property was absent
-     * @return              the value of the given property or <tt>defaultValue</tt> if there is no property for the
-     *                      given name
-     */
-    @Deprecated
-    Object getProperty(String name, Object defaultValue);
-
-    /**
      * Returns a property associated with this exchange by name and specifying the type required
      *
      * @param  name the name of the property
@@ -398,7 +384,7 @@ public interface Exchange {
     /**
      * Removes the properties from this exchange that match the given <tt>pattern</tt>, except for the ones matching one
      * or more <tt>excludePatterns</tt>
-     * 
+     *
      * @param  pattern         pattern of names that should be removed
      * @param  excludePatterns one or more pattern of properties names that should be excluded (= preserved)
      * @return                 boolean whether any properties matched
@@ -632,11 +618,11 @@ public interface Exchange {
     /**
      * Returns the endpoint which originated this message exchange if a consumer on an endpoint created the message
      * exchange, otherwise his property will be <tt>null</tt>.
-     * 
+     *
      * Note: In case this message exchange has been cloned through another parent message exchange (which itself has
      * been created through the consumer of it's own endpoint), then if desired one could still retrieve the consumer
      * endpoint of such a parent message exchange as the following:
-     * 
+     *
      * <pre>
      * getContext().getRoute(getFromRouteId()).getEndpoint()
      * </pre>
@@ -646,7 +632,7 @@ public interface Exchange {
     /**
      * Returns the route id which originated this message exchange if a route consumer on an endpoint created the
      * message exchange, otherwise his property will be <tt>null</tt>.
-     * 
+     *
      * Note: In case this message exchange has been cloned through another parent message exchange then this method
      * would return the <tt>fromRouteId<tt> property of that exchange.
      */
@@ -673,5 +659,13 @@ public interface Exchange {
      * @see Message#getMessageTimestamp()
      */
     long getCreated();
+
+    /**
+     * Gets the {@link ExchangeExtension} that contains the extension points for internal exchange APIs. These APIs are
+     * intended for internal usage within Camel and end-users should avoid using them.
+     *
+     * @return the {@link ExchangeExtension} point for this exchange.
+     */
+    ExchangeExtension getExchangeExtension();
 
 }

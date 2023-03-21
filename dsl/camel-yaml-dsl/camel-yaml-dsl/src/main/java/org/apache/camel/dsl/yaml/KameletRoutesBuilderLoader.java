@@ -18,14 +18,18 @@ package org.apache.camel.dsl.yaml;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.api.management.ManagedResource;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dsl.yaml.common.YamlDeserializationContext;
+import org.apache.camel.dsl.yaml.common.YamlDeserializerSupport;
 import org.apache.camel.model.RouteTemplateDefinition;
 import org.apache.camel.model.RouteTemplateParameterDefinition;
-import org.apache.camel.spi.Resource;
+import org.apache.camel.spi.CamelContextCustomizer;
+import org.apache.camel.spi.DependencyStrategy;
 import org.apache.camel.spi.annotations.RoutesLoader;
 import org.snakeyaml.engine.v2.nodes.Node;
 import org.snakeyaml.engine.v2.nodes.NodeTuple;
@@ -39,6 +43,7 @@ import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.setDeseri
 @ManagedResource(description = "Managed Kamelet RoutesBuilderLoader")
 @RoutesLoader(KameletRoutesBuilderLoader.EXTENSION)
 public class KameletRoutesBuilderLoader extends YamlRoutesBuilderLoaderSupport {
+
     public static final String EXTENSION = "kamelet.yaml";
 
     public KameletRoutesBuilderLoader() {
@@ -46,19 +51,10 @@ public class KameletRoutesBuilderLoader extends YamlRoutesBuilderLoaderSupport {
     }
 
     @Override
-    protected RouteBuilder builder(final Node root, final Resource resource) {
-        getDeserializationContext().setResource(resource);
-        setDeserializationContext(root, getDeserializationContext());
+    protected RouteBuilder builder(final YamlDeserializationContext ctx, final Node root) {
+        setDeserializationContext(root, ctx);
 
         Node template = nodeAt(root, "/spec/template");
-        if (template == null) {
-            // fallback till flows get removed
-            template = nodeAt(root, "/spec/flows");
-        }
-        if (template == null) {
-            // fallback till flow get removed
-            template = nodeAt(root, "/spec/flow");
-        }
         if (template == null) {
             throw new IllegalArgumentException("No template defined");
         }
@@ -68,16 +64,12 @@ public class KameletRoutesBuilderLoader extends YamlRoutesBuilderLoaderSupport {
             required = Collections.emptySet();
         }
 
-        final YamlDeserializationContext context = this.getDeserializationContext();
-        final RouteTemplateDefinition rtd = context.construct(template, RouteTemplateDefinition.class);
-
+        final RouteTemplateDefinition rtd = ctx.construct(template, RouteTemplateDefinition.class);
         rtd.id(asText(nodeAt(root, "/metadata/name")));
 
         Node properties = nodeAt(root, "/spec/definition/properties");
         if (properties != null) {
-
             rtd.setTemplateParameters(new ArrayList<>());
-
             for (NodeTuple p : asMappingNode(properties).getValue()) {
                 final String key = asText(p.getKeyNode());
                 final Node def = nodeAt(p.getValueNode(), "/default");
@@ -91,11 +83,42 @@ public class KameletRoutesBuilderLoader extends YamlRoutesBuilderLoaderSupport {
             }
         }
 
+        // if there are dependencies then we should include them
+        Node deps = nodeAt(root, "/spec/dependencies");
+        CamelContextCustomizer customizer = null;
+        if (deps != null) {
+            customizer = preConfigureDependencies(deps);
+        }
+        final CamelContextCustomizer dependencies = customizer;
+
         return new RouteBuilder() {
             @Override
             public void configure() throws Exception {
+                if (dependencies != null) {
+                    dependencies.configure(getCamelContext());
+                }
                 getRouteTemplateCollection().routeTemplate(rtd);
             }
         };
     }
+
+    private CamelContextCustomizer preConfigureDependencies(Node node) {
+        final List<String> dep = YamlDeserializerSupport.asStringList(node);
+        return new CamelContextCustomizer() {
+            @Override
+            public void configure(CamelContext camelContext) {
+                // notify the listeners about each dependency detected
+                for (DependencyStrategy ds : camelContext.getRegistry().findByType(DependencyStrategy.class)) {
+                    for (String d : dep) {
+                        try {
+                            ds.onDependency(d);
+                        } catch (Exception e) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+        };
+    }
+
 }

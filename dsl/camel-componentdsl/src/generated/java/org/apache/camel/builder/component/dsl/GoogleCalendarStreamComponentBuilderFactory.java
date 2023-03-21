@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -169,6 +169,21 @@ public interface GoogleCalendarStreamComponentBuilderFactory {
             return this;
         }
         /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleCalendarStreamComponentBuilder delegate(
+                java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
          * Max results to be returned.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -204,7 +219,7 @@ public interface GoogleCalendarStreamComponentBuilderFactory {
          * https://developers.google.com/calendar/auth for more info.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -349,6 +364,22 @@ public interface GoogleCalendarStreamComponentBuilderFactory {
             return this;
         }
         /**
+         * Service account key in json format to authenticate an application as
+         * a service account. Accept base64 adding the prefix base64:.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleCalendarStreamComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
+        /**
          * The email address of the user the application is trying to
          * impersonate in the service account flow.
          * 
@@ -394,6 +425,7 @@ public interface GoogleCalendarStreamComponentBuilderFactory {
             case "configuration": ((GoogleCalendarStreamComponent) component).setConfiguration((org.apache.camel.component.google.calendar.stream.GoogleCalendarStreamConfiguration) value); return true;
             case "considerLastUpdate": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setConsiderLastUpdate((boolean) value); return true;
             case "consumeFromNow": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setConsumeFromNow((boolean) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setDelegate((java.lang.String) value); return true;
             case "maxResults": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setMaxResults((int) value); return true;
             case "query": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setQuery((java.lang.String) value); return true;
             case "scopes": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setScopes((java.util.List) value); return true;
@@ -405,6 +437,7 @@ public interface GoogleCalendarStreamComponentBuilderFactory {
             case "emailAddress": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setEmailAddress((java.lang.String) value); return true;
             case "p12FileName": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setP12FileName((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             case "user": getOrCreateConfiguration((GoogleCalendarStreamComponent) component).setUser((java.lang.String) value); return true;
             default: return false;
             }

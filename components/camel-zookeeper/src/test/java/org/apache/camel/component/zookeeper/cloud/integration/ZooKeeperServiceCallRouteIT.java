@@ -21,7 +21,8 @@ import java.util.List;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.zookeeper.cloud.ZooKeeperServiceDiscovery;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.component.zookeeper.cloud.MetaData;
 import org.apache.camel.test.AvailablePortFinder;
 import org.apache.camel.test.infra.zookeeper.services.ZooKeeperService;
 import org.apache.camel.test.infra.zookeeper.services.ZooKeeperServiceFactory;
@@ -41,14 +42,13 @@ public class ZooKeeperServiceCallRouteIT extends CamelTestSupport {
     @RegisterExtension
     static ZooKeeperService service = ZooKeeperServiceFactory.createService();
 
-    private static final int SERVER_PORT = AvailablePortFinder.getNextAvailable();
     private static final String SERVICE_NAME = "http-service";
     private static final int SERVICE_COUNT = 5;
     private static final String SERVICE_PATH = "/camel";
 
     private CuratorFramework curator;
-    private ServiceDiscovery<ZooKeeperServiceDiscovery.MetaData> discovery;
-    private List<ServiceInstance<ZooKeeperServiceDiscovery.MetaData>> instances;
+    private ServiceDiscovery<MetaData> discovery;
+    private List<ServiceInstance<MetaData>> instances;
     private List<String> expectedBodies;
 
     // *************************************************************************
@@ -64,10 +64,10 @@ public class ZooKeeperServiceCallRouteIT extends CamelTestSupport {
                 .retryPolicy(new ExponentialBackoffRetry(1000, 3))
                 .build();
 
-        discovery = ServiceDiscoveryBuilder.builder(ZooKeeperServiceDiscovery.MetaData.class)
+        discovery = ServiceDiscoveryBuilder.builder(MetaData.class)
                 .client(curator)
                 .basePath(SERVICE_PATH)
-                .serializer(new JsonInstanceSerializer<>(ZooKeeperServiceDiscovery.MetaData.class))
+                .serializer(new JsonInstanceSerializer<>(MetaData.class))
                 .build();
 
         curator.start();
@@ -77,8 +77,8 @@ public class ZooKeeperServiceCallRouteIT extends CamelTestSupport {
         expectedBodies = new ArrayList<>(SERVICE_COUNT);
 
         for (int i = 0; i < SERVICE_COUNT; i++) {
-            ServiceInstance<ZooKeeperServiceDiscovery.MetaData> instance
-                    = ServiceInstance.<ZooKeeperServiceDiscovery.MetaData> builder()
+            ServiceInstance<MetaData> instance
+                    = ServiceInstance.<MetaData> builder()
                             .address("127.0.0.1")
                             .port(AvailablePortFinder.getNextAvailable())
                             .name(SERVICE_NAME)
@@ -95,7 +95,7 @@ public class ZooKeeperServiceCallRouteIT extends CamelTestSupport {
     public void tearDown() throws Exception {
         super.tearDown();
 
-        for (ServiceInstance<ZooKeeperServiceDiscovery.MetaData> instace : instances) {
+        for (ServiceInstance<MetaData> instace : instances) {
             try {
                 discovery.unregisterService(instace);
             } catch (Exception e) {
@@ -118,7 +118,7 @@ public class ZooKeeperServiceCallRouteIT extends CamelTestSupport {
 
         instances.forEach(r -> template.sendBody("direct:start", "ping"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // *************************************************************************
@@ -126,10 +126,10 @@ public class ZooKeeperServiceCallRouteIT extends CamelTestSupport {
     // *************************************************************************
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start")
                         .serviceCall()
                         .name(SERVICE_NAME)

@@ -16,10 +16,12 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Store;
-import javax.mail.internet.MimeMessage;
+import java.util.concurrent.TimeUnit;
+
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.Store;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.jvnet.mock_javamail.Mailbox;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -53,9 +56,8 @@ public class MailCommitOnCompletionTest extends CamelTestSupport {
         mock.assertIsSatisfied();
 
         // wait a bit because delete is on completion
-        Thread.sleep(500);
-
-        assertEquals(0, mailbox.size());
+        await().atMost(500, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> assertEquals(0, mailbox.size()));
     }
 
     private void prepareMailbox() throws Exception {

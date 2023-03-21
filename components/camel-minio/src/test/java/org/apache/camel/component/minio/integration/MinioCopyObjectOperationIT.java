@@ -16,8 +16,6 @@
  */
 package org.apache.camel.component.minio.integration;
 
-import java.io.IOException;
-
 import io.minio.MinioClient;
 import org.apache.camel.BindToRegistry;
 import org.apache.camel.EndpointInject;
@@ -42,7 +40,7 @@ class MinioCopyObjectOperationIT extends MinioIntegrationTestSupport {
     @EndpointInject("mock:result")
     private MockEndpoint result;
 
-    MinioCopyObjectOperationIT() throws IOException {
+    MinioCopyObjectOperationIT() {
     }
 
     @Test
@@ -61,7 +59,7 @@ class MinioCopyObjectOperationIT extends MinioIntegrationTestSupport {
             exchange.getIn().setHeader(MinioConstants.MINIO_OPERATION, MinioOperations.copyObject);
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override

@@ -100,6 +100,22 @@ public interface RouteController extends CamelContextAware, StaticService {
     boolean isStartingRoutes();
 
     /**
+     * Reloads all the routes
+     *
+     * @throws Exception is thrown if a route could not be reloaded for whatever reason
+     */
+    void reloadAllRoutes() throws Exception;
+
+    /**
+     * Indicates whether current thread is reloading route(s).
+     * <p/>
+     * This can be useful to know by {@link LifecycleStrategy} or the likes, in case they need to react differently.
+     *
+     * @return <tt>true</tt> if current thread is reloading route(s), or <tt>false</tt> if not.
+     */
+    boolean isReloadingRoutes();
+
+    /**
      * Returns the current status of the given route
      *
      * @param  routeId the route id
@@ -123,6 +139,16 @@ public interface RouteController extends CamelContextAware, StaticService {
      * @see              #suspendRoute(String)
      */
     void stopRoute(String routeId) throws Exception;
+
+    /**
+     * Stops and marks the given route as failed (health check is DOWN) due to a caused exception.
+     *
+     * @param  routeId   the route id
+     * @param  cause     the exception that is causing this route to be stopped and marked as failed
+     * @throws Exception is thrown if the route could not be stopped for whatever reason
+     * @see              #suspendRoute(String)
+     */
+    void stopRoute(String routeId, Throwable cause) throws Exception;
 
     /**
      * Stops the given route using {@link org.apache.camel.spi.ShutdownStrategy} with a specified timeout.

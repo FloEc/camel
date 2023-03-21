@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon STS SDK v2.
  */
 @Component("aws2-sts")
 public class STS2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(STS2Component.class);
-
     @Metadata
     private STS2Configuration configuration = new STS2Configuration();
 
@@ -49,11 +44,12 @@ public class STS2Component extends DefaultComponent {
 
     @Override
     protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
-        STS2Configuration configuration = this.configuration != null ? this.configuration.copy() : new STS2Configuration();
-        STS2Endpoint endpoint = new STS2Endpoint(uri, this, configuration);
+        STS2Configuration configurationClone = this.configuration != null ? this.configuration.copy() : new STS2Configuration();
+        STS2Endpoint endpoint = new STS2Endpoint(uri, this, configurationClone);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getStsClient() == null
-                && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
+        if (Boolean.FALSE.equals(configurationClone.isUseDefaultCredentialsProvider())
+                && configurationClone.getStsClient() == null
+                && (configurationClone.getAccessKey() == null || configurationClone.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, Amazon STS client or accessKey and secretKey must be specified");
         }

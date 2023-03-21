@@ -25,15 +25,12 @@ import com.obs.services.ObsClient;
 import com.obs.services.exception.ObsException;
 import com.obs.services.model.BucketMetadataInfoRequest;
 import com.obs.services.model.BucketMetadataInfoResult;
-import com.obs.services.model.CopyObjectResult;
-import com.obs.services.model.DeleteObjectResult;
 import com.obs.services.model.ListObjectsRequest;
 import com.obs.services.model.ObjectListing;
 import com.obs.services.model.ObsObject;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.huaweicloud.obs.constants.OBSHeaders;
 import org.apache.camel.spi.Synchronization;
@@ -136,7 +133,7 @@ public class OBSConsumer extends ScheduledBatchPollingConsumer {
 
             // if there was a marker set in previous poll, then use it to continue from where last poll finished
             if (marker != null) {
-                LOG.trace("Resuming from marker: " + marker);
+                LOG.trace("Resuming from marker: {}", marker);
                 request.setMarker(marker);
             }
 
@@ -169,7 +166,7 @@ public class OBSConsumer extends ScheduledBatchPollingConsumer {
             // update number of pending exchanges
             pendingExchanges = total - index - 1;
 
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new Synchronization() {
+            exchange.getExchangeExtension().addOnCompletion(new Synchronization() {
                 @Override
                 public void onComplete(Exchange exchange) {
                     processComplete(exchange);
@@ -249,12 +246,12 @@ public class OBSConsumer extends ScheduledBatchPollingConsumer {
 
         // copy object to destination bucket
         if (endpoint.isMoveAfterRead()) {
-            CopyObjectResult result = obsClient.copyObject(bucketName, objectKey, endpoint.getDestinationBucket(), objectKey);
+            obsClient.copyObject(bucketName, objectKey, endpoint.getDestinationBucket(), objectKey);
         }
 
         // delete object from source bucket
         if (endpoint.isDeleteAfterRead()) {
-            DeleteObjectResult result = obsClient.deleteObject(bucketName, objectKey);
+            obsClient.deleteObject(bucketName, objectKey);
         }
     }
 

@@ -24,7 +24,6 @@ import org.apache.camel.ExpressionIllegalSyntaxException;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.camel.test.junit5.TestSupport.assertIsInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,54 +34,54 @@ public class FtpProducerDoneFileNameIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testProducerConstantDoneFileName() throws Exception {
+    public void testProducerConstantDoneFileName() {
         template.sendBodyAndHeader(getFtpUrl() + "&doneFileName=done", "Hello World", Exchange.FILE_NAME, "hello.txt");
 
-        File file = ftpFile("done/hello.txt").toFile();
-        assertEquals(true, file.exists(), "File should exists");
+        File file = service.ftpFile("done/hello.txt").toFile();
+        assertTrue(file.exists(), "File should exists");
 
-        File done = ftpFile("done/done").toFile();
-        assertEquals(true, done.exists(), "Done file should exists");
+        File done = service.ftpFile("done/done").toFile();
+        assertTrue(done.exists(), "Done file should exists");
     }
 
     @Test
-    public void testProducerPrefixDoneFileName() throws Exception {
+    public void testProducerPrefixDoneFileName() {
         template.sendBodyAndHeader(getFtpUrl() + "&doneFileName=done-${file:name}", "Hello World", Exchange.FILE_NAME,
                 "hello.txt");
 
-        File file = ftpFile("done/hello.txt").toFile();
-        assertEquals(true, file.exists(), "File should exists");
+        File file = service.ftpFile("done/hello.txt").toFile();
+        assertTrue(file.exists(), "File should exists");
 
-        File done = ftpFile("done/done-hello.txt").toFile();
-        assertEquals(true, done.exists(), "Done file should exists");
+        File done = service.ftpFile("done/done-hello.txt").toFile();
+        assertTrue(done.exists(), "Done file should exists");
     }
 
     @Test
-    public void testProducerExtDoneFileName() throws Exception {
+    public void testProducerExtDoneFileName() {
         template.sendBodyAndHeader(getFtpUrl() + "&doneFileName=${file:name}.done", "Hello World", Exchange.FILE_NAME,
                 "hello.txt");
 
-        File file = ftpFile("done/hello.txt").toFile();
-        assertEquals(true, file.exists(), "File should exists");
+        File file = service.ftpFile("done/hello.txt").toFile();
+        assertTrue(file.exists(), "File should exists");
 
-        File done = ftpFile("done/hello.txt.done").toFile();
-        assertEquals(true, done.exists(), "Done file should exists");
+        File done = service.ftpFile("done/hello.txt.done").toFile();
+        assertTrue(done.exists(), "Done file should exists");
     }
 
     @Test
-    public void testProducerReplaceExtDoneFileName() throws Exception {
+    public void testProducerReplaceExtDoneFileName() {
         template.sendBodyAndHeader(getFtpUrl() + "&doneFileName=${file:name.noext}.done", "Hello World", Exchange.FILE_NAME,
                 "hello.txt");
 
-        File file = ftpFile("done/hello.txt").toFile();
-        assertEquals(true, file.exists(), "File should exists");
+        File file = service.ftpFile("done/hello.txt").toFile();
+        assertTrue(file.exists(), "File should exists");
 
-        File done = ftpFile("done/hello.done").toFile();
-        assertEquals(true, done.exists(), "Done file should exists");
+        File done = service.ftpFile("done/hello.done").toFile();
+        assertTrue(done.exists(), "Done file should exists");
     }
 
     @Test
-    public void testProducerInvalidDoneFileName() throws Exception {
+    public void testProducerInvalidDoneFileName() {
         String uri = getFtpUrl() + "&doneFileName=${file:parent}/foo";
 
         Exception ex = assertThrows(CamelExecutionException.class,
@@ -95,7 +94,7 @@ public class FtpProducerDoneFileNameIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testProducerEmptyDoneFileName() throws Exception {
+    public void testProducerEmptyDoneFileName() {
         String uri = getFtpUrl() + "&doneFileName=";
         Exception ex = assertThrows(CamelExecutionException.class,
                 () -> template.sendBodyAndHeader(uri, "Hello World", Exchange.FILE_NAME, "hello.txt"));

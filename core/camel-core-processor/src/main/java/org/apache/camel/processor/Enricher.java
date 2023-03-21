@@ -25,8 +25,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.spi.EndpointUtilizationStatistics;
 import org.apache.camel.spi.IdAware;
 import org.apache.camel.spi.ProcessorExchangeFactory;
@@ -162,7 +160,7 @@ public class Enricher extends AsyncProcessorSupport implements IdAware, RouteIdA
             public void done(boolean doneSync) {
                 if (!isAggregateOnException() && resourceExchange.isFailed()) {
                     // copy resource exchange onto original exchange (preserving pattern)
-                    copyResultsPreservePattern(exchange, resourceExchange);
+                    copyResultsWithoutCorrelationId(exchange, resourceExchange);
                 } else {
                     prepareResult(exchange);
                     try {
@@ -173,10 +171,10 @@ public class Enricher extends AsyncProcessorSupport implements IdAware, RouteIdA
                         Exchange aggregatedExchange = aggregationStrategy.aggregate(exchange, resourceExchange);
                         if (aggregatedExchange != null) {
                             // copy aggregation result onto original exchange (preserving pattern)
-                            copyResultsPreservePattern(exchange, aggregatedExchange);
+                            copyResultsWithoutCorrelationId(exchange, aggregatedExchange);
                             // handover any synchronization (if unit of work is not shared)
                             if (resourceExchange != null && !isShareUnitOfWork()) {
-                                resourceExchange.adapt(ExtendedExchange.class).handoverCompletions(exchange);
+                                resourceExchange.getExchangeExtension().handoverCompletions(exchange);
                             }
                         }
                     } catch (Throwable e) {
@@ -210,7 +208,7 @@ public class Enricher extends AsyncProcessorSupport implements IdAware, RouteIdA
         if (isShareUnitOfWork()) {
             target.setProperty(ExchangePropertyKey.PARENT_UNIT_OF_WORK, source.getUnitOfWork());
             // and then share the unit of work
-            target.adapt(ExtendedExchange.class).setUnitOfWork(source.getUnitOfWork());
+            target.getExchangeExtension().setUnitOfWork(source.getUnitOfWork());
         }
         return target;
     }
@@ -240,7 +238,7 @@ public class Enricher extends AsyncProcessorSupport implements IdAware, RouteIdA
         this.sendDynamicProcessor.setAllowOptimisedComponents(allowOptimisedComponents);
 
         // create a per processor exchange factory
-        this.processorExchangeFactory = getCamelContext().adapt(ExtendedCamelContext.class)
+        this.processorExchangeFactory = getCamelContext().getCamelContextExtension()
                 .getProcessorExchangeFactory().newProcessorExchangeFactory(this);
         this.processorExchangeFactory.setRouteId(getRouteId());
         this.processorExchangeFactory.setId(getId());
@@ -262,12 +260,20 @@ public class Enricher extends AsyncProcessorSupport implements IdAware, RouteIdA
         ServiceHelper.stopService(aggregationStrategy, processorExchangeFactory, sendDynamicProcessor);
     }
 
+    private static void copyResultsWithoutCorrelationId(Exchange target, Exchange source) {
+        Object correlationId = source.removeProperty(ExchangePropertyKey.CORRELATION_ID);
+        copyResultsPreservePattern(target, source);
+        if (correlationId != null) {
+            source.setProperty(ExchangePropertyKey.CORRELATION_ID, correlationId);
+        }
+    }
+
     private static class CopyAggregationStrategy implements AggregationStrategy {
 
         @Override
         public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
             if (newExchange != null) {
-                copyResultsPreservePattern(oldExchange, newExchange);
+                copyResultsWithoutCorrelationId(oldExchange, newExchange);
             }
             return oldExchange;
         }

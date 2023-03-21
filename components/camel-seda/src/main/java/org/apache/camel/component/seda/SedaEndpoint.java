@@ -30,7 +30,6 @@ import org.apache.camel.Category;
 import org.apache.camel.Component;
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.MultipleConsumersSupport;
 import org.apache.camel.PollingConsumer;
 import org.apache.camel.Processor;
@@ -101,6 +100,7 @@ public class SedaEndpoint extends DefaultEndpoint implements AsyncEndpoint, Brow
     private boolean discardIfNoConsumers;
 
     private BlockingQueueFactory<Exchange> queueFactory;
+    private volatile QueueReference ref;
 
     public SedaEndpoint() {
         queueFactory = new LinkedBlockingQueueFactory<>();
@@ -209,14 +209,26 @@ public class SedaEndpoint extends DefaultEndpoint implements AsyncEndpoint, Brow
     }
 
     /**
-     * Get's the {@link QueueReference} for the this endpoint.
+     * Gets the {@link QueueReference} for this endpoint.
      *
      * @return the reference, or <tt>null</tt> if no queue reference exists.
      */
-    public synchronized QueueReference getQueueReference() {
-        String key = getComponent().getQueueKey(getEndpointUri());
-        QueueReference ref = getComponent().getQueueReference(key);
+    public QueueReference getQueueReference() {
+        if (ref == null) {
+            ref = tryQueueRefInit();
+        }
+
         return ref;
+    }
+
+    private QueueReference tryQueueRefInit() {
+        final SedaComponent component = getComponent();
+        if (component != null) {
+            final String key = component.getQueueKey(getEndpointUri());
+            return component.getQueueReference(key);
+        }
+
+        return null;
     }
 
     protected synchronized AsyncProcessor getConsumerMulticastProcessor() {
@@ -255,7 +267,7 @@ public class SedaEndpoint extends DefaultEndpoint implements AsyncEndpoint, Brow
             // create multicast processor
             multicastStarted = false;
 
-            consumerMulticastProcessor = (AsyncProcessor) getCamelContext().adapt(ExtendedCamelContext.class)
+            consumerMulticastProcessor = (AsyncProcessor) getCamelContext().getCamelContextExtension()
                     .getProcessorFactory().createProcessor(getCamelContext(), "MulticastProcessor",
                             new Object[] { processors, multicastExecutor, false });
         }
@@ -535,6 +547,8 @@ public class SedaEndpoint extends DefaultEndpoint implements AsyncEndpoint, Brow
         if (queue == null) {
             queue = getQueue();
         }
+
+        ref = tryQueueRefInit();
     }
 
     @Override
@@ -544,6 +558,8 @@ public class SedaEndpoint extends DefaultEndpoint implements AsyncEndpoint, Brow
         } else {
             LOG.debug("There is still active consumers.");
         }
+
+        ref = null;
     }
 
     @Override
@@ -575,6 +591,7 @@ public class SedaEndpoint extends DefaultEndpoint implements AsyncEndpoint, Brow
 
         // clear queue, as we are shutdown, so if re-created then the queue must be updated
         queue = null;
+        ref = null;
     }
 
 }

@@ -19,37 +19,43 @@ public class EventHubsEndpointUriFactory extends org.apache.camel.support.compon
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(22);
+        Set<String> props = new HashSet<>(25);
+        props.add("amqpRetryOptions");
+        props.add("amqpTransportType");
+        props.add("blobAccessKey");
+        props.add("blobAccountName");
+        props.add("blobContainerName");
         props.add("blobStorageSharedKeyCredential");
+        props.add("bridgeErrorHandler");
+        props.add("checkpointBatchSize");
+        props.add("checkpointBatchTimeout");
+        props.add("checkpointStore");
         props.add("connectionString");
+        props.add("consumerGroupName");
+        props.add("eventHubName");
+        props.add("eventPosition");
+        props.add("exceptionHandler");
+        props.add("exchangePattern");
+        props.add("lazyStartProducer");
+        props.add("namespace");
+        props.add("partitionId");
+        props.add("partitionKey");
         props.add("prefetchCount");
+        props.add("producerAsyncClient");
         props.add("sharedAccessKey");
         props.add("sharedAccessName");
-        props.add("partitionId");
-        props.add("checkpointStore");
-        props.add("exchangePattern");
-        props.add("amqpTransportType");
-        props.add("consumerGroupName");
-        props.add("eventPosition");
-        props.add("lazyStartProducer");
-        props.add("blobAccountName");
-        props.add("bridgeErrorHandler");
-        props.add("producerAsyncClient");
-        props.add("partitionKey");
-        props.add("namespace");
-        props.add("amqpRetryOptions");
-        props.add("blobContainerName");
-        props.add("eventHubName");
-        props.add("exceptionHandler");
-        props.add("blobAccessKey");
+        props.add("tokenCredential");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
-        Set<String> secretProps = new HashSet<>(4);
+        Set<String> secretProps = new HashSet<>(5);
+        secretProps.add("blobAccessKey");
         secretProps.add("blobStorageSharedKeyCredential");
         secretProps.add("connectionString");
         secretProps.add("sharedAccessKey");
-        secretProps.add("blobAccessKey");
+        secretProps.add("tokenCredential");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        MULTI_VALUE_PREFIXES = Collections.emptySet();
     }
 
     @Override
@@ -78,6 +84,11 @@ public class EventHubsEndpointUriFactory extends org.apache.camel.support.compon
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

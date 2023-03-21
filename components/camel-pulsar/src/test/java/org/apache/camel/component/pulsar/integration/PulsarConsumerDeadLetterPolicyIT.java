@@ -111,7 +111,7 @@ public class PulsarConsumerDeadLetterPolicyIT extends PulsarITSupport {
     }
 
     @Test
-    public void givenMaxRedeliverCountverifyMessageGetsSentToDefaultDeadLetterTopicAfterCountExceeded()
+    public void givenMaxRedeliverCountVerifyMessageGetsSentToDefaultDeadLetterTopicAfterCountExceeded()
             throws Exception {
         PulsarComponent component = context.getComponent("pulsar", PulsarComponent.class);
 
@@ -132,11 +132,11 @@ public class PulsarConsumerDeadLetterPolicyIT extends PulsarITSupport {
         });
         producer.send("Hello World!");
 
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
     }
 
     @Test
-    public void givenMaxRedeliverCountAndDeadLetterTopicverifyMessageGetsSentToSpecifiedDeadLetterTopicAfterCountExceeded()
+    public void givenMaxRedeliverCountAndDeadLetterTopicVerifyMessageGetsSentToSpecifiedDeadLetterTopicAfterCountExceeded()
             throws Exception {
         PulsarComponent component = context.getComponent("pulsar", PulsarComponent.class);
 
@@ -158,11 +158,11 @@ public class PulsarConsumerDeadLetterPolicyIT extends PulsarITSupport {
         });
 
         producer.send("Hello World!");
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
     }
 
     @Test
-    public void givenOnlyDeadLetterTopicverifyMessageDoesNotGetSentToSpecifiedTopic() throws Exception {
+    public void givenOnlyDeadLetterTopicVerifyMessageDoesNotGetSentToSpecifiedTopic() throws Exception {
         PulsarComponent component = context.getComponent("pulsar", PulsarComponent.class);
 
         PulsarEndpoint from = (PulsarEndpoint) component
@@ -191,7 +191,7 @@ public class PulsarConsumerDeadLetterPolicyIT extends PulsarITSupport {
         });
 
         producer.send("Hello World!");
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
     }
 
     private PulsarClient givenPulsarClient() throws PulsarClientException {

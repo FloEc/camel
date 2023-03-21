@@ -16,6 +16,7 @@
  */
 package org.apache.camel.component.kafka;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -60,15 +61,17 @@ import static org.mockito.ArgumentMatchers.isA;
 
 public class KafkaProducerTest {
 
+    private static final String SOME_INDIVIDUAL_HEADER = "someIndividualHeader";
+
     private KafkaProducer producer;
     private KafkaEndpoint endpoint;
     private KafkaEndpoint fromEndpoint;
 
     private TypeConverter converter = Mockito.mock(TypeConverter.class);
-    private CamelContext context = Mockito.mock(CamelContext.class);
+    private CamelContext context = Mockito.mock(DefaultCamelContext.class);
     private Exchange exchange = Mockito.mock(Exchange.class);
-    private ExtendedCamelContext camelContext = Mockito.mock(ExtendedCamelContext.class);
-    private Message in = new DefaultMessage(camelContext);
+    private ExtendedCamelContext ecc = Mockito.mock(ExtendedCamelContext.class);
+    private Message in = new DefaultMessage(context);
     private AsyncCallback callback = Mockito.mock(AsyncCallback.class);
 
     @SuppressWarnings({ "unchecked" })
@@ -87,7 +90,7 @@ public class KafkaProducerTest {
         fromEndpoint.doBuild();
         assertTrue(fromEndpoint.getKafkaClientFactory() instanceof DefaultKafkaClientFactory);
 
-        RecordMetadata rm = new RecordMetadata(null, 0, 0, 0, 0L, 0, 0);
+        RecordMetadata rm = new RecordMetadata(null, 0, 0, 0, 0, 0);
         Future future = Mockito.mock(Future.class);
         Mockito.when(future.get()).thenReturn(rm);
         org.apache.kafka.clients.producer.KafkaProducer kp
@@ -97,17 +100,17 @@ public class KafkaProducerTest {
         Mockito.when(exchange.getContext()).thenReturn(context);
         Mockito.when(context.getTypeConverter()).thenReturn(converter);
         Mockito.when(converter.tryConvertTo(String.class, exchange, null)).thenReturn(null);
-        Mockito.when(camelContext.adapt(ExtendedCamelContext.class)).thenReturn(camelContext);
-        Mockito.when(camelContext.adapt(ExtendedCamelContext.class).getHeadersMapFactory())
+        Mockito.when(context.getCamelContextExtension()).thenReturn(ecc);
+        Mockito.when(ecc.getHeadersMapFactory())
                 .thenReturn(new DefaultHeadersMapFactory());
-        Mockito.when(camelContext.getTypeConverter()).thenReturn(converter);
+        Mockito.when(context.getTypeConverter()).thenReturn(converter);
 
         producer.setKafkaProducer(kp);
         producer.setWorkerPool(Executors.newFixedThreadPool(1));
     }
 
     @Test
-    public void testPropertyBuilder() throws Exception {
+    public void testPropertyBuilder() {
         Properties props = producer.getProps();
         assertEquals("broker1:1234,broker2:4567", props.getProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
     }
@@ -142,7 +145,7 @@ public class KafkaProducerTest {
     }
 
     @Test
-    public void processAsyncSendsMessage() throws Exception {
+    public void processAsyncSendsMessage() {
         endpoint.getConfiguration().setTopic("sometopic");
         Mockito.when(exchange.getIn()).thenReturn(in);
         Mockito.when(exchange.getMessage()).thenReturn(in);
@@ -154,7 +157,7 @@ public class KafkaProducerTest {
         ArgumentCaptor<Callback> callBackCaptor = ArgumentCaptor.forClass(Callback.class);
         Mockito.verify(producer.getKafkaProducer()).send(any(ProducerRecord.class), callBackCaptor.capture());
         Callback kafkaCallback = callBackCaptor.getValue();
-        kafkaCallback.onCompletion(new RecordMetadata(null, 0, 0, 0, 0L, 0, 0), null);
+        kafkaCallback.onCompletion(new RecordMetadata(null, 0, 0, 0, 0, 0), null);
         assertRecordMetadataExists();
     }
 
@@ -177,7 +180,7 @@ public class KafkaProducerTest {
         Mockito.verify(exchange).setException(isA(ApiException.class));
         Mockito.verify(callback).done(eq(true));
         Callback kafkaCallback = callBackCaptor.getValue();
-        kafkaCallback.onCompletion(new RecordMetadata(null, 0, 0, 0, 0L, 0, 0), null);
+        kafkaCallback.onCompletion(new RecordMetadata(null, 0, 0, 0, 0, 0), null);
         assertRecordMetadataExists();
     }
 
@@ -380,7 +383,7 @@ public class KafkaProducerTest {
         producer.process(exchange);
 
         // assert results
-        verifySendMessages(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"));
+        verifySendMessages(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"), null);
         assertRecordMetadataExists(3);
         assertRecordMetadataExistsForEachAggregatedExchange();
     }
@@ -408,7 +411,69 @@ public class KafkaProducerTest {
         producer.process(exchange);
 
         // assert results
-        verifySendMessages(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"));
+        verifySendMessages(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"),
+                Arrays.asList("", "", ""));
+        assertRecordMetadataExists(3);
+        assertRecordMetadataExistsForEachAggregatedMessage();
+    }
+
+    @Test
+    public void processSendsMessageWithListOfExchangesWithIndividualHeaders() throws Exception {
+        endpoint.getConfiguration().setBatchWithIndividualHeaders(true);
+        endpoint.getConfiguration().setTopic("someTopic");
+        Mockito.when(exchange.getIn()).thenReturn(in);
+        Mockito.when(exchange.getMessage()).thenReturn(in);
+
+        // we set the initial topic
+        in.setHeader(KafkaConstants.OVERRIDE_TOPIC, "anotherTopic");
+        in.setHeader(KafkaConstants.KEY, "someKey");
+        in.setHeader(SOME_INDIVIDUAL_HEADER, "default");
+
+        // we add our exchanges in order to aggregate
+        final List<Exchange> nestedExchanges
+                = createListOfExchangesWithTopics(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"));
+
+        // aggregate
+        final Exchange finalAggregatedExchange = aggregateExchanges(nestedExchanges, new GroupedExchangeAggregationStrategy());
+
+        in.setBody(finalAggregatedExchange.getIn().getBody());
+        in.setHeaders(finalAggregatedExchange.getIn().getHeaders());
+
+        producer.process(exchange);
+
+        // assert results
+        verifySendMessages(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"),
+                Arrays.asList("value-1", "value-2", "value-3"));
+        assertRecordMetadataExists(3);
+        assertRecordMetadataExistsForEachAggregatedExchange();
+    }
+
+    @Test
+    public void processSendsMessageWithListOfMessagesWithIndividualHeaders() throws Exception {
+        endpoint.getConfiguration().setBatchWithIndividualHeaders(true);
+        endpoint.getConfiguration().setTopic("someTopic");
+        Mockito.when(exchange.getIn()).thenReturn(in);
+        Mockito.when(exchange.getMessage()).thenReturn(in);
+
+        // we set the initial topic
+        in.setHeader(KafkaConstants.OVERRIDE_TOPIC, "anotherTopic");
+        in.setHeader(KafkaConstants.KEY, "someKey");
+
+        // we add our exchanges in order to aggregate
+        final List<Exchange> nestedExchanges
+                = createListOfExchangesWithTopics(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"));
+
+        // aggregate messages
+        final Exchange finalAggregatedExchange = aggregateExchanges(nestedExchanges, new GroupedMessageAggregationStrategy());
+
+        in.setBody(finalAggregatedExchange.getIn().getBody());
+        in.setHeaders(finalAggregatedExchange.getIn().getHeaders());
+
+        producer.process(exchange);
+
+        // assert results
+        verifySendMessages(Arrays.asList("overridenTopic1", "overridenTopic2", "overridenTopic3"),
+                Arrays.asList("value-1", "value-2", "value-3"));
         assertRecordMetadataExists(3);
         assertRecordMetadataExistsForEachAggregatedMessage();
     }
@@ -446,13 +511,26 @@ public class KafkaProducerTest {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected void verifySendMessages(final List<String> expectedTopics) {
+    protected void verifySendMessages(final List<String> expectedTopics, final List<String> expectedIndividualHeaderValues) {
         final ArgumentCaptor<ProducerRecord> captor = ArgumentCaptor.forClass(ProducerRecord.class);
         Mockito.verify(producer.getKafkaProducer(), Mockito.atLeast(expectedTopics.size())).send(captor.capture());
+        final List<ProducerRecord> records = captor.getAllValues();
         final List<String> actualTopics
-                = captor.getAllValues().stream().map(ProducerRecord::topic).collect(Collectors.toList());
+                = records.stream().map(ProducerRecord::topic).collect(Collectors.toList());
 
         assertEquals(expectedTopics, actualTopics);
+
+        if (expectedIndividualHeaderValues == null) {
+            return;
+        }
+
+        final List<String> actualIndividualHeaderValues = records.stream()
+                .map(ProducerRecord::headers)
+                .map(headers -> headers.lastHeader(SOME_INDIVIDUAL_HEADER))
+                .map(header -> header == null ? "" : new String(header.value(), StandardCharsets.UTF_8))
+                .collect(Collectors.toList());
+
+        assertEquals(expectedIndividualHeaderValues, actualIndividualHeaderValues);
     }
 
     private void assertRecordMetadataTimestampExists() {
@@ -498,7 +576,7 @@ public class KafkaProducerTest {
     }
 
     private Exchange aggregateExchanges(final List<Exchange> exchangesToAggregate, final AggregationStrategy strategy) {
-        Exchange exchangeHolder = new DefaultExchange(camelContext);
+        Exchange exchangeHolder = new DefaultExchange(context);
 
         for (final Exchange innerExchange : exchangesToAggregate) {
             exchangeHolder = strategy.aggregate(exchangeHolder, innerExchange);
@@ -512,11 +590,16 @@ public class KafkaProducerTest {
     private List<Exchange> createListOfExchangesWithTopics(final List<String> topics) {
         final List<Exchange> resultLists = new LinkedList<>();
 
-        topics.forEach(topic -> {
-            final Exchange innerExchange = new DefaultExchange(camelContext);
-            innerExchange.getIn().setHeader(KafkaConstants.OVERRIDE_TOPIC, topic);
+        int index = 1;
+        for (String topic : topics) {
+            final Exchange innerExchange = new DefaultExchange(context);
+            innerExchange.setExchangeId("exchange-" + index);
+            final Message msg = innerExchange.getIn();
+            msg.setMessageId("message-" + index);
+            msg.setHeader(KafkaConstants.OVERRIDE_TOPIC, topic);
+            msg.setHeader(SOME_INDIVIDUAL_HEADER, "value-" + index++);
             resultLists.add(innerExchange);
-        });
+        }
 
         return resultLists;
     }

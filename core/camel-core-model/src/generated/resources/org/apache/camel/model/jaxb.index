@@ -13,6 +13,7 @@ DelayDefinition
 DescriptionDefinition
 DynamicRouterDefinition
 EnrichDefinition
+ErrorHandlerDefinition
 ExpressionSubElementDefinition
 FaultToleranceConfigurationDefinition
 FilterDefinition
@@ -20,18 +21,14 @@ FinallyDefinition
 FromDefinition
 GlobalOptionDefinition
 GlobalOptionsDefinition
-HystrixConfigurationDefinition
 IdempotentConsumerDefinition
 IdentifiedType
-InOnlyDefinition
-InOutDefinition
 InputTypeDefinition
 InterceptDefinition
 InterceptFromDefinition
 InterceptSendToEndpointDefinition
 KameletDefinition
 LoadBalanceDefinition
-LoadBalancerDefinition
 LogDefinition
 LoopDefinition
 MarshalDefinition
@@ -46,12 +43,14 @@ OtherwiseDefinition
 OutputDefinition
 OutputTypeDefinition
 PackageScanDefinition
+PausableDefinition
 PipelineDefinition
 PolicyDefinition
 PollEnrichDefinition
 ProcessDefinition
 PropertyDefinition
 PropertyDefinitions
+PropertyExpressionDefinition
 RecipientListDefinition
 RedeliveryPolicyDefinition
 RemoveHeaderDefinition
@@ -61,6 +60,7 @@ RemovePropertyDefinition
 ResequenceDefinition
 Resilience4jConfigurationDefinition
 RestContextRefDefinition
+ResumableDefinition
 RollbackDefinition
 RouteBuilderDefinition
 RouteConfigurationContextRefDefinition
@@ -72,7 +72,6 @@ RouteTemplateBeanDefinition
 RouteTemplateContextRefDefinition
 RouteTemplateDefinition
 RouteTemplateParameterDefinition
-RouteTemplateScriptDefinition
 RouteTemplatesDefinition
 RoutesDefinition
 RoutingSlipDefinition
@@ -89,6 +88,10 @@ SortDefinition
 SplitDefinition
 StepDefinition
 StopDefinition
+TemplatedRouteBeanDefinition
+TemplatedRouteDefinition
+TemplatedRouteParameterDefinition
+TemplatedRoutesDefinition
 ThreadPoolProfileDefinition
 ThreadsDefinition
 ThrottleDefinition
@@ -100,5 +103,6 @@ TransformDefinition
 TryDefinition
 UnmarshalDefinition
 ValidateDefinition
+ValueDefinition
 WhenDefinition
 WireTapDefinition

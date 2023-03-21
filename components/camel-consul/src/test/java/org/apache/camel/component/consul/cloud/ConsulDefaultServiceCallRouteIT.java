@@ -25,6 +25,7 @@ import com.orbitz.consul.model.agent.Registration;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.consul.ConsulTestSupport;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.AvailablePortFinder;
 import org.junit.jupiter.api.Test;
 
@@ -78,7 +79,7 @@ public class ConsulDefaultServiceCallRouteIT extends ConsulTestSupport {
 
         registrations.forEach(r -> template.sendBody("direct:start", "ping"));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // *************************************************************************
@@ -89,7 +90,7 @@ public class ConsulDefaultServiceCallRouteIT extends ConsulTestSupport {
     protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").serviceCall().name(SERVICE_NAME).component("http").defaultLoadBalancer()
                         .consulServiceDiscovery().url(service.getConsulUrl()).endParent()
                         .to("log:org.apache.camel.component.consul.cloud?level=INFO&showAll=true&multiline=true")

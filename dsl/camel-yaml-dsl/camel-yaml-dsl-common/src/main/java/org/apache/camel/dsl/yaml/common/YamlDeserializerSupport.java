@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.dsl.yaml.common.exception.InvalidEnumException;
+import org.apache.camel.dsl.yaml.common.exception.InvalidNodeTypeException;
 import org.apache.camel.dsl.yaml.common.exception.UnsupportedFieldException;
 import org.apache.camel.dsl.yaml.common.exception.UnsupportedNodeTypeException;
 import org.apache.camel.dsl.yaml.common.exception.YamlDeserializationException;
@@ -46,22 +48,29 @@ import org.snakeyaml.engine.v2.nodes.ScalarNode;
 import org.snakeyaml.engine.v2.nodes.SequenceNode;
 
 public class YamlDeserializerSupport {
+
     protected YamlDeserializerSupport() {
     }
 
-    public static Class<?> asClass(String val) throws YamlDeserializationException {
-        try {
-            return Class.forName(val);
-        } catch (ClassNotFoundException e) {
-            throw new YamlDeserializationException("Unable to load class " + val, e);
-        }
+    public static Class<?> asClass(String val) throws ClassNotFoundException {
+        return Class.forName(val);
     }
 
-    public static Class<?>[] asClassArray(String val) throws YamlDeserializationException {
+    public static Class<?>[] asClassArray(Node node) throws YamlDeserializationException {
+        if (node == null) {
+            return null;
+        }
+
+        String val = asText(node);
         String[] values = val.split(" ");
         Class<?>[] cls = new Class<?>[values.length];
         for (int i = 0; i < values.length; i++) {
-            cls[i] = asClass(values[i]);
+            String name = values[i];
+            try {
+                cls[i] = asClass(name);
+            } catch (ClassNotFoundException e) {
+                throw new YamlDeserializationException(node, "Cannot load class " + name);
+            }
         }
         return cls;
     }
@@ -91,7 +100,12 @@ public class YamlDeserializerSupport {
             return null;
         }
 
-        return asClass(asText(node));
+        String val = asText(node);
+        try {
+            return Class.forName(val);
+        } catch (ClassNotFoundException e) {
+            throw new YamlDeserializationException(node, "Cannot load class: " + val);
+        }
     }
 
     public static List<String> asStringList(Node node) {
@@ -136,20 +150,12 @@ public class YamlDeserializerSupport {
         return answer;
     }
 
-    public static Class<?>[] asClassArray(Node node) throws YamlDeserializationException {
-        if (node == null) {
-            return null;
-        }
-
-        return asClassArray(asText(node));
-    }
-
     public static String asText(Node node) throws YamlDeserializationException {
         if (node == null) {
             return null;
         }
         if (node.getNodeType() != NodeType.SCALAR) {
-            throw new IllegalArgumentException("Node is not SCALAR");
+            throw new InvalidNodeTypeException(node, NodeType.SCALAR);
         }
 
         return ((ScalarNode) node).getValue();
@@ -160,11 +166,11 @@ public class YamlDeserializerSupport {
             return null;
         }
         if (node.getNodeType() != NodeType.SCALAR) {
-            throw new IllegalArgumentException("Node is not SCALAR");
+            throw new InvalidNodeTypeException(node, NodeType.SCALAR);
         }
 
         String text = ((ScalarNode) node).getValue();
-        return enumConverter(type, text);
+        return enumConverter(node, type, text);
     }
 
     public static Map<String, Object> asMap(Node node) {
@@ -211,7 +217,7 @@ public class YamlDeserializerSupport {
                     answer.put(StringHelper.dashToCamelCase(key), asText(val));
                     break;
                 default:
-                    throw new UnsupportedNodeTypeException(node);
+                    throw new InvalidNodeTypeException(node, NodeType.SCALAR);
             }
         }
 
@@ -240,7 +246,7 @@ public class YamlDeserializerSupport {
         }
 
         if (node.getNodeType() != NodeType.MAPPING) {
-            throw new IllegalArgumentException("Node is not MAPPING");
+            throw new InvalidNodeTypeException(node, NodeType.MAPPING);
         }
 
         return (MappingNode) node;
@@ -252,31 +258,18 @@ public class YamlDeserializerSupport {
         }
 
         if (node.getNodeType() != NodeType.SEQUENCE) {
-            throw new IllegalArgumentException("Node is not MAPPING");
+            throw new InvalidNodeTypeException(node, NodeType.SEQUENCE);
         }
 
         return (SequenceNode) node;
     }
 
-    public static Node getNamedNode(MappingNode node, String name) throws YamlDeserializationException {
+    public static boolean isSequenceNode(Node node) {
         if (node == null) {
-            return null;
+            return false;
         }
 
-        for (NodeTuple tuple : node.getValue()) {
-            if (name.equals(asText(tuple.getKeyNode()))) {
-                return tuple.getValueNode();
-            }
-        }
-
-        return null;
-    }
-
-    public static <T> List<T> asNestedList(Node node, Class<T> type) throws YamlDeserializationException {
-        List<T> answer = new ArrayList<>();
-        asNestedCollection(node, type, answer);
-
-        return answer;
+        return node.getNodeType() == NodeType.SEQUENCE;
     }
 
     public static <T> List<T> asFlatList(Node node, Class<T> type) throws YamlDeserializationException {
@@ -286,9 +279,9 @@ public class YamlDeserializerSupport {
         return answer;
     }
 
-    public static <T> Set<T> asNestedSet(Node node, Class<T> type) throws YamlDeserializationException {
-        Set<T> answer = new HashSet<>();
-        asNestedCollection(node, type, answer);
+    public static <T> List<T> asList(Node node, Class<T> type) throws YamlDeserializationException {
+        List<T> answer = new ArrayList<>();
+        asCollection(node, type, answer);
 
         return answer;
     }
@@ -300,25 +293,25 @@ public class YamlDeserializerSupport {
         return answer;
     }
 
-    public static <T> void asNestedCollection(Node node, Class<T> type, Collection<T> collection)
-            throws YamlDeserializationException {
-        asCollection(node, type, collection, false);
-    }
-
     public static <T> void asFlatCollection(Node node, Class<T> type, Collection<T> collection)
             throws YamlDeserializationException {
         asCollection(node, type, collection, true);
     }
 
+    public static <T> void asCollection(Node node, Class<T> type, Collection<T> collection)
+            throws YamlDeserializationException {
+        asCollection(node, type, collection, false);
+    }
+
     private static <T> void asCollection(Node node, Class<T> type, Collection<T> collection, boolean flat)
             throws YamlDeserializationException {
         if (node.getNodeType() != NodeType.SEQUENCE) {
-            throw new UnsupportedOperationException("Unable to parse no array node");
+            throw new InvalidNodeTypeException(node, NodeType.SEQUENCE);
         }
 
         YamlDeserializationContext dc = getDeserializationContext(node);
         if (dc == null) {
-            throw new IllegalArgumentException("Unable to find YamlConstructor");
+            throw new YamlDeserializationException(node, "Unable to find constructor for node");
         }
 
         for (Node element : asSequenceNode(node).getValue()) {
@@ -341,11 +334,11 @@ public class YamlDeserializerSupport {
         YamlDeserializationContext resolver
                 = (YamlDeserializationContext) node.getProperty(YamlDeserializationContext.class.getName());
         if (resolver == null) {
-            throw new IllegalArgumentException("Unable to find YamlConstructor");
+            throw new YamlDeserializationException(node, "Unable to find YamlConstructor");
         }
         ConstructNode construct = resolver.resolve(type);
         if (construct == null) {
-            throw new IllegalArgumentException("Unable to determine constructor for type: " + type.getName());
+            throw new YamlDeserializationException(node, "Unable to determine constructor for type: " + type.getName());
         }
 
         return (T) construct.construct(node);
@@ -381,7 +374,7 @@ public class YamlDeserializerSupport {
             }
         }
 
-        return YamlSupport.createEndpointUri(cc, uri, properties);
+        return YamlSupport.createEndpointUri(cc, node, uri, properties);
     }
 
     public static YamlDeserializationContext getDeserializationContext(Node node) {
@@ -393,18 +386,26 @@ public class YamlDeserializerSupport {
         return node;
     }
 
+    public static Map<String, Object> parseParameters(NodeTuple node) {
+        Node value = node.getValueNode();
+        final YamlDeserializationContext dc = getDeserializationContext(value);
+        Map<String, Object> answer = asScalarMap(value);
+        return answer;
+    }
+
     public static void setSteps(Block target, Node node) {
         final YamlDeserializationContext dc = getDeserializationContext(node);
+        setStepsFlowMode(target, node);
+    }
 
+    private static void setStepsFlowMode(Block target, Node node) {
         Block block = target;
         for (ProcessorDefinition<?> definition : asFlatList(node, ProcessorDefinition.class)) {
             block.addOutput(definition);
-
-            if (dc.getDeserializationMode() == YamlDeserializationMode.FLOW) {
-                if (definition instanceof OutputNode) {
-                    if (ObjectHelper.isEmpty(definition.getOutputs())) {
-                        block = definition;
-                    }
+            // flow mode
+            if (definition instanceof OutputNode) {
+                if (ObjectHelper.isEmpty(definition.getOutputs())) {
+                    block = definition;
                 }
             }
         }
@@ -433,12 +434,12 @@ public class YamlDeserializerSupport {
         return null;
     }
 
-    public static <T> T enumConverter(Class<T> type, String value) {
+    public static <T> T enumConverter(Node node, Class<T> type, String value) {
         if (type.isEnum()) {
-            String text = value.toString();
+            String text = value;
             Class<Enum<?>> enumClass = (Class<Enum<?>>) type;
 
-            // we want to match case insensitive for enums
+            // we want to match case-insensitive for enums
             for (Enum<?> enumValue : enumClass.getEnumConstants()) {
                 if (enumValue.name().equalsIgnoreCase(text)) {
                     return type.cast(enumValue);
@@ -453,7 +454,7 @@ public class YamlDeserializerSupport {
                 }
             }
 
-            throw new IllegalArgumentException("Enum class " + type + " does not have any constant with value: " + text);
+            throw new InvalidEnumException(node, type, value);
         }
 
         return null;

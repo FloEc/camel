@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon SES SDK v2.
  */
 @Component("aws2-ses")
 public class Ses2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Ses2Component.class);
-
     @Metadata
     private Ses2Configuration configuration = new Ses2Configuration();
 
@@ -43,8 +38,6 @@ public class Ses2Component extends DefaultComponent {
 
     public Ses2Component(CamelContext context) {
         super(context);
-
-        registerExtension(new Ses2ComponentVerifierExtension());
     }
 
     @Override
@@ -57,7 +50,7 @@ public class Ses2Component extends DefaultComponent {
         configuration.setFrom(remaining);
         Ses2Endpoint endpoint = new Ses2Endpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getAmazonSESClient() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider()) && configuration.getAmazonSESClient() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, AmazonSESClient or accessKey and secretKey must be specified");

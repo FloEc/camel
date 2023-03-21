@@ -24,22 +24,23 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FtpPollEnrichConsumeWithDisconnectAndDeleteIT extends FtpServerTestSupport {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FtpPollEnrichConsumeWithDisconnectAndDeleteIT.class);
+class FtpPollEnrichConsumeWithDisconnectAndDeleteIT extends FtpServerTestSupport {
 
     @Test
-    public void testFtpSimpleConsume() throws Exception {
+    void testFtpSimpleConsume() throws Exception {
         String expected = "Hello World";
 
         // create file using regular file
         template.sendBodyAndHeader("file://{{ftp.root.dir}}/poll", expected, Exchange.FILE_NAME, "hello.txt");
+
+        File file = service.ftpFile("poll/hello.txt").toFile();
+        await().atMost(1, TimeUnit.MINUTES)
+                .untilAsserted(() -> assertTrue(file.exists(), "The file should have been created"));
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
@@ -47,21 +48,21 @@ public class FtpPollEnrichConsumeWithDisconnectAndDeleteIT extends FtpServerTest
         mock.expectedBodiesReceived(expected);
 
         ProducerTemplate triggerTemplate = context.createProducerTemplate();
-        triggerTemplate.sendBody("vm:trigger", "");
+        triggerTemplate.sendBody("seda:trigger", "");
 
-        assertMockEndpointsSatisfied();
+        mock.setResultWaitTime(TimeUnit.MINUTES.toMillis(3));
+        mock.assertIsSatisfied();
 
-        File file = ftpFile("poll/hello.txt").toFile();
         await().atMost(3, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertFalse(file.exists(), "The file should have been deleted"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from("vm:trigger").pollEnrich("ftp://admin@localhost:{{ftp.server.port}}/poll?password=admin&delete=true")
+            public void configure() {
+                from("seda:trigger").pollEnrich("ftp://admin@localhost:{{ftp.server.port}}/poll?password=admin&delete=true")
                         .routeId("foo").to("mock:result");
             }
         };

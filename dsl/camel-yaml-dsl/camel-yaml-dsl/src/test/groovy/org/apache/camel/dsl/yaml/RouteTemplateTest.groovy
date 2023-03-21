@@ -20,6 +20,7 @@ import org.apache.camel.component.mock.MockEndpoint
 import org.apache.camel.dsl.yaml.support.YamlTestSupport
 import org.apache.camel.dsl.yaml.support.model.MySetBody
 import org.apache.camel.dsl.yaml.support.model.MyUppercaseProcessor
+import org.apache.camel.impl.engine.DefaultRoute
 import org.apache.camel.model.LogDefinition
 import org.apache.camel.model.RouteTemplateDefinition
 import org.apache.camel.model.ToDefinition
@@ -30,7 +31,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template"() {
         when:
         loadRoutes '''
-                - template:
+                - routeTemplate:
                     id: "myTemplate"
                     from:
                       uri: "direct:info"
@@ -77,7 +78,7 @@ class RouteTemplateTest extends YamlTestSupport {
         where:
         resource << [
                 asResource('beans', """
-                        - template:
+                        - routeTemplate:
                             id: "myTemplate"
                             beans:
                               - name: "myProcessor"
@@ -94,7 +95,7 @@ class RouteTemplateTest extends YamlTestSupport {
                               - to: "mock:result"
                     """),
                 asResource('script', """
-                        - template:
+                        - routeTemplate:
                             id: "myTemplate"
                             beans:
                               - name: "myProcessor"
@@ -112,7 +113,7 @@ class RouteTemplateTest extends YamlTestSupport {
                               - to: "mock:result"
                     """),
                 asResource('script-bean-type', """
-                        - template:
+                        - routeTemplate:
                             id: "myTemplate"
                             beans:
                               - name: "myProcessor"
@@ -131,7 +132,7 @@ class RouteTemplateTest extends YamlTestSupport {
                               - to: "mock:result"
                     """),
                 asResource('script-block', """
-                        - template:
+                        - routeTemplate:
                             id: "myTemplate"
                             beans:
                               - name: "myProcessor"
@@ -155,7 +156,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template with bean and properties"() {
         setup:
         loadRoutes """                
-                - template:
+                - routeTemplate:
                     id: "myTemplate"
                     beans:
                       - name: "myProcessor"
@@ -199,7 +200,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template with bean and property"() {
         setup:
         loadRoutes """                
-                - template:
+                - routeTemplate:
                     id: "myTemplate"
                     beans:
                       - name: "myProcessor"
@@ -244,7 +245,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template with properties"() {
         when:
         loadRoutes """
-                - template:
+                - routeTemplate:
                     id: "myTemplate"
                     parameters:
                       - name: "foo"
@@ -281,7 +282,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template with optional properties"() {
         when:
         loadRoutes """
-                - template:
+                - routeTemplate:
                     id: "myTemplate"
                     parameters:
                       - name: "foo"
@@ -333,7 +334,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template with joor"() {
         setup:
             loadRoutes """                
-                    - template:
+                    - routeTemplate:
                         id: "myTemplate"
                         beans:
                           - name: "myAgg"
@@ -343,7 +344,7 @@ class RouteTemplateTest extends YamlTestSupport {
                           uri: "direct:route"
                           steps:
                             - aggregate:
-                                strategy-ref: "{{myAgg}}"
+                                aggregation-strategy: "{{myAgg}}"
                                 completion-size: 2
                                 correlation-expression:
                                   header: "StockSymbol"
@@ -378,7 +379,7 @@ class RouteTemplateTest extends YamlTestSupport {
     def "create template with groovy"() {
         setup:
             loadRoutes """                
-                    - template:
+                    - routeTemplate:
                         id: "myTemplate"
                         beans:
                           - name: "myAgg"
@@ -388,7 +389,7 @@ class RouteTemplateTest extends YamlTestSupport {
                           uri: "direct:route"
                           steps:
                             - aggregate:
-                                strategy-ref: "{{myAgg}}"
+                                aggregation-strategy: "{{myAgg}}"
                                 completion-size: 2
                                 correlation-expression:
                                   header: "StockSymbol"
@@ -418,6 +419,109 @@ class RouteTemplateTest extends YamlTestSupport {
             }
 
             MockEndpoint.assertIsSatisfied(context)
+    }
+
+    def "create route-template with parameters"() {
+        when:
+        loadRoutes """
+                - route-template:
+                    id: "myTemplate"
+                    parameters:
+                      - name: "foo"
+                      - name: "bar"
+                    from:
+                      uri: "direct:{{foo}}"
+                      steps:
+                        - log: "{{bar}}"
+            """
+        then:
+        context.routeTemplateDefinitions.size() == 1
+
+        with(context.routeTemplateDefinitions[0], RouteTemplateDefinition) {
+            id == 'myTemplate'
+            configurer == null
+
+            templateParameters.any {
+                it.name == 'foo'
+            }
+            templateParameters.any {
+                it.name == 'bar'
+            }
+
+            route.input.endpointUri == 'direct:{{foo}}'
+            with(route.outputs[0], LogDefinition) {
+                message == '{{bar}}'
+            }
+        }
+    }
+
+    def "create route-template with route"() {
+        setup:
+        loadRoutes """
+                - route-template:
+                    id: "myTemplate"
+                    parameters:
+                      - name: "foo"
+                      - name: "bar"
+                    route:
+                      stream-caching: false
+                      message-history: true
+                      log-mask: true
+                      from:
+                        uri: "direct:{{foo}}"
+                        steps:
+                          - to: "mock:{{bar}}"
+            """
+        when:
+            context.addRouteFromTemplate('myId', 'myTemplate', [foo: "start", bar: "result"])
+            context.start()
+
+        then:
+            with(context.routes[0], DefaultRoute) {
+                it.isStreamCaching() == false
+                it.isMessageHistory() == true
+                it.isLogMask() == true
+            }
+    }
+
+    def "create route-template with prefix"() {
+        setup:
+        loadRoutes """
+                - route-template:
+                    id: "myTemplate"
+                    parameters:
+                      - name: "foo"
+                      - name: "bar"
+                    from:
+                      uri: "direct:{{foo}}"
+                      steps:
+                      - choice:  
+                          when:
+                            - header: "foo"
+                              steps:
+                                - log:
+                                    id: "myLog"
+                                    message: "Hello World"
+                          otherwise:
+                            steps:
+                              - to:
+                                  uri: "mock:{{bar}}"
+                                  id: "end"
+            """
+        when:
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("foo", "one");
+        parameters.put("bar", "cheese");
+        context.addRouteFromTemplate("first", "myTemplate", "aaa", parameters);
+
+        parameters.put("foo", "two");
+        parameters.put("bar", "cake");
+        context.addRouteFromTemplate("second", "myTemplate", "bbb", parameters);
+        context.start()
+
+        then:
+        Assertions.assertEquals(3, context.getRoute("first").filter("aaa*").size());
+        Assertions.assertEquals(3, context.getRoute("second").filter("bbb*").size());
     }
 
 }

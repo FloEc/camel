@@ -19,6 +19,7 @@ package org.apache.camel.component.kamelet;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.AggregationStrategies;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ public class KameletEipAggregateTest extends CamelTestSupport {
         template.sendBody("direct:start", "D");
         template.sendBody("direct:start", "E");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     // **********************************************
@@ -43,10 +44,10 @@ public class KameletEipAggregateTest extends CamelTestSupport {
     //
     // **********************************************
 
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 routeTemplate("my-aggregate")
                         .templateParameter("count")
                         .from("kamelet:source")

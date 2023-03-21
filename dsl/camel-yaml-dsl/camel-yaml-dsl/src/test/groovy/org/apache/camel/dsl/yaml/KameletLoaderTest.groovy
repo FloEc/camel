@@ -62,7 +62,7 @@ class KameletLoaderTest extends YamlTestSupport {
                         default: false
                         x-descriptors:
                         - 'urn:alm:descriptor:com.tectonic.ui:checkbox'
-                  flow:
+                  template:
                     from:
                       uri: "kamelet:source"
                       steps:
@@ -93,9 +93,11 @@ class KameletLoaderTest extends YamlTestSupport {
 
                 with(route) {
                     input.endpointUri == 'kamelet:source'
+                    input.lineNumber == 35
                     outputs.size() == 1
                     with (outputs[0], ToDefinition) {
                         endpointUri ==~ /aws2-s3:.*/
+                        lineNumber == 38
                     }
                 }
             }
@@ -269,7 +271,7 @@ class KameletLoaderTest extends YamlTestSupport {
                   definition:
                     title: "Filter"
                     description: "Filter based on the body"
-                  flow:
+                  template:
                     from:
                       uri: kamelet:source
                       steps:

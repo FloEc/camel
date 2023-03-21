@@ -41,8 +41,6 @@ The exchange name determines the exchange to which the produced
 messages will be sent to. In the case of consumers, the exchange name 
 determines the exchange the queue will be bound to.
 
-
-
 // component-configure options: START
 
 // component-configure options: END
@@ -55,7 +53,9 @@ include::partial$component-endpoint-options.adoc[]
 // endpoint options: START
 
 // endpoint options: END
-
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Using a connection factory
 
@@ -236,6 +236,22 @@ then using toD could for example be done as follows:
 ----
 from("direct:order")
   .toD("spring-rabbit:order-${header.orderType}");
+----
+
+== Manual Acknowledgement 
+
+If we need to manually acknowledge a message for some use case  we can
+do it by setting and acknowledgeMode to Manual and using the below snippet
+of code to get Channel and deliveryTag to manually acknowledge the message:
+
+[source,java]
+----
+from("spring-rabbitmq:%s?queues=%s&acknowledgeMode=MANUAL")
+    .process(exchange -> {
+        Channel channel = exchange.getProperty(SpringRabbitMQConstants.CHANNEL, Channel.class);
+        long deliveryTag = exchange.getMessage().getHeader(SpringRabbitMQConstants.DELIVERY_TAG, long.class);
+        channel.basicAck(deliveryTag, false);
+    })
 ----
 
 

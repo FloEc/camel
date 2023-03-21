@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -50,10 +50,10 @@ public interface DebeziumMongodbEndpointBuilderFactory {
          * properties needed by Debezium engine, for example setting
          * KafkaOffsetBackingStore), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -76,10 +76,10 @@ public interface DebeziumMongodbEndpointBuilderFactory {
          * properties needed by Debezium engine, for example setting
          * KafkaOffsetBackingStore), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -91,51 +91,6 @@ public interface DebeziumMongodbEndpointBuilderFactory {
          */
         default DebeziumMongodbEndpointBuilder additionalProperties(Map values) {
             doSetMultiValueProperties("additionalProperties", "additionalProperties.", values);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMongodbEndpointBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMongodbEndpointBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -181,8 +136,6 @@ public interface DebeziumMongodbEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default:
-         * io.debezium.embedded.spi.OffsetCommitPolicy.PeriodicCommitOffsetPolicy
          * Group: consumer
          * 
          * @param offsetCommitPolicy the value to set
@@ -377,6 +330,25 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
+         * The method used to capture changes from MongoDB server. Options
+         * include: 'change_streams' to capture changes via MongoDB Change
+         * Streams, update events do not contain full documents;
+         * 'change_streams_update_full' (the default) to capture changes via
+         * MongoDB Change Streams, update events contain full documents.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: change_streams_update_full
+         * Group: mongodb
+         * 
+         * @param captureMode the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder captureMode(String captureMode) {
+            doSetProperty("captureMode", captureMode);
+            return this;
+        }
+        /**
          * A comma-separated list of regular expressions that match the
          * collection names for which changes are to be excluded.
          * 
@@ -522,9 +494,8 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         }
         /**
          * Optional list of custom converters that would be used instead of
-         * default ones. The converters are defined using
-         * '&lt;converter.prefix&gt;.type' config option and configured using
-         * options '&lt;converter.prefix&gt;.&lt;option&gt;'.
+         * default ones. The converters are defined using '.type' config option
+         * and configured using options '.'.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -586,22 +557,6 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
-         * The path to the file that will be used to record the database
-         * history.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mongodb
-         * 
-         * @param databaseHistoryFileFilename the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMongodbEndpointBuilder databaseHistoryFileFilename(
-                String databaseHistoryFileFilename) {
-            doSetProperty("databaseHistoryFileFilename", databaseHistoryFileFilename);
-            return this;
-        }
-        /**
          * A comma-separated list of regular expressions that match the database
          * names for which changes are to be captured.
          * 
@@ -619,11 +574,11 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         }
         /**
          * Specify how failures during processing of events (i.e. when
-         * encountering a corrupted event) should be handled, including:'fail'
+         * encountering a corrupted event) should be handled, including: 'fail'
          * (the default) an exception indicating the problematic event and its
          * position is raised, causing the connector to be stopped; 'warn' the
          * problematic event and its position will be logged and the event will
-         * be skipped;'ignore' the problematic event will be skipped.
+         * be skipped; 'ignore' the problematic event will be skipped.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -841,6 +796,21 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
+         * Database connection string.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: mongodb
+         * 
+         * @param mongodbConnectionString the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder mongodbConnectionString(
+                String mongodbConnectionString) {
+            doSetProperty("mongodbConnectionString", mongodbConnectionString);
+            return this;
+        }
+        /**
          * The connection timeout, given in milliseconds. Defaults to 10 seconds
          * (10,000 ms).
          * 
@@ -872,6 +842,40 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         default DebeziumMongodbEndpointBuilder mongodbConnectTimeoutMs(
                 String mongodbConnectTimeoutMs) {
             doSetProperty("mongodbConnectTimeoutMs", mongodbConnectTimeoutMs);
+            return this;
+        }
+        /**
+         * The frequency that the cluster monitor attempts to reach each server.
+         * Defaults to 10 seconds (10,000 ms).
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 10s
+         * Group: mongodb
+         * 
+         * @param mongodbHeartbeatFrequencyMs the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder mongodbHeartbeatFrequencyMs(
+                int mongodbHeartbeatFrequencyMs) {
+            doSetProperty("mongodbHeartbeatFrequencyMs", mongodbHeartbeatFrequencyMs);
+            return this;
+        }
+        /**
+         * The frequency that the cluster monitor attempts to reach each server.
+         * Defaults to 10 seconds (10,000 ms).
+         * 
+         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 10s
+         * Group: mongodb
+         * 
+         * @param mongodbHeartbeatFrequencyMs the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder mongodbHeartbeatFrequencyMs(
+                String mongodbHeartbeatFrequencyMs) {
+            doSetProperty("mongodbHeartbeatFrequencyMs", mongodbHeartbeatFrequencyMs);
             return this;
         }
         /**
@@ -926,24 +930,6 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         default DebeziumMongodbEndpointBuilder mongodbMembersAutoDiscover(
                 String mongodbMembersAutoDiscover) {
             doSetProperty("mongodbMembersAutoDiscover", mongodbMembersAutoDiscover);
-            return this;
-        }
-        /**
-         * Unique name that identifies the MongoDB replica set or cluster and
-         * all recorded offsets, andthat is used as a prefix for all schemas and
-         * topics. Each distinct MongoDB installation should have a separate
-         * namespace and monitored by at most one Debezium connector.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Required: true
-         * Group: mongodb
-         * 
-         * @param mongodbName the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMongodbEndpointBuilder mongodbName(String mongodbName) {
-            doSetProperty("mongodbName", mongodbName);
             return this;
         }
         /**
@@ -1213,7 +1199,7 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         }
         /**
          * The maximum number of records that should be loaded into memory while
-         * streaming. A value of 0 uses the default JDBC fetch size.
+         * streaming. A value of '0' uses the default JDBC fetch size.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -1229,7 +1215,7 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         }
         /**
          * The maximum number of records that should be loaded into memory while
-         * streaming. A value of 0 uses the default JDBC fetch size.
+         * streaming. A value of '0' uses the default JDBC fetch size.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -1312,6 +1298,41 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
+         * The path to the file that will be used to record the database schema
+         * history.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: mongodb
+         * 
+         * @param schemaHistoryInternalFileFilename the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder schemaHistoryInternalFileFilename(
+                String schemaHistoryInternalFileFilename) {
+            doSetProperty("schemaHistoryInternalFileFilename", schemaHistoryInternalFileFilename);
+            return this;
+        }
+        /**
+         * Specify how schema names should be adjusted for compatibility with
+         * the message converter used by the connector, including: 'avro'
+         * replaces the characters that cannot be used in the Avro type name
+         * with underscore; 'none' does not apply any adjustment (default).
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: none
+         * Group: mongodb
+         * 
+         * @param schemaNameAdjustmentMode the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder schemaNameAdjustmentMode(
+                String schemaNameAdjustmentMode) {
+            doSetProperty("schemaNameAdjustmentMode", schemaNameAdjustmentMode);
+            return this;
+        }
+        /**
          * The name of the data collection that is used to send signals/commands
          * to Debezium. Signaling is disabled when not set.
          * 
@@ -1329,11 +1350,13 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         }
         /**
          * The comma-separated list of operations to skip during streaming,
-         * defined as: 'c' for inserts/create; 'u' for updates; 'd' for deletes.
-         * By default, no operations will be skipped.
+         * defined as: 'c' for inserts/create; 'u' for updates; 'd' for deletes,
+         * 't' for truncates, and 'none' to indicate nothing skipped. By
+         * default, only truncate operations will be skipped.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
+         * Default: t
          * Group: mongodb
          * 
          * @param skippedOperations the value to set
@@ -1345,11 +1368,10 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
-         * This property contains a comma-separated list of
-         * &lt;dbName&gt;.&lt;collectionName&gt;, for which the initial snapshot
-         * may be a subset of data present in the data source. The subset would
-         * be defined by mongodb filter query specified as value for property
-         * snapshot.collection.filter.override.&lt;dbname&gt;.&lt;collectionName&gt;.
+         * This property contains a comma-separated list of ., for which the
+         * initial snapshot may be a subset of data present in the data source.
+         * The subset would be defined by mongodb filter query specified as
+         * value for property snapshot.collection.filter.override..
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1430,7 +1452,7 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
-         * this setting must be set to specify a list of tables/collections
+         * This setting must be set to specify a list of tables/collections
          * whose snapshot must be taken on creating or restarting the connector.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1498,28 +1520,11 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             return this;
         }
         /**
-         * A version of the format of the publicly visible source part in the
-         * message.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Default: v2
-         * Group: mongodb
-         * 
-         * @param sourceStructVersion the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMongodbEndpointBuilder sourceStructVersion(
-                String sourceStructVersion) {
-            doSetProperty("sourceStructVersion", sourceStructVersion);
-            return this;
-        }
-        /**
          * Whether delete operations should be represented by a delete event and
-         * a subsquenttombstone event (true) or only by a delete event (false).
-         * Emitting the tombstone event (the default behavior) allows Kafka to
-         * completely delete all events pertaining to the given key once the
-         * source record got deleted.
+         * a subsequent tombstone event (true) or only by a delete event
+         * (false). Emitting the tombstone event (the default behavior) allows
+         * Kafka to completely delete all events pertaining to the given key
+         * once the source record got deleted.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1536,10 +1541,10 @@ public interface DebeziumMongodbEndpointBuilderFactory {
         }
         /**
          * Whether delete operations should be represented by a delete event and
-         * a subsquenttombstone event (true) or only by a delete event (false).
-         * Emitting the tombstone event (the default behavior) allows Kafka to
-         * completely delete all events pertaining to the given key once the
-         * source record got deleted.
+         * a subsequent tombstone event (true) or only by a delete event
+         * (false). Emitting the tombstone event (the default behavior) allows
+         * Kafka to completely delete all events pertaining to the given key
+         * once the source record got deleted.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1555,6 +1560,44 @@ public interface DebeziumMongodbEndpointBuilderFactory {
             doSetProperty("tombstonesOnDelete", tombstonesOnDelete);
             return this;
         }
+        /**
+         * The name of the TopicNamingStrategy class that should be used to
+         * determine the topic name for data change, schema change, transaction,
+         * heartbeat event etc.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: io.debezium.schema.SchemaTopicNamingStrategy
+         * Group: mongodb
+         * 
+         * @param topicNamingStrategy the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder topicNamingStrategy(
+                String topicNamingStrategy) {
+            doSetProperty("topicNamingStrategy", topicNamingStrategy);
+            return this;
+        }
+        /**
+         * Topic prefix that identifies and provides a namespace for the
+         * particular database server/cluster is capturing changes. The topic
+         * prefix should be unique across all other connectors, since it is used
+         * as a prefix for all Kafka topic names that receive events emitted by
+         * this connector. Only alphanumeric characters, hyphens, dots and
+         * underscores must be accepted.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Required: true
+         * Group: mongodb
+         * 
+         * @param topicPrefix the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMongodbEndpointBuilder topicPrefix(String topicPrefix) {
+            doSetProperty("topicPrefix", topicPrefix);
+            return this;
+        }
     }
 
     /**
@@ -1566,6 +1609,51 @@ public interface DebeziumMongodbEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default DebeziumMongodbEndpointBuilder basic() {
             return (DebeziumMongodbEndpointBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedDebeziumMongodbEndpointBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedDebeziumMongodbEndpointBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1648,6 +1736,19 @@ public interface DebeziumMongodbEndpointBuilderFactory {
          * Since: 3.0
          * Maven coordinates: org.apache.camel:camel-debezium-mongodb
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default DebeziumMongodbHeaderNameBuilder debeziumMongodb() {
+            return DebeziumMongodbHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Debezium MongoDB Connector (camel-debezium-mongodb)
+         * Capture changes from a MongoDB database.
+         * 
+         * Category: database,nosql
+         * Since: 3.0
+         * Maven coordinates: org.apache.camel:camel-debezium-mongodb
+         * 
          * Syntax: <code>debezium-mongodb:name</code>
          * 
          * Path parameter: name (required)
@@ -1683,6 +1784,115 @@ public interface DebeziumMongodbEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return DebeziumMongodbEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Debezium MongoDB Connector
+     * component.
+     */
+    public static class DebeziumMongodbHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final DebeziumMongodbHeaderNameBuilder INSTANCE = new DebeziumMongodbHeaderNameBuilder();
+
+        /**
+         * The metadata about the source event, for example table name, database
+         * name, log position, etc, please refer to the Debezium documentation
+         * for more info.
+         * 
+         * The option is a: {@code Map<String, Object>} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumSourceMetadata}.
+         */
+        public String debeziumSourceMetadata() {
+            return "DebeziumSourceMetadata";
+        }
+
+        /**
+         * The identifier of the connector, normally is this format
+         * {server-name}.{database-name}.{table-name}.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumIdentifier}.
+         */
+        public String debeziumIdentifier() {
+            return "DebeziumIdentifier";
+        }
+
+        /**
+         * The key of the event, normally is the table Primary Key.
+         * 
+         * The option is a: {@code Struct} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumKey}.
+         */
+        public String debeziumKey() {
+            return "DebeziumKey";
+        }
+
+        /**
+         * If presents, the type of event operation. Values for the connector
+         * are c for create (or insert), u for update, d for delete or r for
+         * read (in the case of a initial sync) or in case of a snapshot event.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumOperation}.
+         */
+        public String debeziumOperation() {
+            return "DebeziumOperation";
+        }
+
+        /**
+         * If presents, the time (using the system clock in the JVM) at which
+         * the connector processed the event.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumTimestamp}.
+         */
+        public String debeziumTimestamp() {
+            return "DebeziumTimestamp";
+        }
+
+        /**
+         * If presents, contains the state of the row before the event occurred.
+         * 
+         * The option is a: {@code Struct} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumBefore}.
+         */
+        public String debeziumBefore() {
+            return "DebeziumBefore";
+        }
+
+        /**
+         * If presents, the ddl sql text of the event.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code DebeziumDdlSQL}.
+         */
+        public String debeziumDdlSQL() {
+            return "DebeziumDdlSQL";
         }
     }
     static DebeziumMongodbEndpointBuilder endpointBuilder(

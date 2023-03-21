@@ -27,6 +27,7 @@ import java.security.cert.Certificate;
 import org.apache.camel.component.as2.api.entity.DispositionNotificationMultipartReportEntity;
 import org.apache.camel.component.as2.api.io.AS2BHttpServerConnection;
 import org.apache.camel.component.as2.api.protocol.ResponseMDN;
+import org.apache.camel.util.ObjectHelper;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpInetConnection;
@@ -43,7 +44,6 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
-import org.apache.http.util.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,14 +68,16 @@ public class AS2ServerConnection {
                                      Certificate[] signingCertificateChain,
                                      PrivateKey signingPrivateKey,
                                      PrivateKey decryptingPrivateKey,
-                                     String mdnMessageTemplate)
-                                                                throws IOException {
+                                     String mdnMessageTemplate,
+                                     Certificate[] validateSigningCertificateChain)
+                                                                                    throws IOException {
             setName(REQUEST_LISTENER_THREAD_NAME_PREFIX + port);
             serversocket = new ServerSocket(port);
 
             // Set up HTTP protocol processor for incoming connections
-            final HttpProcessor inhttpproc = initProtocolProcessor(as2Version, originServer, serverFqdn, port,
-                    signatureAlgorithm, signingCertificateChain, signingPrivateKey, decryptingPrivateKey, mdnMessageTemplate);
+            final HttpProcessor inhttpproc = initProtocolProcessor(as2Version, originServer, serverFqdn,
+                    signatureAlgorithm, signingCertificateChain, signingPrivateKey, decryptingPrivateKey, mdnMessageTemplate,
+                    validateSigningCertificateChain);
 
             reqistry = new UriHttpRequestHandlerMapper();
 
@@ -88,21 +90,16 @@ public class AS2ServerConnection {
             LOG.info("Listening on port {}", this.serversocket.getLocalPort());
             while (!Thread.interrupted()) {
                 try {
-                    final int bufsize = 8 * 1024;
+
                     // Set up incoming HTTP connection
-                    final Socket insocket = this.serversocket.accept();
-                    final AS2BHttpServerConnection inconn = new AS2BHttpServerConnection(bufsize);
-                    LOG.info("Incoming connection from {}", insocket.getInetAddress());
-                    inconn.bind(insocket);
+                    final Socket inSocket = this.serversocket.accept();
 
                     // Start worker thread
-                    final Thread t = new RequestHandlerThread(this.httpService, inconn);
+                    final Thread t = new RequestHandlerThread(this.httpService, inSocket);
                     t.setDaemon(true);
                     t.start();
-                } catch (final InterruptedIOException ex) {
-                    break;
-                } catch (final SocketException e) {
-                    // Server socket closed
+                } catch (final InterruptedIOException | SocketException ex) {
+                    // If interrupted or server socket closed
                     break;
                 } catch (final IOException e) {
                     LOG.error("I/O error initialising connection thread: {}", e.getMessage());
@@ -125,15 +122,25 @@ public class AS2ServerConnection {
         private HttpService httpService;
         private HttpServerConnection serverConnection;
 
-        public RequestHandlerThread(HttpService httpService, HttpServerConnection serverConnection) {
+        public RequestHandlerThread(HttpService httpService, Socket inSocket) throws IOException {
+            final int bufSize = 8 * 1024;
+            final AS2BHttpServerConnection inConn = new AS2BHttpServerConnection(bufSize);
+            LOG.info("Incoming connection from {}", inSocket.getInetAddress());
+            inConn.bind(inSocket);
+
+            setThreadName(inConn);
+
+            this.httpService = httpService;
+            this.serverConnection = inConn;
+        }
+
+        private void setThreadName(HttpServerConnection serverConnection) {
             if (serverConnection instanceof HttpInetConnection) {
                 HttpInetConnection inetConnection = (HttpInetConnection) serverConnection;
                 setName(REQUEST_HANDLER_THREAD_NAME_PREFIX + inetConnection.getLocalPort());
             } else {
                 setName(REQUEST_HANDLER_THREAD_NAME_PREFIX + getId());
             }
-            this.httpService = httpService;
-            this.serverConnection = serverConnection;
         }
 
         @Override
@@ -169,6 +176,7 @@ public class AS2ServerConnection {
                 LOG.error("Unrecoverable HTTP protocol violation: {}", ex.getMessage(), ex);
             } finally {
                 try {
+                    this.serverConnection.close();
                     this.serverConnection.shutdown();
                 } catch (final IOException ignore) {
                 }
@@ -188,6 +196,7 @@ public class AS2ServerConnection {
     private PrivateKey signingPrivateKey;
     private PrivateKey decryptingPrivateKey;
     private String mdnMessageTemplate;
+    private Certificate[] validateSigningCertificateChain;
 
     public AS2ServerConnection(String as2Version,
                                String originServer,
@@ -197,24 +206,30 @@ public class AS2ServerConnection {
                                Certificate[] signingCertificateChain,
                                PrivateKey signingPrivateKey,
                                PrivateKey decryptingPrivateKey,
-                               String mdnMessageTemplate)
-                                                          throws IOException {
-        this.as2Version = Args.notNull(as2Version, "as2Version");
-        this.originServer = Args.notNull(originServer, "userAgent");
-        this.serverFqdn = Args.notNull(serverFqdn, "serverFqdn");
-        this.serverPortNumber = Args.notNull(serverPortNumber, "serverPortNumber");
+                               String mdnMessageTemplate,
+                               Certificate[] validateSigningCertificateChain)
+                                                                              throws IOException {
+        this.as2Version = ObjectHelper.notNull(as2Version, "as2Version");
+        this.originServer = ObjectHelper.notNull(originServer, "userAgent");
+        this.serverFqdn = ObjectHelper.notNull(serverFqdn, "serverFqdn");
+        this.serverPortNumber = ObjectHelper.notNull(serverPortNumber, "serverPortNumber");
         this.signingAlgorithm = signingAlgorithm;
         this.signingCertificateChain = signingCertificateChain;
         this.signingPrivateKey = signingPrivateKey;
         this.decryptingPrivateKey = decryptingPrivateKey;
         this.mdnMessageTemplate = mdnMessageTemplate;
+        this.validateSigningCertificateChain = validateSigningCertificateChain;
 
         listenerThread = new RequestListenerThread(
                 this.as2Version, this.originServer, this.serverFqdn,
                 this.serverPortNumber, this.signingAlgorithm, this.signingCertificateChain, this.signingPrivateKey,
-                this.decryptingPrivateKey, this.mdnMessageTemplate);
+                this.decryptingPrivateKey, this.mdnMessageTemplate, validateSigningCertificateChain);
         listenerThread.setDaemon(true);
         listenerThread.start();
+    }
+
+    public Certificate[] getValidateSigningCertificateChain() {
+        return validateSigningCertificateChain;
     }
 
     public PrivateKey getSigningPrivateKey() {
@@ -257,17 +272,17 @@ public class AS2ServerConnection {
             String as2Version,
             String originServer,
             String serverFqdn,
-            int port,
             AS2SignatureAlgorithm signatureAlgorithm,
             Certificate[] signingCertificateChain,
             PrivateKey signingPrivateKey,
             PrivateKey decryptingPrivateKey,
-            String mdnMessageTemplate) {
+            String mdnMessageTemplate,
+            Certificate[] validateSigningCertificateChain) {
         return HttpProcessorBuilder.create().add(new ResponseContent(true)).add(new ResponseServer(originServer))
                 .add(new ResponseDate()).add(new ResponseConnControl()).add(new ResponseMDN(
                         as2Version, serverFqdn,
                         signatureAlgorithm, signingCertificateChain, signingPrivateKey, decryptingPrivateKey,
-                        mdnMessageTemplate))
+                        mdnMessageTemplate, validateSigningCertificateChain))
                 .build();
     }
 

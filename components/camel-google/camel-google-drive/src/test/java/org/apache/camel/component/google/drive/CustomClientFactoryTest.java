@@ -20,26 +20,29 @@ import org.apache.camel.BindToRegistry;
 import org.apache.camel.Endpoint;
 import org.apache.camel.builder.RouteBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test class for com.google.api.services.drive.Drive$Files APIs.
  */
+@EnabledIf(value = "org.apache.camel.component.google.drive.AbstractGoogleDriveTestSupport#hasCredentials",
+           disabledReason = "Google Drive credentials were not provided")
 public class CustomClientFactoryTest extends AbstractGoogleDriveTestSupport {
 
     @BindToRegistry("myAuth")
     private MyClientFactory cf = new MyClientFactory();
 
     @Test
-    public void testClientFactoryUpdated() throws Exception {
+    public void testClientFactoryUpdated() {
         Endpoint endpoint = context.getEndpoint("google-drive://drive-files/list?clientFactory=#myAuth");
         assertTrue(endpoint instanceof GoogleDriveEndpoint);
         assertTrue(((GoogleDriveEndpoint) endpoint).getClientFactory() instanceof MyClientFactory);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("google-drive://drive-files/list?clientFactory=#myAuth").to("mock:result");

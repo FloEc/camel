@@ -17,21 +17,27 @@
 package org.apache.camel.component.file.remote.sftp.integration;
 
 import java.io.FileOutputStream;
+import java.nio.file.Path;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.camel.test.junit5.TestSupport.createDirectory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpChangedReadLockIT extends SftpServerTestSupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(SftpChangedReadLockIT.class);
+
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
         return "sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}/changed" +
@@ -42,15 +48,15 @@ public class SftpChangedReadLockIT extends SftpServerTestSupport {
     public void testChangedReadLock() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedFileExists(testFile("out/slowfile.dat"));
+        mock.expectedFileExists(testDirectory.resolve("out/slowfile.dat"));
 
         context.getRouteController().startRoute("foo");
 
         writeSlowFile();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        String content = context.getTypeConverter().convertTo(String.class, testFile("out/slowfile.dat").toFile());
+        String content = context.getTypeConverter().convertTo(String.class, testDirectory.resolve("out/slowfile.dat").toFile());
         String[] lines = content.split(LS);
         assertEquals(20, lines.length, "There should be 20 lines in the file");
         for (int i = 0; i < 20; i++) {
@@ -74,11 +80,11 @@ public class SftpChangedReadLockIT extends SftpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from(getFtpUrl()).routeId("foo").noAutoStartup().to(fileUri("out"), "mock:result");
+            public void configure() {
+                from(getFtpUrl()).routeId("foo").noAutoStartup().to(TestSupport.fileUri(testDirectory, "out"), "mock:result");
             }
         };
     }

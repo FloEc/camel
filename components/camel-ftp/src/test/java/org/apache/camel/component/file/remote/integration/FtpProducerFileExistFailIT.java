@@ -46,7 +46,7 @@ public class FtpProducerFileExistFailIT extends FtpServerTestSupport {
     public void testFail() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedBodiesReceived("Hello World");
-        mock.expectedFileExists(ftpFile("exist/hello.txt"), "Hello World");
+        mock.expectedFileExists(service.ftpFile("exist/hello.txt"), "Hello World");
 
         String uri = getFtpUrl();
         Exception ex = assertThrows(CamelExecutionException.class,
@@ -56,14 +56,14 @@ public class FtpProducerFileExistFailIT extends FtpServerTestSupport {
                 = assertIsInstanceOf(GenericFileOperationFailedException.class, ex.getCause());
         assertEquals("File already exist: exist/hello.txt. Cannot write new file.", cause.getMessage());
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

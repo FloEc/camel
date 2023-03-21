@@ -22,6 +22,8 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.component.aws2.msk.client.MSK2ClientFactory;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.impl.health.ComponentsHealthCheckRepository;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.support.ScheduledPollEndpoint;
@@ -32,9 +34,12 @@ import software.amazon.awssdk.services.kafka.KafkaClient;
  * Manage AWS MSK instances using AWS SDK version 2.x.
  */
 @UriEndpoint(firstVersion = "3.1.0", scheme = "aws2-msk", title = "AWS Managed Streaming for Apache Kafka (MSK)",
-             syntax = "aws2-msk:label", producerOnly = true, category = { Category.CLOUD, Category.MANAGEMENT })
+             syntax = "aws2-msk:label", producerOnly = true, category = { Category.CLOUD, Category.MANAGEMENT },
+             headersClass = MSK2Constants.class)
 public class MSK2Endpoint extends ScheduledPollEndpoint {
 
+    private ComponentsHealthCheckRepository healthCheckRepository;
+    private MSK2HealthCheck clientHealthCheck;
     private KafkaClient mskClient;
 
     @UriParam
@@ -62,6 +67,15 @@ public class MSK2Endpoint extends ScheduledPollEndpoint {
         mskClient = configuration.getMskClient() != null
                 ? configuration.getMskClient()
                 : MSK2ClientFactory.getKafkaClient(configuration).getKafkaClient();
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(getCamelContext(),
+                ComponentsHealthCheckRepository.REPOSITORY_ID, ComponentsHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            // Do not register the health check until we resolve CAMEL-18992
+            // clientHealthCheck = new MSK2HealthCheck(this, getId());
+            // healthCheckRepository.addHealthCheck(clientHealthCheck);
+        }
+
     }
 
     @Override
@@ -71,6 +85,11 @@ public class MSK2Endpoint extends ScheduledPollEndpoint {
                 mskClient.close();
             }
         }
+        if (healthCheckRepository != null && clientHealthCheck != null) {
+            healthCheckRepository.removeHealthCheck(clientHealthCheck);
+            clientHealthCheck = null;
+        }
+
         super.doStop();
     }
 

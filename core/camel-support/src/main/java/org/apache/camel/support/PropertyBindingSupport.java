@@ -33,11 +33,12 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.PropertyBindingException;
 import org.apache.camel.spi.BeanIntrospection;
+import org.apache.camel.spi.PropertiesComponent;
 import org.apache.camel.spi.PropertyConfigurer;
 import org.apache.camel.spi.PropertyConfigurerGetter;
 import org.apache.camel.util.StringHelper;
@@ -84,6 +85,17 @@ import static org.apache.camel.util.StringHelper.startsWithIgnoreCase;
  * </pre>
  * <p>
  * Where foo is mandatory, and bar is optional.
+ *
+ * <p>
+ * Values can be marked as optional property placeholder if the values name starts with a question mark, such as:
+ *
+ * <pre>
+ * username={{?clientUserName}}
+ * </pre>
+ * <p>
+ * Where the username property will only be set if the property placeholder <tt>clientUserName</tt> exists, otherwise
+ * the username is not affected.
+ * </p>
  */
 public final class PropertyBindingSupport {
 
@@ -151,6 +163,7 @@ public final class PropertyBindingSupport {
      * @param  removeParameter    whether to remove bound parameters
      * @param  flattenProperties  whether properties should be flattened (when properties is a map of maps)
      * @param  mandatory          whether all parameters must be bound
+     * @param  optional           whether parameters can be optional such as configuring endpoints that are lenient
      * @param  nesting            whether nesting is in use
      * @param  deepNesting        whether deep nesting is in use, where Camel will attempt to walk as deep as possible
      *                            by creating new objects in the OGNL graph if a property has a setter and the object
@@ -162,14 +175,17 @@ public final class PropertyBindingSupport {
      * @param  placeholder        whether to use Camels property placeholder to resolve placeholders on keys and values
      * @param  reflection         whether to allow using reflection (when there is no configurer available).
      * @param  configurer         to use an optional {@link PropertyConfigurer} to configure the properties
+     * @param  listener           optional listener
      * @return                    true if one or more properties was bound
      */
     private static boolean doBindProperties(
             CamelContext camelContext, Object target, Map<String, Object> properties,
-            String optionPrefix, boolean ignoreCase, boolean removeParameter, boolean flattenProperties, boolean mandatory,
+            String optionPrefix, boolean ignoreCase, boolean removeParameter, boolean flattenProperties,
+            boolean mandatory, boolean optional,
             boolean nesting, boolean deepNesting, boolean fluentBuilder, boolean allowPrivateSetter,
             boolean reference, boolean placeholder,
-            boolean reflection, PropertyConfigurer configurer) {
+            boolean reflection, PropertyConfigurer configurer,
+            PropertyBindingListener listener) {
 
         if (properties == null || properties.isEmpty()) {
             return false;
@@ -177,6 +193,9 @@ public final class PropertyBindingSupport {
 
         if (flattenProperties) {
             properties = new FlattenMap(properties);
+        }
+        if (listener == null && camelContext != null) {
+            listener = camelContext.getRegistry().findSingleByType(PropertyBindingListener.class);
         }
 
         boolean answer = false;
@@ -207,8 +226,11 @@ public final class PropertyBindingSupport {
             }
 
             // attempt to bind the property
+            if (listener != null) {
+                listener.bindProperty(target, key, value);
+            }
             boolean hit = doBuildPropertyOgnlPath(camelContext, target, key, value, deepNesting, fluentBuilder,
-                    allowPrivateSetter, ignoreCase, reference, placeholder, mandatory, reflection, configurer);
+                    allowPrivateSetter, ignoreCase, reference, placeholder, mandatory, optional, reflection, configurer);
             if (hit && removeParameter) {
                 properties.remove(key);
             }
@@ -221,12 +243,13 @@ public final class PropertyBindingSupport {
     private static boolean doBuildPropertyOgnlPath(
             final CamelContext camelContext, final Object originalTarget, String name, final Object value,
             boolean deepNesting, boolean fluentBuilder, boolean allowPrivateSetter,
-            boolean ignoreCase, boolean reference, boolean placeholder, boolean mandatory,
+            boolean ignoreCase, boolean reference, boolean placeholder, boolean mandatory, boolean optional,
             boolean reflection, PropertyConfigurer configurer) {
 
-        boolean optional = name.startsWith("?");
-        if (optional) {
+        if (name.startsWith("?")) {
+            // the name marks the option as optional
             name = name.substring(1);
+            optional = true;
         }
 
         Object newTarget = originalTarget;
@@ -240,7 +263,13 @@ public final class PropertyBindingSupport {
 
         // we should only walk and create OGNL path for the middle graph
         String[] parts;
-        if (isDotKey(name)) {
+        boolean quoted = StringHelper.isQuoted(name);
+        if (quoted) {
+            // remove quotes around the key
+            name = StringHelper.removeLeadingAndEndingQuotes(name);
+            newName = name;
+            parts = new String[] { name };
+        } else if (isDotKey(name)) {
             parts = splitKey(name);
         } else {
             parts = new String[] { name };
@@ -312,8 +341,8 @@ public final class PropertyBindingSupport {
                 // prepare for next iterator
                 newTarget = prop;
                 newClass = newTarget.getClass();
-                newName = parts[i + 1];
-
+                // do not ignore remaining parts, which was not traversed
+                newName = Arrays.stream(parts, i + 1, parts.length).collect(Collectors.joining("."));
                 // if we have not yet found a configurer for the new target
                 if (configurer == null) {
                     configurer = PropertyConfigurerHelper.resolvePropertyConfigurer(camelContext, newTarget);
@@ -420,7 +449,12 @@ public final class PropertyBindingSupport {
             key = camelContext.resolvePropertyPlaceholders(key);
             if (text instanceof String) {
                 // resolve property placeholders
-                text = camelContext.resolvePropertyPlaceholders(text.toString());
+                String s = text.toString();
+                text = camelContext.resolvePropertyPlaceholders(s);
+                if (text == null && s.startsWith(PropertiesComponent.PREFIX_TOKEN + "?")) {
+                    // it was an optional value, so we should not try to set the property but regard it as a "hit"
+                    return true;
+                }
             }
         }
 
@@ -450,12 +484,18 @@ public final class PropertyBindingSupport {
                 }
                 if (!bound && reflection) {
                     // fallback to reflection based
-                    bound = setPropertyCollectionViaReflection(camelContext, target, key, value, ignoreCase, reference);
+                    bound = setPropertyCollectionViaReflection(camelContext, target, key, value, ignoreCase, reference,
+                            optional);
                 }
             } else {
                 // regular key
                 if (configurer != null) {
                     bound = setSimplePropertyViaConfigurer(camelContext, target, key, value, ignoreCase, configurer);
+                }
+                if (!bound && reflection) {
+                    // fallback to reflection based
+                    bound = setSimplePropertyViaReflection(camelContext, target, key, value, fluentBuilder, allowPrivateSetter,
+                            reflection, ignoreCase);
                 }
                 // if the target value is a map type, then we can skip reflection
                 // and set the entry
@@ -463,12 +503,18 @@ public final class PropertyBindingSupport {
                     ((Map) target).put(key, value);
                     bound = true;
                 }
-                if (!bound && reflection) {
-                    // fallback to reflection based
-                    bound = setSimplePropertyViaReflection(camelContext, target, key, value, fluentBuilder, allowPrivateSetter,
-                            reflection, ignoreCase);
+                // if the target value is a list type (and key is digit),
+                // then we can skip reflection and set the entry
+                if (!bound && List.class.isAssignableFrom(target.getClass()) && StringHelper.isDigit(key)) {
+                    try {
+                        // key must be digit
+                        int idx = Integer.parseInt(key);
+                        org.apache.camel.util.ObjectHelper.addListByIndex((List) target, idx, value);
+                        bound = true;
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
                 }
-
             }
         } catch (PropertyBindingException e) {
             throw e;
@@ -489,16 +535,26 @@ public final class PropertyBindingSupport {
 
     private static boolean setPropertyCollectionViaReflection(
             CamelContext context, Object target, String name, Object value,
-            boolean ignoreCase, boolean reference)
+            boolean ignoreCase, boolean reference, boolean optional)
             throws Exception {
 
-        BeanIntrospection bi = context.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        BeanIntrospection bi = context.getCamelContextExtension().getBeanIntrospection();
 
         int pos = name.indexOf('[');
         String lookupKey = name.substring(pos + 1, name.length() - 1);
+        lookupKey = StringHelper.removeLeadingAndEndingQuotes(lookupKey);
         String key = name.substring(0, pos);
 
-        Object obj = bi.getOrElseProperty(target, key, null, ignoreCase);
+        Object obj = null;
+        if (pos == 0) {
+            // there are no prefix key to invoke as getter first, so check if target is an object
+            // we can use for collection
+            if (target instanceof Map || target instanceof List || target.getClass().isArray()) {
+                obj = target;
+            }
+        } else {
+            obj = bi.getOrElseProperty(target, key, null, ignoreCase);
+        }
         if (obj == null) {
             // it was supposed to be a list or map, but its null, so lets create a new list or map and set it automatically
             Method getter = bi.getPropertyGetter(target.getClass(), key, ignoreCase);
@@ -520,6 +576,9 @@ public final class PropertyBindingSupport {
             }
             boolean hit = bi.setProperty(context, target, key, obj);
             if (!hit) {
+                if (optional) {
+                    return false;
+                }
                 throw new IllegalArgumentException(
                         "Cannot set property: " + name + " as a Map because target bean has no setter method for the Map");
             }
@@ -546,25 +605,7 @@ public final class PropertyBindingSupport {
             List list = (List) obj;
             if (isNotEmpty(lookupKey)) {
                 int idx = Integer.parseInt(lookupKey);
-                if (idx < list.size()) {
-                    list.set(idx, value);
-                } else if (idx == list.size()) {
-                    list.add(value);
-                } else {
-                    // If the list implementation is based on an array, we
-                    // can increase tha capacity to the required value to
-                    // avoid potential re-allocation weh invoking List::add.
-                    //
-                    // Note that ArrayList is the default List impl that
-                    // is automatically created if the property is null.
-                    if (list instanceof ArrayList) {
-                        ((ArrayList) list).ensureCapacity(idx + 1);
-                    }
-                    while (list.size() < idx) {
-                        list.add(null);
-                    }
-                    list.add(idx, value);
-                }
+                org.apache.camel.util.ObjectHelper.addListByIndex(list, idx, value);
             } else {
                 list.add(value);
             }
@@ -602,6 +643,7 @@ public final class PropertyBindingSupport {
 
         int pos = name.indexOf('[');
         String lookupKey = name.substring(pos + 1, name.length() - 1);
+        lookupKey = StringHelper.removeLeadingAndEndingQuotes(lookupKey);
         String key = name.substring(0, pos);
         String undashKey = undashKey(key);
 
@@ -717,7 +759,7 @@ public final class PropertyBindingSupport {
             boolean ignoreCase) {
 
         try {
-            if (target != null && name != null) {
+            if (name != null) {
                 return doSetSimplePropertyViaReflection(camelContext, target, name, value, false, ignoreCase, fluentBuilder,
                         allowPrivateSetter, reference);
             }
@@ -831,7 +873,7 @@ public final class PropertyBindingSupport {
             }
         }
 
-        boolean hit = context.adapt(ExtendedCamelContext.class).getBeanIntrospection().setProperty(context,
+        boolean hit = context.getCamelContextExtension().getBeanIntrospection().setProperty(context,
                 context.getTypeConverter(), target, name, value, refName, fluentBuilder, allowPrivateSetter, ignoreCase);
         if (!hit && mandatory) {
             // there is no setter with this given name, so lets report this as a problem
@@ -982,7 +1024,7 @@ public final class PropertyBindingSupport {
         Object answer;
         Class<?> type = null;
 
-        final BeanIntrospection introspection = context.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        final BeanIntrospection introspection = context.getCamelContextExtension().getBeanIntrospection();
         answer = introspection.getOrElseProperty(target, key, null, ignoreCase);
         if (answer != null) {
             type = answer.getClass();
@@ -1134,7 +1176,7 @@ public final class PropertyBindingSupport {
             CamelContext context, Class clazz, String name,
             boolean fluentBuilder, boolean allowPrivateSetter, boolean ignoreCase) {
         // is there a direct setter?
-        Set<Method> candidates = context.adapt(ExtendedCamelContext.class).getBeanIntrospection().findSetterMethods(clazz, name,
+        Set<Method> candidates = context.getCamelContextExtension().getBeanIntrospection().findSetterMethods(clazz, name,
                 false, allowPrivateSetter, ignoreCase);
         if (candidates.size() == 1) {
             return candidates.iterator().next();
@@ -1142,7 +1184,7 @@ public final class PropertyBindingSupport {
 
         // okay now try with builder pattern
         if (fluentBuilder) {
-            candidates = context.adapt(ExtendedCamelContext.class).getBeanIntrospection().findSetterMethods(clazz, name,
+            candidates = context.getCamelContextExtension().getBeanIntrospection().findSetterMethods(clazz, name,
                     fluentBuilder, allowPrivateSetter, ignoreCase);
             if (candidates.size() == 1) {
                 return candidates.iterator().next();
@@ -1193,7 +1235,7 @@ public final class PropertyBindingSupport {
      */
     public static Object newInstanceConstructorParameters(CamelContext camelContext, Class<?> type, String parameters)
             throws Exception {
-        String[] params = StringQuoteHelper.splitSafeQuote(parameters, ',');
+        String[] params = StringQuoteHelper.splitSafeQuote(parameters, ',', false);
         Constructor found = findMatchingConstructor(type.getConstructors(), params);
         if (found != null) {
             Object[] arr = new Object[found.getParameterCount()];
@@ -1291,7 +1333,7 @@ public final class PropertyBindingSupport {
     public static Object newInstanceFactoryParameters(
             CamelContext camelContext, Class<?> type, String factoryMethod, String parameters)
             throws Exception {
-        String[] params = StringQuoteHelper.splitSafeQuote(parameters, ',');
+        String[] params = StringQuoteHelper.splitSafeQuote(parameters, ',', false);
         Method found = findMatchingFactoryMethod(type.getMethods(), factoryMethod, params);
         if (found != null) {
             Object[] arr = new Object[found.getParameterCount()];
@@ -1607,6 +1649,7 @@ public final class PropertyBindingSupport {
         private boolean removeParameters = true;
         private boolean flattenProperties;
         private boolean mandatory;
+        private boolean optional;
         private boolean nesting = true;
         private boolean deepNesting = true;
         private boolean reference = true;
@@ -1617,6 +1660,7 @@ public final class PropertyBindingSupport {
         private String optionPrefix;
         private boolean reflection = true;
         private PropertyConfigurer configurer;
+        private PropertyBindingListener listener;
 
         /**
          * CamelContext to be used
@@ -1681,6 +1725,14 @@ public final class PropertyBindingSupport {
          */
         public Builder withMandatory(boolean mandatory) {
             this.mandatory = mandatory;
+            return this;
+        }
+
+        /**
+         * Whether parameters can be optional such as configuring endpoints that are lenient
+         */
+        public Builder withOptional(boolean optional) {
+            this.optional = optional;
             return this;
         }
 
@@ -1768,6 +1820,14 @@ public final class PropertyBindingSupport {
         }
 
         /**
+         * To use the property binding listener.
+         */
+        public Builder withListener(PropertyBindingListener listener) {
+            this.listener = listener;
+            return this;
+        }
+
+        /**
          * Binds the properties to the target object, and removes the property that was bound from properties.
          *
          * @return true if one or more properties was bound
@@ -1782,8 +1842,9 @@ public final class PropertyBindingSupport {
             }
 
             return doBindProperties(camelContext, target, removeParameters ? properties : new HashMap<>(properties),
-                    optionPrefix, ignoreCase, removeParameters, flattenProperties, mandatory,
-                    nesting, deepNesting, fluentBuilder, allowPrivateSetter, reference, placeholder, reflection, configurer);
+                    optionPrefix, ignoreCase, removeParameters, flattenProperties, mandatory, optional,
+                    nesting, deepNesting, fluentBuilder, allowPrivateSetter, reference, placeholder, reflection, configurer,
+                    listener);
         }
 
         /**
@@ -1800,8 +1861,9 @@ public final class PropertyBindingSupport {
             Map<String, Object> prop = properties != null ? properties : this.properties;
 
             return doBindProperties(context, obj, removeParameters ? prop : new HashMap<>(prop),
-                    optionPrefix, ignoreCase, removeParameters, flattenProperties, mandatory,
-                    nesting, deepNesting, fluentBuilder, allowPrivateSetter, reference, placeholder, reflection, configurer);
+                    optionPrefix, ignoreCase, removeParameters, flattenProperties, mandatory, optional,
+                    nesting, deepNesting, fluentBuilder, allowPrivateSetter, reference, placeholder, reflection, configurer,
+                    listener);
         }
 
         /**
@@ -1818,7 +1880,9 @@ public final class PropertyBindingSupport {
             properties.put(key, value);
 
             return doBindProperties(camelContext, target, properties, optionPrefix, ignoreCase, true, false, mandatory,
-                    nesting, deepNesting, fluentBuilder, allowPrivateSetter, reference, placeholder, reflection, configurer);
+                    optional,
+                    nesting, deepNesting, fluentBuilder, allowPrivateSetter, reference, placeholder, reflection, configurer,
+                    listener);
         }
 
     }

@@ -54,11 +54,18 @@ public class GoogleSheetsComponent
 
     public Sheets getClient(GoogleSheetsConfiguration config) {
         if (client == null) {
-            client = getClientFactory().makeClient(config.getClientId(),
-                    config.getClientSecret(),
-                    config.getApplicationName(),
-                    config.getRefreshToken(),
-                    config.getAccessToken());
+            if (config.getClientId() != null && !config.getClientId().isBlank()
+                    && config.getClientSecret() != null && !config.getClientSecret().isBlank()) {
+                client = getClientFactory().makeClient(config.getClientId(),
+                        config.getClientSecret(), config.getScopes(),
+                        config.getApplicationName(), config.getRefreshToken(), config.getAccessToken());
+            } else if (config.getServiceAccountKey() != null && !config.getServiceAccountKey().isBlank()) {
+                client = getClientFactory().makeClient(getCamelContext(), config.getServiceAccountKey(),
+                        config.getScopes(), config.getApplicationName(), config.getDelegate());
+            } else {
+                throw new IllegalArgumentException(
+                        "(clientId and clientSecret) or serviceAccountKey are required to create Google Sheets client");
+            }
         }
         return client;
     }

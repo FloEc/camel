@@ -30,12 +30,12 @@ public final class MSK2ClientFactory {
 
     /**
      * Return the correct AWS Kafka client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               MqClient
      */
     public static MSK2InternalClient getKafkaClient(MSK2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new MSK2ClientOptimizedImpl(configuration) : new MSK2ClientStandardImpl(configuration);
     }
 }

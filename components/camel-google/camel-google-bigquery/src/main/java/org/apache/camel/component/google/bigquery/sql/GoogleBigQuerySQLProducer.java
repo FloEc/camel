@@ -23,8 +23,11 @@ import java.util.UUID;
 
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
+import com.google.cloud.bigquery.Job;
 import com.google.cloud.bigquery.JobException;
 import com.google.cloud.bigquery.JobId;
+import com.google.cloud.bigquery.JobInfo;
+import com.google.cloud.bigquery.JobStatistics;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
@@ -102,12 +105,20 @@ public class GoogleBigQuerySQLProducer extends DefaultProducer {
                 queryJobId = JobId.of(configuration.getProjectId(), UUID.randomUUID().toString());
             }
 
-            TableResult result = bigquery.query(queryJobConfiguration, queryJobId);
+            Job job = bigquery.create(JobInfo.of(queryJobId, queryJobConfiguration)).waitFor();
+            JobStatistics.QueryStatistics statistics = job.getStatistics();
+            TableResult result = job.getQueryResults();
+            Long numAffectedRows = statistics.getNumDmlAffectedRows();
 
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Result of query {} is {}", translatedQuery, result.toString());
+                LOG.trace("Query {} - Affected rows {} - Result {}", translatedQuery, numAffectedRows, result);
             }
 
+            //numAffectedRows is present only for DML statements INSERT, UPDATE or DELETE.
+            if (numAffectedRows != null) {
+                return numAffectedRows;
+            }
+            //in other cases (SELECT), the number of affected rows is returned
             return result.getTotalRows();
         } catch (JobException e) {
             throw new Exception("Query " + translatedQuery + " failed: " + e.getErrors(), e);
@@ -152,7 +163,15 @@ public class GoogleBigQuerySQLProducer extends DefaultProducer {
         }
 
         params.forEach((key, value) -> {
-            QueryParameterValue parameterValue = QueryParameterValue.of(value.toString(), StandardSQLTypeName.STRING);
+            QueryParameterValue parameterValue;
+
+            try {
+                parameterValue = QueryParameterValue.of(value, (Class<Object>) value.getClass());
+            } catch (IllegalArgumentException e) {
+                LOG.warn("{} Fallback to *.toString() value.", e.getMessage());
+                //use String representation
+                parameterValue = QueryParameterValue.of(value.toString(), StandardSQLTypeName.STRING);
+            }
             builder.addNamedParameter(key, parameterValue);
         });
     }

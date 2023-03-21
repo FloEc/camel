@@ -25,7 +25,6 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Ordered;
 import org.apache.camel.Processor;
 import org.apache.camel.spi.AsyncProcessorAwaitManager;
@@ -82,8 +81,8 @@ public class SharedCamelInternalProcessor implements SharedInternalProcessor {
 
     public SharedCamelInternalProcessor(CamelContext camelContext, CamelInternalProcessorAdvice... advices) {
         this.camelContext = camelContext;
-        this.reactiveExecutor = camelContext.adapt(ExtendedCamelContext.class).getReactiveExecutor();
-        this.awaitManager = camelContext.adapt(ExtendedCamelContext.class).getAsyncProcessorAwaitManager();
+        this.reactiveExecutor = camelContext.getCamelContextExtension().getReactiveExecutor();
+        this.awaitManager = camelContext.getCamelContextExtension().getAsyncProcessorAwaitManager();
         this.shutdownStrategy = camelContext.getShutdownStrategy();
 
         if (advices != null) {
@@ -171,9 +170,7 @@ public class SharedCamelInternalProcessor implements SharedInternalProcessor {
         // create internal callback which will execute the advices in reverse order when done
         AsyncCallback callback = new InternalCallback(states, exchange, originalCallback, resultProcessor);
 
-        // UNIT_OF_WORK_PROCESS_SYNC is @deprecated and we should remove it from Camel 3.0
-        Object synchronous = exchange.removeProperty(Exchange.UNIT_OF_WORK_PROCESS_SYNC);
-        if (exchange.isTransacted() || synchronous != null) {
+        if (exchange.isTransacted()) {
             // must be synchronized for transacted exchanges
             if (LOG.isTraceEnabled()) {
                 if (exchange.isTransacted()) {
@@ -200,8 +197,7 @@ public class SharedCamelInternalProcessor implements SharedInternalProcessor {
         } else {
             final UnitOfWork uow = exchange.getUnitOfWork();
 
-            // do uow before processing and if a value is returned the the uow wants to be processed after
-            // was well in the same thread
+            // do uow before processing and if a value is returned then the uow wants to be processed after in the same thread
             AsyncCallback async = callback;
             boolean beforeAndAfter = uow.isBeforeAfterProcess();
             if (beforeAndAfter) {
@@ -267,19 +263,7 @@ public class SharedCamelInternalProcessor implements SharedInternalProcessor {
 
             // we should call after in reverse order
             try {
-                for (int i = advices != null ? advices.size() - 1 : -1, j = states.length - 1; i >= 0; i--) {
-                    CamelInternalProcessorAdvice task = advices.get(i);
-                    Object state = null;
-                    if (task.hasState()) {
-                        state = states[j--];
-                    }
-                    try {
-                        task.after(exchange, state);
-                    } catch (Throwable e) {
-                        exchange.setException(e);
-                        // allow all advices to complete even if there was an exception
-                    }
-                }
+                AdviceIterator.runAfterTasks(advices, states, exchange);
             } finally {
                 // ----------------------------------------------------------
                 // CAMEL END USER - DEBUG ME HERE +++ START +++

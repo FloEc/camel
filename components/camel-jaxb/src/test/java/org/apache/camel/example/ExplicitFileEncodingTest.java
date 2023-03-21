@@ -16,18 +16,24 @@
  */
 package org.apache.camel.example;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
+import java.nio.file.Path;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.test.junit5.CamelTestSupport;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExplicitFileEncodingTest extends CamelTestSupport {
+    @TempDir
+    Path testDirectory;
 
     @Test
     public void testISOFileEncoding() throws Exception {
@@ -39,28 +45,28 @@ public class ExplicitFileEncodingTest extends CamelTestSupport {
         order.setPrice(2.22);
 
         MockEndpoint result = getMockEndpoint("mock:file");
-        result.expectedFileExists(testFile("output.txt"));
+        result.expectedFileExists(testDirectory.resolve("output.txt"));
 
         template.sendBody("direct:start", order);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         JAXBContext jaxbContext = JAXBContext.newInstance("org.apache.camel.example");
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        PurchaseOrder obj = (PurchaseOrder) unmarshaller.unmarshal(testFile("output.txt").toFile());
+        PurchaseOrder obj = (PurchaseOrder) unmarshaller.unmarshal(testDirectory.resolve("output.txt").toFile());
         assertEquals(obj.getName(), name);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 JaxbDataFormat jaxb = new JaxbDataFormat("org.apache.camel.example");
                 jaxb.setEncoding("iso-8859-1");
 
                 from("direct:start")
                         .marshal(jaxb)
-                        .to(fileUri("?fileName=output.txt&charset=iso-8859-1"));
+                        .to(TestSupport.fileUri(testDirectory, "?fileName=output.txt&charset=iso-8859-1"));
             }
         };
     }

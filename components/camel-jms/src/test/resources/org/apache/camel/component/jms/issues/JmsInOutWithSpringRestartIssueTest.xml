@@ -26,16 +26,16 @@ http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/came
     <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring" autoStartup="false">
         <jmxAgent id="agent" disabled="true"/>
         <route id="foo">
-            <from uri="activemq:queue:foo"/>
+            <from uri="activemq:queue:JmsInOutWithSpringRestartIssueTest"/>
             <transform><simple>Bye ${body}</simple></transform>
         </route>
     </camelContext>
 
    <bean id="activemq" class="org.apache.camel.component.jms.JmsComponent">
     <property name="connectionFactory">
-       <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+       <bean class="org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory">
            <property name="brokerURL">
-               <bean class="org.apache.camel.component.jms.CamelJmsTestHelper" factory-method="createBrokerUrl"/>
+               <bean class="org.apache.camel.component.jms.AbstractSpringJMSTestSupport"  factory-method="getServiceAddress"/>
            </property>
        </bean>
     </property>

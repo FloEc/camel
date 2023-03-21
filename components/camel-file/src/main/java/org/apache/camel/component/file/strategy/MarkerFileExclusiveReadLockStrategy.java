@@ -94,26 +94,35 @@ public class MarkerFileExclusiveReadLockStrategy implements GenericFileExclusive
     public void releaseExclusiveReadLockOnAbort(
             GenericFileOperations<File> operations, GenericFile<File> file, Exchange exchange)
             throws Exception {
-        doReleaseExclusiveReadLock(operations, file, exchange);
+        doReleaseExclusiveReadLock(file, exchange);
     }
 
     @Override
     public void releaseExclusiveReadLockOnRollback(
             GenericFileOperations<File> operations, GenericFile<File> file, Exchange exchange)
             throws Exception {
-        doReleaseExclusiveReadLock(operations, file, exchange);
+        doReleaseExclusiveReadLock(file, exchange);
     }
 
     @Override
     public void releaseExclusiveReadLockOnCommit(
             GenericFileOperations<File> operations, GenericFile<File> file, Exchange exchange)
             throws Exception {
-        doReleaseExclusiveReadLock(operations, file, exchange);
+        doReleaseExclusiveReadLock(file, exchange);
     }
 
-    protected void doReleaseExclusiveReadLock(
-            GenericFileOperations<File> operations, GenericFile<File> file, Exchange exchange)
-            throws Exception {
+    /**
+     * Perform the releases of the exclusive read lock granted by the <tt>acquireExclusiveReadLock</tt> method due a
+     * commit operation.
+     *
+     * @param  file      the file
+     * @param  exchange  the exchange
+     * @throws Exception can be thrown in case of errors
+     * @see              #releaseExclusiveReadLockOnCommit(GenericFileOperations, GenericFile, Exchange)
+     * @see              #releaseExclusiveReadLockOnRollback(GenericFileOperations, GenericFile, Exchange)
+     * @see              #releaseExclusiveReadLockOnAbort(GenericFileOperations, GenericFile, Exchange)
+     */
+    protected void doReleaseExclusiveReadLock(GenericFile<File> file, Exchange exchange) throws Exception {
         if (!markerFile) {
             // if not using marker file then nothing to release
             return;

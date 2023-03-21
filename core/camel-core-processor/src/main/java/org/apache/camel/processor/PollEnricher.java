@@ -26,7 +26,6 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Expression;
 import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.NoTypeConversionAvailableException;
 import org.apache.camel.PollingConsumer;
 import org.apache.camel.spi.ConsumerCache;
@@ -171,13 +170,6 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
         this.aggregateOnException = aggregateOnException;
     }
 
-    /**
-     * Sets the default aggregation strategy for this poll enricher.
-     */
-    public void setDefaultAggregationStrategy() {
-        this.aggregationStrategy = defaultAggregationStrategy();
-    }
-
     public int getCacheSize() {
         return cacheSize;
     }
@@ -319,7 +311,7 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
                     copyResultsPreservePattern(exchange, aggregatedExchange);
                     // handover any synchronization
                     if (resourceExchange != null) {
-                        resourceExchange.adapt(ExtendedExchange.class).handoverCompletions(exchange);
+                        resourceExchange.getExchangeExtension().handoverCompletions(exchange);
                     }
                 }
             }
@@ -329,7 +321,7 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
                 // restore caused exception
                 exchange.setException(cause);
                 // remove the exhausted marker as we want to be able to perform redeliveries with the error handler
-                exchange.adapt(ExtendedExchange.class).setRedeliveryExhausted(false);
+                exchange.getExchangeExtension().setRedeliveryExhausted(false);
 
                 // preserve the redelivery stats
                 if (redeliveried != null) {
@@ -363,7 +355,7 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
             recipient = ((String) recipient).trim();
         }
         if (recipient != null) {
-            ExtendedCamelContext ecc = (ExtendedCamelContext) exchange.getContext();
+            CamelContext ecc = exchange.getContext();
             String uri;
             if (recipient instanceof String) {
                 uri = (String) recipient;
@@ -372,7 +364,7 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
                 uri = ecc.getTypeConverter().mandatoryConvertTo(String.class, exchange, recipient);
             }
             // optimize and normalize endpoint
-            return ecc.normalizeUri(uri);
+            return ecc.getCamelContextExtension().normalizeUri(uri);
         }
         return null;
     }
@@ -384,7 +376,7 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
         if (recipient != null) {
             if (recipient instanceof NormalizedEndpointUri) {
                 NormalizedEndpointUri nu = (NormalizedEndpointUri) recipient;
-                ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+                ExtendedCamelContext ecc = context.getCamelContextExtension();
                 return ecc.hasEndpoint(nu);
             } else {
                 String uri = recipient.toString();
@@ -418,10 +410,6 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
         }
     }
 
-    private static AggregationStrategy defaultAggregationStrategy() {
-        return new CopyAggregationStrategy();
-    }
-
     @Override
     public String toString() {
         return id;
@@ -433,6 +421,9 @@ public class PollEnricher extends AsyncProcessorSupport implements IdAware, Rout
             // create consumer cache if we use dynamic expressions for computing the endpoints to poll
             consumerCache = new DefaultConsumerCache(this, camelContext, cacheSize);
             LOG.debug("PollEnrich {} using ConsumerCache with cacheSize={}", this, cacheSize);
+        }
+        if (aggregationStrategy == null) {
+            aggregationStrategy = new CopyAggregationStrategy();
         }
         CamelContextAware.trySetCamelContext(aggregationStrategy, camelContext);
         ServiceHelper.buildService(consumerCache, aggregationStrategy);

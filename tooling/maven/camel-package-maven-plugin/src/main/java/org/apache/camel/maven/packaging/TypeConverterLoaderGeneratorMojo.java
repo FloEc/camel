@@ -17,12 +17,7 @@
 package org.apache.camel.maven.packaging;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -45,11 +40,11 @@ import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo.NestingType;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
-import org.jboss.jandex.IndexReader;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
 import static org.apache.camel.maven.packaging.SchemaHelper.dashToCamelCase;
+import static org.apache.camel.maven.packaging.generics.PackagePluginUtils.readJandexIndex;
 
 @Mojo(name = "generate-type-converter-loader", threadSafe = true,
       requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
@@ -82,13 +77,7 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
             return;
         }
 
-        Path output = Paths.get(project.getBuild().getOutputDirectory());
-        Index index;
-        try (InputStream is = Files.newInputStream(output.resolve("META-INF/jandex.idx"))) {
-            index = new IndexReader(is).read();
-        } catch (IOException e) {
-            throw new MojoExecutionException("IOException: " + e.getMessage(), e);
-        }
+        Index index = readJandexIndex(project);
 
         Map<String, ClassConverters> converters = new TreeMap<>();
         List<MethodInfo> bulkConverters = new ArrayList<>();
@@ -117,7 +106,7 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
                                     classConverters.addFallbackTypeConverter(ee);
                                 } else {
                                     Type to = ee.returnType();
-                                    Type from = ee.parameters().get(0);
+                                    Type from = ee.parameterTypes().get(0);
                                     if (asBoolean(annotation, "generateBulkLoader")) {
                                         bulkConverters.add(ee);
                                     } else {
@@ -172,8 +161,8 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
                 Integer order2 = asInteger(o2.annotation(CONVERTER_ANNOTATION), "order");
                 sort = order1.compareTo(order2);
                 if (sort == 0) {
-                    String str1 = o1.parameters().stream().findFirst().map(Type::toString).orElse("");
-                    String str2 = o2.parameters().stream().findFirst().map(Type::toString).orElse("");
+                    String str1 = o1.parameterTypes().stream().findFirst().map(Type::toString).orElse("");
+                    String str2 = o2.parameterTypes().stream().findFirst().map(Type::toString).orElse("");
                     return str1.compareTo(str2);
                 }
             }
@@ -306,7 +295,7 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
             } else {
                 to = method.returnType().name().toString();
             }
-            String from = method.parameters().get(0).toString();
+            String from = method.parameterTypes().get(0).toString();
             // clip generics
             if (to.indexOf('<') != -1) {
                 to = to.substring(0, to.indexOf('<'));
@@ -529,7 +518,8 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
         // the 2nd parameter is optional and can either be Exchange or CamelContext
         String param = "";
         String paramType
-                = converter.parameters().size() == 2 ? converter.parameters().get(1).asClassType().name().toString() : null;
+                = converter.parameterTypes().size() == 2
+                        ? converter.parameterTypes().get(1).asClassType().name().toString() : null;
         if (paramType != null) {
             if ("org.apache.camel.Exchange".equals(paramType)) {
                 param = ", exchange";
@@ -537,7 +527,7 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
                 param = ", camelContext";
             }
         }
-        String type = toString(converter.parameters().get(0));
+        String type = toString(converter.parameterTypes().get(0));
         String cast = type.equals("java.lang.Object") ? "" : "(" + type + ") ";
         return pfx + "(" + cast + "value" + param + ")";
     }
@@ -550,9 +540,9 @@ public class TypeConverterLoaderGeneratorMojo extends AbstractGeneratorMojo {
             converterClasses.add(converter.declaringClass().toString());
             pfx = "get" + converter.declaringClass().simpleName() + "()." + converter.name();
         }
-        String type = toString(converter.parameters().get(converter.parameters().size() - 2));
+        String type = toString(converter.parameterTypes().get(converter.parameterTypes().size() - 2));
         String cast = type.equals("java.lang.Object") ? "" : "(" + type + ") ";
-        return pfx + "(type, " + (converter.parameters().size() == 4 ? "exchange, " : "") + cast + "value" + ", registry)";
+        return pfx + "(type, " + (converter.parameterTypes().size() == 4 ? "exchange, " : "") + cast + "value" + ", registry)";
     }
 
     private static boolean isFallbackCanPromote(MethodInfo element) {

@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -38,6 +38,9 @@ public interface AtlasMapEndpointBuilderFactory {
      * Builder for endpoint for the AtlasMap component.
      */
     public interface AtlasMapEndpointBuilder extends EndpointProducerBuilder {
+        default AdvancedAtlasMapEndpointBuilder advanced() {
+            return (AdvancedAtlasMapEndpointBuilder) this;
+        }
         /**
          * Sets whether the context map should allow access to all details. By
          * default only the message body and headers can be accessed. This
@@ -150,6 +153,95 @@ public interface AtlasMapEndpointBuilderFactory {
             return this;
         }
         /**
+         * The Exchange property name for a source message map which hold
+         * java.util.Map&amp;amp;lt;String, Message&amp;amp;gt; where the key is
+         * AtlasMap Document ID. AtlasMap consumes Message bodies as source
+         * documents, as well as message headers as source properties where the
+         * scope equals to Document ID.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: producer
+         * 
+         * @param sourceMapName the value to set
+         * @return the dsl builder
+         */
+        default AtlasMapEndpointBuilder sourceMapName(String sourceMapName) {
+            doSetProperty("sourceMapName", sourceMapName);
+            return this;
+        }
+        /**
+         * TargetMapMode enum value to specify how multiple target documents are
+         * delivered if exist. 'MAP': Stores them into a java.util.Map, and the
+         * java.util.Map is set to an exchange property if 'targetMapName' is
+         * specified, otherwise message body. 'MESSAGE_HEADER': Stores them into
+         * message headers. 'EXCHANGE_PROPERTY': Stores them into exchange
+         * properties. ).
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.atlasmap.AtlasMapEndpoint.TargetMapMode&lt;/code&gt; type.
+         * 
+         * Default: MAP
+         * Group: producer
+         * 
+         * @param targetMapMode the value to set
+         * @return the dsl builder
+         */
+        default AtlasMapEndpointBuilder targetMapMode(
+                org.apache.camel.component.atlasmap.AtlasMapEndpoint.TargetMapMode targetMapMode) {
+            doSetProperty("targetMapMode", targetMapMode);
+            return this;
+        }
+        /**
+         * TargetMapMode enum value to specify how multiple target documents are
+         * delivered if exist. 'MAP': Stores them into a java.util.Map, and the
+         * java.util.Map is set to an exchange property if 'targetMapName' is
+         * specified, otherwise message body. 'MESSAGE_HEADER': Stores them into
+         * message headers. 'EXCHANGE_PROPERTY': Stores them into exchange
+         * properties. ).
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.atlasmap.AtlasMapEndpoint.TargetMapMode&lt;/code&gt; type.
+         * 
+         * Default: MAP
+         * Group: producer
+         * 
+         * @param targetMapMode the value to set
+         * @return the dsl builder
+         */
+        default AtlasMapEndpointBuilder targetMapMode(String targetMapMode) {
+            doSetProperty("targetMapMode", targetMapMode);
+            return this;
+        }
+        /**
+         * The Exchange property name for a target document map which hold
+         * java.util.Map&amp;amp;lt;String, Object&amp;amp;gt; where the key is
+         * AtlasMap Document ID. AtlasMap populates multiple target documents
+         * into this map.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: producer
+         * 
+         * @param targetMapName the value to set
+         * @return the dsl builder
+         */
+        default AtlasMapEndpointBuilder targetMapName(String targetMapName) {
+            doSetProperty("targetMapName", targetMapName);
+            return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint for the AtlasMap component.
+     */
+    public interface AdvancedAtlasMapEndpointBuilder
+            extends
+                EndpointProducerBuilder {
+        default AtlasMapEndpointBuilder basic() {
+            return (AtlasMapEndpointBuilder) this;
+        }
+        /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
          * startup in situations where a producer may otherwise fail during
@@ -163,12 +255,12 @@ public interface AtlasMapEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default AtlasMapEndpointBuilder lazyStartProducer(
+        default AdvancedAtlasMapEndpointBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -188,99 +280,32 @@ public interface AtlasMapEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default AtlasMapEndpointBuilder lazyStartProducer(
+        default AdvancedAtlasMapEndpointBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * The Exchange property name for a source message map which hold
-         * &lt;code&gt;java.util.Map&lt;String, Message&gt; where the key is
-         * AtlasMap Document ID. AtlasMap consumes Message bodies as source
-         * documents, as well as message headers as source properties where the
-         * scope equals to Document ID.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: producer
-         * 
-         * @param sourceMapName the value to set
-         * @return the dsl builder
-         */
-        default AtlasMapEndpointBuilder sourceMapName(String sourceMapName) {
-            doSetProperty("sourceMapName", sourceMapName);
-            return this;
-        }
-        /**
-         * TargetMapMode enum value to specify how multiple target documents are
-         * delivered if exist. &lt;ul&gt; &lt;li&gt;'MAP': Stores them into a
-         * java.util.Map, and the java.util.Map is set to an exchange property
-         * if 'targetMapName' is specified, otherwise message body.
-         * &lt;li&gt;'MESSAGE_HEADER': Stores them into message headers.
-         * &lt;li&gt;'EXCHANGE_PROPERTY': Stores them into exchange properties.
-         * ).
-         * 
-         * The option is a:
-         * &lt;code&gt;org.apache.camel.component.atlasmap.AtlasMapEndpoint.TargetMapMode&lt;/code&gt; type.
-         * 
-         * Default: MAP
-         * Group: producer
-         * 
-         * @param targetMapMode the value to set
-         * @return the dsl builder
-         */
-        default AtlasMapEndpointBuilder targetMapMode(
-                org.apache.camel.component.atlasmap.AtlasMapEndpoint.TargetMapMode targetMapMode) {
-            doSetProperty("targetMapMode", targetMapMode);
-            return this;
-        }
-        /**
-         * TargetMapMode enum value to specify how multiple target documents are
-         * delivered if exist. &lt;ul&gt; &lt;li&gt;'MAP': Stores them into a
-         * java.util.Map, and the java.util.Map is set to an exchange property
-         * if 'targetMapName' is specified, otherwise message body.
-         * &lt;li&gt;'MESSAGE_HEADER': Stores them into message headers.
-         * &lt;li&gt;'EXCHANGE_PROPERTY': Stores them into exchange properties.
-         * ).
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.atlasmap.AtlasMapEndpoint.TargetMapMode&lt;/code&gt; type.
-         * 
-         * Default: MAP
-         * Group: producer
-         * 
-         * @param targetMapMode the value to set
-         * @return the dsl builder
-         */
-        default AtlasMapEndpointBuilder targetMapMode(String targetMapMode) {
-            doSetProperty("targetMapMode", targetMapMode);
-            return this;
-        }
-        /**
-         * The Exchange property name for a target document map which hold
-         * &lt;code&gt;java.util.Map&lt;String, Object&gt; where the key is
-         * AtlasMap Document ID. AtlasMap populates multiple target documents
-         * into this map.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: producer
-         * 
-         * @param targetMapName the value to set
-         * @return the dsl builder
-         */
-        default AtlasMapEndpointBuilder targetMapName(String targetMapName) {
-            doSetProperty("targetMapName", targetMapName);
             return this;
         }
     }
 
     public interface AtlasMapBuilders {
+        /**
+         * AtlasMap (camel-atlasmap)
+         * Transforms the message using an AtlasMap transformation.
+         * 
+         * Category: transformation
+         * Since: 3.7
+         * Maven coordinates: org.apache.camel:camel-atlasmap
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default AtlasMapHeaderNameBuilder atlasmap() {
+            return AtlasMapHeaderNameBuilder.INSTANCE;
+        }
         /**
          * AtlasMap (camel-atlasmap)
          * Transforms the message using an AtlasMap transformation.
@@ -334,10 +359,61 @@ public interface AtlasMapEndpointBuilderFactory {
             return AtlasMapEndpointBuilderFactory.endpointBuilder(componentName, path);
         }
     }
+
+    /**
+     * The builder of headers' name for the AtlasMap component.
+     */
+    public static class AtlasMapHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final AtlasMapHeaderNameBuilder INSTANCE = new AtlasMapHeaderNameBuilder();
+
+        /**
+         * The new resource URI to use.
+         * 
+         * The option is a: {@code java.lang.String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AtlasResourceUri}.
+         */
+        public String atlasResourceUri() {
+            return "AtlasResourceUri";
+        }
+
+        /**
+         * The Atlas mapping to use.
+         * 
+         * The option is a: {@code java.lang.String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AtlasMapping}.
+         */
+        public String atlasMapping() {
+            return "AtlasMapping";
+        }
+
+        /**
+         * The content type that is set according to the datasource (json or
+         * xml).
+         * 
+         * The option is a: {@code java.lang.String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code Content-Type}.
+         */
+        public String contentType() {
+            return "Content-Type";
+        }
+    }
     static AtlasMapEndpointBuilder endpointBuilder(
             String componentName,
             String path) {
-        class AtlasMapEndpointBuilderImpl extends AbstractEndpointBuilder implements AtlasMapEndpointBuilder {
+        class AtlasMapEndpointBuilderImpl extends AbstractEndpointBuilder implements AtlasMapEndpointBuilder, AdvancedAtlasMapEndpointBuilder {
             public AtlasMapEndpointBuilderImpl(String path) {
                 super(componentName, path);
             }

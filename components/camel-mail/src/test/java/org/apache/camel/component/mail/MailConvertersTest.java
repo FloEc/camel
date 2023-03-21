@@ -18,8 +18,8 @@ package org.apache.camel.component.mail;
 
 import java.io.InputStream;
 
-import javax.mail.Message;
-import javax.mail.Multipart;
+import jakarta.mail.Message;
+import jakarta.mail.Multipart;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -50,7 +50,7 @@ public class MailConvertersTest extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:a", "Hello World", "Subject", "Camel rocks");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Message mailMessage = mock.getReceivedExchanges().get(0).getIn().getBody(MailMessage.class).getMessage();
         assertNotNull(mailMessage);
@@ -66,7 +66,7 @@ public class MailConvertersTest extends CamelTestSupport {
 
         template.sendBodyAndHeader("direct:a", "Hello World", "Subject", "Camel rocks");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Message mailMessage = mock.getReceivedExchanges().get(0).getIn().getBody(MailMessage.class).getMessage();
         assertNotNull(mailMessage);
@@ -82,13 +82,13 @@ public class MailConvertersTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
 
         template.send("direct:a", new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody("Hello World");
                 exchange.getIn().setHeader(MailConstants.MAIL_ALTERNATIVE_BODY, "Alternative World");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Message mailMessage = mock.getReceivedExchanges().get(0).getIn().getBody(MailMessage.class).getMessage();
         assertNotNull(mailMessage);
@@ -107,13 +107,13 @@ public class MailConvertersTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
 
         template.send("direct:a", new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody("Hello World");
                 exchange.getIn().setHeader(MailConstants.MAIL_ALTERNATIVE_BODY, "Alternative World");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Message mailMessage = mock.getReceivedExchanges().get(0).getIn().getBody(MailMessage.class).getMessage();
         assertNotNull(mailMessage);
@@ -132,13 +132,13 @@ public class MailConvertersTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
 
         template.send("direct:a", new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody("Hello World");
                 exchange.getIn().setHeader(MailConstants.MAIL_ALTERNATIVE_BODY, "Alternative World");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Message mailMessage = mock.getReceivedExchanges().get(0).getIn().getBody(MailMessage.class).getMessage();
         assertNotNull(mailMessage);
@@ -151,10 +151,10 @@ public class MailConvertersTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:a").to("smtp://localhost?username=james@localhost");
 
                 from("pop3://localhost?username=james&password=secret&initialDelay=100&delay=100").to("mock:result");

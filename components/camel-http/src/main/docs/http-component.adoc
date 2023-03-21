@@ -2,7 +2,7 @@
 :doctitle: HTTP
 :shortname: http
 :artifactid: camel-http
-:description: Send requests to external HTTP servers using Apache HTTP Client 4.x.
+:description: Send requests to external HTTP servers using Apache HTTP Client 5.x.
 :since: 2.3
 :supportlevel: Stable
 :component-header: Only producer is supported
@@ -52,49 +52,21 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
-
-== Message Headers
-
-[width="100%",cols="10%,20%,70%",options="header",]
-|=======================================================================
-|Name |Type |Description
-
-|`Exchange.HTTP_URI` |`String` |URI to call. Will override existing URI set directly on the endpoint.
-This uri is the uri of the http server to call. Its not the same as the
-Camel endpoint uri, where you can configure endpoint options such as
-security etc. This header does not support that, its only the uri of the
-http server.
-
-|`Exchange.HTTP_PATH` |`String` |Request URI's path, the header will be used to build the request URI
-with the HTTP_URI.
-
-|`Exchange.HTTP_QUERY` |`String` |URI parameters. Will override existing URI parameters set directly on
-the endpoint.
-
-|`Exchange.HTTP_RESPONSE_CODE` |`int` |The HTTP response code from the external server. Is 200 for OK.
-
-|`Exchange.HTTP_RESPONSE_TEXT` | `String` |The HTTP response text from the external server.
-
-|`Exchange.HTTP_CHARACTER_ENCODING` |`String` |Character encoding.
-
-|`Exchange.CONTENT_TYPE` |`String` |The HTTP content type. Is set on both the IN and OUT message to provide
-a content type, such as `text/html`.
-
-|`Exchange.CONTENT_ENCODING` |`String` |The HTTP content encoding. Is set on both the IN and OUT message to
-provide a content encoding, such as `gzip`.
-|=======================================================================
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Message Body
 
 Camel will store the HTTP response from the external server on the OUT
 body. All headers from the IN message will be copied to the OUT message,
-so headers are preserved during routing. Additionally Camel will add the
+so headers are preserved during routing. Additionally, Camel will add the
 HTTP response headers as well to the OUT message headers.
 
 == Using System Properties
 
 When setting useSystemProperties to true, the HTTP Client will look for
-the following System Properties and it will use it:
+the following System Properties, and it will use it:
 
 * ssl.TrustManagerFactory.algorithm
 * http://javax.net/[javax.net].ssl.trustStoreType
@@ -126,10 +98,10 @@ with the information.
 and will throw a `HttpOperationFailedException` with the information.
 
 *throwExceptionOnFailure*
+
 The option, `throwExceptionOnFailure`, can be set to `false` to prevent
 the `HttpOperationFailedException` from being thrown for failed response
-codes. This allows you to get any response from the remote server. +
-There is a sample below demonstrating this.
+codes. This allows you to get any response from the remote server.
 
 == Exceptions
 
@@ -151,49 +123,30 @@ The following algorithm is used to determine what HTTP method should be used: +
  5. `POST` if there is data to send (body is not `null`). +
  6. `GET` otherwise.
 
-== How to get access to HttpServletRequest and HttpServletResponse
-
-You can get access to these two using the Camel type converter system
-using 
-
-[NOTE]
-====
-You can get the request and response not just from the processor
-after the camel-jetty or camel-cxf endpoint.
-====
-
-[source,java]
-----------------------------------------------------------------------------------
-HttpServletRequest request = exchange.getIn().getBody(HttpServletRequest.class);
-HttpServletRequest response = exchange.getIn().getBody(HttpServletResponse.class);
-----------------------------------------------------------------------------------
-
 == Configuring URI to call
 
-You can set the HTTP producer's URI directly form the endpoint URI. In
+You can set the HTTP producer's URI directly from the endpoint URI. In
 the route below, Camel will call out to the external server, `oldhost`,
 using HTTP.
 
 [source,java]
 -------------------------------
 from("direct:start")
-        .to("http://oldhost");
+    .to("http://oldhost");
 -------------------------------
 
-And the equivalent Spring sample:
+And the equivalent XML DSL:
 
 [source,xml]
 ---------------------------------------------------------------------
-<camelContext xmlns="http://activemq.apache.org/camel/schema/spring">
-  <route>
-    <from uri="direct:start"/>
-    <to uri="http://oldhost"/>
-  </route>
-</camelContext>
+<route>
+  <from uri="direct:start"/>
+  <to uri="http://oldhost"/>
+</route>
 ---------------------------------------------------------------------
 
-You can override the HTTP endpoint URI by adding a header with the key,
-`Exchange.HTTP_URI`, on the message.
+You can override the HTTP endpoint URI by adding a header with the key
+`Exchange.HTTP_URI` on the message.
 
 [source,java]
 -----------------------------------------------------------
@@ -248,20 +201,18 @@ The method can be written a bit shorter using the string constants:
 .setHeader("CamelHttpMethod", constant("POST"))
 -----------------------------------------------
 
-And the equivalent Spring sample:
+And the equivalent XML DSL:
 
 [source,xml]
 ---------------------------------------------------------------------
-<camelContext xmlns="http://activemq.apache.org/camel/schema/spring">
-  <route>
-    <from uri="direct:start"/>
-    <setHeader name="CamelHttpMethod">
-        <constant>POST</constant>
-    </setHeader>
-    <to uri="http://www.google.com"/>
-    <to uri="mock:results"/>
-  </route>
-</camelContext>
+<route>
+  <from uri="direct:start"/>
+  <setHeader name="CamelHttpMethod">
+      <constant>POST</constant>
+  </setHeader>
+  <to uri="http://www.google.com"/>
+  <to uri="mock:results"/>
+</route>
 ---------------------------------------------------------------------
 
 == Using client timeout - SO_TIMEOUT
@@ -291,25 +242,25 @@ only from the CamelContext or URI. +
 
 [source,java]
 ---------------------------------------------------------------
- context.getGlobalOptions().put("http.proxyHost", "172.168.18.9");
- context.getGlobalOptions().put("http.proxyPort", "8080");
+context.getGlobalOptions().put("http.proxyHost", "172.168.18.9");
+context.getGlobalOptions().put("http.proxyPort", "8080");
 ---------------------------------------------------------------
 
 Spring XML
 
 [source,xml]
 ----------------------------------------------------------------
-   <camelContext>
-       <properties>
-           <property key="http.proxyHost" value="172.168.18.9"/>
-           <property key="http.proxyPort" value="8080"/>
-      </properties>
-   </camelContext>
+<camelContext>
+    <properties>
+        <property key="http.proxyHost" value="172.168.18.9"/>
+        <property key="http.proxyPort" value="8080"/>
+   </properties>
+</camelContext>
 ----------------------------------------------------------------
 
 Camel will first set the settings from Java System or CamelContext
-Properties and then the endpoint proxy options if provided. +
- So you can override the system properties with the endpoint options.
+Properties and then the endpoint proxy options if provided.
+So you can override the system properties with the endpoint options.
 
 There is also a `http.proxyScheme` property you
 can set to explicit configure the scheme to use.
@@ -383,14 +334,12 @@ int responseCode = out.getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
 == Disabling Cookies
 
 To disable cookies you can set the HTTP Client to ignore cookies by
-adding this URI option: +
- `httpClient.cookieSpec=ignoreCookies`
+adding this URI option: `httpClient.cookieSpec=ignoreCookies`
 
 == Basic auth with the streaming message body
 
 In order to avoid the `NonRepeatableRequestException`, you need to do the
-Preemptive Basic Authentication by adding the option: +
- `authenticationPreemptive=true`
+Preemptive Basic Authentication by adding the option: `authenticationPreemptive=true`
 
 == Advanced Usage
 
@@ -431,6 +380,7 @@ httpComponent.setSslContextParameters(scp);
 ---------------------------------------------------------------------------------------
 
 [[HTTP-SpringDSLbasedconfigurationofendpoint]]
+
 Spring DSL based configuration of endpoint
 
 [source,xml]
@@ -454,7 +404,7 @@ Configuring Apache HTTP Client Directly
 Basically camel-http component is built on the top of
 http://hc.apache.org/httpcomponents-client-ga/[Apache HttpClient].
 Please refer to
-http://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html#d4e537[SSL/TLS
+https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/connmgmt.html[SSL/TLS
 customization] for details or have a look into the
 `org.apache.camel.component.http.HttpsServerTestSupport` unit test base
 class. +

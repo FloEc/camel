@@ -101,13 +101,13 @@ public class Web3jConsumerReplyTransactionsObservableMockTest extends Web3jMockT
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 errorHandler(deadLetterChannel("mock:error"));
                 from(getUrl() + OPERATION.toLowerCase() + "=" + REPLAY_TRANSACTIONS_OBSERVABLE
                      + "&fromBlock=5499965&toBlock=5499967")
-                             .to("mock:result");
+                        .to("mock:result");
             }
         };
     }

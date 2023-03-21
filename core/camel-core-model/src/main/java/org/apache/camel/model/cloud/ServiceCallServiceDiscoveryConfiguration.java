@@ -19,13 +19,12 @@ package org.apache.camel.model.cloud;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.NoFactoryAvailableException;
 import org.apache.camel.cloud.ServiceDiscovery;
 import org.apache.camel.cloud.ServiceDiscoveryFactory;
@@ -40,6 +39,7 @@ import org.apache.camel.util.ObjectHelper;
 @XmlRootElement(name = "serviceDiscoveryConfiguration")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Configurer(extended = true)
+@Deprecated
 public class ServiceCallServiceDiscoveryConfiguration extends ServiceCallConfiguration implements ServiceDiscoveryFactory {
     @XmlTransient
     private final Optional<ServiceCallDefinition> parent;
@@ -93,7 +93,7 @@ public class ServiceCallServiceDiscoveryConfiguration extends ServiceCallConfigu
             Class<?> type;
             try {
                 // Then use Service factory.
-                type = camelContext.adapt(ExtendedCamelContext.class)
+                type = camelContext.getCamelContextExtension()
                         .getFactoryFinder(ServiceCallDefinitionConstants.RESOURCE_PATH).findClass(factoryKey).orElse(null);
             } catch (Exception e) {
                 throw new NoFactoryAvailableException(ServiceCallDefinitionConstants.RESOURCE_PATH + factoryKey, e);

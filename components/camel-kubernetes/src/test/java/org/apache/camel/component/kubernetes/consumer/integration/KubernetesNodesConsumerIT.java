@@ -47,7 +47,7 @@ public class KubernetesNodesConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(1)
-    public void listNode() throws Exception {
+    void listNode() throws Exception {
         configureMock();
         Exchange ex = template.request("direct:listNode", exchange -> {
 
@@ -68,10 +68,10 @@ public class KubernetesNodesConsumerIT extends KubernetesTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:listNode").toF("kubernetes-nodes://%s?oauthToken=%s&operation=listNodes", host, authToken);
                 fromF("kubernetes-nodes://%s?oauthToken=%s&operation=listNodes", host, authToken)
                         .process(new KubernetesProcessor()).to(mockResultEndpoint);
@@ -81,7 +81,7 @@ public class KubernetesNodesConsumerIT extends KubernetesTestSupport {
 
     public class KubernetesProcessor implements Processor {
         @Override
-        public void process(Exchange exchange) throws Exception {
+        public void process(Exchange exchange) {
             Message in = exchange.getIn();
             Node node = exchange.getIn().getBody(Node.class);
             log.info("Got event with node name: " + node.getMetadata().getName() + " and action "

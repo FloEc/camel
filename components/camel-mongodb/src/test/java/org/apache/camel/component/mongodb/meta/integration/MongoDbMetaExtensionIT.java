@@ -42,17 +42,12 @@ public class MongoDbMetaExtensionIT extends AbstractMongoDbITSupport {
         super.createAuthorizationUser();
     }
 
-    @Override
-    public boolean isUseRouteBuilder() {
-        return false;
-    }
-
     protected MongoDbComponent getComponent() {
-        return context().getComponent(SCHEME, MongoDbComponent.class);
+        return context.getComponent(SCHEME, MongoDbComponent.class);
     }
 
     @Test
-    public void testValidMetaData() throws Exception {
+    public void testValidMetaData() {
         // When
         final String database = "test";
         final String collection = "validatedCollection";
@@ -159,5 +154,4 @@ public class MongoDbMetaExtensionIT extends AbstractMongoDbITSupport {
         // Then
         assertThrows(UnsupportedOperationException.class, () -> meta.orElseThrow(UnsupportedOperationException::new));
     }
-
 }

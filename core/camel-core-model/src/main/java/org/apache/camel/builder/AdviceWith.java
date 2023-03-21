@@ -140,6 +140,39 @@ public final class AdviceWith {
      * <p/>
      * Will stop and remove the old route from camel context and add and start this new advised route.
      *
+     * @param  routeId      either the route id as a string value, or <tt>null</tt> to chose the 1st route, or you can
+     *                      specify a number for the n'th route, or provide the route definition instance directly as
+     *                      well.
+     * @param  camelContext the camel context
+     * @param  builder      the route builder
+     * @return              a new route which is this route merged with the route builder
+     * @throws Exception    can be thrown from the route builder
+     * @see                 AdviceWithRouteBuilder
+     */
+    public static RouteDefinition adviceWith(Object routeId, CamelContext camelContext, RouteBuilder builder)
+            throws Exception {
+        RouteDefinition rd = findRouteDefinition(camelContext, routeId);
+        return adviceWith(rd, camelContext, builder);
+    }
+
+    /**
+     * Advices this route with the route builder.
+     * <p/>
+     * <b>Important:</b> It is recommended to only advice a given route once (you can of course advice multiple routes).
+     * If you do it multiple times, then it may not work as expected, especially when any kind of error handling is
+     * involved. The Camel team plan for Camel 3.0 to support this as internal refactorings in the routing engine is
+     * needed to support this properly.
+     * <p/>
+     * You can use a regular {@link RouteBuilder} but the specialized {@link AdviceWithRouteBuilder} has additional
+     * features when using the advice with feature. We therefore suggest you to use the {@link AdviceWithRouteBuilder}.
+     * <p/>
+     * The advice process will add the interceptors, on exceptions, on completions etc. configured from the route
+     * builder to this route.
+     * <p/>
+     * This is mostly used for testing purpose to add interceptors and the likes to an existing route.
+     * <p/>
+     * Will stop and remove the old route from camel context and add and start this new advised route.
+     *
      * @param  definition   the model definition
      * @param  camelContext the camel context
      * @param  builder      the route builder
@@ -164,7 +197,7 @@ public final class AdviceWith {
         ObjectHelper.notNull(builder, "RouteBuilder");
 
         LOG.debug("AdviceWith route before: {}", definition);
-        ExtendedCamelContext ecc = camelContext.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = camelContext.getCamelContextExtension();
         Model model = camelContext.getExtension(Model.class);
 
         // inject this route into the advice route builder so it can access this route
@@ -257,7 +290,7 @@ public final class AdviceWith {
     }
 
     private static RouteDefinition findRouteDefinition(CamelContext camelContext, Object routeId) {
-        ModelCamelContext mcc = camelContext.adapt(ModelCamelContext.class);
+        ModelCamelContext mcc = (ModelCamelContext) camelContext;
         if (mcc.getRouteDefinitions().isEmpty()) {
             throw new IllegalArgumentException("Cannot advice route as there are no routes");
         }

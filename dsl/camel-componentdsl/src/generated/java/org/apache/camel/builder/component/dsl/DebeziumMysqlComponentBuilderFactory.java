@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -56,10 +56,10 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * properties needed by Debezium engine, for example setting
          * KafkaOffsetBackingStore), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -152,8 +152,6 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default:
-         * io.debezium.embedded.spi.OffsetCommitPolicy.PeriodicCommitOffsetPolicy
          * Group: consumer
          * 
          * @param offsetCommitPolicy the value to set
@@ -303,7 +301,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Specify how BIGINT UNSIGNED columns should be represented in change
-         * events, including:'precise' uses java.math.BigDecimal to represent
+         * events, including: 'precise' uses java.math.BigDecimal to represent
          * values, which are encoded in the change events using a binary
          * representation and Kafka Connect's
          * 'org.apache.kafka.connect.data.Decimal' type; 'long' (the default)
@@ -325,9 +323,11 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Specify how binary (blob, binary, etc.) columns should be represented
-         * in change events, including:'bytes' represents binary data as byte
-         * array (default)'base64' represents binary data as base64-encoded
-         * string'hex' represents binary data as hex-encoded (base16) string.
+         * in change events, including: 'bytes' represents binary data as byte
+         * array (default); 'base64' represents binary data as base64-encoded
+         * string; 'base64-url-safe' represents binary data as
+         * base64-url-safe-encoded string; 'hex' represents binary data as
+         * hex-encoded (base16) string.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -359,22 +359,6 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder binlogBufferSize(
                 int binlogBufferSize) {
             doSetProperty("binlogBufferSize", binlogBufferSize);
-            return this;
-        }
-        /**
-         * Regular expressions matching columns to exclude from change events
-         * (deprecated, use column.exclude.list instead).
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param columnBlacklist the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder columnBlacklist(
-                java.lang.String columnBlacklist) {
-            doSetProperty("columnBlacklist", columnBlacklist);
             return this;
         }
         /**
@@ -423,22 +407,6 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder columnPropagateSourceType(
                 java.lang.String columnPropagateSourceType) {
             doSetProperty("columnPropagateSourceType", columnPropagateSourceType);
-            return this;
-        }
-        /**
-         * Regular expressions matching columns to include in change events
-         * (deprecated, use column.include.list instead).
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param columnWhitelist the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder columnWhitelist(
-                java.lang.String columnWhitelist) {
-            doSetProperty("columnWhitelist", columnWhitelist);
             return this;
         }
         /**
@@ -495,9 +463,8 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Optional list of custom converters that would be used instead of
-         * default ones. The converters are defined using
-         * '&lt;converter.prefix&gt;.type' config option and configured using
-         * options '&lt;converter.prefix&gt;.&lt;option&gt;'.
+         * default ones. The converters are defined using '.type' config option
+         * and configured using options '.'.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -525,168 +492,6 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder databaseExcludeList(
                 java.lang.String databaseExcludeList) {
             doSetProperty("databaseExcludeList", databaseExcludeList);
-            return this;
-        }
-        /**
-         * The name of the DatabaseHistory class that should be used to store
-         * and recover database schema changes. The configuration properties for
-         * the history are prefixed with the 'database.history.' string.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Default: io.debezium.relational.history.FileDatabaseHistory
-         * Group: mysql
-         * 
-         * @param databaseHistory the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistory(
-                java.lang.String databaseHistory) {
-            doSetProperty("databaseHistory", databaseHistory);
-            return this;
-        }
-        /**
-         * The path to the file that will be used to record the database
-         * history.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param databaseHistoryFileFilename the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryFileFilename(
-                java.lang.String databaseHistoryFileFilename) {
-            doSetProperty("databaseHistoryFileFilename", databaseHistoryFileFilename);
-            return this;
-        }
-        /**
-         * A list of host/port pairs that the connector will use for
-         * establishing the initial connection to the Kafka cluster for
-         * retrieving database schema history previously stored by the
-         * connector. This should point to the same Kafka cluster used by the
-         * Kafka Connect process.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param databaseHistoryKafkaBootstrapServers the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryKafkaBootstrapServers(
-                java.lang.String databaseHistoryKafkaBootstrapServers) {
-            doSetProperty("databaseHistoryKafkaBootstrapServers", databaseHistoryKafkaBootstrapServers);
-            return this;
-        }
-        /**
-         * The number of attempts in a row that no data are returned from Kafka
-         * before recover completes. The maximum amount of time to wait after
-         * receiving no data is (recovery.attempts) x
-         * (recovery.poll.interval.ms).
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: 100
-         * Group: mysql
-         * 
-         * @param databaseHistoryKafkaRecoveryAttempts the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryKafkaRecoveryAttempts(
-                int databaseHistoryKafkaRecoveryAttempts) {
-            doSetProperty("databaseHistoryKafkaRecoveryAttempts", databaseHistoryKafkaRecoveryAttempts);
-            return this;
-        }
-        /**
-         * The number of milliseconds to wait while polling for persisted data
-         * during recovery.
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: 100ms
-         * Group: mysql
-         * 
-         * @param databaseHistoryKafkaRecoveryPollIntervalMs the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryKafkaRecoveryPollIntervalMs(
-                int databaseHistoryKafkaRecoveryPollIntervalMs) {
-            doSetProperty("databaseHistoryKafkaRecoveryPollIntervalMs", databaseHistoryKafkaRecoveryPollIntervalMs);
-            return this;
-        }
-        /**
-         * The name of the topic for the database schema history.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param databaseHistoryKafkaTopic the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryKafkaTopic(
-                java.lang.String databaseHistoryKafkaTopic) {
-            doSetProperty("databaseHistoryKafkaTopic", databaseHistoryKafkaTopic);
-            return this;
-        }
-        /**
-         * Controls the action Debezium will take when it meets a DDL statement
-         * in binlog, that it cannot parse.By default the connector will stop
-         * operating but by changing the setting it can ignore the statements
-         * which it cannot parse. If skipping is enabled then Debezium can miss
-         * metadata changes.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: mysql
-         * 
-         * @param databaseHistorySkipUnparseableDdl the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistorySkipUnparseableDdl(
-                boolean databaseHistorySkipUnparseableDdl) {
-            doSetProperty("databaseHistorySkipUnparseableDdl", databaseHistorySkipUnparseableDdl);
-            return this;
-        }
-        /**
-         * Controls what DDL will Debezium store in database history. By default
-         * (false) Debezium will store all incoming DDL statements. If set to
-         * true, then only DDL that manipulates a captured table will be stored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: mysql
-         * 
-         * @param databaseHistoryStoreOnlyCapturedTablesDdl the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryStoreOnlyCapturedTablesDdl(
-                boolean databaseHistoryStoreOnlyCapturedTablesDdl) {
-            doSetProperty("databaseHistoryStoreOnlyCapturedTablesDdl", databaseHistoryStoreOnlyCapturedTablesDdl);
-            return this;
-        }
-        /**
-         * Controls what DDL will Debezium store in database history. By default
-         * (false) Debezium will store all incoming DDL statements. If set to
-         * true, then only DDL that manipulates a monitored table will be stored
-         * (deprecated, use database.history.store.only.captured.tables.ddl
-         * instead).
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: mysql
-         * 
-         * @param databaseHistoryStoreOnlyMonitoredTablesDdl the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseHistoryStoreOnlyMonitoredTablesDdl(
-                boolean databaseHistoryStoreOnlyMonitoredTablesDdl) {
-            doSetProperty("databaseHistoryStoreOnlyMonitoredTablesDdl", databaseHistoryStoreOnlyMonitoredTablesDdl);
             return this;
         }
         /**
@@ -724,7 +529,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * JDBC connection (not binlog reading connection) to the database is
          * established. Note that the connector may establish JDBC connections
          * at its own discretion, so this should typically be used for
-         * configuration of session parameters only,but not for executing DML
+         * configuration of session parameters only, but not for executing DML
          * statements. Use doubled semicolon (';;') to use a semicolon as a
          * character and not as a delimiter.
          * 
@@ -745,7 +550,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: class com.mysql.cj.jdbc.Driver
+         * Default: com.mysql.cj.jdbc.Driver
          * Group: mysql
          * 
          * @param databaseJdbcDriver the value to set
@@ -791,8 +596,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * A numeric ID of this database client, which must be unique across all
          * currently-running database processes in the cluster. This connector
          * joins the MySQL database cluster as another server (with this unique
-         * ID) so it can read the binlog. By default, a random number is
-         * generated between 5400 and 6400.
+         * ID) so it can read the binlog.
          * 
          * The option is a: &lt;code&gt;long&lt;/code&gt; type.
          * 
@@ -826,26 +630,8 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * Unique name that identifies the database server and all recorded
-         * offsets, and that is used as a prefix for all schemas and topics.
-         * Each distinct installation should have a separate namespace and be
-         * monitored by at most one Debezium connector.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param databaseServerName the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder databaseServerName(
-                java.lang.String databaseServerName) {
-            doSetProperty("databaseServerName", databaseServerName);
-            return this;
-        }
-        /**
-         * Location of the Java keystore file containing an application
-         * process's own certificate and private key.
+         * The location of the key store file. This is optional and can be used
+         * for two-way authentication between the client and the MySQL Server.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -860,11 +646,8 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * Password to access the private key from the keystore file specified
-         * by 'ssl.keystore' configuration property or the
-         * 'javax.net.ssl.keyStore' system or JVM property. This password is
-         * used to unlock the keystore file (store password), and to decrypt the
-         * private key stored in the keystore (key password).
+         * The password for the key store file. This is optional and only needed
+         * if 'database.ssl.keystore' is configured.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -879,8 +662,8 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * Whether to use an encrypted connection to MySQL. Options
-         * include'disabled' (the default) to use an unencrypted connection;
+         * Whether to use an encrypted connection to MySQL. Options include:
+         * 'disabled' (the default) to use an unencrypted connection;
          * 'preferred' to establish a secure (encrypted) connection if the
          * server supports secure connections, but fall back to an unencrypted
          * connection otherwise; 'required' to use a secure (encrypted)
@@ -905,8 +688,8 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * Location of the Java truststore file containing the collection of CA
-         * certificates trusted by this application process (trust store).
+         * The location of the trust store file for the server certificate
+         * verification.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -921,9 +704,8 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * Password to unlock the keystore file (store password) specified by
-         * 'ssl.trustore' configuration property or the
-         * 'javax.net.ssl.trustStore' system or JVM property.
+         * The password for the trust store file. Used to check the integrity of
+         * the truststore, and unlock the truststore.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -972,7 +754,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Specify how DECIMAL and NUMERIC columns should be represented in
-         * change events, including:'precise' (the default) uses
+         * change events, including: 'precise' (the default) uses
          * java.math.BigDecimal to represent values, which are encoded in the
          * change events using a binary representation and Kafka Connect's
          * 'org.apache.kafka.connect.data.Decimal' type; 'string' uses string to
@@ -1014,12 +796,12 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Specify how failures during deserialization of binlog events (i.e.
-         * when encountering a corrupted event) should be handled,
-         * including:'fail' (the default) an exception indicating the
-         * problematic event and its binlog position is raised, causing the
-         * connector to be stopped; 'warn' the problematic event and its binlog
-         * position will be logged and the event will be skipped;'ignore' the
-         * problematic event will be skipped.
+         * when encountering a corrupted event) should be handled, including:
+         * 'fail' (the default) an exception indicating the problematic event
+         * and its binlog position is raised, causing the connector to be
+         * stopped; 'warn' the problematic event and its binlog position will be
+         * logged and the event will be skipped; 'ignore' the problematic event
+         * will be skipped.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1036,11 +818,11 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Specify how failures during processing of events (i.e. when
-         * encountering a corrupted event) should be handled, including:'fail'
+         * encountering a corrupted event) should be handled, including: 'fail'
          * (the default) an exception indicating the problematic event and its
          * position is raised, causing the connector to be stopped; 'warn' the
          * problematic event and its position will be logged and the event will
-         * be skipped;'ignore' the problematic event will be skipped.
+         * be skipped; 'ignore' the problematic event will be skipped.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1107,6 +889,21 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
+         * The query executed with every heartbeat.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: mysql
+         * 
+         * @param heartbeatActionQuery the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder heartbeatActionQuery(
+                java.lang.String heartbeatActionQuery) {
+            doSetProperty("heartbeatActionQuery", heartbeatActionQuery);
+            return this;
+        }
+        /**
          * Length of an interval in milli-seconds in in which the connector
          * periodically sends heartbeat messages to a heartbeat topic. Use 0 to
          * disable heartbeat messages. Disabled by default.
@@ -1147,7 +944,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * configured with the binlog_rows_query_log_events option set to ON.
          * Query will not be present for events generated from snapshot.
          * WARNING: Enabling this option may expose tables or fields explicitly
-         * blacklisted or masked by including the original SQL statement in the
+         * excluded or masked by including the original SQL statement in the
          * change event. For this reason the default value is 'false'.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -1167,8 +964,9 @@ public interface DebeziumMysqlComponentBuilderFactory {
          * to a Kafka topic with the same name as the database server ID. Each
          * schema change will be recorded using a key that contains the database
          * name and whose value include logical description of the new schema
-         * and optionally the DDL statement(s).The default is 'true'. This is
-         * independent of how the connector internally records database history.
+         * and optionally the DDL statement(s). The default is 'true'. This is
+         * independent of how the connector internally records database schema
+         * history.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1184,13 +982,34 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
+         * Whether the connector parse table and column's comment to metadata
+         * object. Note: Enable this option will bring the implications on
+         * memory usage. The number and size of ColumnImpl objects is what
+         * largely impacts how much memory is consumed by the Debezium
+         * connectors, and adding a String to each of them can potentially be
+         * quite heavy. The default is 'false'.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param includeSchemaComments the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder includeSchemaComments(
+                boolean includeSchemaComments) {
+            doSetProperty("includeSchemaComments", includeSchemaComments);
+            return this;
+        }
+        /**
          * Specify how binlog events that belong to a table missing from
          * internal schema representation (i.e. internal representation is not
-         * consistent with database) should be handled, including:'fail' (the
+         * consistent with database) should be handled, including: 'fail' (the
          * default) an exception indicating the problematic event and its binlog
          * position is raised, causing the connector to be stopped; 'warn' the
          * problematic event and its binlog position will be logged and the
-         * event will be skipped;'skip' the problematic event will be skipped.
+         * event will be skipped; 'skip' the problematic event will be skipped.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1203,6 +1022,29 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder inconsistentSchemaHandlingMode(
                 java.lang.String inconsistentSchemaHandlingMode) {
             doSetProperty("inconsistentSchemaHandlingMode", inconsistentSchemaHandlingMode);
+            return this;
+        }
+        /**
+         * Detect schema change during an incremental snapshot and re-select a
+         * current chunk to avoid locking DDLs. Note that changes to a primary
+         * key are not supported and can cause incorrect results if performed
+         * during an incremental snapshot. Another limitation is that if a
+         * schema change affects only columns' default values, then the change
+         * won't be detected until the DDL is processed from the binlog stream.
+         * This doesn't affect the snapshot events' values, but the schema of
+         * snapshot events may have outdated defaults.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param incrementalSnapshotAllowSchemaChanges the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder incrementalSnapshotAllowSchemaChanges(
+                boolean incrementalSnapshotAllowSchemaChanges) {
+            doSetProperty("incrementalSnapshotAllowSchemaChanges", incrementalSnapshotAllowSchemaChanges);
             return this;
         }
         /**
@@ -1274,12 +1116,12 @@ public interface DebeziumMysqlComponentBuilderFactory {
         /**
          * A semicolon-separated list of expressions that match fully-qualified
          * tables and column(s) to be used as message key. Each expression must
-         * match the pattern '',where the table names could be defined as
+         * match the pattern ':', where the table names could be defined as
          * (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on the
-         * specific connector,and the key columns are a comma-separated list of
+         * specific connector, and the key columns are a comma-separated list of
          * columns representing the custom key. For any table without an
          * explicit key configuration the table's primary key column(s) will be
-         * used as message key.Example:
+         * used as message key. Example:
          * dbserver1.inventory.orderlines:orderId,orderLineId;dbserver1.inventory.orders:id.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1347,7 +1189,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * The maximum number of records that should be loaded into memory while
-         * streaming. A value of 0 uses the default JDBC fetch size.
+         * streaming. A value of '0' uses the default JDBC fetch size.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -1395,6 +1237,99 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
+         * The name of the SchemaHistory class that should be used to store and
+         * recover database schema changes. The configuration properties for the
+         * history are prefixed with the 'schema.history.internal.' string.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: io.debezium.storage.kafka.history.KafkaSchemaHistory
+         * Group: mysql
+         * 
+         * @param schemaHistoryInternal the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder schemaHistoryInternal(
+                java.lang.String schemaHistoryInternal) {
+            doSetProperty("schemaHistoryInternal", schemaHistoryInternal);
+            return this;
+        }
+        /**
+         * The path to the file that will be used to record the database schema
+         * history.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: mysql
+         * 
+         * @param schemaHistoryInternalFileFilename the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder schemaHistoryInternalFileFilename(
+                java.lang.String schemaHistoryInternalFileFilename) {
+            doSetProperty("schemaHistoryInternalFileFilename", schemaHistoryInternalFileFilename);
+            return this;
+        }
+        /**
+         * Controls the action Debezium will take when it meets a DDL statement
+         * in binlog, that it cannot parse.By default the connector will stop
+         * operating but by changing the setting it can ignore the statements
+         * which it cannot parse. If skipping is enabled then Debezium can miss
+         * metadata changes.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param schemaHistoryInternalSkipUnparseableDdl the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder schemaHistoryInternalSkipUnparseableDdl(
+                boolean schemaHistoryInternalSkipUnparseableDdl) {
+            doSetProperty("schemaHistoryInternalSkipUnparseableDdl", schemaHistoryInternalSkipUnparseableDdl);
+            return this;
+        }
+        /**
+         * Controls what DDL will Debezium store in database schema history. By
+         * default (false) Debezium will store all incoming DDL statements. If
+         * set to true, then only DDL that manipulates a captured table will be
+         * stored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: mysql
+         * 
+         * @param schemaHistoryInternalStoreOnlyCapturedTablesDdl the value to
+         * set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder schemaHistoryInternalStoreOnlyCapturedTablesDdl(
+                boolean schemaHistoryInternalStoreOnlyCapturedTablesDdl) {
+            doSetProperty("schemaHistoryInternalStoreOnlyCapturedTablesDdl", schemaHistoryInternalStoreOnlyCapturedTablesDdl);
+            return this;
+        }
+        /**
+         * Specify how schema names should be adjusted for compatibility with
+         * the message converter used by the connector, including: 'avro'
+         * replaces the characters that cannot be used in the Avro type name
+         * with underscore; 'none' does not apply any adjustment (default).
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: none
+         * Group: mysql
+         * 
+         * @param schemaNameAdjustmentMode the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder schemaNameAdjustmentMode(
+                java.lang.String schemaNameAdjustmentMode) {
+            doSetProperty("schemaNameAdjustmentMode", schemaNameAdjustmentMode);
+            return this;
+        }
+        /**
          * The name of the data collection that is used to send signals/commands
          * to Debezium. Signaling is disabled when not set.
          * 
@@ -1412,11 +1347,13 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * The comma-separated list of operations to skip during streaming,
-         * defined as: 'c' for inserts/create; 'u' for updates; 'd' for deletes.
-         * By default, no operations will be skipped.
+         * defined as: 'c' for inserts/create; 'u' for updates; 'd' for deletes,
+         * 't' for truncates, and 'none' to indicate nothing skipped. By
+         * default, only truncate operations will be skipped.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
+         * Default: t
          * Group: mysql
          * 
          * @param skippedOperations the value to set
@@ -1461,7 +1398,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * this setting must be set to specify a list of tables/collections
+         * This setting must be set to specify a list of tables/collections
          * whose snapshot must be taken on creating or restarting the connector.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1572,10 +1509,10 @@ public interface DebeziumMysqlComponentBuilderFactory {
         /**
          * BETA FEATURE: On connector restart, the connector will check if there
          * have been any new tables added to the configuration, and snapshot
-         * them. There is presently only two options:'off': Default behavior. Do
-         * not snapshot new tables.'parallel': The snapshot of the new tables
-         * will occur in parallel to the continued binlog reading of the old
-         * tables. When the snapshot completes, an independent binlog reader
+         * them. There is presently only two options: 'off': Default behavior.
+         * Do not snapshot new tables. 'parallel': The snapshot of the new
+         * tables will occur in parallel to the continued binlog reading of the
+         * old tables. When the snapshot completes, an independent binlog reader
          * will begin reading the events for the new tables until it catches up
          * to present time. At this point, both old and new binlog readers will
          * be momentarily halted and new binlog reader will start that will read
@@ -1599,7 +1536,7 @@ public interface DebeziumMysqlComponentBuilderFactory {
         /**
          * This property contains a comma-separated list of fully-qualified
          * tables (DB_NAME.TABLE_NAME) or (SCHEMA_NAME.TABLE_NAME), depending on
-         * thespecific connectors. Select statements for the individual tables
+         * the specific connectors. Select statements for the individual tables
          * are specified in further configuration properties, one for each
          * table, identified by the id
          * 'snapshot.select.statement.overrides.DB_NAME.TABLE_NAME' or
@@ -1620,40 +1557,6 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder snapshotSelectStatementOverrides(
                 java.lang.String snapshotSelectStatementOverrides) {
             doSetProperty("snapshotSelectStatementOverrides", snapshotSelectStatementOverrides);
-            return this;
-        }
-        /**
-         * A version of the format of the publicly visible source part in the
-         * message.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Default: v2
-         * Group: mysql
-         * 
-         * @param sourceStructVersion the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder sourceStructVersion(
-                java.lang.String sourceStructVersion) {
-            doSetProperty("sourceStructVersion", sourceStructVersion);
-            return this;
-        }
-        /**
-         * A comma-separated list of regular expressions that match the
-         * fully-qualified names of tables to be excluded from monitoring
-         * (deprecated, use table.exclude.list instead).
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param tableBlacklist the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder tableBlacklist(
-                java.lang.String tableBlacklist) {
-            doSetProperty("tableBlacklist", tableBlacklist);
             return this;
         }
         /**
@@ -1704,26 +1607,10 @@ public interface DebeziumMysqlComponentBuilderFactory {
             return this;
         }
         /**
-         * The tables for which changes are to be captured (deprecated, use
-         * table.include.list instead).
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: mysql
-         * 
-         * @param tableWhitelist the value to set
-         * @return the dsl builder
-         */
-        default DebeziumMysqlComponentBuilder tableWhitelist(
-                java.lang.String tableWhitelist) {
-            doSetProperty("tableWhitelist", tableWhitelist);
-            return this;
-        }
-        /**
          * Time, date and timestamps can be represented with different kinds of
-         * precisions, including:'adaptive_time_microseconds': the precision of
+         * precisions, including: 'adaptive_time_microseconds': the precision of
          * date and timestamp values is based the database column's precision;
-         * but time fields always use microseconds precision;'connect': always
+         * but time fields always use microseconds precision; 'connect': always
          * represents time, date and timestamp values using Kafka Connect's
          * built-in representations for Time, Date, and Timestamp, which uses
          * millisecond precision regardless of the database columns' precision.
@@ -1743,10 +1630,10 @@ public interface DebeziumMysqlComponentBuilderFactory {
         }
         /**
          * Whether delete operations should be represented by a delete event and
-         * a subsquenttombstone event (true) or only by a delete event (false).
-         * Emitting the tombstone event (the default behavior) allows Kafka to
-         * completely delete all events pertaining to the given key once the
-         * source record got deleted.
+         * a subsequent tombstone event (true) or only by a delete event
+         * (false). Emitting the tombstone event (the default behavior) allows
+         * Kafka to completely delete all events pertaining to the given key
+         * once the source record got deleted.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1759,6 +1646,44 @@ public interface DebeziumMysqlComponentBuilderFactory {
         default DebeziumMysqlComponentBuilder tombstonesOnDelete(
                 boolean tombstonesOnDelete) {
             doSetProperty("tombstonesOnDelete", tombstonesOnDelete);
+            return this;
+        }
+        /**
+         * The name of the TopicNamingStrategy class that should be used to
+         * determine the topic name for data change, schema change, transaction,
+         * heartbeat event etc.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: io.debezium.schema.SchemaTopicNamingStrategy
+         * Group: mysql
+         * 
+         * @param topicNamingStrategy the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder topicNamingStrategy(
+                java.lang.String topicNamingStrategy) {
+            doSetProperty("topicNamingStrategy", topicNamingStrategy);
+            return this;
+        }
+        /**
+         * Topic prefix that identifies and provides a namespace for the
+         * particular database server/cluster is capturing changes. The topic
+         * prefix should be unique across all other connectors, since it is used
+         * as a prefix for all Kafka topic names that receive events emitted by
+         * this connector. Only alphanumeric characters, hyphens, dots and
+         * underscores must be accepted.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: mysql
+         * 
+         * @param topicPrefix the value to set
+         * @return the dsl builder
+         */
+        default DebeziumMysqlComponentBuilder topicPrefix(
+                java.lang.String topicPrefix) {
+            doSetProperty("topicPrefix", topicPrefix);
             return this;
         }
     }
@@ -1802,25 +1727,14 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "bigintUnsignedHandlingMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setBigintUnsignedHandlingMode((java.lang.String) value); return true;
             case "binaryHandlingMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setBinaryHandlingMode((java.lang.String) value); return true;
             case "binlogBufferSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setBinlogBufferSize((int) value); return true;
-            case "columnBlacklist": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnBlacklist((java.lang.String) value); return true;
             case "columnExcludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnExcludeList((java.lang.String) value); return true;
             case "columnIncludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnIncludeList((java.lang.String) value); return true;
             case "columnPropagateSourceType": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnPropagateSourceType((java.lang.String) value); return true;
-            case "columnWhitelist": getOrCreateConfiguration((DebeziumMySqlComponent) component).setColumnWhitelist((java.lang.String) value); return true;
             case "connectKeepAlive": getOrCreateConfiguration((DebeziumMySqlComponent) component).setConnectKeepAlive((boolean) value); return true;
             case "connectKeepAliveIntervalMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setConnectKeepAliveIntervalMs((long) value); return true;
             case "connectTimeoutMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setConnectTimeoutMs((int) value); return true;
             case "converters": getOrCreateConfiguration((DebeziumMySqlComponent) component).setConverters((java.lang.String) value); return true;
             case "databaseExcludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseExcludeList((java.lang.String) value); return true;
-            case "databaseHistory": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistory((java.lang.String) value); return true;
-            case "databaseHistoryFileFilename": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryFileFilename((java.lang.String) value); return true;
-            case "databaseHistoryKafkaBootstrapServers": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaBootstrapServers((java.lang.String) value); return true;
-            case "databaseHistoryKafkaRecoveryAttempts": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaRecoveryAttempts((int) value); return true;
-            case "databaseHistoryKafkaRecoveryPollIntervalMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaRecoveryPollIntervalMs((int) value); return true;
-            case "databaseHistoryKafkaTopic": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryKafkaTopic((java.lang.String) value); return true;
-            case "databaseHistorySkipUnparseableDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistorySkipUnparseableDdl((boolean) value); return true;
-            case "databaseHistoryStoreOnlyCapturedTablesDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryStoreOnlyCapturedTablesDdl((boolean) value); return true;
-            case "databaseHistoryStoreOnlyMonitoredTablesDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHistoryStoreOnlyMonitoredTablesDdl((boolean) value); return true;
             case "databaseHostname": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseHostname((java.lang.String) value); return true;
             case "databaseIncludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseIncludeList((java.lang.String) value); return true;
             case "databaseInitialStatements": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseInitialStatements((java.lang.String) value); return true;
@@ -1829,7 +1743,6 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "databasePort": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabasePort((int) value); return true;
             case "databaseServerId": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseServerId((long) value); return true;
             case "databaseServerIdOffset": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseServerIdOffset((long) value); return true;
-            case "databaseServerName": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseServerName((java.lang.String) value); return true;
             case "databaseSslKeystore": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseSslKeystore((java.lang.String) value); return true;
             case "databaseSslKeystorePassword": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseSslKeystorePassword((java.lang.String) value); return true;
             case "databaseSslMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setDatabaseSslMode((java.lang.String) value); return true;
@@ -1844,11 +1757,14 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "gtidSourceExcludes": getOrCreateConfiguration((DebeziumMySqlComponent) component).setGtidSourceExcludes((java.lang.String) value); return true;
             case "gtidSourceFilterDmlEvents": getOrCreateConfiguration((DebeziumMySqlComponent) component).setGtidSourceFilterDmlEvents((boolean) value); return true;
             case "gtidSourceIncludes": getOrCreateConfiguration((DebeziumMySqlComponent) component).setGtidSourceIncludes((java.lang.String) value); return true;
+            case "heartbeatActionQuery": getOrCreateConfiguration((DebeziumMySqlComponent) component).setHeartbeatActionQuery((java.lang.String) value); return true;
             case "heartbeatIntervalMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setHeartbeatIntervalMs((int) value); return true;
             case "heartbeatTopicsPrefix": getOrCreateConfiguration((DebeziumMySqlComponent) component).setHeartbeatTopicsPrefix((java.lang.String) value); return true;
             case "includeQuery": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncludeQuery((boolean) value); return true;
             case "includeSchemaChanges": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncludeSchemaChanges((boolean) value); return true;
+            case "includeSchemaComments": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncludeSchemaComments((boolean) value); return true;
             case "inconsistentSchemaHandlingMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setInconsistentSchemaHandlingMode((java.lang.String) value); return true;
+            case "incrementalSnapshotAllowSchemaChanges": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncrementalSnapshotAllowSchemaChanges((boolean) value); return true;
             case "incrementalSnapshotChunkSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setIncrementalSnapshotChunkSize((int) value); return true;
             case "maxBatchSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMaxBatchSize((int) value); return true;
             case "maxQueueSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setMaxQueueSize((int) value); return true;
@@ -1860,6 +1776,11 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "queryFetchSize": getOrCreateConfiguration((DebeziumMySqlComponent) component).setQueryFetchSize((int) value); return true;
             case "retriableRestartConnectorWaitMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setRetriableRestartConnectorWaitMs((long) value); return true;
             case "sanitizeFieldNames": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSanitizeFieldNames((boolean) value); return true;
+            case "schemaHistoryInternal": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSchemaHistoryInternal((java.lang.String) value); return true;
+            case "schemaHistoryInternalFileFilename": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSchemaHistoryInternalFileFilename((java.lang.String) value); return true;
+            case "schemaHistoryInternalSkipUnparseableDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSchemaHistoryInternalSkipUnparseableDdl((boolean) value); return true;
+            case "schemaHistoryInternalStoreOnlyCapturedTablesDdl": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSchemaHistoryInternalStoreOnlyCapturedTablesDdl((boolean) value); return true;
+            case "schemaNameAdjustmentMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSchemaNameAdjustmentMode((java.lang.String) value); return true;
             case "signalDataCollection": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSignalDataCollection((java.lang.String) value); return true;
             case "skippedOperations": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSkippedOperations((java.lang.String) value); return true;
             case "snapshotDelayMs": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSnapshotDelayMs((long) value); return true;
@@ -1871,14 +1792,13 @@ public interface DebeziumMysqlComponentBuilderFactory {
             case "snapshotMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSnapshotMode((java.lang.String) value); return true;
             case "snapshotNewTables": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSnapshotNewTables((java.lang.String) value); return true;
             case "snapshotSelectStatementOverrides": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSnapshotSelectStatementOverrides((java.lang.String) value); return true;
-            case "sourceStructVersion": getOrCreateConfiguration((DebeziumMySqlComponent) component).setSourceStructVersion((java.lang.String) value); return true;
-            case "tableBlacklist": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTableBlacklist((java.lang.String) value); return true;
             case "tableExcludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTableExcludeList((java.lang.String) value); return true;
             case "tableIgnoreBuiltin": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTableIgnoreBuiltin((boolean) value); return true;
             case "tableIncludeList": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTableIncludeList((java.lang.String) value); return true;
-            case "tableWhitelist": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTableWhitelist((java.lang.String) value); return true;
             case "timePrecisionMode": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTimePrecisionMode((java.lang.String) value); return true;
             case "tombstonesOnDelete": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTombstonesOnDelete((boolean) value); return true;
+            case "topicNamingStrategy": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTopicNamingStrategy((java.lang.String) value); return true;
+            case "topicPrefix": getOrCreateConfiguration((DebeziumMySqlComponent) component).setTopicPrefix((java.lang.String) value); return true;
             default: return false;
             }
         }

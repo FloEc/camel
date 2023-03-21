@@ -25,7 +25,6 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.component.platform.http.spi.PlatformHttpEngine;
 import org.apache.camel.spi.FactoryFinder;
@@ -53,7 +52,7 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
     @Metadata(label = "advanced", description = "An HTTP Server engine implementation to serve the requests")
     private volatile PlatformHttpEngine engine;
 
-    private final Set<String> httpEndpoints = new TreeSet<>();
+    private final Set<HttpEndpointModel> httpEndpoints = new TreeSet<>();
 
     private volatile boolean localEngine;
 
@@ -84,7 +83,7 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
         // reuse the createConsumer method we already have. The api need to use GET and match on uri prefix
         Consumer consumer = doCreateConsumer(camelContext, processor, "GET", contextPath, null, null, null, configuration,
                 parameters, true);
-        addHttpEndpoint(contextPath);
+        addHttpEndpoint(contextPath, "GET");
         return consumer;
     }
 
@@ -98,9 +97,13 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
                 = doCreateConsumer(camelContext, processor, verb, basePath, uriTemplate, consumes, produces, configuration,
                         parameters, false);
         if (uriTemplate != null) {
-            addHttpEndpoint(basePath + "/" + uriTemplate);
+            if (uriTemplate.startsWith("/")) {
+                addHttpEndpoint(basePath + uriTemplate, verb);
+            } else {
+                addHttpEndpoint(basePath + "/" + uriTemplate, verb);
+            }
         } else {
-            addHttpEndpoint(basePath);
+            addHttpEndpoint(basePath, verb);
         }
         return consumer;
     }
@@ -108,21 +111,27 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
     /**
      * Adds a known http endpoint managed by this component.
      */
-    public void addHttpEndpoint(String uri) {
-        httpEndpoints.add(uri);
+    public void addHttpEndpoint(String uri, String verbs) {
+        HttpEndpointModel model = httpEndpoints.stream().filter(e -> e.getUri().equals(uri)).findFirst().orElse(null);
+        if (model == null) {
+            model = new HttpEndpointModel(uri, verbs);
+            httpEndpoints.add(model);
+        } else {
+            model.addVerb(verbs);
+        }
     }
 
     /**
      * Removes a known http endpoint managed by this component.
      */
     public void removeHttpEndpoint(String uri) {
-        httpEndpoints.remove(uri);
+        httpEndpoints.stream().filter(e -> e.getUri().equals(uri)).findFirst().ifPresent(httpEndpoints::remove);
     }
 
     /**
      * Lists the known http endpoints managed by this component. The endpoints are without host:port/[context-path]
      */
-    public Set<String> getHttpEndpoints() {
+    public Set<HttpEndpointModel> getHttpEndpoints() {
         return Collections.unmodifiableSet(httpEndpoints);
     }
 
@@ -226,7 +235,7 @@ public class PlatformHttpComponent extends DefaultComponent implements RestConsu
                         LOG.debug("Lookup platform http engine from factory");
 
                         engine = getCamelContext()
-                                .adapt(ExtendedCamelContext.class)
+                                .getCamelContextExtension()
                                 .getFactoryFinder(FactoryFinder.DEFAULT_PATH)
                                 .newInstance(PlatformHttpConstants.PLATFORM_HTTP_ENGINE_FACTORY, PlatformHttpEngine.class)
                                 .orElseThrow(() -> new IllegalStateException(

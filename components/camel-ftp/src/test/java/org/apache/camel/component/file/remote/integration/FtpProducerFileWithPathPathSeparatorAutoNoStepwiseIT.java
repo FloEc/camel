@@ -36,14 +36,14 @@ public class FtpProducerFileWithPathPathSeparatorAutoNoStepwiseIT extends FtpSer
     @Test
     public void testProducerFileWithPathNoStepwise() throws Exception {
         Exchange out = template.send(getFtpUrl(), new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody("Hello World");
                 exchange.getIn().setHeader(Exchange.FILE_NAME, "hello/claus.txt");
             }
         });
         assertNotNull(out);
 
-        File file = ftpFile("upload/hello/claus.txt").toFile();
+        File file = service.ftpFile("upload/hello/claus.txt").toFile();
         assertTrue(file.exists(), "The uploaded file should exists");
         assertEquals("Hello World", IOConverter.toString(file, null));
 

@@ -20,10 +20,10 @@ package org.apache.camel.support.task;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 
 import org.apache.camel.support.task.budget.TimeBoundedBudget;
 import org.apache.camel.support.task.budget.TimeBudget;
@@ -45,9 +45,8 @@ public class BackgroundTask implements BlockingTask {
 
         /**
          * Sets a time budget for the task
-         * 
-         * @param  timeBudget the time budget
-         * @return
+         *
+         * @param timeBudget the time budget
          */
         public BackgroundTaskBuilder withBudget(TimeBudget timeBudget) {
             this.budget = timeBudget;
@@ -58,8 +57,7 @@ public class BackgroundTask implements BlockingTask {
         /**
          * Sets an executor service manager for managing the threads
          *
-         * @param  service an instance of an executor service to use
-         * @return
+         * @param service an instance of an executor service to use
          */
         public BackgroundTaskBuilder withScheduledExecutor(ScheduledExecutorService service) {
             this.service = service;
@@ -78,7 +76,10 @@ public class BackgroundTask implements BlockingTask {
     private final TimeBudget budget;
     private final ScheduledExecutorService service;
     private final String name;
+    private final CountDownLatch latch = new CountDownLatch(1);
+
     private Duration elapsed = Duration.ZERO;
+    private boolean completed;
 
     BackgroundTask(TimeBudget budget, ScheduledExecutorService service, String name) {
         this.budget = budget;
@@ -86,94 +87,57 @@ public class BackgroundTask implements BlockingTask {
         this.name = name;
     }
 
-    private <T> void runTaskWrapper(CountDownLatch latch, Predicate<T> predicate, T payload) {
+    private void runTaskWrapper(BooleanSupplier supplier) {
         LOG.trace("Current latch value: {}", latch.getCount());
-
         if (latch.getCount() == 0) {
             return;
         }
 
         if (!budget.next()) {
             LOG.warn("The task {} does not have more budget to continue running", name);
-
-            return;
-        }
-
-        if (predicate.test(payload)) {
+            completed = false;
             latch.countDown();
-            LOG.trace("Task {} has succeeded and the current task won't be schedulable anymore: {}", name, latch.getCount());
-        }
-    }
-
-    private void runTaskWrapper(CountDownLatch latch, BooleanSupplier supplier) {
-        LOG.trace("Current latch value: {}", latch.getCount());
-        if (latch.getCount() == 0) {
-            return;
-        }
-
-        if (!budget.next()) {
-            LOG.warn("The task {} does not have more budget to continue running", name);
-
             return;
         }
 
         if (supplier.getAsBoolean()) {
+            completed = true;
             latch.countDown();
             LOG.trace("Task {} succeeded and the current task won't be schedulable anymore: {}", name, latch.getCount());
         }
     }
 
     @Override
-    public <T> boolean run(Predicate<T> predicate, T payload) {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        // We need it to be cancellable/non-runnable after reaching a certain point, and it needs to be deterministic.
-        // This is why we ignore the ScheduledFuture returned and implement the go/no-go using a latch.
-        service.scheduleAtFixedRate(() -> runTaskWrapper(latch, predicate, payload),
-                budget.initialDelay(), budget.interval(), TimeUnit.MILLISECONDS);
-
-        return waitForTaskCompletion(latch, service);
-    }
-
-    @Override
     public boolean run(BooleanSupplier supplier) {
-        CountDownLatch latch = new CountDownLatch(1);
 
-        // We need it to be cancellable/non-runnable after reaching a certain point, and it needs to be deterministic.
-        // This is why we ignore the ScheduledFuture returned and implement the go/no-go using a latch.
-        service.scheduleAtFixedRate(() -> runTaskWrapper(latch, supplier), budget.initialDelay(),
+        Future<?> task = service.scheduleAtFixedRate(() -> runTaskWrapper(supplier), budget.initialDelay(),
                 budget.interval(), TimeUnit.MILLISECONDS);
 
-        return waitForTaskCompletion(latch, service);
+        waitForTaskCompletion(task);
+        return completed;
     }
 
-    private boolean waitForTaskCompletion(CountDownLatch latch, ScheduledExecutorService service) {
-        boolean completed = false;
+    private void waitForTaskCompletion(Future<?> task) {
         try {
+            // We need it to be cancellable/non-runnable after reaching a certain point, and it needs to be deterministic.
+            // This is why we ignore the ScheduledFuture returned and implement the go/no-go using a latch.
             if (budget.maxDuration() == TimeBoundedBudget.UNLIMITED_DURATION) {
                 latch.await();
-                completed = true;
             } else {
                 if (!latch.await(budget.maxDuration(), TimeUnit.MILLISECONDS)) {
                     LOG.debug("Timeout out waiting for the completion of the task");
                 } else {
                     LOG.debug("The task has finished the execution and it is ready to continue");
-
-                    completed = true;
                 }
             }
 
-            service.shutdown();
-            service.awaitTermination(1, TimeUnit.SECONDS);
+            task.cancel(true);
         } catch (InterruptedException e) {
-            LOG.warn("Interrupted while waiting for the repeatable task to execute");
+            LOG.warn("Interrupted while waiting for the repeatable task to execute: {}", e.getMessage(), e);
             Thread.currentThread().interrupt();
         } finally {
             elapsed = budget.elapsed();
-            service.shutdownNow();
         }
-
-        return completed;
     }
 
     @Override

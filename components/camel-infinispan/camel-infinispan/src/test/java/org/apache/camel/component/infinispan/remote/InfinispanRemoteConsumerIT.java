@@ -23,10 +23,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.infinispan.commons.api.BasicCache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
-@DisabledOnOs(OS.MAC)
 public class InfinispanRemoteConsumerIT extends InfinispanRemoteTestSupport implements InfinispanConsumerTestSupport {
     @Test
     public void consumerReceivedEventNotifications() throws Exception {
@@ -66,7 +63,7 @@ public class InfinispanRemoteConsumerIT extends InfinispanRemoteTestSupport impl
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

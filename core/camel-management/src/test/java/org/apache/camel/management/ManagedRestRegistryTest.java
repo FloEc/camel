@@ -69,7 +69,7 @@ public class ManagedRestRegistryTest extends ManagementTestSupport {
         TabularData data = (TabularData) mbeanServer.invoke(name, "listRestServices", null, null);
         assertEquals(3, data.size());
 
-        // should not be enabled as api-doc is not enabled or camel-swagger-java is not on classpath
+        // should not be enabled as api-doc is not enabled or camel-openapi-java is not on classpath
         String json = (String) mbeanServer.invoke(name, "apiDocAsJson", null, null);
         assertNull(json);
 
@@ -94,13 +94,15 @@ public class ManagedRestRegistryTest extends ManagementTestSupport {
                         .get().to("direct:hello").description("Calling direct route");
 
                 rest("/say/bye").description("the bye rest service")
-                        .get().consumes("application/json").description("I am saying bye world")
-                        .route().routeId("myRestRoute").transform().constant("Bye World").endRest()
-                        .post()
-                        .to("mock:update");
+                        .get().consumes("application/json").description("I am saying bye world").to("direct:bye")
+                        .post().to("mock:update");
 
                 from("direct:hello").description("The hello route")
                         .transform().simple("Hello ${header.name}");
+
+                from("direct:bye").description("The bye route")
+                        .transform().constant("Bye World");
+
             }
         };
     }

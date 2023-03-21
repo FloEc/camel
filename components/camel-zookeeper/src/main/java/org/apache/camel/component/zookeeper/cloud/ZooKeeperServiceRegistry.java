@@ -16,15 +16,12 @@
  */
 package org.apache.camel.component.zookeeper.cloud;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.annotation.JsonRootName;
 import org.apache.camel.cloud.ServiceDefinition;
 import org.apache.camel.component.zookeeper.ZooKeeperCuratorHelper;
 import org.apache.camel.impl.cloud.AbstractServiceRegistry;
@@ -263,9 +260,11 @@ public class ZooKeeperServiceRegistry extends AbstractServiceRegistry {
             ObjectHelper.notNull(getCamelContext(), "Camel Context");
             ObjectHelper.notNull(configuration.getBasePath(), "ZooKeeper base path");
 
-            LOGGER.debug("Starting ZooKeeper Curator with namespace '{}', nodes: '{}'",
-                    configuration.getNamespace(),
-                    String.join(",", configuration.getNodes()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Starting ZooKeeper Curator with namespace '{}', nodes: '{}'",
+                        configuration.getNamespace(),
+                        String.join(",", configuration.getNodes()));
+            }
 
             curator = ZooKeeperCuratorHelper.createCurator(configuration);
             curator.start();
@@ -379,13 +378,4 @@ public class ZooKeeperServiceRegistry extends AbstractServiceRegistry {
         return ObjectHelper.notNull(host, "service host");
     }
 
-    @JsonRootName("meta")
-    public static final class MetaData extends HashMap<String, String> {
-        public MetaData() {
-        }
-
-        public MetaData(Map<? extends String, ? extends String> meta) {
-            super(meta);
-        }
-    }
 }

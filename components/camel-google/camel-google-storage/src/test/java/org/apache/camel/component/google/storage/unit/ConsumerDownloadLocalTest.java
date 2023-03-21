@@ -38,10 +38,10 @@ public class ConsumerDownloadLocalTest extends GoogleCloudStorageBaseTest {
     private MockEndpoint consumedObjects;
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
 
                 String endpoint = "google-storage://myCamelBucket?autoCreateBucket=true";
 
@@ -57,9 +57,9 @@ public class ConsumerDownloadLocalTest extends GoogleCloudStorageBaseTest {
                      + "&deleteAfterRead=true"
                      + "&includeBody=true"
                      + "&downloadFileName=target")
-                             .startupOrder(2)
-                             //.log("consuming: ${header.CamelGoogleCloudStorageBucketName}/${header.CamelGoogleCloudStorageObjectName}, body=${body}")
-                             .to("mock:consumedObjects");
+                        .startupOrder(2)
+                        //.log("consuming: ${header.CamelGoogleCloudStorageBucketName}/${header.CamelGoogleCloudStorageObjectName}, body=${body}")
+                        .to("mock:consumedObjects");
 
             }
         };
@@ -83,7 +83,7 @@ public class ConsumerDownloadLocalTest extends GoogleCloudStorageBaseTest {
             });
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         context.stop();
 

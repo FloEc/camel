@@ -25,14 +25,19 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mongodb.MongoDbConstants;
 import org.apache.camel.component.mongodb.MongoDbOperation;
+import org.apache.camel.test.infra.core.annotations.RouteFixture;
+import org.apache.camel.test.infra.core.api.ConfigurableRoute;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.mongodb.client.model.Accumulators.sum;
@@ -43,6 +48,7 @@ import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.currentTimestamp;
 import static com.mongodb.client.model.Updates.set;
+import static org.apache.camel.component.mongodb.MongoDbConstants.CRITERIA;
 import static org.apache.camel.component.mongodb.MongoDbConstants.MONGO_ID;
 import static org.apache.camel.test.junit5.TestSupport.assertListSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,12 +56,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
+public class MongoDbOperationsIT extends AbstractMongoDbITSupport implements ConfigurableRoute {
+
+    @BeforeEach
+    void checkDocuments() {
+        Assumptions.assumeTrue(0 == testCollection.countDocuments(), "The collection should have no documents");
+    }
 
     @Test
-    public void testCountOperation() throws Exception {
-        // Test that the collection has 0 documents in it
-        assertEquals(0, testCollection.countDocuments());
+    public void testCountOperation() {
         Object result = template.requestBody("direct:count", "irrelevantBody");
         assertTrue(result instanceof Long, "Result is not of type Long");
         assertEquals(0L, result, "Test collection should not contain any records");
@@ -77,8 +86,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testInsertString() throws Exception {
-        assertEquals(0, testCollection.countDocuments());
+    public void testInsertString() {
         Object result = template.requestBody("direct:insert",
                 new Document(MONGO_ID, "testInsertString").append("scientist", "Einstein").toJson());
         assertTrue(result instanceof Document);
@@ -87,14 +95,14 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testStoreOidOnInsert() throws Exception {
+    public void testStoreOidOnInsert() {
         Document document = new Document();
         ObjectId oid = template.requestBody("direct:testStoreOidOnInsert", document, ObjectId.class);
         assertEquals(document.get(MONGO_ID), oid);
     }
 
     @Test
-    public void testStoreOidsOnInsert() throws Exception {
+    public void testStoreOidsOnInsert() {
         Document firsDocument = new Document();
         Document secondDoocument = new Document();
         List<?> oids
@@ -104,9 +112,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testSave() throws Exception {
-        // Prepare test
-        assertEquals(0, testCollection.countDocuments());
+    public void testSave() {
         Object[] req = new Object[] {
                 new Document(MONGO_ID, "testSave1").append("scientist", "Einstein").toJson(),
                 new Document(MONGO_ID, "testSave2").append("scientist", "Copernicus").toJson() };
@@ -129,9 +135,34 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testSaveWithoutId() {
+    public void testSaveWithShardedKey() {
         // Prepare test
-        assertEquals(0, testCollection.countDocuments());
+        Assumptions.assumeTrue(0 == testCollection.countDocuments(), "The collection should have no documents");
+
+        Object[] req = new Object[] {
+                new Document(MONGO_ID, "testSave1").append("scientist", "Einstein").append("country", "Germany").toJson(),
+                new Document(MONGO_ID, "testSave2").append("scientist", "Copernicus").append("country", "Poland").toJson() };
+        Object result = template.requestBody("direct:insert", req);
+        assertTrue(result instanceof List);
+        assertEquals(2, testCollection.countDocuments(), "Number of records persisted must be 2");
+
+        // Testing the save logic
+        Document record1 = testCollection.find(eq(MONGO_ID, "testSave1")).first();
+        assertEquals("Einstein", record1.get("scientist"), "Scientist field of 'testSave1' must equal 'Einstein'");
+        record1.put("scientist", "Kepler");
+
+        //Pass sharded collection key as CRITERIA to prevent "MongoWriteException: Failed to target upsert by query :: could not extract exact shard key"
+        result = template.requestBodyAndHeader("direct:save", record1, CRITERIA, eq("country", "Germany"));
+        assertTrue(result instanceof UpdateResult);
+
+        record1 = testCollection.find(eq(MONGO_ID, "testSave1")).first();
+        assertEquals("Kepler", record1.get("scientist"),
+                "Scientist field of 'testSave1' must equal 'Kepler' after save operation");
+
+    }
+
+    @Test
+    public void testSaveWithoutId() {
         // This document should not be modified
         Document doc = new Document("scientist", "Copernic");
         template.requestBody("direct:insert", doc);
@@ -149,23 +180,21 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testStoreOidOnSaveWithoutId() throws Exception {
+    public void testStoreOidOnSaveWithoutId() {
         Document document = new Document();
         ObjectId oid = template.requestBody("direct:testStoreOidOnSave", document, ObjectId.class);
         assertNotNull(oid);
     }
 
     @Test
-    public void testStoreOidOnSave() throws Exception {
+    public void testStoreOidOnSave() {
         Document document = new Document(MONGO_ID, new ObjectId("5847e39e0824d6b54194e197"));
         ObjectId oid = template.requestBody("direct:testStoreOidOnSave", document, ObjectId.class);
         assertEquals(document.get(MONGO_ID), oid);
     }
 
     @Test
-    public void testUpdate() throws Exception {
-        // Prepare test
-        assertEquals(0, testCollection.countDocuments());
+    public void testUpdate() {
         for (int i = 1; i <= 100; i++) {
             String body = null;
             try (Formatter f = new Formatter();) {
@@ -191,7 +220,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
 
         Exchange resultExchange = template.request("direct:update", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody(new Bson[] { extraField, updateObj });
                 exchange.getIn().setHeader(MongoDbConstants.MULTIUPDATE, true);
             }
@@ -206,9 +235,10 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testUpdateFromString() throws Exception {
+    public void testUpdateFromString() {
         // Prepare test
-        assertEquals(0, testCollection.countDocuments());
+        Assumptions.assumeTrue(0 == testCollection.countDocuments(), "The collection should have no documents");
+
         for (int i = 1; i <= 100; i++) {
             String body = null;
             try (Formatter f = new Formatter();) {
@@ -238,7 +268,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
 
         Exchange resultExchange = template.request("direct:update", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody(updates);
                 exchange.getIn().setHeader(MongoDbConstants.MULTIUPDATE, true);
             }
@@ -253,9 +283,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testUpdateUsingFieldsFilterHeader() throws Exception {
-        // Prepare test
-        assertEquals(0, testCollection.countDocuments());
+    public void testUpdateUsingFieldsFilterHeader() {
         for (int i = 1; i <= 100; i++) {
             String body = null;
             try (Formatter f = new Formatter();) {
@@ -290,9 +318,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testRemove() throws Exception {
-        // Prepare test
-        assertEquals(0, testCollection.countDocuments());
+    public void testRemove() {
         for (int i = 1; i <= 100; i++) {
             String body = null;
             try (Formatter f = new Formatter()) {
@@ -314,7 +340,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
 
         Exchange resultExchange = template.request("direct:remove", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody(extraField);
             }
         });
@@ -329,9 +355,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testAggregate() throws Exception {
-        // Test that the collection has 0 documents in it
-        assertEquals(0, testCollection.countDocuments());
+    public void testAggregate() {
         pumpDataIntoTestCollection();
 
         // Repeat ten times, obtain 10 batches of 100 results each time
@@ -347,17 +371,16 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testDbStats() throws Exception {
-        assertEquals(0, testCollection.countDocuments());
+    public void testDbStats() {
+        Assumptions.assumeTrue(0 == testCollection.countDocuments(), "The collection should have no documents");
+
         Object result = template.requestBody("direct:getDbStats", "irrelevantBody");
         assertTrue(result instanceof Document, "Result is not of type Document");
         assertTrue(Document.class.cast(result).keySet().size() > 0, "The result should contain keys");
     }
 
     @Test
-    public void testColStats() throws Exception {
-        assertEquals(0, testCollection.countDocuments());
-
+    public void testColStats() {
         // Add some records to the collection (and do it via camel-mongodb)
         for (int i = 1; i <= 100; i++) {
             String body = null;
@@ -374,7 +397,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testCommand() throws Exception {
+    public void testCommand() {
         // Call hostInfo, command working with every configuration
         Object result = template.requestBody("direct:command", "{\"hostInfo\":\"1\"}");
         assertTrue(result instanceof Document, "Result is not of type Document");
@@ -382,10 +405,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
     }
 
     @Test
-    public void testOperationHeader() throws Exception {
-        // Test that the collection has 0 documents in it
-        assertEquals(0, testCollection.countDocuments());
-
+    public void testOperationHeader() {
         // check that the count operation was invoked instead of the insert
         // operation
         Object result
@@ -402,8 +422,7 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
 
     }
 
-    @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
 
@@ -434,5 +453,11 @@ public class MongoDbOperationsIT extends AbstractMongoDbITSupport {
 
             }
         };
+    }
+
+    @RouteFixture
+    @Override
+    public void createRouteBuilder(CamelContext context) throws Exception {
+        context.addRoutes(createRouteBuilder());
     }
 }

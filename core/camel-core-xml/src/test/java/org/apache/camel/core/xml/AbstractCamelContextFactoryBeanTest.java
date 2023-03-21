@@ -109,7 +109,9 @@ public class AbstractCamelContextFactoryBeanTest {
         final DefaultCamelContext context = mock(DefaultCamelContext.class,
                 withSettings().invocationListeners(i -> invocations.add((Invocation) i.getInvocation())));
 
-        when(context.adapt(ExtendedCamelContext.class)).thenReturn(context);
+        final ExtendedCamelContext extendedCamelContext = mock(ExtendedCamelContext.class);
+
+        when(context.getCamelContextExtension()).thenReturn(extendedCamelContext);
 
         // program the property resolution in context mock
         when(context.resolvePropertyPlaceholders(anyString())).thenAnswer(invocation -> {
@@ -134,7 +136,7 @@ public class AbstractCamelContextFactoryBeanTest {
         when(context.getManagementNameStrategy()).thenReturn(mock(ManagementNameStrategy.class));
         when(context.getExecutorServiceManager()).thenReturn(mock(ExecutorServiceManager.class));
         when(context.getInflightRepository()).thenReturn(mock(InflightRepository.class));
-        when(context.getBeanPostProcessor()).thenReturn(mock(CamelBeanPostProcessor.class));
+        when(context.getCamelContextExtension().getBeanPostProcessor()).thenReturn(mock(CamelBeanPostProcessor.class));
 
         @SuppressWarnings("unchecked")
         final AbstractCamelContextFactoryBean<ModelCamelContext> factory = mock(AbstractCamelContextFactoryBean.class);

@@ -19,20 +19,21 @@ package org.apache.camel.component.file.remote.integration;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.test.junit5.TestSupport;
 
 public class FtpConsumerLocalWorkDirectoryWorkOnPayloadIT extends FtpConsumerLocalWorkDirectoryIT {
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         // alter the body by setting it to a String type
                         exchange.getIn().setBody("Hello World");
 
                     }
-                }).to("mock:result", fileUri("out"));
+                }).to("mock:result", TestSupport.fileUri(testDirectory, "out"));
             }
         };
     }

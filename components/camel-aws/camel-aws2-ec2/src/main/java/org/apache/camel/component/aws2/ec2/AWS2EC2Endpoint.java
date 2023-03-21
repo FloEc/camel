@@ -22,6 +22,8 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.component.aws2.ec2.client.AWS2EC2ClientFactory;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.impl.health.ComponentsHealthCheckRepository;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.support.ScheduledPollEndpoint;
@@ -32,10 +34,13 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
  * Manage AWS EC2 instances using AWS SDK version 2.x.
  */
 @UriEndpoint(firstVersion = "3.1.0", scheme = "aws2-ec2", title = "AWS Elastic Compute Cloud (EC2)",
-             syntax = "aws2-ec2:label", producerOnly = true, category = { Category.CLOUD, Category.MANAGEMENT })
+             syntax = "aws2-ec2:label", producerOnly = true, category = { Category.CLOUD, Category.MANAGEMENT },
+             headersClass = AWS2EC2Constants.class)
 public class AWS2EC2Endpoint extends ScheduledPollEndpoint {
 
     private Ec2Client ec2Client;
+    private ComponentsHealthCheckRepository healthCheckRepository;
+    private AWS2EC2HealthCheck clientHealthCheck;
 
     @UriParam
     private AWS2EC2Configuration configuration;
@@ -61,6 +66,15 @@ public class AWS2EC2Endpoint extends ScheduledPollEndpoint {
 
         ec2Client = configuration.getAmazonEc2Client() != null
                 ? configuration.getAmazonEc2Client() : AWS2EC2ClientFactory.getEc2Client(configuration).getEc2Client();
+
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(getCamelContext(),
+                ComponentsHealthCheckRepository.REPOSITORY_ID, ComponentsHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            // Do not register the health check until we resolve CAMEL-18992
+            //clientHealthCheck = new AWS2EC2HealthCheck(this, getId());
+            //healthCheckRepository.addHealthCheck(clientHealthCheck);
+        }
     }
 
     @Override
@@ -69,6 +83,11 @@ public class AWS2EC2Endpoint extends ScheduledPollEndpoint {
             if (ec2Client != null) {
                 ec2Client.close();
             }
+        }
+
+        if (healthCheckRepository != null && clientHealthCheck != null) {
+            healthCheckRepository.removeHealthCheck(clientHealthCheck);
+            clientHealthCheck = null;
         }
         super.doStop();
     }

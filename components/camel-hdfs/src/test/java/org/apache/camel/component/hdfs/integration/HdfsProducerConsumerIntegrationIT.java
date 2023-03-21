@@ -26,21 +26,24 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.infra.hdfs.v2.services.HDFSService;
+import org.apache.camel.test.infra.hdfs.v2.services.HDFSServiceFactory;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled("Must run manual")
 public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
+    @RegisterExtension
+    public static HDFSService service = HDFSServiceFactory.createSingletonService();
+
     private static final int ITERATIONS = 400;
 
     @Override
@@ -53,9 +56,11 @@ public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
         context.addRoutes(new RouteBuilder() {
             @Override
             public void configure() {
-                from("direct:start").to(
-                        "hdfs://localhost:9000/tmp/test/test-camel-simple-write-file?fileSystemType=HDFS&splitStrategy=BYTES:5,IDLE:1000");
-                from("hdfs://localhost:9000/tmp/test/test-camel-simple-write-file?pattern=*&initialDelay=2000&fileSystemType=HDFS&chunkSize=5")
+                from("direct:start").toF(
+                        "hdfs://%s:%d/tmp/test/test-camel-simple-write-file?fileSystemType=HDFS&splitStrategy=BYTES:5,IDLE:1000",
+                        service.getHDFSHost(), service.getPort());
+                fromF("hdfs://%s:%d/tmp/test/test-camel-simple-write-file?pattern=*&initialDelay=2000&fileSystemType=HDFS&chunkSize=5",
+                        service.getHDFSHost(), service.getPort())
                         .to("mock:result");
             }
         });
@@ -79,20 +84,20 @@ public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
             String text = exchange.getIn().getBody(String.class);
             sent.remove(text);
         }
-        assertThat(sent.isEmpty(), is(true));
+        assertTrue(sent.isEmpty());
     }
 
     @Test
     // see https://issues.apache.org/jira/browse/CAMEL-7318
     public void testMultipleConsumers() throws Exception {
 
-        Path p = new Path("hdfs://localhost:9000/tmp/test/multiple-consumers");
+        Path p = new Path(String.format("hdfs://%s:%d/tmp/test/multiple-consumers", service.getHDFSHost(), service.getPort()));
         FileSystem fs = FileSystem.get(p.toUri(), new Configuration());
         fs.mkdirs(p);
         for (int i = 1; i <= ITERATIONS; i++) {
-            FSDataOutputStream os = fs.create(new Path(p, String.format("file-%03d.txt", i)));
-            os.write(String.format("hello (%03d)\n", i).getBytes());
-            os.close();
+            try (FSDataOutputStream os = fs.create(new Path(p, String.format("file-%03d.txt", i)))) {
+                os.write(String.format("hello (%03d)\n", i).getBytes());
+            }
         }
 
         final Set<String> fileNames = new HashSet<>();
@@ -100,7 +105,7 @@ public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
         MockEndpoint resultEndpoint = context.getEndpoint("mock:result", MockEndpoint.class);
         resultEndpoint.whenAnyExchangeReceived(new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 fileNames.add(exchange.getIn().getHeader(Exchange.FILE_NAME, String.class));
                 latch.countDown();
             }
@@ -110,13 +115,17 @@ public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
             @Override
             public void configure() {
                 // difference in chunkSize only to allow multiple consumers
-                from("hdfs://localhost:9000/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=128")
+                fromF("hdfs://%s:%d/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=128",
+                        service.getHDFSHost(), service.getPort())
                         .to("mock:result");
-                from("hdfs://localhost:9000/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=256")
+                fromF("hdfs://%s:%d/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=256",
+                        service.getHDFSHost(), service.getPort())
                         .to("mock:result");
-                from("hdfs://localhost:9000/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=512")
+                fromF("hdfs://%s:%d/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=512",
+                        service.getHDFSHost(), service.getPort())
                         .to("mock:result");
-                from("hdfs://localhost:9000/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=1024")
+                fromF("hdfs://%s:%d/tmp/test/multiple-consumers?pattern=*.txt&fileSystemType=HDFS&chunkSize=1024",
+                        service.getHDFSHost(), service.getPort())
                         .to("mock:result");
             }
         });
@@ -127,7 +136,7 @@ public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
         latch.await(30, TimeUnit.SECONDS);
 
         resultEndpoint.assertIsSatisfied();
-        assertThat(fileNames.size(), equalTo(ITERATIONS));
+        assertEquals(ITERATIONS, fileNames.size());
     }
 
     @Override
@@ -137,10 +146,11 @@ public class HdfsProducerConsumerIntegrationIT extends CamelTestSupport {
 
         Thread.sleep(250);
         Configuration conf = new Configuration();
-        Path dir = new Path("hdfs://localhost:9000/tmp/test");
+        Path dir = new Path(String.format("hdfs://%s:%d/tmp/test", service.getHDFSHost(), service.getPort()));
         FileSystem fs = FileSystem.get(dir.toUri(), conf);
         fs.delete(dir, true);
-        fs.delete(new Path("hdfs://localhost:9000/tmp/test/multiple-consumers"), true);
+        dir = new Path(String.format("hdfs://%s:%d/tmp/test/multiple-consumers", service.getHDFSHost(), service.getPort()));
+        fs.delete(dir, true);
     }
 
 }

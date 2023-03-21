@@ -40,23 +40,23 @@ public class IAMCreateUserPojoIT extends Aws2IAMBase {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createUserPojo", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.createUser);
                 exchange.getIn().setBody(CreateUserRequest.builder().userName("test").build());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateUserResponse resultGet = (CreateUserResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.user().userName());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:createUserPojo")
                         .to("aws2-iam://test?operation=createUser&pojoRequest=true")
                         .to("mock:result");

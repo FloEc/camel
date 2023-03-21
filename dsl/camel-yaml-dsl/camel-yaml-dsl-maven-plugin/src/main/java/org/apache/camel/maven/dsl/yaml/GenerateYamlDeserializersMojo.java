@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
@@ -43,14 +43,9 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.apache.camel.CamelContext;
-import org.apache.camel.catalog.CamelCatalog;
-import org.apache.camel.catalog.DefaultCamelCatalog;
-import org.apache.camel.maven.dsl.yaml.support.ToolingSupport;
 import org.apache.camel.maven.dsl.yaml.support.TypeSpecHolder;
-import org.apache.camel.tooling.model.ComponentModel;
 import org.apache.camel.tooling.util.FileUtil;
 import org.apache.camel.util.StringHelper;
 import org.apache.maven.plugin.MojoFailureException;
@@ -86,8 +81,6 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
     protected void generate() throws MojoFailureException {
         try {
             write(generateExpressionDeserializers());
-            write(generateEndpointProducer());
-            write(generateEndpointConsumer());
             write(generateDeserializers());
         } catch (Exception e) {
             throw new MojoFailureException(e.getMessage(), e);
@@ -122,6 +115,11 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         type.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
         type.superclass(CN_DESERIALIZER_SUPPORT);
 
+        // PMD suppression
+        AnnotationSpec.Builder suppress = AnnotationSpec.builder(SuppressWarnings.class);
+        suppress.addMember("value", "$L", "\"PMD.UnnecessaryFullyQualifiedName\"");
+        type.addAnnotation(suppress.build());
+
         // add private constructor
         type.addMethod(MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PRIVATE)
@@ -142,7 +140,11 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     .addStatement("$T dc = getDeserializationContext(node)", CN_DESERIALIZATION_CONTEXT)
                     .addStatement("String key = asText(nt.getKeyNode())")
                     .addStatement("$T val = setDeserializationContext(nt.getValueNode(), dc)", CN_NODE)
-                    .addStatement("return constructExpressionType(key, val)")
+                    .addStatement("ExpressionDefinition answer = constructExpressionType(key, val)")
+                    .beginControlFlow("if (answer == null)")
+                    .addStatement("throw new org.apache.camel.dsl.yaml.common.exception.InvalidExpressionException(node, \"Unknown expression with id: \" + key)")
+                    .endControlFlow()
+                    .addStatement("return answer")
                     .build())
             .build());
 
@@ -298,6 +300,11 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         deserializers.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
         deserializers.superclass(CN_DESERIALIZER_SUPPORT);
 
+        // PMD suppression
+        AnnotationSpec.Builder suppress = AnnotationSpec.builder(SuppressWarnings.class);
+        suppress.addMember("value", "$L", "\"PMD.UnnecessaryFullyQualifiedName\"");
+        deserializers.addAnnotation(suppress.build());
+
         // add private constructor
         deserializers.addMethod(MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PRIVATE)
@@ -309,7 +316,8 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         all()
             .filter(ci -> {
                 return !ci.name().equals(EXPRESSION_DEFINITION_CLASS)
-                    && !ci.name().equals(EXPRESSION_SUBELEMENT_DEFINITION_CLASS);
+                    && !ci.name().equals(EXPRESSION_SUBELEMENT_DEFINITION_CLASS)
+                    && !implementType(ci, ERROR_HANDLER_BUILDER_CLASS);
             })
             .map(this::generateParser)
             .sorted(Comparator.comparing(o -> o.type.name))
@@ -361,76 +369,6 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         );
     }
 
-    public final Collection<TypeSpec> generateEndpointConsumer() {
-        return generateEndpoint(
-            "EndpointConsumerDeserializers",
-            component -> !component.isProducerOnly(),
-            ClassName.get("org.apache.camel.model", "FromDefinition")
-        );
-    }
-
-    public final Collection<TypeSpec> generateEndpointProducer() {
-        return generateEndpoint(
-            "EndpointProducerDeserializers",
-            component -> !component.isConsumerOnly(),
-            ClassName.get("org.apache.camel.model", "ToDefinition")
-        );
-    }
-
-    public final Collection<TypeSpec> generateEndpoint(
-        String className,
-        Predicate<ComponentModel> componentFilter,
-        TypeName superClass) {
-
-        TypeSpec.Builder resolver = TypeSpec.classBuilder(className + "Resolver");
-        resolver.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-        resolver.addSuperinterface(CN_DESERIALIZER_RESOLVER);
-
-        CodeBlock.Builder sw = CodeBlock.builder();
-        sw.beginControlFlow("switch(id)");
-
-        CamelCatalog catalog = new DefaultCamelCatalog();
-        catalog.findComponentNames().stream()
-            .map(catalog::componentModel)
-            .filter(componentFilter)
-            .flatMap(component -> ToolingSupport.combine(component.getScheme(), component.getAlternativeSchemes()))
-            .sorted()
-            .distinct()
-            .forEach(scheme -> sw.add("case $S:\n", scheme));
-
-        sw.addStatement("return org.apache.camel.dsl.yaml.common.YamlSupport.creteEndpointUri(id, node)", superClass);
-        sw.endControlFlow();
-        sw.addStatement("return null");
-
-        resolver.addMethod(
-            MethodSpec.methodBuilder("getOrder")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Override.class)
-                .returns(int.class)
-                .addStatement("return YamlDeserializerResolver.ORDER_LOWEST")
-                .build());
-        resolver.addMethod(
-            MethodSpec.methodBuilder("resolveEndpointUri")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(String.class, "id")
-                .addParameter(Node.class, "node")
-                .returns(String.class)
-                .addCode(sw.build())
-                .build());
-        resolver.addMethod(
-            MethodSpec.methodBuilder("resolve")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Override.class)
-                .addParameter(String.class, "id")
-                .returns(ConstructNode.class)
-                .addStatement("return node -> org.apache.camel.dsl.yaml.common.YamlSupport.creteEndpoint(id, node, $L::new)", superClass)
-                .build());
-
-        return Arrays.asList(
-            resolver.build()
-        );
-    }
-
     private TypeSpecHolder generateParser(ClassInfo info) {
         final ClassName targetType = ClassName.get(info.name().prefix().toString(), info.name().withoutPackagePrefix());
         final TypeSpec.Builder builder = TypeSpec.classBuilder(info.simpleName() + "Deserializer");
@@ -439,7 +377,6 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         final AnnotationSpec.Builder yamlTypeAnnotation = AnnotationSpec.builder(CN_YAML_TYPE);
 
         builder.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-
 
         if (extendsType(info, SEND_DEFINITION_CLASS) || extendsType(info, TO_DYNAMIC_DEFINITION_CLASS)) {
             builder.superclass(ParameterizedTypeName.get(CN_ENDPOINT_AWARE_DESERIALIZER_BASE, targetType));
@@ -456,6 +393,23 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         if (info.name().toString().equals("org.apache.camel.model.rest.RestDefinition")) {
             builder.addAnnotation(CN_YAML_IN);
         }
+
+        final AtomicReference<String> modelName = new AtomicReference<>();
+        annotationValue(info, XML_ROOT_ELEMENT_ANNOTATION_CLASS, "name")
+                .map(AnnotationValue::asString)
+                .filter(value -> !"##default".equals(value))
+                .ifPresent(value -> {
+                    // generate the kebab case variant for backward compatibility
+                    // https://issues.apache.org/jira/browse/CAMEL-17097
+                    if (!Objects.equals(value, StringHelper.camelCaseToDash(value))) {
+                        yamlTypeAnnotation.addMember("nodes", "$S", StringHelper.camelCaseToDash(value));
+                        TypeSpecHolder.put(attributes, "node", StringHelper.camelCaseToDash(value));
+                    }
+
+                    yamlTypeAnnotation.addMember("nodes", "$S", value);
+                    modelName.set(value);
+                    TypeSpecHolder.put(attributes, "node", value);
+                });
 
         //
         // Constructors
@@ -482,7 +436,15 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         // T handledTypeInstance(String value);
         //
         for (MethodInfo ctor: info.constructors()) {
-            if (ctor.parameters().size() == 1 && ctor.parameters().get(0).name().equals(STRING_CLASS)) {
+
+            // do not generate inline for error handlers (only ref error handler is allowed)
+            boolean eh = implementType(info, ERROR_HANDLER_DEFINITION_CLASS);
+            boolean ref = eh && implementType(info, REF_ERROR_HANDLER_DEFINITION_CLASS);
+            if (eh && !ref) {
+                break;
+            }
+
+            if (ctor.parameterTypes().size() == 1 && ctor.parameterTypes().get(0).name().equals(STRING_CLASS)) {
                 if ((ctor.flags() & java.lang.reflect.Modifier.PUBLIC) == 0) {
                     break;
                 }
@@ -512,25 +474,9 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         CodeBlock.Builder setProperty = CodeBlock.builder();
         setProperty.beginControlFlow("switch(propertyKey)");
 
-        if (implementType(info, ERROR_HANDLER_BUILDER_CLASS)) {
-            List<MethodInfo> methods = methods(info).stream()
-                .filter(mi -> java.lang.reflect.Modifier.isPublic(mi.flags()))
-                .filter(mi -> mi.name().matches("^set[1-9A-Z].*$"))
-                .filter(mi -> mi.parameters().size() == 1)
-                .filter(mi -> PRIMITIVE_CLASSES.contains(mi.parameters().get(0).name().toString()))
-                .filter(mi -> mi.returnType().kind() == Type.Kind.VOID)
-                .collect(Collectors.toList());
-
-            for (MethodInfo method : methods) {
-                if (generateSetValue(setProperty, method, properties)) {
-                    caseAdded = true;
-                }
-            }
-        } else {
-            for (FieldInfo field : fields(info)) {
-                if (generateSetValue(setProperty, field, properties)) {
-                    caseAdded = true;
-                }
+        for (FieldInfo field : fields(info)) {
+            if (generateSetValue(modelName.get(), setProperty, field, properties)) {
+                caseAdded = true;
             }
         }
 
@@ -545,6 +491,15 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
             setProperty.addStatement("target.setDescription(val)");
             setProperty.addStatement("break");
             setProperty.endControlFlow();
+
+            properties.add(
+                yamlProperty(
+                        "id",
+                        "string"));
+            properties.add(
+                yamlProperty(
+                        "description",
+                        "string"));
         }
 
         if (implementType(info, OUTPUT_NODE_CLASS)) {
@@ -564,14 +519,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
 
         if (extendsType(info, SEND_DEFINITION_CLASS) || extendsType(info, TO_DYNAMIC_DEFINITION_CLASS)) {
             setProperty.beginControlFlow("default:");
-            setProperty.addStatement("String uri = EndpointProducerDeserializersResolver.resolveEndpointUri(propertyKey, node)");
-            setProperty.beginControlFlow("if (uri == null)");
             setProperty.addStatement("return false");
-            setProperty.endControlFlow();
-            setProperty.beginControlFlow("if (target.getUri() != null)");
-            setProperty.addStatement("throw new IllegalStateException(\"url must not be set when using Endpoint DSL\")");
-            setProperty.endControlFlow();
-            setProperty.addStatement("target.setUri(uri)");
             setProperty.endControlFlow();
 
             properties.add(
@@ -584,6 +532,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                 .addAnnotation(AnnotationSpec.builder(Override.class).build())
                 .addModifiers(Modifier.PROTECTED)
                 .addParameter(CamelContext.class, "camelContext")
+                .addParameter(Node.class, "node")
                 .addParameter(targetType, "target")
                 .addParameter(
                     ParameterizedTypeName.get(
@@ -593,14 +542,14 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     "parameters")
                 .addCode(
                     CodeBlock.builder()
-                        .addStatement("target.setUri(org.apache.camel.dsl.yaml.common.YamlSupport.createEndpointUri(camelContext, target.getUri(), parameters))")
+                        .addStatement("target.setUri(org.apache.camel.dsl.yaml.common.YamlSupport.createEndpointUri(camelContext, node, target.getUri(), parameters))")
                         .build())
                 .build());
         } else if (implementType(info, HAS_EXPRESSION_TYPE_CLASS)) {
             setProperty.beginControlFlow("default:");
             setProperty.addStatement("$T ed = target.getExpressionType()", CN_EXPRESSION_DEFINITION);
             setProperty.beginControlFlow("if (ed != null)");
-            setProperty.addStatement("throw new org.apache.camel.dsl.yaml.common.exception.UnsupportedFieldException(propertyName, \"an expression has already been configured (\" + ed + \")\")");
+            setProperty.addStatement("throw new org.apache.camel.dsl.yaml.common.exception.DuplicateFieldException(node, propertyName, \"as an expression\")");
             setProperty.endControlFlow();
             setProperty.addStatement("ed = ExpressionDeserializers.constructExpressionType(propertyKey, node)");
             setProperty.beginControlFlow("if (ed != null)");
@@ -650,30 +599,6 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         yamlTypeAnnotation.addMember("types", "$L.class", info.name().toString());
         yamlTypeAnnotation.addMember("order", "org.apache.camel.dsl.yaml.common.YamlDeserializerResolver.ORDER_LOWEST - 1", info.name().toString());
 
-        annotationValue(info, XML_ROOT_ELEMENT_ANNOTATION_CLASS, "name")
-            .map(AnnotationValue::asString)
-            .filter(value -> !"##default".equals(value))
-            .ifPresent(value -> {
-                // generate the kebab case variant for backward compatibility
-                // https://issues.apache.org/jira/browse/CAMEL-17097
-                if (!Objects.equals(value, StringHelper.camelCaseToDash(value))) {
-                    yamlTypeAnnotation.addMember("nodes", "$S", StringHelper.camelCaseToDash(value));
-                    TypeSpecHolder.put(attributes, "node", StringHelper.camelCaseToDash(value));
-                }
-
-                yamlTypeAnnotation.addMember("nodes", "$S", value);
-                TypeSpecHolder.put(attributes, "node", value);
-            });
-
-        //
-        // Workaround for:
-        //     https://issues.apache.org/jira/browse/CAMEL-16490
-        //
-        if (info.name().equals(TO_DYNAMIC_DEFINITION_CLASS)) {
-            yamlTypeAnnotation.addMember("nodes", "$S", "tod");
-            TypeSpecHolder.put(attributes, "node", "tod");
-        }
-
         properties.stream().sorted(Comparator.comparing(a -> a.members.get("name").toString())).forEach(spec -> {
             yamlTypeAnnotation.addMember("properties", "$L", spec);
         });
@@ -683,8 +608,17 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
         return new TypeSpecHolder(builder.build(), attributes);
     }
 
+    private boolean expressionRequired(String modelName) {
+        if ("method".equals(modelName) || "tokenize".equals(modelName)) {
+            // skip expression attribute on these three languages as they are
+            // solely configured using attributes
+            return false;
+        }
+        return true;
+    }
+
     @SuppressWarnings("MethodLength")
-    private boolean generateSetValue(CodeBlock.Builder cb, FieldInfo field, Collection<AnnotationSpec> annotations) {
+    private boolean generateSetValue(String modelName, CodeBlock.Builder cb, FieldInfo field, Collection<AnnotationSpec> annotations) {
         if (hasAnnotation(field, XML_TRANSIENT_CLASS) && !hasAnnotation(field, DSL_PROPERTY_ANNOTATION)) {
             return false;
         }
@@ -806,6 +740,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                                 false)
                         );
                     });
+                    return true;
                 }
             }
         }
@@ -900,6 +835,12 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
             }
         }
 
+        if ("expression".equals(fieldName) && !expressionRequired(modelName)) {
+            // special for some language models which does not have required expression
+            // which should be skipped
+            return true;
+        }
+
         //
         // Others
         //
@@ -912,9 +853,13 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
 
             Set<String> values = new TreeSet<>();
 
+            // gather enum values
             List<FieldInfo> fields = c.fields();
-            for (int i = 1; i< fields.size(); i++) {
-                values.add(fields.get(i).name());
+            for (int i = 1; i < fields.size(); i++) {
+                FieldInfo f = fields.get(i);
+                if (f.isEnumConstant()) {
+                    values.add(f.name());
+                }
             }
 
             AnnotationSpec.Builder builder = AnnotationSpec.builder(CN_YAML_PROPERTY);
@@ -926,6 +871,19 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
             }
 
             annotations.add(builder.build());
+        } else if (isEnum(field)) {
+            // this is a fake enum where the model is text based by have enum values to represent the user to choose between
+            cb.addStatement("String val = asText(node)");
+            cb.addStatement("target.set$L(val)", StringHelper.capitalize(field.name()));
+            cb.addStatement("break");
+
+            AnnotationSpec.Builder builder = AnnotationSpec.builder(CN_YAML_PROPERTY);
+            builder.addMember("name", "$S", fieldName);
+            builder.addMember("type", "$S", "enum:" + getEnums(field));
+            if (isRequired(field)) {
+                builder.addMember("required", "$L", isRequired(field));
+            }
+            annotations.add(builder.build());
         } else {
             switch (field.type().name().toString()) {
                 case "[B":
@@ -934,7 +892,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     cb.addStatement("break");
 
                     annotations.add(
-                        yamlPropertyWithFormat(fieldName, "string", "binary", isRequired(field))
+                        yamlPropertyWithFormat(fieldName, "string", "binary", isRequired(field), isDeprecated(field))
                     );
                     break;
                 case "Z":
@@ -942,28 +900,28 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     cb.addStatement("boolean val = asBoolean(node)");
                     cb.addStatement("target.set$L(val)", StringHelper.capitalize(field.name()));
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "boolean", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "boolean", isRequired(field), isDeprecated(field)));
                     break;
                 case "I":
                 case "int":
                     cb.addStatement("int val = asInt(node)");
                     cb.addStatement("target.set$L(val)", StringHelper.capitalize(field.name()));
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "number", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "number", isRequired(field), isDeprecated(field)));
                     break;
                 case "J":
                 case "long":
                     cb.addStatement("long val = asLong(node)");
                     cb.addStatement("target.set$L(val)", StringHelper.capitalize(field.name()));
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "number", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "number", isRequired(field), isDeprecated(field)));
                     break;
                 case "D":
                 case "double":
                     cb.addStatement("double val = asDouble(node)");
                     cb.addStatement("target.set$L(val)", StringHelper.capitalize(field.name()));
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "number", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "number", isRequired(field), isDeprecated(field)));
                     break;
                 case "java.lang.String":
                     cb.addStatement("String val = asText(node)");
@@ -976,17 +934,17 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
 
                     switch (javaType) {
                         case "java.lang.Boolean":
-                            annotations.add(yamlProperty(fieldName, "boolean", isRequired(field)));
+                            annotations.add(yamlProperty(fieldName, "boolean", isRequired(field), isDeprecated(field)));
                             break;
                         case "java.lang.Integer":
                         case "java.lang.Short":
                         case "java.lang.Long":
                         case "java.lang.Float":
                         case "java.lang.Double":
-                            annotations.add(yamlProperty(fieldName, "number", isRequired(field)));
+                            annotations.add(yamlProperty(fieldName, "number", isRequired(field), isDeprecated(field)));
                             break;
                         default:
-                            annotations.add(yamlProperty(fieldName, "string", isRequired(field)));
+                            annotations.add(yamlProperty(fieldName, "string", isRequired(field), isDeprecated(field)));
                     }
 
                     break;
@@ -994,7 +952,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     cb.addStatement("java.lang.Class<?> val = asClass(node)");
                     cb.addStatement("target.set$L(val)", StringHelper.capitalize(field.name()));
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "string", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "string", isRequired(field), isDeprecated(field)));
                     break;
                 case "[Ljava.lang.Class;":
                     cb.addStatement("java.lang.Class<?>[] val = asClassArray(node)");
@@ -1009,13 +967,13 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     cb.addStatement("String val = asText(node)");
                     cb.addStatement("target.set$L($L.valueOf(val))", StringHelper.capitalize(field.name()), field.type().name().toString());
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "number", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "number", isRequired(field), isDeprecated(field)));
                     break;
                 case "java.lang.Boolean":
                     cb.addStatement("String val = asText(node)");
                     cb.addStatement("target.set$L($L.valueOf(val))", StringHelper.capitalize(field.name()), field.type().name().toString());
                     cb.addStatement("break");
-                    annotations.add(yamlProperty(fieldName, "boolean", isRequired(field)));
+                    annotations.add(yamlProperty(fieldName, "boolean", isRequired(field), isDeprecated(field)));
                     break;
                 default:
                     if (field.type().kind() == Type.Kind.CLASS) {
@@ -1041,7 +999,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
     @SuppressWarnings("MethodLength")
     private boolean generateSetValue(CodeBlock.Builder cb, MethodInfo method, Collection<AnnotationSpec> annotations) {
         final String name = StringHelper.camelCaseToDash(method.name()).toLowerCase(Locale.US).substring(4);
-        final Type parameterType = method.parameters().get(0);
+        final Type parameterType = method.parameterTypes().get(0);
 
         //
         // Others
@@ -1055,9 +1013,13 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
 
             Set<String> values = new TreeSet<>();
 
+            // gather enum values
             List<FieldInfo> fields = c.fields();
-            for (int i = 1; i< fields.size(); i++) {
-                values.add(fields.get(i).name());
+            for (int i = 1; i < fields.size(); i++) {
+                FieldInfo f = fields.get(i);
+                if (f.isEnumConstant()) {
+                    values.add(f.name());
+                }
             }
 
             AnnotationSpec.Builder builder = AnnotationSpec.builder(CN_YAML_PROPERTY);
@@ -1108,6 +1070,7 @@ public class GenerateYamlDeserializersMojo extends GenerateYamlSupportMojo {
                     cb.addStatement("String val = asText(node)");
                     cb.addStatement("target.$L(val)", method.name());
                     cb.addStatement("break");
+                    annotations.add(yamlProperty(name, "string"));
                     break;
                 case "java.lang.Class":
                     cb.addStatement("java.lang.Class<?> val = asClass(node)");

@@ -45,7 +45,7 @@ public class FtpConsumerTemplateIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testConsumerTemplate() throws Exception {
+    public void testConsumerTemplate() {
         Exchange exchange = consumer.receive(getFtpUrl(), 5000);
         assertNotNull(exchange);
         assertEquals("hello.txt", exchange.getIn().getHeader(Exchange.FILE_NAME));
@@ -64,13 +64,13 @@ public class FtpConsumerTemplateIT extends FtpServerTestSupport {
         consumer.doneUoW(exchange);
 
         // file should still exist
-        File file = ftpFile("template/hello.txt").toFile();
+        File file = service.ftpFile("template/hello.txt").toFile();
         await().atMost(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertTrue(file.exists(), "The file should exist: " + file));
     }
 
     @Test
-    public void testConsumerTemplateNotDone() throws Exception {
+    public void testConsumerTemplateNotDone() {
         Exchange exchange = consumer.receive(getFtpUrl(), 5000);
         assertNotNull(exchange);
         assertEquals("hello.txt", exchange.getIn().getHeader(Exchange.FILE_NAME));
@@ -93,7 +93,7 @@ public class FtpConsumerTemplateIT extends FtpServerTestSupport {
         consumer.doneUoW(exchange2);
 
         // file should still exists
-        File file = ftpFile("template/hello.txt").toFile();
+        File file = service.ftpFile("template/hello.txt").toFile();
         await().atMost(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertTrue(file.exists(), "The file should exist: " + file));
     }
@@ -109,7 +109,7 @@ public class FtpConsumerTemplateIT extends FtpServerTestSupport {
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("template/hello.txt").toFile();
+        File file = service.ftpFile("template/hello.txt").toFile();
         assertTrue(file.exists(), "The file should exist: " + file);
     }
 

@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EventNotifierExchangeSentTest extends ContextTestSupport {
 
-    protected List<CamelEvent> events = new ArrayList<>();
+    protected final List<CamelEvent> events = new ArrayList<>();
 
     @BeforeEach
     public void clearEvents() throws Exception {
@@ -60,6 +60,7 @@ public class EventNotifierExchangeSentTest extends ContextTestSupport {
                 setIgnoreExchangeCompletedEvent(true);
                 setIgnoreExchangeFailedEvents(true);
                 setIgnoreExchangeRedeliveryEvents(true);
+                setIgnoreExchangeAsyncProcessingStartedEvents(true);
             }
         });
         return context;
@@ -74,6 +75,7 @@ public class EventNotifierExchangeSentTest extends ContextTestSupport {
         assertMockEndpointsSatisfied();
 
         assertEquals(8, events.size());
+
         ExchangeSendingEvent e0 = assertIsInstanceOf(ExchangeSendingEvent.class, events.get(0));
         ExchangeSendingEvent e1 = assertIsInstanceOf(ExchangeSendingEvent.class, events.get(1));
         ExchangeSentEvent e2 = assertIsInstanceOf(ExchangeSentEvent.class, events.get(2));

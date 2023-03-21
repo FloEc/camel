@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.support.AsyncProcessorSupport;
 import org.junit.jupiter.api.Test;
 
@@ -55,32 +56,32 @@ public class FromFtpAsyncProcessIT extends FtpServerTestSupport {
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // give time for files to be deleted on ftp server
 
-        File hello = ftpFile("async/hello.txt").toFile();
+        File hello = service.ftpFile("async/hello.txt").toFile();
         await().atMost(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertFalse(hello.exists(), "File should not exist " + hello));
 
-        File bye = ftpFile("async/bye.txt").toFile();
+        File bye = service.ftpFile("async/bye.txt").toFile();
         await().atMost(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertFalse(bye.exists(), "File should not exist " + bye));
 
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).routeId("foo").noAutoStartup().process(new MyAsyncProcessor()).to("mock:result");
             }
         };
     }
 
-    private class MyAsyncProcessor extends AsyncProcessorSupport {
+    private static class MyAsyncProcessor extends AsyncProcessorSupport {
 
-        private ExecutorService executor = Executors.newSingleThreadExecutor();
+        private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
         @Override
         public boolean process(final Exchange exchange, final AsyncCallback callback) {

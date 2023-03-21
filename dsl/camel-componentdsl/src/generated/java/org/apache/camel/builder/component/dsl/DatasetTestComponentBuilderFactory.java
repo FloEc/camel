@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -77,10 +77,10 @@ public interface DatasetTestComponentBuilderFactory {
             return this;
         }
         /**
-         * To turn on logging when the mock receives an incoming message.
-         * &lt;p/&gt; This will log only one time at INFO level for the incoming
-         * message. For more detailed logging then set the logger to DEBUG level
-         * for the org.apache.camel.component.mock.MockEndpoint class.
+         * To turn on logging when the mock receives an incoming message. This
+         * will log only one time at INFO level for the incoming message. For
+         * more detailed logging then set the logger to DEBUG level for the
+         * org.apache.camel.component.mock.MockEndpoint class.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 

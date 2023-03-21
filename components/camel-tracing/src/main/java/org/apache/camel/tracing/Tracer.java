@@ -27,7 +27,6 @@ import org.apache.camel.CamelContextAware;
 import org.apache.camel.Component;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.NamedNode;
 import org.apache.camel.Route;
 import org.apache.camel.RuntimeCamelException;
@@ -52,6 +51,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Tracer extends ServiceSupport implements RoutePolicyFactory, StaticService, CamelContextAware {
     protected static final Map<String, SpanDecorator> DECORATORS = new HashMap<>();
+    static final AutoCloseable NOOP_CLOSEABLE = () -> {
+    };
     private static final Logger LOG = LoggerFactory.getLogger(Tracer.class);
 
     static {
@@ -75,6 +76,8 @@ public abstract class Tracer extends ServiceSupport implements RoutePolicyFactor
     private CamelContext camelContext;
 
     protected abstract void initTracer();
+
+    protected abstract void initContextPropagators();
 
     protected abstract SpanAdapter startSendingEventSpan(String operationName, SpanKind kind, SpanAdapter parent);
 
@@ -171,12 +174,13 @@ public abstract class Tracer extends ServiceSupport implements RoutePolicyFactor
         if (!camelContext.getRoutePolicyFactories().contains(this)) {
             camelContext.addRoutePolicyFactory(this);
         }
-        camelContext.adapt(ExtendedCamelContext.class).addLogListener(logListener);
+        camelContext.getCamelContextExtension().addLogListener(logListener);
 
         if (tracingStrategy != null) {
-            camelContext.adapt(ExtendedCamelContext.class).addInterceptStrategy(tracingStrategy);
+            camelContext.getCamelContextExtension().addInterceptStrategy(tracingStrategy);
         }
         initTracer();
+        initContextPropagators();
         ServiceHelper.startService(eventNotifier);
     }
 
@@ -230,16 +234,25 @@ public abstract class Tracer extends ServiceSupport implements RoutePolicyFactor
 
     private final class TracingEventNotifier extends EventNotifierSupport {
 
+        public TracingEventNotifier() {
+            // ignore these
+            setIgnoreCamelContextEvents(true);
+            setIgnoreCamelContextInitEvents(true);
+            setIgnoreRouteEvents(true);
+            // we need also async processing started events
+            setIgnoreExchangeAsyncProcessingStartedEvents(false);
+        }
+
         @Override
         public void notify(CamelEvent event) throws Exception {
             try {
                 if (event instanceof CamelEvent.ExchangeSendingEvent) {
                     CamelEvent.ExchangeSendingEvent ese = (CamelEvent.ExchangeSendingEvent) event;
                     SpanDecorator sd = getSpanDecorator(ese.getEndpoint());
-                    if (sd instanceof AbstractInternalSpanDecorator || !sd.newSpan()
-                            || isExcluded(ese.getExchange(), ese.getEndpoint())) {
+                    if (shouldExclude(sd, ese.getExchange(), ese.getEndpoint())) {
                         return;
                     }
+
                     SpanAdapter parent = ActiveSpanManager.getSpan(ese.getExchange());
                     SpanAdapter span = startSendingEventSpan(sd.getOperationName(ese.getExchange(), ese.getEndpoint()),
                             sd.getInitiatorSpanKind(), parent);
@@ -252,26 +265,38 @@ public abstract class Tracer extends ServiceSupport implements RoutePolicyFactor
                 } else if (event instanceof CamelEvent.ExchangeSentEvent) {
                     CamelEvent.ExchangeSentEvent ese = (CamelEvent.ExchangeSentEvent) event;
                     SpanDecorator sd = getSpanDecorator(ese.getEndpoint());
-                    if (sd instanceof AbstractInternalSpanDecorator || !sd.newSpan()
-                            || isExcluded(ese.getExchange(), ese.getEndpoint())) {
+                    if (shouldExclude(sd, ese.getExchange(), ese.getEndpoint())) {
                         return;
                     }
+
                     SpanAdapter span = ActiveSpanManager.getSpan(ese.getExchange());
                     if (span != null) {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Tracing: start client span={}", span);
                         }
                         sd.post(span, ese.getExchange(), ese.getEndpoint());
-                        finishSpan(span);
                         ActiveSpanManager.deactivate(ese.getExchange());
+                        finishSpan(span);
                     } else {
                         LOG.warn("Tracing: could not find managed span for exchange={}", ese.getExchange());
                     }
+                } else if (event instanceof CamelEvent.ExchangeAsyncProcessingStartedEvent) {
+                    CamelEvent.ExchangeAsyncProcessingStartedEvent eap = (CamelEvent.ExchangeAsyncProcessingStartedEvent) event;
+
+                    // no need to filter scopes here. It's ok to close a scope multiple times and
+                    // implementations check if scope being disposed is current
+                    // and should not do anything if scopes don't match.
+                    ActiveSpanManager.endScope(eap.getExchange());
                 }
             } catch (Exception t) {
                 // This exception is ignored
                 LOG.warn("Tracing: Failed to capture tracing data", t);
             }
+        }
+
+        private boolean shouldExclude(SpanDecorator sd, Exchange exchange, Endpoint endpoint) {
+            return sd instanceof AbstractInternalSpanDecorator || !sd.newSpan()
+                    || isExcluded(exchange, endpoint);
         }
     }
 

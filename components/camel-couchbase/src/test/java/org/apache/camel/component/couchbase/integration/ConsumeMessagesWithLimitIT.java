@@ -21,19 +21,26 @@ import java.util.concurrent.TimeUnit;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
+@DisabledIfSystemProperty(named = "ci.env.name", matches = "apache.org", disabledReason = "Flaky on Apache CI")
 public class ConsumeMessagesWithLimitIT extends CouchbaseIntegrationTestBase {
 
-    @Test
-    public void testQueryForBeers() throws Exception {
+    @BeforeEach
+    public void addToBucket() {
         for (int i = 0; i < 15; i++) {
             cluster.bucket(bucketName).defaultCollection().upsert("DocumentID_" + i, "message" + i);
         }
+    }
+
+    @Test
+    public void testQueryForBeers() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(10);
 
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
 
     }
 
@@ -43,10 +50,10 @@ public class ConsumeMessagesWithLimitIT extends CouchbaseIntegrationTestBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(String.format("%s&designDocumentName=%s&viewName=%s&limit=10", getConnectionUri(), bucketName, bucketName))
                         .log("message received")
                         .to("mock:result");

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 public class FromFtpRemoteFileSorterIT extends FtpServerTestSupport {
 
     @BindToRegistry("mySorter")
-    private MyRemoteFileSorter sorter = new MyRemoteFileSorter();
+    private final MyRemoteFileSorter sorter = new MyRemoteFileSorter();
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/sorter?password=admin&sorter=#mySorter";
@@ -52,7 +52,7 @@ public class FromFtpRemoteFileSorterIT extends FtpServerTestSupport {
         mock.assertIsSatisfied();
     }
 
-    private void prepareFtpServer() throws Exception {
+    private void prepareFtpServer() {
         // prepares the FTP Server by creating files on the server that we want
         // to unit
         // test that we can pool
@@ -62,16 +62,16 @@ public class FromFtpRemoteFileSorterIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };
     }
 
     // START SNIPPET: e1
-    public class MyRemoteFileSorter implements Comparator<RemoteFile<?>> {
+    public static class MyRemoteFileSorter implements Comparator<RemoteFile<?>> {
 
         @Override
         public int compare(RemoteFile<?> o1, RemoteFile<?> o2) {

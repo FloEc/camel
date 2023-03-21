@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component.hdfs.integration;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.infra.hdfs.v2.services.HDFSService;
@@ -29,18 +31,16 @@ import org.apache.hadoop.fs.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.org.apache.commons.lang3.SystemUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisabledOnOs(value = OS.MAC, disabledReason = "Temporarily disabled due to CAMEL-16387")
 public class HdfsAppendIT extends CamelTestSupport {
     @RegisterExtension
-    public static HDFSService service = HDFSServiceFactory.createService();
+    public static HDFSService service = HDFSServiceFactory.createSingletonService();
 
     private static final Logger LOG = LoggerFactory.getLogger(HdfsAppendIT.class);
 
@@ -57,7 +57,11 @@ public class HdfsAppendIT extends CamelTestSupport {
         super.setUp();
 
         Configuration conf = new Configuration();
-        conf.addResource("hdfs-test.xml");
+        if (SystemUtils.IS_OS_MAC) {
+            conf.addResource("hdfs-mac-test.xml");
+        } else {
+            conf.addResource("hdfs-test.xml");
+        }
         String path = String.format("hdfs://%s:%d/tmp/test/test-camel-simple-write-file1", service.getHDFSHost(),
                 service.getPort());
 
@@ -66,18 +70,18 @@ public class HdfsAppendIT extends CamelTestSupport {
         if (fs.exists(file)) {
             fs.delete(file, true);
         }
-        FSDataOutputStream out = fs.create(file);
-        for (int i = 0; i < 10; ++i) {
-            out.write("PIPPO".getBytes("UTF-8"));
+        try (FSDataOutputStream out = fs.create(file)) {
+            for (int i = 0; i < 10; ++i) {
+                out.write("PIPPO".getBytes(StandardCharsets.UTF_8));
+            }
         }
-        out.close();
     }
 
     @Test
     public void testAppend() throws Exception {
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start1")
                         .toF("hdfs://%s:%d/tmp/test/test-camel-simple-write-file1?append=true&fileSystemType=HDFS",
                                 service.getHDFSHost(), service.getPort());
@@ -94,16 +98,16 @@ public class HdfsAppendIT extends CamelTestSupport {
                 service.getPort());
         Path file = new Path(path);
         FileSystem fs = FileSystem.get(file.toUri(), conf);
-        FSDataInputStream in = fs.open(file);
-        byte[] buffer = new byte[5];
         int ret = 0;
-        for (int i = 0; i < 20; ++i) {
+        try (FSDataInputStream in = fs.open(file)) {
+            byte[] buffer = new byte[5];
+            for (int i = 0; i < 20; ++i) {
+                assertEquals(5, in.read(buffer));
+                LOG.info("> {}", new String(buffer));
+            }
             ret = in.read(buffer);
-            LOG.info("> {}", new String(buffer));
         }
-        ret = in.read(buffer);
         assertEquals(-1, ret);
-        in.close();
     }
 
     @Test
@@ -111,7 +115,7 @@ public class HdfsAppendIT extends CamelTestSupport {
 
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start1").toF("hdfs://%s:%d/tmp/test-dynamic/?append=true&fileSystemType=HDFS",
                         service.getHDFSHost(), service.getPort());
             }
@@ -128,15 +132,16 @@ public class HdfsAppendIT extends CamelTestSupport {
 
         Path file = new Path(path);
         FileSystem fs = FileSystem.get(file.toUri(), conf);
-        FSDataInputStream in = fs.open(file);
-        byte[] buffer = new byte[5];
-        for (int i = 0; i < ITERATIONS; ++i) {
-            assertEquals(5, in.read(buffer));
-            LOG.info("> {}", new String(buffer));
+        int ret = 0;
+        try (FSDataInputStream in = fs.open(file)) {
+            byte[] buffer = new byte[5];
+            for (int i = 0; i < ITERATIONS; ++i) {
+                assertEquals(5, in.read(buffer));
+                LOG.info("> {}", new String(buffer));
+            }
+            ret = in.read(buffer);
         }
-        int ret = in.read(buffer);
         assertEquals(-1, ret);
-        in.close();
     }
 
     @Override

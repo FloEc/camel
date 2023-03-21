@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -43,51 +43,6 @@ public interface MailEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default AdvancedMailEndpointConsumerBuilder advanced() {
             return (AdvancedMailEndpointConsumerBuilder) this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default MailEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default MailEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
         }
         /**
          * Whether the consumer should close the folder after polling. Setting
@@ -253,10 +208,9 @@ public interface MailEndpointBuilderFactory {
          * If the mail consumer cannot retrieve a given mail message, then this
          * option allows to handle the caused exception by the consumer's error
          * handler. By enable the bridge error handler on the consumer, then the
-         * Camel routing error handler can handle the exception instead.
-         * &lt;p/&gt; The default behavior would be the consumer throws an
-         * exception and no mails from the batch would be able to be routed by
-         * Camel.
+         * Camel routing error handler can handle the exception instead. The
+         * default behavior would be the consumer throws an exception and no
+         * mails from the batch would be able to be routed by Camel.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -275,10 +229,9 @@ public interface MailEndpointBuilderFactory {
          * If the mail consumer cannot retrieve a given mail message, then this
          * option allows to handle the caused exception by the consumer's error
          * handler. By enable the bridge error handler on the consumer, then the
-         * Camel routing error handler can handle the exception instead.
-         * &lt;p/&gt; The default behavior would be the consumer throws an
-         * exception and no mails from the batch would be able to be routed by
-         * Camel.
+         * Camel routing error handler can handle the exception instead. The
+         * default behavior would be the consumer throws an exception and no
+         * mails from the batch would be able to be routed by Camel.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -383,11 +336,11 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * Will mark the javax.mail.Message as peeked before processing the mail
-         * message. This applies to IMAPMessage messages types only. By using
-         * peek the mail will not be eager marked as SEEN on the mail server,
-         * which allows us to rollback the mail message if there is an error
-         * processing in Camel.
+         * Will mark the jakarta.mail.Message as peeked before processing the
+         * mail message. This applies to IMAPMessage messages types only. By
+         * using peek the mail will not be eager marked as SEEN on the mail
+         * server, which allows us to rollback the mail message if there is an
+         * error processing in Camel.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -402,11 +355,11 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * Will mark the javax.mail.Message as peeked before processing the mail
-         * message. This applies to IMAPMessage messages types only. By using
-         * peek the mail will not be eager marked as SEEN on the mail server,
-         * which allows us to rollback the mail message if there is an error
-         * processing in Camel.
+         * Will mark the jakarta.mail.Message as peeked before processing the
+         * mail message. This applies to IMAPMessage messages types only. By
+         * using peek the mail will not be eager marked as SEEN on the mail
+         * server, which allows us to rollback the mail message if there is an
+         * error processing in Camel.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -459,9 +412,9 @@ public interface MailEndpointBuilderFactory {
         /**
          * If the mail consumer cannot retrieve a given mail message, then this
          * option allows to skip the message and move on to retrieve the next
-         * mail message. &lt;p/&gt; The default behavior would be the consumer
-         * throws an exception and no mails from the batch would be able to be
-         * routed by Camel.
+         * mail message. The default behavior would be the consumer throws an
+         * exception and no mails from the batch would be able to be routed by
+         * Camel.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -479,9 +432,9 @@ public interface MailEndpointBuilderFactory {
         /**
          * If the mail consumer cannot retrieve a given mail message, then this
          * option allows to skip the message and move on to retrieve the next
-         * mail message. &lt;p/&gt; The default behavior would be the consumer
-         * throws an exception and no mails from the batch would be able to be
-         * routed by Camel.
+         * mail message. The default behavior would be the consumer throws an
+         * exception and no mails from the batch would be able to be routed by
+         * Camel.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -532,7 +485,7 @@ public interface MailEndpointBuilderFactory {
          * A pluggable repository org.apache.camel.spi.IdempotentRepository
          * which allows to cluster consuming from the same mailbox, and let the
          * repository coordinate whether a mail message is valid for the
-         * consumer to process. &lt;p/&gt; By default no repository is in use.
+         * consumer to process. By default no repository is in use.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.spi.IdempotentRepository&lt;/code&gt;
@@ -552,7 +505,7 @@ public interface MailEndpointBuilderFactory {
          * A pluggable repository org.apache.camel.spi.IdempotentRepository
          * which allows to cluster consuming from the same mailbox, and let the
          * repository coordinate whether a mail message is valid for the
-         * consumer to process. &lt;p/&gt; By default no repository is in use.
+         * consumer to process. By default no repository is in use.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.spi.IdempotentRepository&lt;/code&gt;
@@ -572,12 +525,12 @@ public interface MailEndpointBuilderFactory {
          * When using idempotent repository, then when the mail message has been
          * successfully processed and is committed, should the message id be
          * removed from the idempotent repository (default) or be kept in the
-         * repository. &lt;p/&gt; By default its assumed the message id is
-         * unique and has no value to be kept in the repository, because the
-         * mail message will be marked as seen/moved or deleted to prevent it
-         * from being consumed again. And therefore having the message id stored
-         * in the idempotent repository has little value. However this option
-         * allows to store the message id, for whatever reason you may have.
+         * repository. By default its assumed the message id is unique and has
+         * no value to be kept in the repository, because the mail message will
+         * be marked as seen/moved or deleted to prevent it from being consumed
+         * again. And therefore having the message id stored in the idempotent
+         * repository has little value. However this option allows to store the
+         * message id, for whatever reason you may have.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -596,12 +549,12 @@ public interface MailEndpointBuilderFactory {
          * When using idempotent repository, then when the mail message has been
          * successfully processed and is committed, should the message id be
          * removed from the idempotent repository (default) or be kept in the
-         * repository. &lt;p/&gt; By default its assumed the message id is
-         * unique and has no value to be kept in the repository, because the
-         * mail message will be marked as seen/moved or deleted to prevent it
-         * from being consumed again. And therefore having the message id stored
-         * in the idempotent repository has little value. However this option
-         * allows to store the message id, for whatever reason you may have.
+         * repository. By default its assumed the message id is unique and has
+         * no value to be kept in the repository, because the mail message will
+         * be marked as seen/moved or deleted to prevent it from being consumed
+         * again. And therefore having the message id stored in the idempotent
+         * repository has little value. However this option allows to store the
+         * message id, for whatever reason you may have.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -618,12 +571,12 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * Refers to a javax.mail.search.SearchTerm which allows to filter mails
-         * based on search criteria such as subject, body, from, sent after a
-         * certain date etc.
+         * Refers to a jakarta.mail.search.SearchTerm which allows to filter
+         * mails based on search criteria such as subject, body, from, sent
+         * after a certain date etc.
          * 
          * The option is a:
-         * &lt;code&gt;javax.mail.search.SearchTerm&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.mail.search.SearchTerm&lt;/code&gt; type.
          * The option is multivalued, and you can use the searchTerm(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -639,12 +592,12 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * Refers to a javax.mail.search.SearchTerm which allows to filter mails
-         * based on search criteria such as subject, body, from, sent after a
-         * certain date etc.
+         * Refers to a jakarta.mail.search.SearchTerm which allows to filter
+         * mails based on search criteria such as subject, body, from, sent
+         * after a certain date etc.
          * 
          * The option is a:
-         * &lt;code&gt;javax.mail.search.SearchTerm&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.mail.search.SearchTerm&lt;/code&gt; type.
          * The option is multivalued, and you can use the searchTerm(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -998,8 +951,8 @@ public interface MailEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -1020,8 +973,8 @@ public interface MailEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -1239,6 +1192,51 @@ public interface MailEndpointBuilderFactory {
             return (MailEndpointConsumerBuilder) this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -1309,6 +1307,45 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether to fail processing the mail if the mail message contains
+         * attachments with duplicate file names. If set to false, then the
+         * duplicate attachment is skipped and a WARN is logged. If set to true
+         * then an exception is thrown failing to process the mail message.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param failOnDuplicateFileAttachment the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointConsumerBuilder failOnDuplicateFileAttachment(
+                boolean failOnDuplicateFileAttachment) {
+            doSetProperty("failOnDuplicateFileAttachment", failOnDuplicateFileAttachment);
+            return this;
+        }
+        /**
+         * Whether to fail processing the mail if the mail message contains
+         * attachments with duplicate file names. If set to false, then the
+         * duplicate attachment is skipped and a WARN is logged. If set to true
+         * then an exception is thrown failing to process the mail message.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param failOnDuplicateFileAttachment the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointConsumerBuilder failOnDuplicateFileAttachment(
+                String failOnDuplicateFileAttachment) {
+            doSetProperty("failOnDuplicateFileAttachment", failOnDuplicateFileAttachment);
+            return this;
+        }
+        /**
          * Sets the maximum number of messages to consume during a poll. This
          * can be used to avoid overloading a mail server, if a mailbox folder
          * contains a lot of messages. Default value of -1 means no fetch size
@@ -1364,6 +1401,44 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
+         * Set this to 'uuid' to set a UUID for the filename of the attachment
+         * if no filename was set.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param generateMissingAttachmentNames the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointConsumerBuilder generateMissingAttachmentNames(
+                String generateMissingAttachmentNames) {
+            doSetProperty("generateMissingAttachmentNames", generateMissingAttachmentNames);
+            return this;
+        }
+        /**
+         * Set the strategy to handle duplicate filenames of attachments never:
+         * attachments that have a filename which is already present in the
+         * attachments will be ignored unless failOnDuplicateFileAttachment is
+         * set to true. uuidPrefix: this will prefix the duplicate attachment
+         * filenames each with a uuid and underscore
+         * (uuid_filename.fileextension). uuidSuffix: this will suffix the
+         * duplicate attachment filenames each with a underscore and uuid
+         * (filename_uuid.fileextension).
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer (advanced)
+         * 
+         * @param handleDuplicateAttachmentNames the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointConsumerBuilder handleDuplicateAttachmentNames(
+                String handleDuplicateAttachmentNames) {
+            doSetProperty("handleDuplicateAttachmentNames", handleDuplicateAttachmentNames);
+            return this;
+        }
+        /**
          * A pluggable MailUidGenerator that allows to use custom logic to
          * generate UUID of the mail message.
          * 
@@ -1403,9 +1478,9 @@ public interface MailEndpointBuilderFactory {
          * message is mapped to the body of the Camel IN message, the mail
          * headers are mapped to IN headers, and the attachments to Camel IN
          * attachment message. If this option is set to false then the IN
-         * message contains a raw javax.mail.Message. You can retrieve this raw
-         * message by calling
-         * exchange.getIn().getBody(javax.mail.Message.class).
+         * message contains a raw jakarta.mail.Message. You can retrieve this
+         * raw message by calling
+         * exchange.getIn().getBody(jakarta.mail.Message.class).
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1426,9 +1501,9 @@ public interface MailEndpointBuilderFactory {
          * message is mapped to the body of the Camel IN message, the mail
          * headers are mapped to IN headers, and the attachments to Camel IN
          * attachment message. If this option is set to false then the IN
-         * message contains a raw javax.mail.Message. You can retrieve this raw
-         * message by calling
-         * exchange.getIn().getBody(javax.mail.Message.class).
+         * message contains a raw jakarta.mail.Message. You can retrieve this
+         * raw message by calling
+         * exchange.getIn().getBody(jakarta.mail.Message.class).
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1615,9 +1690,9 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -1633,9 +1708,9 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -1952,7 +2027,7 @@ public interface MailEndpointBuilderFactory {
          * using a custom mail session, then the hostname and port from the mail
          * session will be used (if configured on the session).
          * 
-         * The option is a: &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1960,7 +2035,7 @@ public interface MailEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedMailEndpointConsumerBuilder session(
-                javax.mail.Session session) {
+                jakarta.mail.Session session) {
             doSetProperty("session", session);
             return this;
         }
@@ -1972,7 +2047,7 @@ public interface MailEndpointBuilderFactory {
          * session will be used (if configured on the session).
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2070,55 +2145,6 @@ public interface MailEndpointBuilderFactory {
          */
         default MailEndpointProducerBuilder from(String from) {
             doSetProperty("from", from);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default MailEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default MailEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -2272,6 +2298,55 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMailEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * Sets additional java mail properties, that will append/override any
          * default properties that is set based on all the other options. This
          * is useful if you need to add some special options but want to keep
@@ -2370,9 +2445,9 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -2388,9 +2463,9 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -2707,7 +2782,7 @@ public interface MailEndpointBuilderFactory {
          * using a custom mail session, then the hostname and port from the mail
          * session will be used (if configured on the session).
          * 
-         * The option is a: &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2715,7 +2790,7 @@ public interface MailEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedMailEndpointProducerBuilder session(
-                javax.mail.Session session) {
+                jakarta.mail.Session session) {
             doSetProperty("session", session);
             return this;
         }
@@ -2727,7 +2802,7 @@ public interface MailEndpointBuilderFactory {
          * session will be used (if configured on the session).
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2954,9 +3029,9 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -2972,9 +3047,9 @@ public interface MailEndpointBuilderFactory {
             return this;
         }
         /**
-         * The authenticator for login. If set then the &lt;code&gt;password and
-         * &lt;code&gt;username are ignored. Can be used for tokens which can
-         * expire and therefore must be read dynamically.
+         * The authenticator for login. If set then the password and username
+         * are ignored. Can be used for tokens which can expire and therefore
+         * must be read dynamically.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.mail.MailAuthenticator&lt;/code&gt; type.
@@ -3289,14 +3364,14 @@ public interface MailEndpointBuilderFactory {
          * using a custom mail session, then the hostname and port from the mail
          * session will be used (if configured on the session).
          * 
-         * The option is a: &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
          * @param session the value to set
          * @return the dsl builder
          */
-        default AdvancedMailEndpointBuilder session(javax.mail.Session session) {
+        default AdvancedMailEndpointBuilder session(jakarta.mail.Session session) {
             doSetProperty("session", session);
             return this;
         }
@@ -3308,7 +3383,7 @@ public interface MailEndpointBuilderFactory {
          * session will be used (if configured on the session).
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.mail.Session&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.mail.Session&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -3355,6 +3430,19 @@ public interface MailEndpointBuilderFactory {
     }
 
     public interface MailBuilders {
+        /**
+         * IMAP (camel-mail)
+         * Send and receive emails using imap, pop3 and smtp protocols.
+         * 
+         * Category: mail
+         * Since: 1.0
+         * Maven coordinates: org.apache.camel:camel-mail
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default MailHeaderNameBuilder imap() {
+            return MailHeaderNameBuilder.INSTANCE;
+        }
         /**
          * IMAP (camel-mail)
          * Send and receive emails using imap, pop3 and smtp protocols.
@@ -3510,6 +3598,162 @@ public interface MailEndpointBuilderFactory {
          */
         default MailEndpointBuilder smtps(String path) {
             return MailEndpointBuilderFactory.endpointBuilder("smtps", path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the IMAP component.
+     */
+    public static class MailHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final MailHeaderNameBuilder INSTANCE = new MailHeaderNameBuilder();
+
+        /**
+         * Subject.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Subject}.
+         */
+        public String subject() {
+            return "Subject";
+        }
+
+        /**
+         * From.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code From}.
+         */
+        public String from() {
+            return "From";
+        }
+
+        /**
+         * To.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code To}.
+         */
+        public String to() {
+            return "To";
+        }
+
+        /**
+         * Cc.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Cc}.
+         */
+        public String cc() {
+            return "Cc";
+        }
+
+        /**
+         * Bcc.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Bcc}.
+         */
+        public String bcc() {
+            return "Bcc";
+        }
+
+        /**
+         * Reply to.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Reply-To}.
+         */
+        public String replyTo() {
+            return "Reply-To";
+        }
+
+        /**
+         * The content type.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code contentType}.
+         */
+        public String contentType() {
+            return "contentType";
+        }
+
+        /**
+         * After processing a mail message, it can be copied to a mail folder
+         * with the given name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code copyTo}.
+         */
+        public String copyTo() {
+            return "copyTo";
+        }
+
+        /**
+         * After processing a mail message, it can be moved to a mail folder
+         * with the given name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code moveTo}.
+         */
+        public String moveTo() {
+            return "moveTo";
+        }
+
+        /**
+         * Deletes the messages after they have been processed.
+         * 
+         * The option is a: {@code boolean} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code delete}.
+         */
+        public String delete() {
+            return "delete";
+        }
+
+        /**
+         * The message ID.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code MailMessageId}.
+         */
+        public String mailMessageId() {
+            return "MailMessageId";
         }
     }
     static MailEndpointBuilder endpointBuilder(String componentName, String path) {

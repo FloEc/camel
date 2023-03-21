@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -73,8 +73,8 @@ public interface ScpComponentBuilderFactory {
         }
         /**
          * JSCH is verbose logging out of the box. Therefore we turn the logging
-         * down to DEBUG logging by default. But setting this option to
-         * &lt;tt&gt;true turns on the verbose logging again.
+         * down to DEBUG logging by default. But setting this option to true
+         * turns on the verbose logging again.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 

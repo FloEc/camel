@@ -26,11 +26,13 @@ import java.util.concurrent.ExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.test.infra.common.http.WebsocketTestClient;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithInitParamTestSupport {
@@ -40,7 +42,7 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
     private static Map<String, String> connectionKeyUserMap = new HashMap<>();
 
     private void runtTest(String s) throws InterruptedException, ExecutionException, IOException {
-        TestClient wsclient = new TestClient("ws://localhost:" + PORT + s);
+        WebsocketTestClient wsclient = new WebsocketTestClient("ws://localhost:" + PORT + s);
         wsclient.connect();
         wsclient.close();
     }
@@ -61,9 +63,9 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
         final int awaitTime = 5;
         connectionKeyUserMap.clear();
 
-        TestClient wsclient1 = new TestClient("ws://localhost:" + PORT + "/hola2", 2);
-        TestClient wsclient2 = new TestClient("ws://localhost:" + PORT + "/hola2", 2);
-        TestClient wsclient3 = new TestClient("ws://localhost:" + PORT + "/hola2", 2);
+        WebsocketTestClient wsclient1 = new WebsocketTestClient("ws://localhost:" + PORT + "/broadcast", 2);
+        WebsocketTestClient wsclient2 = new WebsocketTestClient("ws://localhost:" + PORT + "/broadcast", 2);
+        WebsocketTestClient wsclient3 = new WebsocketTestClient("ws://localhost:" + PORT + "/broadcast", 2);
 
         wsclient1.connect();
         wsclient1.await(awaitTime);
@@ -108,9 +110,9 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
         final int awaitTime = 5;
         connectionKeyUserMap.clear();
 
-        TestClient wsclient1 = new TestClient("ws://localhost:" + PORT + "/hola3", 2);
-        TestClient wsclient2 = new TestClient("ws://localhost:" + PORT + "/hola3", 2);
-        TestClient wsclient3 = new TestClient("ws://localhost:" + PORT + "/hola3", 2);
+        WebsocketTestClient wsclient1 = new WebsocketTestClient("ws://localhost:" + PORT + "/guarantee", 2);
+        WebsocketTestClient wsclient2 = new WebsocketTestClient("ws://localhost:" + PORT + "/guarantee", 2);
+        WebsocketTestClient wsclient3 = new WebsocketTestClient("ws://localhost:" + PORT + "/guarantee", 2);
 
         wsclient1.connect();
         wsclient1.await(awaitTime);
@@ -169,7 +171,7 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
                 });
 
                 // route for single client broadcast to multiple clients
-                from("atmosphere-websocket:///hola2").to("log:info")
+                from("atmosphere-websocket:///broadcast").to("log:info")
                         .choice()
                         .when(header(WebsocketConstants.EVENT_TYPE).isEqualTo(WebsocketConstants.ONOPEN_EVENT_TYPE))
                         .process(new Processor() {
@@ -180,13 +182,13 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
                         .when(header(WebsocketConstants.EVENT_TYPE).isEqualTo(WebsocketConstants.ONCLOSE_EVENT_TYPE))
                         .process(new Processor() {
                             public void process(final Exchange exchange) {
-                                removeExternalConnectionRegister(exchange);
+                                removeExternalConnectionRegister();
                             }
                         })
                         .when(header(WebsocketConstants.EVENT_TYPE).isEqualTo(WebsocketConstants.ONERROR_EVENT_TYPE))
                         .process(new Processor() {
                             public void process(final Exchange exchange) {
-                                removeExternalConnectionRegister(exchange);
+                                removeExternalConnectionRegister();
                             }
                         })
                         .otherwise()
@@ -194,10 +196,10 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
                             public void process(final Exchange exchange) {
                                 createBroadcastMultipleClientsResponse(exchange);
                             }
-                        }).to("atmosphere-websocket:///hola2");
+                        }).to("atmosphere-websocket:///broadcast");
 
                 // route for single client broadcast to multiple clients guarantee delivery
-                from("atmosphere-websocket:///hola3").to("log:info")
+                from("atmosphere-websocket:///guarantee").to("log:info")
                         .choice()
                         .when(header(WebsocketConstants.EVENT_TYPE).isEqualTo(WebsocketConstants.ONOPEN_EVENT_TYPE))
                         .process(new Processor() {
@@ -208,13 +210,13 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
                         .when(header(WebsocketConstants.EVENT_TYPE).isEqualTo(WebsocketConstants.ONCLOSE_EVENT_TYPE))
                         .process(new Processor() {
                             public void process(final Exchange exchange) {
-                                removeExternalConnectionRegister(exchange);
+                                removeExternalConnectionRegister();
                             }
                         })
                         .when(header(WebsocketConstants.EVENT_TYPE).isEqualTo(WebsocketConstants.ONERROR_EVENT_TYPE))
                         .process(new Processor() {
                             public void process(final Exchange exchange) {
-                                removeExternalConnectionRegister(exchange);
+                                removeExternalConnectionRegister();
                             }
                         })
                         .when(header(WebsocketConstants.ERROR_TYPE).isEqualTo(WebsocketConstants.MESSAGE_NOT_SENT_ERROR_TYPE))
@@ -228,7 +230,7 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
                             public void process(final Exchange exchange) {
                                 createBroadcastMultipleClientsResponse(exchange);
                             }
-                        }).to("atmosphere-websocket:///hola3");
+                        }).to("atmosphere-websocket:///guarantee");
             }
         };
     }
@@ -251,7 +253,7 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
         connectionKeyUserMap.put(userName, (String) connectionKey);
     }
 
-    private static void removeExternalConnectionRegister(Exchange exchange) {
+    private static void removeExternalConnectionRegister() {
         // remove connectionKey from external store
     }
 
@@ -278,7 +280,7 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
         Object eventType = exchange.getIn().getHeader(WebsocketConstants.EVENT_TYPE);
         Object msg = exchange.getIn().getBody();
 
-        assertEquals(null, msg);
+        assertNull(msg);
         assertNotNull(connectionKey);
 
         if (eventType instanceof Integer) {
@@ -293,7 +295,7 @@ public class WebsocketRouteWithInitParamTest extends WebsocketCamelRouterWithIni
         Object eventType = exchange.getIn().getHeader(WebsocketConstants.EVENT_TYPE);
         Object msg = exchange.getIn().getBody();
 
-        assertEquals(null, msg);
+        assertNull(msg);
         assertNotNull(connectionKey);
 
         if (eventType instanceof Integer && eventType.equals(WebsocketConstants.ONOPEN_EVENT_TYPE)) {

@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +38,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -122,8 +123,8 @@ public class PackageJaxbMojo extends AbstractGeneratorMojo {
                     .anyMatch(Files::isRegularFile)) {
                 continue;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("# " + GENERATED_MSG + NL);
+            StringBuilder sb = new StringBuilder(256);
+            sb.append("# ").append(GENERATED_MSG).append(NL);
             for (String s : entry.getValue()) {
                 sb.append(s);
                 sb.append(NL);
@@ -138,6 +139,7 @@ public class PackageJaxbMojo extends AbstractGeneratorMojo {
     }
 
     private IndexView createIndex(List<String> locations) throws MojoExecutionException {
+
         if (index.exists()) {
             try (InputStream is = new FileInputStream(index)) {
                 IndexReader r = new IndexReader(is);
@@ -159,7 +161,7 @@ public class PackageJaxbMojo extends AbstractGeneratorMojo {
     private Path asFolder(String p) {
         if (p.endsWith(".jar")) {
             File fp = new File(p);
-            try (FileSystem fs = FileSystems.newFileSystem(URI.create("jar:" + fp.toURI()), new HashMap<>())) {
+            try (FileSystem fs = FileSystems.newFileSystem(URI.create("jar:" + fp.toURI()), Collections.emptyMap())) {
                 return fs.getPath("/");
             } catch (FileSystemAlreadyExistsException e) {
                 return FileSystems.getFileSystem(URI.create("jar:" + fp.toURI())).getPath("/");

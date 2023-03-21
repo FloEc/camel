@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -61,51 +61,6 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default GoogleSheetsStreamEndpointBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default GoogleSheetsStreamEndpointBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
          * Client ID of the sheets application.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -117,6 +72,20 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
          */
         default GoogleSheetsStreamEndpointBuilder clientId(String clientId) {
             doSetProperty("clientId", clientId);
+            return this;
+        }
+        /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: consumer
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsStreamEndpointBuilder delegate(String delegate) {
+            doSetProperty("delegate", delegate);
             return this;
         }
         /**
@@ -221,7 +190,7 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
          * more info.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -240,7 +209,7 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
          * more info.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -682,8 +651,8 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -704,8 +673,8 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -866,6 +835,21 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Sets .json file with credentials for Service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsStreamEndpointBuilder serviceAccountKey(
+                String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     /**
@@ -876,6 +860,51 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default GoogleSheetsStreamEndpointBuilder basic() {
             return (GoogleSheetsStreamEndpointBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGoogleSheetsStreamEndpointBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGoogleSheetsStreamEndpointBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -996,6 +1025,19 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
          * Since: 2.23
          * Maven coordinates: org.apache.camel:camel-google-sheets
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default GoogleSheetsStreamHeaderNameBuilder googleSheetsStream() {
+            return GoogleSheetsStreamHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Google Sheets Stream (camel-google-sheets)
+         * Poll for changes in Google Sheets.
+         * 
+         * Category: cloud,sheets
+         * Since: 2.23
+         * Maven coordinates: org.apache.camel:camel-google-sheets
+         * 
          * Syntax: <code>google-sheets-stream:spreadsheetId</code>
          * 
          * Path parameter: spreadsheetId (required)
@@ -1031,6 +1073,96 @@ public interface GoogleSheetsStreamEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return GoogleSheetsStreamEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Google Sheets Stream component.
+     */
+    public static class GoogleSheetsStreamHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final GoogleSheetsStreamHeaderNameBuilder INSTANCE = new GoogleSheetsStreamHeaderNameBuilder();
+
+        /**
+         * Specifies the spreadsheet identifier that is used to identify the
+         * target to obtain.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleSheetsSpreadsheetId}.
+         */
+        public String googleSheetsSpreadsheetId() {
+            return "GoogleSheetsSpreadsheetId";
+        }
+
+        /**
+         * The URL of the spreadsheet.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleSheetsSpreadsheetUrl}.
+         */
+        public String googleSheetsSpreadsheetUrl() {
+            return "GoogleSheetsSpreadsheetUrl";
+        }
+
+        /**
+         * The major dimension of the values.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleSheetsMajorDimension}.
+         */
+        public String googleSheetsMajorDimension() {
+            return "GoogleSheetsMajorDimension";
+        }
+
+        /**
+         * The range the values cover, in A1 notation.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleSheetsRange}.
+         */
+        public String googleSheetsRange() {
+            return "GoogleSheetsRange";
+        }
+
+        /**
+         * The index of the range.
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleSheetsRangeIndex}.
+         */
+        public String googleSheetsRangeIndex() {
+            return "GoogleSheetsRangeIndex";
+        }
+
+        /**
+         * The index of the value.
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code GoogleSheetsValueIndex}.
+         */
+        public String googleSheetsValueIndex() {
+            return "GoogleSheetsValueIndex";
         }
     }
     static GoogleSheetsStreamEndpointBuilder endpointBuilder(

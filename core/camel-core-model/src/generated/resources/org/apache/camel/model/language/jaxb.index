@@ -7,12 +7,15 @@ ExpressionDefinition
 GroovyExpression
 HeaderExpression
 Hl7TerserExpression
+JavaScriptExpression
 JoorExpression
+JqExpression
 JsonPathExpression
 LanguageExpression
 MethodCallExpression
 MvelExpression
 OgnlExpression
+PythonExpression
 RefExpression
 SimpleExpression
 SpELExpression

@@ -39,23 +39,23 @@ public class IAMCreateUserIT extends Aws2IAMBase {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createUser", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.createUser);
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateUserResponse resultGet = (CreateUserResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.user().userName());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:createUser").to("aws2-iam://test?operation=createUser")
                         .to("mock:result");
 

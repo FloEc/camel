@@ -67,25 +67,9 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
-
-== Headers
-
-The following headers are set on exchanges during message transport.
-
-[width="100%",cols="20%,80%",options="header",]
-|=======================================================================
-|Property |Value
-
-|`CouchDbDatabase` |the database the message came from
-
-|`CouchDbSeq` |the couchdb changeset sequence number of the update / delete message
-
-|`CouchDbId` |the couchdb document id
-
-|`CouchDbRev` |the couchdb document revision
-
-|`CouchDbMethod` |the method (delete / update)
-|=======================================================================
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 Headers are set by the consumer once the message is received. The
 producer will also set the headers for downstream processors once the
@@ -102,6 +86,8 @@ GSON object before insert. This means that the string must be valid JSON
 or the insert / update will fail. If the body is an instance of a
 com.google.gson.JsonElement then it will be inserted as is. Otherwise
 the producer will throw an exception of unsupported body type.
+
+NOTE: To update a CouchDB document, it's _id and _rev field must be part of the json payload routed to CouchDB by Camel.
 
 == Samples
 

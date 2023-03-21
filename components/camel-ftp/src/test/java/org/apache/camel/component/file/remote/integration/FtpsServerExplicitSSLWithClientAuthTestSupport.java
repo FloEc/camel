@@ -16,7 +16,8 @@
  */
 package org.apache.camel.component.file.remote.integration;
 
-import org.apache.camel.component.file.remote.services.FtpsEmbeddedService;
+import org.apache.camel.test.infra.ftp.services.embedded.EmbeddedConfiguration;
+import org.apache.camel.test.infra.ftp.services.embedded.FtpsEmbeddedService;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
@@ -25,7 +26,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public abstract class FtpsServerExplicitSSLWithClientAuthTestSupport extends FtpsServerTestSupport {
 
     @RegisterExtension
-    static FtpsEmbeddedService service = new FtpsEmbeddedService(false, AUTH_VALUE_SSL, true);
+    static FtpsEmbeddedService service
+            = new FtpsEmbeddedService(new EmbeddedConfiguration.SecurityConfiguration(false, AUTH_VALUE_SSL, true));
 
     @Deprecated
     public static int getPort() {

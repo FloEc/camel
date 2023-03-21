@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -84,8 +84,8 @@ public interface SjmsEndpointBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -93,7 +93,7 @@ public interface SjmsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default SjmsEndpointConsumerBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -102,7 +102,7 @@ public interface SjmsEndpointBuilderFactory {
          * configured either on the component or endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -297,51 +297,6 @@ public interface SjmsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SjmsEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SjmsEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
          * Sets the JMS client ID to use. Note that this value, if specified,
          * must be unique and can only be used by a single JMS connection
          * instance. It is typically only required for durable topic
@@ -491,6 +446,51 @@ public interface SjmsEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default SjmsEndpointConsumerBuilder basic() {
             return (SjmsEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSjmsEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSjmsEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * Enables eager loading of JMS properties and payload as soon as a
@@ -800,8 +800,8 @@ public interface SjmsEndpointBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -809,7 +809,7 @@ public interface SjmsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedSjmsEndpointConsumerBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -818,7 +818,7 @@ public interface SjmsEndpointBuilderFactory {
          * underlying JMS exceptions.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -955,7 +955,7 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * See section about how mapping works below for more details.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -973,7 +973,7 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * See section about how mapping works below for more details.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
@@ -992,8 +992,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of &lt;tt&gt;javax.jms.Message objects when
-         * Camel is sending a JMS message.
+         * creates new instances of jakarta.jms.Message objects when Camel is
+         * sending a JMS message.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.sjms.jms.MessageCreatedStrategy&lt;/code&gt; type.
@@ -1010,8 +1010,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of &lt;tt&gt;javax.jms.Message objects when
-         * Camel is sending a JMS message.
+         * creates new instances of jakarta.jms.Message objects when Camel is
+         * sending a JMS message.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.sjms.jms.MessageCreatedStrategy&lt;/code&gt; type.
@@ -1098,18 +1098,18 @@ public interface SjmsEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1127,18 +1127,18 @@ public interface SjmsEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1205,8 +1205,8 @@ public interface SjmsEndpointBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1214,7 +1214,7 @@ public interface SjmsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default SjmsEndpointProducerBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -1223,7 +1223,7 @@ public interface SjmsEndpointBuilderFactory {
          * configured either on the component or endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1339,8 +1339,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies the delivery mode to be used. Possible values are those
-         * defined by javax.jms.DeliveryMode. NON_PERSISTENT = 1 and PERSISTENT
-         * = 2.
+         * defined by jakarta.jms.DeliveryMode. NON_PERSISTENT = 1 and
+         * PERSISTENT = 2.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
@@ -1355,8 +1355,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies the delivery mode to be used. Possible values are those
-         * defined by javax.jms.DeliveryMode. NON_PERSISTENT = 1 and PERSISTENT
-         * = 2.
+         * defined by jakarta.jms.DeliveryMode. NON_PERSISTENT = 1 and
+         * PERSISTENT = 2.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
@@ -1401,55 +1401,6 @@ public interface SjmsEndpointBuilderFactory {
         default SjmsEndpointProducerBuilder deliveryPersistent(
                 String deliveryPersistent) {
             doSetProperty("deliveryPersistent", deliveryPersistent);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SjmsEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SjmsEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -1823,6 +1774,55 @@ public interface SjmsEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSjmsEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSjmsEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * Set to true, if you want to send message using the QoS settings
          * specified on the message, instead of the QoS settings on the JMS
          * endpoint. The following three headers are considered JMSPriority,
@@ -1993,8 +1993,8 @@ public interface SjmsEndpointBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2002,7 +2002,7 @@ public interface SjmsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedSjmsEndpointProducerBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -2011,7 +2011,7 @@ public interface SjmsEndpointBuilderFactory {
          * underlying JMS exceptions.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2148,7 +2148,7 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * See section about how mapping works below for more details.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -2166,7 +2166,7 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * See section about how mapping works below for more details.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
@@ -2185,8 +2185,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of &lt;tt&gt;javax.jms.Message objects when
-         * Camel is sending a JMS message.
+         * creates new instances of jakarta.jms.Message objects when Camel is
+         * sending a JMS message.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.sjms.jms.MessageCreatedStrategy&lt;/code&gt; type.
@@ -2203,8 +2203,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of &lt;tt&gt;javax.jms.Message objects when
-         * Camel is sending a JMS message.
+         * creates new instances of jakarta.jms.Message objects when Camel is
+         * sending a JMS message.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.sjms.jms.MessageCreatedStrategy&lt;/code&gt; type.
@@ -2291,18 +2291,18 @@ public interface SjmsEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -2320,18 +2320,18 @@ public interface SjmsEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -2399,8 +2399,8 @@ public interface SjmsEndpointBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2408,7 +2408,7 @@ public interface SjmsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default SjmsEndpointBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -2417,7 +2417,7 @@ public interface SjmsEndpointBuilderFactory {
          * configured either on the component or endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2694,8 +2694,8 @@ public interface SjmsEndpointBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2703,7 +2703,7 @@ public interface SjmsEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedSjmsEndpointBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -2712,7 +2712,7 @@ public interface SjmsEndpointBuilderFactory {
          * underlying JMS exceptions.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -2849,7 +2849,7 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * See section about how mapping works below for more details.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -2866,7 +2866,7 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * See section about how mapping works below for more details.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
@@ -2884,8 +2884,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of &lt;tt&gt;javax.jms.Message objects when
-         * Camel is sending a JMS message.
+         * creates new instances of jakarta.jms.Message objects when Camel is
+         * sending a JMS message.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.sjms.jms.MessageCreatedStrategy&lt;/code&gt; type.
@@ -2902,8 +2902,8 @@ public interface SjmsEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of &lt;tt&gt;javax.jms.Message objects when
-         * Camel is sending a JMS message.
+         * creates new instances of jakarta.jms.Message objects when Camel is
+         * sending a JMS message.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.sjms.jms.MessageCreatedStrategy&lt;/code&gt; type.
@@ -2988,18 +2988,18 @@ public interface SjmsEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -3017,18 +3017,18 @@ public interface SjmsEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -3047,6 +3047,20 @@ public interface SjmsEndpointBuilderFactory {
     }
 
     public interface SjmsBuilders {
+        /**
+         * Simple JMS (camel-sjms)
+         * Send and receive messages to/from a JMS Queue or Topic using plain
+         * JMS 1.x API.
+         * 
+         * Category: messaging
+         * Since: 2.11
+         * Maven coordinates: org.apache.camel:camel-sjms
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default SjmsHeaderNameBuilder sjms() {
+            return SjmsHeaderNameBuilder.INSTANCE;
+        }
         /**
          * Simple JMS (camel-sjms)
          * Send and receive messages to/from a JMS Queue or Topic using plain
@@ -3100,6 +3114,72 @@ public interface SjmsEndpointBuilderFactory {
          */
         default SjmsEndpointBuilder sjms(String componentName, String path) {
             return SjmsEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Simple JMS component.
+     */
+    public static class SjmsHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final SjmsHeaderNameBuilder INSTANCE = new SjmsHeaderNameBuilder();
+
+        /**
+         * DestinationName is a JMS queue or topic name. By default, the
+         * destinationName is interpreted as a queue name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code JMSDestinationName}.
+         */
+        public String jMSDestinationName() {
+            return "JMSDestinationName";
+        }
+
+        /**
+         * The timeout for waiting for a reply when using the InOut Exchange
+         * Pattern (in milliseconds).
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code JmsRequestTimeout}.
+         */
+        public String jmsRequestTimeout() {
+            return "JmsRequestTimeout";
+        }
+
+        /**
+         * The correlation ID.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code JMSCorrelationID}.
+         */
+        public String jMSCorrelationID() {
+            return "JMSCorrelationID";
+        }
+
+        /**
+         * Provides an explicit ReplyTo destination (overrides any incoming
+         * value of Message.getJMSReplyTo() in consumer).
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code JMSReplyTo}.
+         */
+        public String jMSReplyTo() {
+            return "JMSReplyTo";
         }
     }
     static SjmsEndpointBuilder endpointBuilder(String componentName, String path) {

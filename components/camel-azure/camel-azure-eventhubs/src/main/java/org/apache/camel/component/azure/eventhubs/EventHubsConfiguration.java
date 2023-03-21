@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.core.amqp.AmqpTransportType;
+import com.azure.core.credential.TokenCredential;
 import com.azure.messaging.eventhubs.CheckpointStore;
 import com.azure.messaging.eventhubs.EventData;
 import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
@@ -46,6 +47,8 @@ public class EventHubsConfiguration implements Cloneable {
     private String sharedAccessKey;
     @UriParam(label = "security", secret = true)
     private String connectionString;
+    @UriParam(label = "security", secret = true)
+    private TokenCredential tokenCredential;
     @UriParam(label = "common", defaultValue = "AMQP")
     private AmqpTransportType amqpTransportType = AmqpTransportType.AMQP;
     @UriParam(label = "common")
@@ -66,6 +69,10 @@ public class EventHubsConfiguration implements Cloneable {
     private StorageSharedKeyCredential blobStorageSharedKeyCredential;
     @UriParam(label = "consumer")
     private Map<String, EventPosition> eventPosition = new HashMap<>();
+    @UriParam(label = "consumer", defaultValue = "500")
+    private int checkpointBatchSize = 500;
+    @UriParam(label = "consumer", defaultValue = "5000")
+    private int checkpointBatchTimeout = 5000;
     @UriParam(label = "producer")
     @Metadata(autowired = true)
     private EventHubProducerAsyncClient producerAsyncClient;
@@ -75,7 +82,7 @@ public class EventHubsConfiguration implements Cloneable {
     private String partitionId;
 
     /**
-     * EventHubs namespace created in Azure Portal
+     * EventHubs namespace created in Azure Portal.
      */
     public String getNamespace() {
         return namespace;
@@ -86,7 +93,7 @@ public class EventHubsConfiguration implements Cloneable {
     }
 
     /**
-     * EventHubs name under a specific namcespace
+     * EventHubs name under a specific namespace.
      */
     public String getEventHubName() {
         return eventHubName;
@@ -97,7 +104,7 @@ public class EventHubsConfiguration implements Cloneable {
     }
 
     /**
-     * The name you chose for your EventHubs SAS keys
+     * The name you chose for your EventHubs SAS keys.
      */
     public String getSharedAccessName() {
         return sharedAccessName;
@@ -108,7 +115,7 @@ public class EventHubsConfiguration implements Cloneable {
     }
 
     /**
-     * The generated value for the SharedAccessName
+     * The generated value for the SharedAccessName.
      */
     public String getSharedAccessKey() {
         return sharedAccessKey;
@@ -130,6 +137,18 @@ public class EventHubsConfiguration implements Cloneable {
 
     public void setConnectionString(String connectionString) {
         this.connectionString = connectionString;
+    }
+
+    /**
+     * Still another way of authentication (beside supplying namespace, sharedAccessKey, sharedAccessName or connection
+     * string) is through Azure-AD authentication using an implementation instance of {@link TokenCredential}.
+     */
+    public TokenCredential getTokenCredential() {
+        return tokenCredential;
+    }
+
+    public void setTokenCredential(TokenCredential tokenCredential) {
+        this.tokenCredential = tokenCredential;
     }
 
     /**
@@ -157,8 +176,7 @@ public class EventHubsConfiguration implements Cloneable {
 
     /**
      * Sets the name of the consumer group this consumer is associated with. Events are read in the context of this
-     * group. The name of the consumer group that is created by default is {@link #DEFAULT_CONSUMER_GROUP_NAME
-     * "$Default"}.
+     * group. The name of the consumer group that is created by default is {@code "$Default"}.
      */
     public String getConsumerGroupName() {
         return consumerGroupName;
@@ -239,7 +257,7 @@ public class EventHubsConfiguration implements Cloneable {
      * </p>
      *
      * By default it set to use {@link com.azure.messaging.eventhubs.checkpointstore.blob.BlobCheckpointStore} which
-     * stores all checkpoint offsets into Azure Blob Storage
+     * stores all checkpoint offsets into Azure Blob Storage.
      */
     public CheckpointStore getCheckpointStore() {
         return checkpointStore;
@@ -263,7 +281,7 @@ public class EventHubsConfiguration implements Cloneable {
 
     /**
      * In case you chose the default BlobCheckpointStore, this sets access key for the associated azure account name to
-     * be used for authentication with azure blob services
+     * be used for authentication with azure blob services.
      */
     public String getBlobAccessKey() {
         return blobAccessKey;
@@ -275,7 +293,7 @@ public class EventHubsConfiguration implements Cloneable {
 
     /**
      * In case you chose the default BlobCheckpointStore, this sets the blob container that shall be used by the
-     * BlobCheckpointStore to store the checkpoint offsets
+     * BlobCheckpointStore to store the checkpoint offsets.
      */
     public String getBlobContainerName() {
         return blobContainerName;
@@ -287,7 +305,7 @@ public class EventHubsConfiguration implements Cloneable {
 
     /**
      * In case you chose the default BlobCheckpointStore, StorageSharedKeyCredential can be injected to create the azure
-     * client, this holds the important authentication information
+     * client, this holds the important authentication information.
      */
     public StorageSharedKeyCredential getBlobStorageSharedKeyCredential() {
         return blobStorageSharedKeyCredential;
@@ -311,9 +329,27 @@ public class EventHubsConfiguration implements Cloneable {
         this.eventPosition = eventPosition;
     }
 
-    // *************************************************
-    //
-    // *************************************************
+    public int getCheckpointBatchSize() {
+        return checkpointBatchSize;
+    }
+
+    /**
+     * Sets the batch size between each checkpoint updates. Works jointly with {@link #checkpointBatchTimeout}.
+     */
+    public void setCheckpointBatchSize(int checkpointBatchSize) {
+        this.checkpointBatchSize = checkpointBatchSize;
+    }
+
+    public int getCheckpointBatchTimeout() {
+        return checkpointBatchTimeout;
+    }
+
+    /**
+     * Sets the batch timeout between each checkpoint updates. Works jointly with {@link #checkpointBatchSize}.
+     */
+    public void setCheckpointBatchTimeout(int checkpointBatchTimeout) {
+        this.checkpointBatchTimeout = checkpointBatchTimeout;
+    }
 
     public EventHubsConfiguration copy() {
         try {

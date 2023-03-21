@@ -25,8 +25,9 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
+import org.apache.camel.ExchangeExtension;
 import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.component.salesforce.api.dto.PlatformEvent;
 import org.apache.camel.component.salesforce.internal.streaming.SubscriptionHelper;
 import org.apache.camel.spi.ClassResolver;
@@ -84,10 +85,12 @@ public class SalesforceConsumerTest {
 
     SalesforceEndpointConfig configuration = new SalesforceEndpointConfig();
     SalesforceEndpoint endpoint = mock(SalesforceEndpoint.class);
-    ExtendedExchange exchange = mock(ExtendedExchange.class);
+    Exchange exchange = mock(Exchange.class);
+    ExchangeExtension exchangeExtension = mock(ExchangeExtension.class);
     org.apache.camel.Message in = mock(org.apache.camel.Message.class);
     AsyncProcessor processor = mock(AsyncProcessor.class);
-    ExtendedCamelContext context = mock(ExtendedCamelContext.class);
+    CamelContext context = mock(CamelContext.class);
+    ExtendedCamelContext ecc = mock(ExtendedCamelContext.class);
     ExchangeFactory exchangeFactory = mock(ExchangeFactory.class);
     Message pushTopicMessage;
 
@@ -104,11 +107,11 @@ public class SalesforceConsumerTest {
     public void setupMocks() {
         when(endpoint.getConfiguration()).thenReturn(configuration);
         when(endpoint.getCamelContext()).thenReturn(context);
-        when(context.adapt(ExtendedCamelContext.class)).thenReturn(context);
-        when(context.getExchangeFactory()).thenReturn(exchangeFactory);
+        when(context.getCamelContextExtension()).thenReturn(ecc);
+        when(ecc.getExchangeFactory()).thenReturn(exchangeFactory);
         when(exchangeFactory.newExchangeFactory(any())).thenReturn(exchangeFactory);
         when(exchangeFactory.create(endpoint, true)).thenReturn(exchange);
-        when(exchange.adapt(ExtendedExchange.class)).thenReturn(exchange);
+        when(exchange.getExchangeExtension()).thenReturn(exchangeExtension);
         when(exchange.getIn()).thenReturn(in);
         final SalesforceComponent component = mock(SalesforceComponent.class);
         when(endpoint.getComponent()).thenReturn(component);
@@ -273,7 +276,8 @@ public class SalesforceConsumerTest {
 
         consumer.processMessage(mock(ClientSessionChannel.class), message);
 
-        verify(in).setBody(message.getJSON());
+        verify(in).setBody(new org.cometd.common.JacksonJSONContextClient()
+                .generate(new org.cometd.common.HashMapMessage(message)));
         verify(in).setHeader("CamelSalesforceCreatedDate", ZonedDateTime.parse("2018-07-06T12:41:04Z"));
         verify(in).setHeader("CamelSalesforceReplayId", 4L);
         verify(in).setHeader("CamelSalesforceChannel", "/event/TestEvent__e");
@@ -337,7 +341,8 @@ public class SalesforceConsumerTest {
 
         consumer.processMessage(mock(ClientSessionChannel.class), mockChangeEvent);
 
-        verify(in).setBody(mockChangeEvent.getJSON());
+        verify(in).setBody(new org.cometd.common.JacksonJSONContextClient()
+                .generate(new org.cometd.common.HashMapMessage(mockChangeEvent)));
     }
 
     static Message createPushTopicMessage() {

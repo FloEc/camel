@@ -25,29 +25,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RestUndertowProducerEncodingTest extends BaseUndertowTest {
 
     @Test
-    public void testSelect() throws Exception {
+    public void testSelect() {
         template.sendBody("rest:get:bw-web-api/v1/objects/timesheets?companyId=RD&select=personId,personName", "Hello World");
     }
 
     @Test
-    public void testFilter() throws Exception {
+    public void testFilter() {
         template.sendBody("rest:get:bw-web-api/v1/objects/timesheets?companyId=RD&select=personId,personName"
                           + "&filter=date(time/date) ge 2020-06-01 and personId eq 'R10019'",
                 "Bye World");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // configure to use undertow on localhost with the given port
                 restConfiguration().component("undertow").host("localhost").port(getPort());
 
                 // use the rest DSL to define the rest services
                 rest("/bw-web-api/v1/objects")
                         .get("{action}")
-                        .route()
+                        .to("direct:action");
+
+                from("direct:action")
                         .process(exchange -> {
                             String action = exchange.getIn().getHeader("action", String.class);
                             assertEquals("timesheets", action);

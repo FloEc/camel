@@ -17,6 +17,7 @@
 
 package org.apache.camel.component.couchbase.integration;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import com.couchbase.client.java.Bucket;
@@ -32,11 +33,12 @@ import org.apache.camel.test.infra.couchbase.services.CouchbaseServiceFactory;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class CouchbaseIntegrationTestBase extends CamelTestSupport {
     @RegisterExtension
-    public static CouchbaseService service = CouchbaseServiceFactory.createService();
+    public static CouchbaseService service = CouchbaseServiceFactory.createSingletonService();
 
     protected static String bucketName;
     protected static Cluster cluster;
@@ -54,14 +56,17 @@ public class CouchbaseIntegrationTestBase extends CamelTestSupport {
                 bucketName,
                 Collections.singletonMap(bucketName, new View("function (doc, meta) {  emit(meta.id, doc);}")));
         cluster.bucket(bucketName).viewIndexes().upsertDesignDocument(designDoc, DesignDocumentNamespace.PRODUCTION);
+    }
 
+    @BeforeEach
+    public void waitForStarted() {
+        cluster.bucket(bucketName).waitUntilReady(Duration.ofSeconds(30));
     }
 
     @AfterAll
     public static void tearDownCouchbase() {
         cluster.buckets().dropBucket(bucketName);
         cluster.disconnect();
-        service.shutdown();
     }
 
     public String getConnectionUri() {

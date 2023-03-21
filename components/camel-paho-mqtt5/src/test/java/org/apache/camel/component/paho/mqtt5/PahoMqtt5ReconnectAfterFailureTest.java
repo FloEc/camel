@@ -81,7 +81,7 @@ public class PahoMqtt5ReconnectAfterFailureTest extends CamelTestSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
-        // Setup supervisor to restart routes because paho consumer 
+        // Setup supervisor to restart routes because paho consumer
         // is not able to recover automatically on startup
         SupervisingRouteController supervising = context.getRouteController().supervising();
         supervising.setBackOffDelay(500);
@@ -97,10 +97,10 @@ public class PahoMqtt5ReconnectAfterFailureTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
 
                 from("direct:test").to("paho-mqtt5:queue?lazyStartProducer=true&brokerUrl=tcp://localhost:" + mqttPort);
                 from("paho-mqtt5:queue?brokerUrl=tcp://localhost:" + mqttPort)
@@ -162,7 +162,7 @@ public class PahoMqtt5ReconnectAfterFailureTest extends CamelTestSupport {
         mock.assertIsSatisfied(10000);
     }
 
-    private void startBroker() throws Exception {
+    private void startBroker() {
         service.initialize();
     }
 }

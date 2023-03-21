@@ -25,6 +25,8 @@ import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.aws2.ddb.client.Ddb2ClientFactory;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.impl.health.ComponentsHealthCheckRepository;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.support.ScheduledPollEndpoint;
@@ -50,10 +52,14 @@ import software.amazon.awssdk.services.dynamodb.model.TableStatus;
  * Store and retrieve data from AWS DynamoDB service using AWS SDK version 2.x.
  */
 @UriEndpoint(firstVersion = "3.1.0", scheme = "aws2-ddb", title = "AWS DynamoDB", syntax = "aws2-ddb:tableName",
-             producerOnly = true, category = { Category.CLOUD, Category.DATABASE, Category.NOSQL })
+             producerOnly = true, category = { Category.CLOUD, Category.DATABASE, Category.NOSQL },
+             headersClass = Ddb2Constants.class)
 public class Ddb2Endpoint extends ScheduledPollEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(Ddb2Endpoint.class);
+
+    private ComponentsHealthCheckRepository healthCheckRepository;
+    private Ddb2ClientHealthCheck clientHealthCheck;
 
     @UriParam
     private Ddb2Configuration configuration;
@@ -78,6 +84,15 @@ public class Ddb2Endpoint extends ScheduledPollEndpoint {
     @Override
     public void doStart() throws Exception {
         super.doStart();
+
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(getCamelContext(),
+                ComponentsHealthCheckRepository.REPOSITORY_ID, ComponentsHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            // Do not register the health check until we resolve CAMEL-18992
+            //clientHealthCheck = new Ddb2ClientHealthCheck(this, getId());
+            //healthCheckRepository.addHealthCheck(clientHealthCheck);
+        }
 
         ddbClient = configuration.getAmazonDDBClient() != null
                 ? configuration.getAmazonDDBClient() : Ddb2ClientFactory.getDynamoDBClient(configuration).getDynamoDBClient();

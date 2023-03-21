@@ -16,6 +16,8 @@
  */
 package org.apache.camel.api.management.mbean;
 
+import java.util.Collection;
+
 import javax.management.openmbean.TabularData;
 
 import org.apache.camel.api.management.ManagedAttribute;
@@ -37,6 +39,9 @@ public interface ManagedRouteMBean extends ManagedPerformanceCounterMBean {
 
     @ManagedAttribute(description = "Route Source Location")
     String getSourceLocation();
+
+    @ManagedAttribute(description = "Route Source Location (Short)")
+    String getSourceLocationShort();
 
     @ManagedAttribute(description = "Route Configuration ID")
     String getRouteConfigurationId();
@@ -83,11 +88,17 @@ public interface ManagedRouteMBean extends ManagedPerformanceCounterMBean {
     @ManagedAttribute(description = "Average load over the last fifteen minutes")
     String getLoad15();
 
+    @ManagedAttribute(description = "Throughput message/second")
+    String getThroughput();
+
     @ManagedOperation(description = "Start route")
     void start() throws Exception;
 
     @ManagedOperation(description = "Stop route")
     void stop() throws Exception;
+
+    @ManagedOperation(description = "Stop and marks the route as failed (health-check reporting as DOWN)")
+    void stopAndFail() throws Exception;
 
     @ManagedOperation(description = "Stop route (using timeout in seconds)")
     void stop(long timeout) throws Exception;
@@ -131,9 +142,12 @@ public interface ManagedRouteMBean extends ManagedPerformanceCounterMBean {
     @ManagedAttribute(description = "Oldest inflight exchange id")
     String getOldestInflightExchangeId();
 
-    @ManagedAttribute(description = "Route controller")
+    @ManagedAttribute(description = "Is using route controller")
     Boolean getHasRouteController();
 
     @ManagedAttribute(description = "Last error")
     RouteError getLastError();
+
+    @ManagedOperation(description = "IDs for the processors that are part of this route")
+    Collection<String> processorIds() throws Exception;
 }

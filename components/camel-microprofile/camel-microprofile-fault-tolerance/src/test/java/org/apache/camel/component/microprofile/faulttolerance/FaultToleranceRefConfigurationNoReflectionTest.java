@@ -17,9 +17,9 @@
 package org.apache.camel.component.microprofile.faulttolerance;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.FaultToleranceConfigurationDefinition;
 import org.apache.camel.spi.BeanIntrospection;
 import org.apache.camel.spi.CircuitBreakerConstants;
@@ -41,7 +41,7 @@ public class FaultToleranceRefConfigurationNoReflectionTest extends CamelTestSup
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
 
-        bi = context.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        bi = context.getCamelContextExtension().getBeanIntrospection();
         bi.setLoggingLevel(LoggingLevel.INFO);
         bi.resetCounters();
 
@@ -66,16 +66,16 @@ public class FaultToleranceRefConfigurationNoReflectionTest extends CamelTestSup
 
         template.sendBody("direct:start", "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         assertEquals(0, bi.getInvokedCounter());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").circuitBreaker().configuration("myConfig").faultToleranceConfiguration().delay(2000)
                         .timeoutEnabled(true).timeoutDuration(5000).end()
                         .to("direct:foo").to("log:foo").onFallback().transform().constant("Fallback message").end()

@@ -16,11 +16,11 @@
  */
 package org.apache.camel.model.language;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.spi.Metadata;
 
@@ -31,23 +31,34 @@ import org.apache.camel.spi.Metadata;
 @XmlRootElement(name = "xquery")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XQueryExpression extends NamespaceAwareExpression {
-    @XmlAttribute
-    private String type;
+
     @XmlTransient
     private Class<?> resultType;
+    @XmlAttribute(name = "resultType")
+    private String resultTypeName;
+    @XmlTransient
+    private Object configuration;
+
     @XmlAttribute
-    private String headerName;
+    private String type;
     @XmlAttribute
     @Metadata(label = "advanced")
     private String configurationRef;
-    @XmlTransient
-    private Object configuration;
 
     public XQueryExpression() {
     }
 
     public XQueryExpression(String expression) {
         super(expression);
+    }
+
+    private XQueryExpression(Builder builder) {
+        super(builder);
+        this.resultTypeName = builder.resultTypeName;
+        this.resultType = builder.resultType;
+        this.configuration = builder.configuration;
+        this.type = builder.type;
+        this.configurationRef = builder.configurationRef;
     }
 
     @Override
@@ -81,15 +92,15 @@ public class XQueryExpression extends NamespaceAwareExpression {
         this.resultType = resultType;
     }
 
-    public String getHeaderName() {
-        return headerName;
+    public String getResultTypeName() {
+        return resultTypeName;
     }
 
     /**
-     * Name of header to use as input, instead of the message body
+     * Sets the class of the result type (type from output)
      */
-    public void setHeaderName(String headerName) {
-        this.headerName = headerName;
+    public void setResultTypeName(String resultTypeName) {
+        this.resultTypeName = resultTypeName;
     }
 
     public String getConfigurationRef() {
@@ -115,5 +126,70 @@ public class XQueryExpression extends NamespaceAwareExpression {
      */
     public void setConfiguration(Object configuration) {
         this.configuration = configuration;
+    }
+
+    /**
+     * {@code Builder} is a specific builder for {@link XQueryExpression}.
+     */
+    @XmlTransient
+    public static class Builder extends AbstractNamespaceAwareBuilder<Builder, XQueryExpression> {
+
+        private String resultTypeName;
+        private Class<?> resultType;
+        private Object configuration;
+        private String type;
+        private String configurationRef;
+
+        /**
+         * Sets the class of the result type (type from output)
+         */
+        public Builder resultTypeName(String resultTypeName) {
+            this.resultTypeName = resultTypeName;
+            return this;
+        }
+
+        /**
+         * Sets the class of the result type (type from output).
+         * <p/>
+         * The default result type is NodeSet
+         */
+        public Builder resultType(Class<?> resultType) {
+            this.resultType = resultType;
+            return this;
+        }
+
+        /**
+         * Custom saxon configuration (requires camel-saxon). This may be needed to add custom functions to a saxon
+         * configuration, so these custom functions can be used in xquery expressions.
+         */
+        public Builder configuration(Object configuration) {
+            this.configuration = configuration;
+            return this;
+        }
+
+        /**
+         * Sets the class name of the result type (type from output)
+         * <p/>
+         * The default result type is NodeSet
+         */
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        /**
+         * Reference to a saxon configuration instance in the registry to use for xquery (requires camel-saxon). This
+         * may be needed to add custom functions to a saxon configuration, so these custom functions can be used in
+         * xquery expressions.
+         */
+        public Builder configurationRef(String configurationRef) {
+            this.configurationRef = configurationRef;
+            return this;
+        }
+
+        @Override
+        public XQueryExpression end() {
+            return new XQueryExpression(this);
+        }
     }
 }

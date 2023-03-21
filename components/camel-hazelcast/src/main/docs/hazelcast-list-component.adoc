@@ -2,7 +2,7 @@
 :doctitle: Hazelcast List
 :shortname: hazelcast-list
 :artifactid: camel-hazelcast
-:description: Perform operations on distributed list.
+:description: Perform operations on Hazelcast distributed list.
 :since: 2.7
 :supportlevel: Stable
 :component-header: Both producer and consumer are supported
@@ -34,14 +34,20 @@ include::partial$component-endpoint-options.adoc[]
 
 == List producer – to(“hazelcast-list:foo”)
 
-The list producer provides 7 operations:
+The list producer provides 8 operations:
+
 * add
 * addAll
-* set
+* setvalue
 * get
 * removevalue
 * removeAll
 * clear
+* retainAll
+
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 === Sample for *add*:
 

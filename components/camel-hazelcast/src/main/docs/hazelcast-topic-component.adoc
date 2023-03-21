@@ -2,7 +2,7 @@
 :doctitle: Hazelcast Topic
 :shortname: hazelcast-topic
 :artifactid: camel-hazelcast
-:description: Send and receive messages to/from distributed topic.
+:description: Send and receive messages to/from Hazelcast distributed topic.
 :since: 2.15
 :supportlevel: Stable
 :component-header: Both producer and consumer are supported
@@ -36,6 +36,10 @@ include::partial$component-endpoint-options.adoc[]
 == Topic producer – to(“hazelcast-topic:foo”)
 
 The topic producer provides only one operation (publish).
+
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 === Sample for *publish*:
 

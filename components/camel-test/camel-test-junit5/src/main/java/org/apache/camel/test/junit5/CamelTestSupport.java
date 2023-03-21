@@ -16,15 +16,10 @@
  */
 package org.apache.camel.test.junit5;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.camel.CamelContext;
@@ -32,7 +27,6 @@ import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.FluentProducerTemplate;
 import org.apache.camel.Message;
 import org.apache.camel.NamedNode;
@@ -83,7 +77,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.camel.test.junit5.TestSupport.deleteDirectory;
+import static org.apache.camel.test.junit5.TestSupport.isCamelDebugPresent;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -125,7 +119,6 @@ public abstract class CamelTestSupport
     private boolean isCreateCamelContextPerClass = false;
     private CamelRouteCoverageDumper routeCoverageDumper = new CamelRouteCoverageDumper();
     private ExtensionContext.Store globalStore;
-    private boolean testDirectoryCleaned;
     // CHECKSTYLE:ON
 
     @Override
@@ -353,6 +346,9 @@ public abstract class CamelTestSupport
         LOG.info("Testing: {} ({})", currentTestName, getClass().getName());
         LOG.info("********************************************************************************");
 
+        doSpringBootCheck();
+        doQuarkusCheck();
+
         if (isCreateCamelContextPerClass()) {
             INSTANCE.set(this);
             AtomicInteger v = TESTS.get();
@@ -372,11 +368,10 @@ public abstract class CamelTestSupport
                 LOG.debug("Reset between test methods");
                 // and in between tests we must do IoC and reset mocks
                 postProcessTest();
-                resetMocks();
+                MockEndpoint.resetMocks(context);
             }
         } else {
             // test is per test so always setup
-            doSpringBootCheck();
             setupResources();
             doPreSetup();
             doSetUp();
@@ -413,12 +408,24 @@ public abstract class CamelTestSupport
         }
     }
 
-    private void doSetUp() throws Exception {
+    /**
+     * Detects if this is a Camel-quarkus test and throw an exception, as these base classes is not intended for testing
+     * Camel onQuarkus.
+     */
+    protected void doQuarkusCheck() {
+        boolean quarkus = hasClassAnnotation("io.quarkus.test.junit.QuarkusTest") ||
+                hasClassAnnotation("org.apache.camel.quarkus.test.CamelQuarkusTest");
+        if (quarkus) {
+            throw new RuntimeException(
+                    "Quarkus detected: The CamelTestSupport/CamelSpringTestSupport class is not intended for Camel testing with Quarkus.");
+        }
+    }
+
+    protected void doSetUp() throws Exception {
         LOG.debug("setUp test");
-        // jmx is enabled if we have configured to use it, or if dump route
-        // coverage is enabled (it requires JMX)
-        boolean jmx = useJmx() || isRouteCoverageEnabled();
-        if (jmx) {
+        // jmx is enabled if we have configured to use it, if dump route coverage is enabled (it requires JMX) or if
+        // the component camel-debug is in the classpath
+        if (useJmx() || isRouteCoverageEnabled() || isCamelDebugPresent()) {
             enableJMX();
         } else {
             disableJMX();
@@ -462,12 +469,12 @@ public abstract class CamelTestSupport
         // enable auto mocking if enabled
         String pattern = isMockEndpoints();
         if (pattern != null) {
-            context.adapt(ExtendedCamelContext.class)
+            context.getCamelContextExtension()
                     .registerEndpointCallback(new InterceptSendToMockEndpointStrategy(pattern));
         }
         pattern = isMockEndpointsAndSkip();
         if (pattern != null) {
-            context.adapt(ExtendedCamelContext.class)
+            context.getCamelContextExtension()
                     .registerEndpointCallback(new InterceptSendToMockEndpointStrategy(pattern, true));
         }
 
@@ -515,8 +522,12 @@ public abstract class CamelTestSupport
                 }
             }
             for (RoutesBuilder builder : builders) {
-                LOG.debug("Using created route builder: {}", builder);
+                LOG.debug("Using created route builder to add routes: {}", builder);
                 context.addRoutes(builder);
+            }
+            for (RoutesBuilder builder : builders) {
+                LOG.debug("Using created route builder to add templated routes: {}", builder);
+                context.addTemplatedRoutes(builder);
             }
             replaceFromEndpoints();
             boolean skip = "true".equalsIgnoreCase(System.getProperty("skipStartingCamelContext"));
@@ -557,7 +568,7 @@ public abstract class CamelTestSupport
 
         LOG.info("********************************************************************************");
         LOG.info("Testing done: {} ({})", currentTestName, getClass().getName());
-        LOG.info("Took: {} ({} millis)", TimeUtils.printDuration(time), time);
+        LOG.info("Took: {} ({} millis)", TimeUtils.printDuration(time, true), time);
 
         // if we should dump route stats, then write that to a file
         if (isRouteCoverageEnabled()) {
@@ -586,7 +597,6 @@ public abstract class CamelTestSupport
             doPostTearDown();
             cleanupResources();
         }
-        testDirectoryCleaned = false;
     }
 
     void tearDownCreateCamelContextPerClass() throws Exception {
@@ -609,7 +619,6 @@ public abstract class CamelTestSupport
      * Strategy to perform resources setup, before {@link CamelContext} is created
      */
     protected void setupResources() throws Exception {
-        deleteTestDirectory();
     }
 
     /**
@@ -680,9 +689,9 @@ public abstract class CamelTestSupport
         boolean spring = hasClassAnnotation("org.springframework.boot.test.context.SpringBootTest",
                 "org.springframework.context.annotation.ComponentScan");
         if (!spring) {
-            context.getExtension(ExtendedCamelContext.class).getBeanPostProcessor().postProcessBeforeInitialization(this,
+            context.getCamelContextExtension().getBeanPostProcessor().postProcessBeforeInitialization(this,
                     getClass().getName());
-            context.getExtension(ExtendedCamelContext.class).getBeanPostProcessor().postProcessAfterInitialization(this,
+            context.getCamelContextExtension().getBeanPostProcessor().postProcessAfterInitialization(this,
                     getClass().getName());
         }
     }
@@ -706,7 +715,7 @@ public abstract class CamelTestSupport
         doStopCamelContext(context, camelContextService);
     }
 
-    private static void doStopCamelContext(CamelContext context, Service camelContextService) {
+    protected void doStopCamelContext(CamelContext context, Service camelContextService) {
         if (camelContextService != null) {
             if (camelContextService == threadService.get()) {
                 threadService.remove();
@@ -972,29 +981,8 @@ public abstract class CamelTestSupport
      */
     protected Language assertResolveLanguage(String languageName) {
         Language language = context.resolveLanguage(languageName);
-        assertNotNull(language, "No language found for name: " + languageName);
+        assertNotNull(language, "Nog language found for name: " + languageName);
         return language;
-    }
-
-    /**
-     * Asserts that all the expectations of the Mock endpoints are valid
-     */
-    protected void assertMockEndpointsSatisfied() throws InterruptedException {
-        MockEndpoint.assertIsSatisfied(context);
-    }
-
-    /**
-     * Asserts that all the expectations of the Mock endpoints are valid
-     */
-    protected void assertMockEndpointsSatisfied(long timeout, TimeUnit unit) throws InterruptedException {
-        MockEndpoint.assertIsSatisfied(context, timeout, unit);
-    }
-
-    /**
-     * Reset all Mock endpoints.
-     */
-    protected void resetMocks() {
-        MockEndpoint.resetMocks(context);
     }
 
     protected void assertValidContext(CamelContext context) {
@@ -1057,62 +1045,6 @@ public abstract class CamelTestSupport
         public void afterProcess(Exchange exchange, Processor processor, NamedNode definition, long timeTaken) {
             CamelTestSupport.this.debugAfter(exchange, processor, (ProcessorDefinition<?>) definition, definition.getId(),
                     definition.getLabel(), timeTaken);
-        }
-    }
-
-    protected Path testDirectory() {
-        return testDirectory(false);
-    }
-
-    protected Path testDirectory(boolean create) {
-        Class<?> testClass = getClass();
-        return testDirectory(testClass, create);
-    }
-
-    public static Path testDirectory(Class<?> testClass, boolean create) {
-        Path dir = Paths.get("target", "data", testClass.getSimpleName());
-        if (create) {
-            try {
-                Files.createDirectories(dir);
-            } catch (IOException e) {
-                throw new IllegalStateException("Unable to create test directory: " + dir, e);
-            }
-        }
-        return dir;
-    }
-
-    protected Path testFile(String dir) {
-        return testDirectory().resolve(dir);
-    }
-
-    protected Path testDirectory(String dir) {
-        return testDirectory(dir, false);
-    }
-
-    protected Path testDirectory(String dir, boolean create) {
-        Path f = testDirectory().resolve(dir);
-        if (create) {
-            try {
-                Files.createDirectories(f);
-            } catch (IOException e) {
-                throw new IllegalStateException("Unable to create test directory: " + dir, e);
-            }
-        }
-        return f;
-    }
-
-    protected String fileUri() {
-        return "file:" + testDirectory();
-    }
-
-    protected String fileUri(String query) {
-        return "file:" + testDirectory() + (query.startsWith("?") ? "" : "/") + query;
-    }
-
-    public void deleteTestDirectory() {
-        if (!testDirectoryCleaned) {
-            deleteDirectory(testDirectory());
-            testDirectoryCleaned = true;
         }
     }
 

@@ -55,9 +55,9 @@ public final class DefaultAnnotationBasedProcessorFactory implements AnnotationB
         recipientList.setCacheSize(annotation.cacheSize());
         recipientList.setShareUnitOfWork(annotation.shareUnitOfWork());
 
-        if (ObjectHelper.isNotEmpty(annotation.executorServiceRef())) {
+        if (ObjectHelper.isNotEmpty(annotation.executorService())) {
             ExecutorService executor = camelContext.getExecutorServiceManager().newThreadPool(this, "@RecipientList",
-                    annotation.executorServiceRef());
+                    annotation.executorService());
             recipientList.setExecutorService(executor);
         }
 
@@ -67,14 +67,15 @@ public final class DefaultAnnotationBasedProcessorFactory implements AnnotationB
             recipientList.setExecutorService(executor);
         }
 
-        if (ObjectHelper.isNotEmpty(annotation.strategyRef())) {
+        if (ObjectHelper.isNotEmpty(annotation.aggregationStrategy())) {
             AggregationStrategy strategy
-                    = CamelContextHelper.mandatoryLookup(camelContext, annotation.strategyRef(), AggregationStrategy.class);
+                    = CamelContextHelper.mandatoryLookup(camelContext, annotation.aggregationStrategy(),
+                            AggregationStrategy.class);
             recipientList.setAggregationStrategy(strategy);
         }
 
-        if (ObjectHelper.isNotEmpty(annotation.onPrepareRef())) {
-            Processor onPrepare = CamelContextHelper.mandatoryLookup(camelContext, annotation.onPrepareRef(), Processor.class);
+        if (ObjectHelper.isNotEmpty(annotation.onPrepare())) {
+            Processor onPrepare = CamelContextHelper.mandatoryLookup(camelContext, annotation.onPrepare(), Processor.class);
             recipientList.setOnPrepare(onPrepare);
         }
 

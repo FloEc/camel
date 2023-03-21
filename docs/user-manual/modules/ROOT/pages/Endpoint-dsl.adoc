@@ -2,6 +2,8 @@
 
 Endpoint-DSL is a builder API that allows using type-safe endpoint xref:uris.adoc[URL] configurations.
 
+The Endpoint DSL is exclusively available as part of the Java DSL.
+
 The DSL can be accessed in several ways, but the main one is to switch to using an `EndpointRouteBuilder` instead of the usual
 `RouteBuilder`. This builder provides access to all of Camel endpoint builders which are defined through inheritance on the `org.apache.camel.builder.endpoint.EndpointRouteBuilder`.
 
@@ -13,11 +15,11 @@ The following is an example of an FTP route using the standard `RouteBuilder` Ja
 ----
 public class MyRoutes extends RouteBuilder {
     @Override
-    public void configure() throws Exception {
-        from("ftp://foo@myserver?password=secret&recursive=true&
-               ftpClient.dataTimeout=30000&
-               ftpClientConfig.serverLanguageCode=fr")
-        .to("bean:doSomething");
+    public void configure() {
+        from("ftp://foo@myserver?password=secret&recursive=true&" +
+                "ftpClient.dataTimeout=30000&" +
+                "ftpClientConfig.serverLanguageCode=fr")
+                .to("bean:doSomething");
     }
 }
 ----
@@ -62,6 +64,28 @@ from(jms("myWMQ", "cheese").concurrentConsumers(5))
 
 Notice how we can refer to their names as the first parameter in the `jms` fluent builder.
 The example would then consume messages from WebSphereMQ queue named cheese and route to ActiveMQ on a queue named smelly.
+
+=== Headers' name
+
+The endpoint-dsl can also be used to be assisted when selecting the name of a header to set or to get. The headers' name builder
+is accessible directly from the method of the class `EndpointRouteBuilder` without argument whose name is the scheme of
+the target component.
+
+In the example below the method `file()` available from `EndpointRouteBuilder`, gives access to the methods corresponding to the name of the headers of the file component. Here the method `fileName()` is called to get the name of the header for the name of the file.
+
+[source,java]
+----
+public class MyRoutes extends EndpointRouteBuilder {
+    @Override
+    public void configure() {
+        from(/*some endpoint*/)
+            // Some route start
+            .setHeader(file().fileName(), constant("foo.txt"))
+            // Some route end
+            ;
+    }
+}
+----
 
 === Using Endpoint-DSL outside route builders
 
@@ -125,7 +149,7 @@ public class MyPojo {
 ----
 
 The `MyPojo` is a class that with standalone Camel can be discovered and registered with the `@BindToRegistry` annotation.
-If you use Spring Boot, CDI, or Quarkus etc then you should use their kind of annotations for this.
+If you use Spring Boot, or Quarkus etc then you should use their kind of annotations for this.
 
 That's not the point of this example, it is the Endpoint DSL to configure the MQTT endpoint (camel-paho).
 The endpoint is configured the same way as before by the type-safe endpoint-dsl by static importing the `paho`,

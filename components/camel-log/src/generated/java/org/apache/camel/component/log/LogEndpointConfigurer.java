@@ -49,6 +49,8 @@ public class LogEndpointConfigurer extends PropertyConfigurerSupport implements 
         case "showBody": target.setShowBody(property(camelContext, boolean.class, value)); return true;
         case "showbodytype":
         case "showBodyType": target.setShowBodyType(property(camelContext, boolean.class, value)); return true;
+        case "showcachedstreams":
+        case "showCachedStreams": target.setShowCachedStreams(property(camelContext, boolean.class, value)); return true;
         case "showcaughtexception":
         case "showCaughtException": target.setShowCaughtException(property(camelContext, boolean.class, value)); return true;
         case "showexception":
@@ -71,6 +73,8 @@ public class LogEndpointConfigurer extends PropertyConfigurerSupport implements 
         case "showStreams": target.setShowStreams(property(camelContext, boolean.class, value)); return true;
         case "skipbodylineseparator":
         case "skipBodyLineSeparator": target.setSkipBodyLineSeparator(property(camelContext, boolean.class, value)); return true;
+        case "sourcelocationloggername":
+        case "sourceLocationLoggerName": target.setSourceLocationLoggerName(property(camelContext, boolean.class, value)); return true;
         case "style": target.setStyle(property(camelContext, org.apache.camel.support.processor.DefaultExchangeFormatter.OutputStyle.class, value)); return true;
         default: return false;
         }
@@ -107,6 +111,8 @@ public class LogEndpointConfigurer extends PropertyConfigurerSupport implements 
         case "showBody": return boolean.class;
         case "showbodytype":
         case "showBodyType": return boolean.class;
+        case "showcachedstreams":
+        case "showCachedStreams": return boolean.class;
         case "showcaughtexception":
         case "showCaughtException": return boolean.class;
         case "showexception":
@@ -129,6 +135,8 @@ public class LogEndpointConfigurer extends PropertyConfigurerSupport implements 
         case "showStreams": return boolean.class;
         case "skipbodylineseparator":
         case "skipBodyLineSeparator": return boolean.class;
+        case "sourcelocationloggername":
+        case "sourceLocationLoggerName": return boolean.class;
         case "style": return org.apache.camel.support.processor.DefaultExchangeFormatter.OutputStyle.class;
         default: return null;
         }
@@ -166,6 +174,8 @@ public class LogEndpointConfigurer extends PropertyConfigurerSupport implements 
         case "showBody": return target.isShowBody();
         case "showbodytype":
         case "showBodyType": return target.isShowBodyType();
+        case "showcachedstreams":
+        case "showCachedStreams": return target.isShowCachedStreams();
         case "showcaughtexception":
         case "showCaughtException": return target.isShowCaughtException();
         case "showexception":
@@ -188,6 +198,8 @@ public class LogEndpointConfigurer extends PropertyConfigurerSupport implements 
         case "showStreams": return target.isShowStreams();
         case "skipbodylineseparator":
         case "skipBodyLineSeparator": return target.isSkipBodyLineSeparator();
+        case "sourcelocationloggername":
+        case "sourceLocationLoggerName": return target.isSourceLocationLoggerName();
         case "style": return target.getStyle();
         default: return null;
         }

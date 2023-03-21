@@ -16,11 +16,10 @@
  */
 package org.apache.camel.component.jetty;
 
-import java.io.IOException;
 import java.security.Principal;
-import java.util.Arrays;
+import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.camel.BindToRegistry;
 import org.apache.camel.Exchange;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class HttpBasicAuthTest extends BaseJettyTest {
 
     @BindToRegistry("myAuthHandler")
-    public SecurityHandler getSecurityHandler() throws IOException {
+    public SecurityHandler getSecurityHandler() {
         Constraint constraint = new Constraint(Constraint.__BASIC_AUTH, "user");
         constraint.setAuthenticate(true);
 
@@ -54,17 +53,17 @@ public class HttpBasicAuthTest extends BaseJettyTest {
 
         ConstraintSecurityHandler sh = new ConstraintSecurityHandler();
         sh.setAuthenticator(new BasicAuthenticator());
-        sh.setConstraintMappings(Arrays.asList(new ConstraintMapping[] { cm }));
+        sh.setConstraintMappings(List.of(cm));
 
         HashLoginService loginService = new HashLoginService("MyRealm", "src/test/resources/myRealm.properties");
         sh.setLoginService(loginService);
-        sh.setConstraintMappings(Arrays.asList(new ConstraintMapping[] { cm }));
+        sh.setConstraintMappings(List.of(cm));
 
         return sh;
     }
 
     @Test
-    public void testHttpBasicAuth() throws Exception {
+    public void testHttpBasicAuth() {
         String out
                 = template.requestBody("http://localhost:{{port}}/test?authMethod=Basic&authUsername=donald&authPassword=duck",
                         "Hello World", String.class);
@@ -72,7 +71,7 @@ public class HttpBasicAuthTest extends BaseJettyTest {
     }
 
     @Test
-    public void testHttpBasicAuthInvalidPassword() throws Exception {
+    public void testHttpBasicAuthInvalidPassword() {
         try {
             template.requestBody("http://localhost:{{port}}/test?authMethod=Basic&authUsername=donald&authPassword=sorry",
                     "Hello World", String.class);
@@ -84,12 +83,12 @@ public class HttpBasicAuthTest extends BaseJettyTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("jetty://http://localhost:{{port}}/test?handlers=myAuthHandler").process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         HttpServletRequest req = exchange.getIn().getBody(HttpServletRequest.class);
                         assertNotNull(req);
                         Principal user = req.getUserPrincipal();

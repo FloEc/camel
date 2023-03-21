@@ -73,12 +73,16 @@ public class Sqs2ComponentConfigurer extends PropertyConfigurerSupport implement
         case "messageDeduplicationIdStrategy": getOrCreateConfiguration(target).setMessageDeduplicationIdStrategy(property(camelContext, java.lang.String.class, value)); return true;
         case "messagegroupidstrategy":
         case "messageGroupIdStrategy": getOrCreateConfiguration(target).setMessageGroupIdStrategy(property(camelContext, java.lang.String.class, value)); return true;
+        case "messageheaderexceededlimit":
+        case "messageHeaderExceededLimit": getOrCreateConfiguration(target).setMessageHeaderExceededLimit(property(camelContext, java.lang.String.class, value)); return true;
         case "messageretentionperiod":
         case "messageRetentionPeriod": getOrCreateConfiguration(target).setMessageRetentionPeriod(property(camelContext, java.lang.Integer.class, value)); return true;
         case "operation": getOrCreateConfiguration(target).setOperation(property(camelContext, org.apache.camel.component.aws2.sqs.Sqs2Operations.class, value)); return true;
         case "overrideendpoint":
         case "overrideEndpoint": getOrCreateConfiguration(target).setOverrideEndpoint(property(camelContext, boolean.class, value)); return true;
         case "policy": getOrCreateConfiguration(target).setPolicy(property(camelContext, java.lang.String.class, value)); return true;
+        case "profilecredentialsname":
+        case "profileCredentialsName": getOrCreateConfiguration(target).setProfileCredentialsName(property(camelContext, java.lang.String.class, value)); return true;
         case "protocol": getOrCreateConfiguration(target).setProtocol(property(camelContext, java.lang.String.class, value)); return true;
         case "proxyhost":
         case "proxyHost": getOrCreateConfiguration(target).setProxyHost(property(camelContext, java.lang.String.class, value)); return true;
@@ -105,6 +109,8 @@ public class Sqs2ComponentConfigurer extends PropertyConfigurerSupport implement
         case "uriEndpointOverride": getOrCreateConfiguration(target).setUriEndpointOverride(property(camelContext, java.lang.String.class, value)); return true;
         case "usedefaultcredentialsprovider":
         case "useDefaultCredentialsProvider": getOrCreateConfiguration(target).setUseDefaultCredentialsProvider(property(camelContext, boolean.class, value)); return true;
+        case "useprofilecredentialsprovider":
+        case "useProfileCredentialsProvider": getOrCreateConfiguration(target).setUseProfileCredentialsProvider(property(camelContext, boolean.class, value)); return true;
         case "visibilitytimeout":
         case "visibilityTimeout": getOrCreateConfiguration(target).setVisibilityTimeout(property(camelContext, java.lang.Integer.class, value)); return true;
         case "waittimeseconds":
@@ -166,12 +172,16 @@ public class Sqs2ComponentConfigurer extends PropertyConfigurerSupport implement
         case "messageDeduplicationIdStrategy": return java.lang.String.class;
         case "messagegroupidstrategy":
         case "messageGroupIdStrategy": return java.lang.String.class;
+        case "messageheaderexceededlimit":
+        case "messageHeaderExceededLimit": return java.lang.String.class;
         case "messageretentionperiod":
         case "messageRetentionPeriod": return java.lang.Integer.class;
         case "operation": return org.apache.camel.component.aws2.sqs.Sqs2Operations.class;
         case "overrideendpoint":
         case "overrideEndpoint": return boolean.class;
         case "policy": return java.lang.String.class;
+        case "profilecredentialsname":
+        case "profileCredentialsName": return java.lang.String.class;
         case "protocol": return java.lang.String.class;
         case "proxyhost":
         case "proxyHost": return java.lang.String.class;
@@ -198,6 +208,8 @@ public class Sqs2ComponentConfigurer extends PropertyConfigurerSupport implement
         case "uriEndpointOverride": return java.lang.String.class;
         case "usedefaultcredentialsprovider":
         case "useDefaultCredentialsProvider": return boolean.class;
+        case "useprofilecredentialsprovider":
+        case "useProfileCredentialsProvider": return boolean.class;
         case "visibilitytimeout":
         case "visibilityTimeout": return java.lang.Integer.class;
         case "waittimeseconds":
@@ -255,12 +267,16 @@ public class Sqs2ComponentConfigurer extends PropertyConfigurerSupport implement
         case "messageDeduplicationIdStrategy": return getOrCreateConfiguration(target).getMessageDeduplicationIdStrategy();
         case "messagegroupidstrategy":
         case "messageGroupIdStrategy": return getOrCreateConfiguration(target).getMessageGroupIdStrategy();
+        case "messageheaderexceededlimit":
+        case "messageHeaderExceededLimit": return getOrCreateConfiguration(target).getMessageHeaderExceededLimit();
         case "messageretentionperiod":
         case "messageRetentionPeriod": return getOrCreateConfiguration(target).getMessageRetentionPeriod();
         case "operation": return getOrCreateConfiguration(target).getOperation();
         case "overrideendpoint":
         case "overrideEndpoint": return getOrCreateConfiguration(target).isOverrideEndpoint();
         case "policy": return getOrCreateConfiguration(target).getPolicy();
+        case "profilecredentialsname":
+        case "profileCredentialsName": return getOrCreateConfiguration(target).getProfileCredentialsName();
         case "protocol": return getOrCreateConfiguration(target).getProtocol();
         case "proxyhost":
         case "proxyHost": return getOrCreateConfiguration(target).getProxyHost();
@@ -287,6 +303,8 @@ public class Sqs2ComponentConfigurer extends PropertyConfigurerSupport implement
         case "uriEndpointOverride": return getOrCreateConfiguration(target).getUriEndpointOverride();
         case "usedefaultcredentialsprovider":
         case "useDefaultCredentialsProvider": return getOrCreateConfiguration(target).isUseDefaultCredentialsProvider();
+        case "useprofilecredentialsprovider":
+        case "useProfileCredentialsProvider": return getOrCreateConfiguration(target).isUseProfileCredentialsProvider();
         case "visibilitytimeout":
         case "visibilityTimeout": return getOrCreateConfiguration(target).getVisibilityTimeout();
         case "waittimeseconds":

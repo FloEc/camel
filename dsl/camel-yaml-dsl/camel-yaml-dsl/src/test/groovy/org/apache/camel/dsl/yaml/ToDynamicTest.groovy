@@ -35,37 +35,29 @@ class ToDynamicTest extends YamlTestSupport {
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - to-d: "direct:start"
+                          - toD: "direct:start"
                     '''),
                 asResource('uri', '''
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - to-d: 
+                          - toD: 
                               uri: "direct:start"
                     '''),
                 asResource('properties', '''
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - to-d: 
+                          - toD: 
                               uri: "direct"
                               parameters:
-                                name: "start"
-                    '''),
-                asResource('endpoint', '''
-                    - from:
-                        uri: "direct:start"
-                        steps:    
-                          - to-d: 
-                              direct:
                                 name: "start"
                     '''),
                 asResource('properties-out-of-order', '''
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - to-d: 
+                          - toD: 
                               parameters:
                                 name: "start"
                               uri: "direct"
@@ -86,37 +78,29 @@ class ToDynamicTest extends YamlTestSupport {
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - tod: "direct:start"
+                          - toD: "direct:start"
                     '''),
                     asResource('uri', '''
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - tod: 
+                          - toD: 
                               uri: "direct:start"
                     '''),
                     asResource('properties', '''
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - tod: 
+                          - toD: 
                               uri: "direct"
                               parameters:
-                                name: "start"
-                    '''),
-                    asResource('endpoint', '''
-                    - from:
-                        uri: "direct:start"
-                        steps:    
-                          - tod: 
-                              direct:
                                 name: "start"
                     '''),
                     asResource('properties-out-of-order', '''
                     - from:
                         uri: "direct:start"
                         steps:    
-                          - tod: 
+                          - toD: 
                               parameters:
                                 name: "start"
                               uri: "direct"

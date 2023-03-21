@@ -20,7 +20,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -81,21 +80,20 @@ import io.swagger.v3.oas.models.media.DateSchema;
 import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.PasswordSchema;
 import org.apache.camel.CamelContext;
+import org.apache.camel.model.rest.ApiKeyDefinition;
+import org.apache.camel.model.rest.BasicAuthDefinition;
+import org.apache.camel.model.rest.BearerTokenDefinition;
+import org.apache.camel.model.rest.MutualTLSDefinition;
+import org.apache.camel.model.rest.OAuth2Definition;
+import org.apache.camel.model.rest.OpenIdConnectDefinition;
+import org.apache.camel.model.rest.ParamDefinition;
+import org.apache.camel.model.rest.ResponseHeaderDefinition;
+import org.apache.camel.model.rest.ResponseMessageDefinition;
 import org.apache.camel.model.rest.RestDefinition;
-import org.apache.camel.model.rest.RestOperationParamDefinition;
-import org.apache.camel.model.rest.RestOperationResponseHeaderDefinition;
-import org.apache.camel.model.rest.RestOperationResponseMsgDefinition;
 import org.apache.camel.model.rest.RestParamType;
 import org.apache.camel.model.rest.RestPropertyDefinition;
 import org.apache.camel.model.rest.RestSecuritiesDefinition;
-import org.apache.camel.model.rest.RestSecuritiesRequirement;
-import org.apache.camel.model.rest.RestSecurityApiKey;
-import org.apache.camel.model.rest.RestSecurityBasicAuth;
-import org.apache.camel.model.rest.RestSecurityBearerToken;
 import org.apache.camel.model.rest.RestSecurityDefinition;
-import org.apache.camel.model.rest.RestSecurityMutualTLS;
-import org.apache.camel.model.rest.RestSecurityOAuth2;
-import org.apache.camel.model.rest.RestSecurityOpenIdConnect;
 import org.apache.camel.model.rest.SecurityDefinition;
 import org.apache.camel.model.rest.VerbDefinition;
 import org.apache.camel.spi.ClassResolver;
@@ -158,7 +156,10 @@ public class RestOpenApiReader {
         }
 
         for (RestDefinition rest : rests) {
-            parse(camelContext, openApi, rest, camelContextId, classResolver);
+            Boolean disabled = CamelContextHelper.parseBoolean(camelContext, rest.getDisabled());
+            if (disabled == null || !disabled) {
+                parse(camelContext, openApi, rest, camelContextId, classResolver);
+            }
         }
 
         shortenClassNames(openApi);
@@ -192,17 +193,30 @@ public class RestOpenApiReader {
             ClassResolver classResolver)
             throws ClassNotFoundException {
 
-        List<VerbDefinition> verbs = new ArrayList<>(rest.getVerbs());
+        // only include enabled verbs
+        List<VerbDefinition> filter = new ArrayList<>();
+        for (VerbDefinition verb : rest.getVerbs()) {
+            Boolean disabled = CamelContextHelper.parseBoolean(camelContext, verb.getDisabled());
+            if (disabled == null || !disabled) {
+                filter.add(verb);
+            }
+        }
+        List<VerbDefinition> verbs = new ArrayList<>(filter);
         // must sort the verbs by uri so we group them together when an uri has multiple operations
         verbs.sort(new VerbOrdering(camelContext));
 
         // we need to group the operations within the same tag, so use the path as default if not configured
-        String opPath = OpenApiHelper.buildUrl(buildBasePath(camelContext, rest), getValue(camelContext, rest.getPath()));
-        String pathAsTag = getValue(camelContext, rest.getTag() != null ? rest.getTag() : opPath);
+        // Multi tag support for a comma delimeted tag
+        String[] pathAsTags = null != rest.getTag()
+                ? getValue(camelContext, rest.getTag()).split(",")
+                : null != rest.getPath()
+                        ? new String[] { getValue(camelContext, rest.getPath()) }
+                : new String[0];
+
         if (openApi instanceof Oas20Document) {
-            parseOas20(camelContext, (Oas20Document) openApi, rest, pathAsTag);
+            parseOas20(camelContext, (Oas20Document) openApi, rest, pathAsTags);
         } else if (openApi instanceof Oas30Document) {
-            parseOas30((Oas30Document) openApi, rest, pathAsTag);
+            parseOas30((Oas30Document) openApi, rest, pathAsTags);
         }
 
         // gather all types in use
@@ -237,7 +251,7 @@ public class RestOpenApiReader {
             }
             // there can also be types in response messages
             if (verb.getResponseMsgs() != null) {
-                for (RestOperationResponseMsgDefinition def : verb.getResponseMsgs()) {
+                for (ResponseMessageDefinition def : verb.getResponseMsgs()) {
                     type = def.getResponseModel();
                     if (org.apache.camel.util.ObjectHelper.isNotEmpty(type)) {
                         if (type.endsWith("[]")) {
@@ -255,32 +269,29 @@ public class RestOpenApiReader {
             appendModels(clazz, openApi);
         }
 
-        doParseVerbs(camelContext, openApi, rest, camelContextId, verbs, pathAsTag);
+        doParseVerbs(camelContext, openApi, rest, camelContextId, verbs, pathAsTags);
 
         // setup root security node if necessary
-        RestSecuritiesRequirement securitiesRequirement = rest.getSecurityRequirements();
-        if (securitiesRequirement != null) {
-            Collection<SecurityDefinition> securityRequirements = securitiesRequirement.securityRequirements();
-            securityRequirements.forEach(requirement -> {
-                OasSecurityRequirement oasRequirement = openApi.createSecurityRequirement();
-                List<String> scopes;
-                if (requirement.getScopes() == null || requirement.getScopes().trim().isEmpty()) {
-                    scopes = Collections.emptyList();
-                } else {
-                    scopes = Arrays.asList(requirement.getScopes().trim().split("\\s*,\\s*"));
-                }
-                oasRequirement.addSecurityRequirementItem(requirement.getKey(), scopes);
-                openApi.addSecurityRequirement(oasRequirement);
-            });
-        }
+        List<SecurityDefinition> securityRequirements = rest.getSecurityRequirements();
+        securityRequirements.forEach(requirement -> {
+            OasSecurityRequirement oasRequirement = openApi.createSecurityRequirement();
+            List<String> scopes;
+            if (requirement.getScopes() == null || requirement.getScopes().trim().isEmpty()) {
+                scopes = Collections.emptyList();
+            } else {
+                scopes = Arrays.asList(requirement.getScopes().trim().split("\\s*,\\s*"));
+            }
+            oasRequirement.addSecurityRequirementItem(requirement.getKey(), scopes);
+            openApi.addSecurityRequirement(oasRequirement);
+        });
     }
 
-    private void parseOas30(Oas30Document openApi, RestDefinition rest, String pathAsTag) {
+    private void parseOas30(Oas30Document openApi, RestDefinition rest, String[] pathAsTags) {
         String summary = rest.getDescriptionText();
 
-        if (org.apache.camel.util.ObjectHelper.isNotEmpty(pathAsTag)) {
+        for (String tag : pathAsTags) {
             // add rest as tag
-            openApi.addTag(pathAsTag, summary);
+            openApi.addTag(tag, summary);
         }
 
         // setup security definitions
@@ -291,22 +302,22 @@ public class RestOpenApiReader {
         }
         if (sd != null) {
             for (RestSecurityDefinition def : sd.getSecurityDefinitions()) {
-                if (def instanceof RestSecurityBasicAuth) {
+                if (def instanceof BasicAuthDefinition) {
                     Oas30SecurityScheme auth = openApi.components
                             .createSecurityScheme(def.getKey());
                     auth.type = "http";
                     auth.scheme = "basic";
                     auth.description = def.getDescription();
                     openApi.components.addSecurityScheme(def.getKey(), auth);
-                } else if (def instanceof RestSecurityBearerToken) {
+                } else if (def instanceof BearerTokenDefinition) {
                     Oas30SecurityScheme auth = openApi.components.createSecurityScheme(def.getKey());
                     auth.type = "http";
                     auth.scheme = "bearer";
                     auth.description = def.getDescription();
-                    auth.bearerFormat = ((RestSecurityBearerToken) def).getFormat();
+                    auth.bearerFormat = ((BearerTokenDefinition) def).getFormat();
                     openApi.components.addSecurityScheme(def.getKey(), auth);
-                } else if (def instanceof RestSecurityApiKey) {
-                    RestSecurityApiKey rs = (RestSecurityApiKey) def;
+                } else if (def instanceof ApiKeyDefinition) {
+                    ApiKeyDefinition rs = (ApiKeyDefinition) def;
                     Oas30SecurityScheme auth = openApi.components
                             .createSecurityScheme(def.getKey());
                     auth.type = "apiKey";
@@ -322,8 +333,8 @@ public class RestOpenApiReader {
                         throw new IllegalStateException("No API Key location specified.");
                     }
                     openApi.components.addSecurityScheme(def.getKey(), auth);
-                } else if (def instanceof RestSecurityOAuth2) {
-                    RestSecurityOAuth2 rs = (RestSecurityOAuth2) def;
+                } else if (def instanceof OAuth2Definition) {
+                    OAuth2Definition rs = (OAuth2Definition) def;
 
                     Oas30SecurityScheme auth = openApi.components
                             .createSecurityScheme(def.getKey());
@@ -373,26 +384,26 @@ public class RestOpenApiReader {
                     }
 
                     openApi.components.addSecurityScheme(def.getKey(), auth);
-                } else if (def instanceof RestSecurityMutualTLS) {
+                } else if (def instanceof MutualTLSDefinition) {
                     Oas30SecurityScheme auth = openApi.components.createSecurityScheme(def.getKey());
                     auth.type = "mutualTLS";
                     openApi.components.addSecurityScheme(def.getKey(), auth);
-                } else if (def instanceof RestSecurityOpenIdConnect) {
+                } else if (def instanceof OpenIdConnectDefinition) {
                     Oas30SecurityScheme auth = openApi.components.createSecurityScheme(def.getKey());
                     auth.type = "openIdConnect";
-                    auth.openIdConnectUrl = ((RestSecurityOpenIdConnect) def).getUrl();
+                    auth.openIdConnectUrl = ((OpenIdConnectDefinition) def).getUrl();
                     openApi.components.addSecurityScheme(def.getKey(), auth);
                 }
             }
         }
     }
 
-    private void parseOas20(CamelContext camelContext, Oas20Document openApi, RestDefinition rest, String pathAsTag) {
+    private void parseOas20(CamelContext camelContext, Oas20Document openApi, RestDefinition rest, String[] pathAsTags) {
         String summary = getValue(camelContext, rest.getDescriptionText());
 
-        if (org.apache.camel.util.ObjectHelper.isNotEmpty(pathAsTag)) {
+        for (String tag : pathAsTags) {
             // add rest as tag
-            openApi.addTag(pathAsTag, summary);
+            openApi.addTag(tag, summary);
         }
 
         // setup security definitions
@@ -402,16 +413,16 @@ public class RestOpenApiReader {
         }
         if (sd != null) {
             for (RestSecurityDefinition def : sd.getSecurityDefinitions()) {
-                if (def instanceof RestSecurityBasicAuth) {
+                if (def instanceof BasicAuthDefinition) {
                     Oas20SecurityScheme auth
                             = openApi.securityDefinitions.createSecurityScheme(getValue(camelContext, def.getKey()));
                     auth.type = "basicAuth";
                     auth.description = getValue(camelContext, def.getDescription());
                     openApi.securityDefinitions.addSecurityScheme(getValue(camelContext, def.getKey()), auth);
-                } else if (def instanceof RestSecurityBearerToken) {
+                } else if (def instanceof BearerTokenDefinition) {
                     throw new IllegalStateException("OpenAPI 2.0 does not support bearer token security schemes.");
-                } else if (def instanceof RestSecurityApiKey) {
-                    RestSecurityApiKey rs = (RestSecurityApiKey) def;
+                } else if (def instanceof ApiKeyDefinition) {
+                    ApiKeyDefinition rs = (ApiKeyDefinition) def;
                     Oas20SecurityScheme auth
                             = openApi.securityDefinitions.createSecurityScheme(getValue(camelContext, def.getKey()));
                     auth.type = "apiKey";
@@ -425,8 +436,8 @@ public class RestOpenApiReader {
                         throw new IllegalStateException("Invalid 'in' value for API Key security scheme");
                     }
                     openApi.securityDefinitions.addSecurityScheme(getValue(camelContext, def.getKey()), auth);
-                } else if (def instanceof RestSecurityOAuth2) {
-                    RestSecurityOAuth2 rs = (RestSecurityOAuth2) def;
+                } else if (def instanceof OAuth2Definition) {
+                    OAuth2Definition rs = (OAuth2Definition) def;
                     Oas20SecurityScheme auth
                             = openApi.securityDefinitions.createSecurityScheme(getValue(camelContext, def.getKey()));
                     auth.type = "oauth2";
@@ -463,9 +474,9 @@ public class RestOpenApiReader {
                         openApi.securityDefinitions = openApi.createSecurityDefinitions();
                     }
                     openApi.securityDefinitions.addSecurityScheme(getValue(camelContext, def.getKey()), auth);
-                } else if (def instanceof RestSecurityMutualTLS) {
+                } else if (def instanceof MutualTLSDefinition) {
                     throw new IllegalStateException("Mutual TLS security scheme is not supported");
-                } else if (def instanceof RestSecurityOpenIdConnect) {
+                } else if (def instanceof OpenIdConnectDefinition) {
                     throw new IllegalStateException("OpenId Connect security scheme is not supported");
                 }
             }
@@ -475,17 +486,6 @@ public class RestOpenApiReader {
     private String buildBasePath(CamelContext camelContext, RestDefinition rest) {
         // used during gathering of apis
         String basePath = FileUtil.stripLeadingSeparator(getValue(camelContext, rest.getPath()));
-
-        // is there any context-path which we must use in base path for each rest service
-        String cp = camelContext.getRestConfiguration() != null ? camelContext.getRestConfiguration().getContextPath() : null;
-        if (cp != null) {
-            cp = FileUtil.stripLeadingSeparator(cp);
-            if (basePath != null) {
-                basePath = cp + "/" + basePath;
-            } else {
-                basePath = cp;
-            }
-        }
         // must start with leading slash
         if (basePath != null && !basePath.startsWith("/")) {
             basePath = "/" + basePath;
@@ -495,7 +495,7 @@ public class RestOpenApiReader {
 
     private void doParseVerbs(
             CamelContext camelContext, OasDocument openApi, RestDefinition rest, String camelContextId,
-            List<VerbDefinition> verbs, String pathAsTag) {
+            List<VerbDefinition> verbs, String[] pathAsTags) {
 
         String basePath = buildBasePath(camelContext, rest);
 
@@ -515,7 +515,7 @@ public class RestOpenApiReader {
             // the method must be in lower case
             String method = verb.asVerb().toLowerCase(Locale.US);
             // operation path is a key
-            String opPath = OpenApiHelper.buildUrl(basePath, getValue(camelContext, verb.getUri()));
+            String opPath = OpenApiHelper.buildUrl(basePath, getValue(camelContext, verb.getPath()));
 
             if (openApi.paths == null) {
                 openApi.paths = openApi.createPaths();
@@ -526,15 +526,14 @@ public class RestOpenApiReader {
             }
 
             OasOperation op = path.createOperation(method);
-            if (org.apache.camel.util.ObjectHelper.isNotEmpty(pathAsTag)) {
+            for (String tag : pathAsTags) {
                 // group in the same tag
                 if (op.tags == null) {
                     op.tags = new ArrayList<>();
                 }
-                op.tags.add(pathAsTag);
+                op.tags.add(tag);
             }
 
-            final String routeId = getValue(camelContext, verb.getRouteId());
             // favour ids from verb, rest, route
             final String operationId;
             if (verb.getId() != null) {
@@ -542,7 +541,8 @@ public class RestOpenApiReader {
             } else if (rest.getId() != null) {
                 operationId = getValue(camelContext, rest.getId());
             } else {
-                operationId = routeId;
+                verb.idOrCreate(camelContext.getCamelContextExtension().getNodeIdFactory());
+                operationId = verb.getId();
             }
             op.operationId = operationId;
 
@@ -552,8 +552,6 @@ public class RestOpenApiReader {
             extension.value = camelContextId;
             op.addExtension(extension.name, extension);
             extension = op.createExtension();
-            extension.name = "x-routeId";
-            extension.value = routeId;
             op.addExtension(extension.name, extension);
             path = setPathOperation(path, op, method);
 
@@ -579,8 +577,8 @@ public class RestOpenApiReader {
             op.summary = getValue(camelContext, verb.getDescriptionText());
         }
 
-        if (Boolean.TRUE.equals(verb.getDeprecated())) {
-            op.deprecated = verb.getDeprecated();
+        if ("true".equals(verb.getDeprecated())) {
+            op.deprecated = Boolean.TRUE;
         }
 
         // security
@@ -596,7 +594,7 @@ public class RestOpenApiReader {
             op.addSecurityRequirement(securityRequirement);
         }
 
-        for (RestOperationParamDefinition param : verb.getParams()) {
+        for (ParamDefinition param : verb.getParams()) {
             OasParameter parameter = null;
             if (param.getType().equals(RestParamType.body)) {
                 parameter = op.createParameter();
@@ -627,7 +625,7 @@ public class RestOpenApiReader {
                     Oas30Parameter parameter30 = (Oas30Parameter) parameter;
                     Oas30Schema oas30Schema = null;
                     final boolean isArray = getValue(camelContext, param.getDataType()).equalsIgnoreCase("array");
-                    final List<String> allowableValues = getValue(camelContext, param.getAllowableValues());
+                    final List<String> allowableValues = getValue(camelContext, param.getAllowableValuesAsStringList());
                     final boolean hasAllowableValues = allowableValues != null && !allowableValues.isEmpty();
                     if (param.getDataType() != null) {
                         parameter30.schema = parameter30.createSchema();
@@ -810,8 +808,8 @@ public class RestOpenApiReader {
             op.consumes.addAll(Arrays.asList(parts));
         }
 
-        if (Boolean.TRUE.equals(verb.getDeprecated())) {
-            op.deprecated = verb.getDeprecated();
+        if ("true".equals(verb.getDeprecated())) {
+            op.deprecated = Boolean.TRUE;
         }
 
         if (produces != null) {
@@ -839,7 +837,7 @@ public class RestOpenApiReader {
             op.addSecurityRequirement(securityRequirement);
         }
 
-        for (RestOperationParamDefinition param : verb.getParams()) {
+        for (ParamDefinition param : verb.getParams()) {
             OasParameter parameter = null;
             if (param.getType().equals(RestParamType.body)) {
                 parameter = op.createParameter();
@@ -870,7 +868,7 @@ public class RestOpenApiReader {
 
                     Oas20Parameter serializableParameter = (Oas20Parameter) parameter;
                     final boolean isArray = getValue(camelContext, param.getDataType()).equalsIgnoreCase("array");
-                    final List<String> allowableValues = getValue(camelContext, param.getAllowableValues());
+                    final List<String> allowableValues = getValue(camelContext, param.getAllowableValuesAsStringList());
                     final boolean hasAllowableValues = allowableValues != null && !allowableValues.isEmpty();
                     if (param.getDataType() != null) {
                         serializableParameter.type = param.getDataType();
@@ -1094,18 +1092,16 @@ public class RestOpenApiReader {
             final List<?> values = allowableValues.stream().map(v -> {
                 try {
                     return valueOf.invoke(v);
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Throwable e) {
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    }
                     throw new IllegalStateException(e);
                 }
             }).collect(Collectors.toList());
             setEnum.invoke(values);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Throwable e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
             throw new IllegalStateException(e);
         }
     }
@@ -1115,7 +1111,7 @@ public class RestOpenApiReader {
         if (op.responses == null) {
             op.responses = op.createResponses();
         }
-        for (RestOperationResponseMsgDefinition msg : verb.getResponseMsgs()) {
+        for (ResponseMessageDefinition msg : verb.getResponseMsgs()) {
             if (openApi instanceof Oas20Document) {
                 doParseResponseOas20(camelContext, (Oas20Document) openApi, (Oas20Operation) op, msg);
             } else if (openApi instanceof Oas30Document) {
@@ -1131,7 +1127,7 @@ public class RestOpenApiReader {
 
     private void doParseResponseOas30(
             CamelContext camelContext, Oas30Document openApi, Oas30Operation op, String produces,
-            RestOperationResponseMsgDefinition msg) {
+            ResponseMessageDefinition msg) {
         Oas30Response response = null;
 
         String code = getValue(camelContext, msg.getCode());
@@ -1161,7 +1157,7 @@ public class RestOpenApiReader {
 
         // add headers
         if (msg.getHeaders() != null) {
-            for (RestOperationResponseHeaderDefinition header : msg.getHeaders()) {
+            for (ResponseHeaderDefinition header : msg.getHeaders()) {
                 String name = getValue(camelContext, header.getName());
                 String type = getValue(camelContext, header.getDataType());
                 String format = getValue(camelContext, header.getDataFormat());
@@ -1224,7 +1220,7 @@ public class RestOpenApiReader {
     }
 
     private void setResponseHeaderOas30(
-            CamelContext camelContext, Oas30Response response, RestOperationResponseHeaderDefinition header,
+            CamelContext camelContext, Oas30Response response, ResponseHeaderDefinition header,
             String name, String format, String type) {
         Oas30Header ip = response.createHeader(name);
         response.addHeader(name, ip);
@@ -1237,9 +1233,9 @@ public class RestOpenApiReader {
         ip.description = getValue(camelContext, header.getDescription());
 
         List<String> values;
-        if (!header.getAllowableValues().isEmpty()) {
+        if (header.getAllowableValues() != null) {
             values = new ArrayList<>();
-            for (String text : header.getAllowableValues()) {
+            for (String text : header.getAllowableValuesAsStringList()) {
                 values.add(getValue(camelContext, text));
             }
             schema.enum_ = values;
@@ -1255,7 +1251,7 @@ public class RestOpenApiReader {
 
     private void doParseResponseOas20(
             CamelContext camelContext, Oas20Document openApi, Oas20Operation op,
-            RestOperationResponseMsgDefinition msg) {
+            ResponseMessageDefinition msg) {
         Oas20Response response = null;
 
         String code = getValue(camelContext, msg.getCode());
@@ -1277,7 +1273,7 @@ public class RestOpenApiReader {
 
         // add headers
         if (msg.getHeaders() != null) {
-            for (RestOperationResponseHeaderDefinition header : msg.getHeaders()) {
+            for (ResponseHeaderDefinition header : msg.getHeaders()) {
                 String name = getValue(camelContext, header.getName());
                 String type = getValue(camelContext, header.getDataType());
                 String format = getValue(camelContext, header.getDataFormat());
@@ -1342,7 +1338,7 @@ public class RestOpenApiReader {
     }
 
     private void setResponseHeaderOas20(
-            CamelContext camelContext, Oas20Response response, RestOperationResponseHeaderDefinition header,
+            CamelContext camelContext, Oas20Response response, ResponseHeaderDefinition header,
             String name, String format, String type) {
         Oas20Header ip = response.headers.createHeader(name);
         ip.type = type;
@@ -1352,9 +1348,9 @@ public class RestOpenApiReader {
         ip.description = getValue(camelContext, header.getDescription());
 
         List<String> values;
-        if (!header.getAllowableValues().isEmpty()) {
+        if (header.getAllowableValues() != null) {
             values = new ArrayList<>();
-            for (String text : header.getAllowableValues()) {
+            for (String text : header.getAllowableValuesAsStringList()) {
                 values.add(getValue(camelContext, text));
             }
             ip.enum_ = values;
@@ -1379,7 +1375,29 @@ public class RestOpenApiReader {
             return null;
         }
 
-        return typeName;
+        if (openApi instanceof Oas20Document) {
+            if (((Oas20Document) openApi).definitions != null) {
+                for (Oas20SchemaDefinition model : ((Oas20Document) openApi).definitions.getDefinitions()) {
+                    @SuppressWarnings("rawtypes")
+                    Map modelType = (Map) model.getExtension("x-className").value;
+                    if (modelType != null && typeName.equals(modelType.get("format"))) {
+                        return model.getName();
+                    }
+                }
+            }
+        } else if (openApi instanceof Oas30Document) {
+            if (((Oas30Document) openApi).components != null
+                    && ((Oas30Document) openApi).components.schemas != null) {
+                for (Oas30SchemaDefinition model : ((Oas30Document) openApi).components.schemas.values()) {
+                    @SuppressWarnings("rawtypes")
+                    Map modelType = (Map) model.getExtension("x-className").value;
+                    if (modelType != null && typeName.equals(modelType.get("format"))) {
+                        return model.getName();
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private OasSchema modelTypeAsProperty(String typeName, OasDocument openApi, OasSchema prop) {
@@ -1510,14 +1528,14 @@ public class RestOpenApiReader {
         @Override
         public int compare(VerbDefinition a, VerbDefinition b) {
             String u1 = "";
-            if (a.getUri() != null) {
+            if (a.getPath() != null) {
                 // replace { with _ which comes before a when soring by char
-                u1 = getValue(camelContext, a.getUri()).replace("{", "_");
+                u1 = getValue(camelContext, a.getPath()).replace("{", "_");
             }
             String u2 = "";
-            if (b.getUri() != null) {
+            if (b.getPath() != null) {
                 // replace { with _ which comes before a when soring by char
-                u2 = getValue(camelContext, b.getUri()).replace("{", "_");
+                u2 = getValue(camelContext, b.getPath()).replace("{", "_");
             }
 
             int num = u1.compareTo(u2);
@@ -1603,7 +1621,7 @@ public class RestOpenApiReader {
         return name == null ? ref : name;
     }
 
-    private String inferOauthFlow(RestSecurityOAuth2 rs) {
+    private String inferOauthFlow(OAuth2Definition rs) {
         String flow;
         if (rs.getAuthorizationUrl() != null && rs.getTokenUrl() != null) {
             flow = "authorizationCode";

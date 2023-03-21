@@ -54,7 +54,7 @@ public class FromFtpPreMoveFilePrefixIT extends FtpServerTestSupport {
         mock.assertIsSatisfied();
 
         // assert the file is moved
-        File file = ftpFile("movefile/done/hello.txt").toFile();
+        File file = service.ftpFile("movefile/done/hello.txt").toFile();
         assertTrue(file.exists(), "The file should have been moved");
     }
 
@@ -72,14 +72,14 @@ public class FromFtpPreMoveFilePrefixIT extends FtpServerTestSupport {
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("movefile/hello.txt").toFile();
+        File file = service.ftpFile("movefile/hello.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

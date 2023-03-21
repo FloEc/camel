@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon Eventbridge SDK v2.
  */
 @Component("aws2-eventbridge")
 public class EventbridgeComponent extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(EventbridgeComponent.class);
-
     @Metadata
     private EventbridgeConfiguration configuration = new EventbridgeConfiguration();
 
@@ -43,8 +38,6 @@ public class EventbridgeComponent extends DefaultComponent {
 
     public EventbridgeComponent(CamelContext context) {
         super(context);
-
-        registerExtension(new EventbridgeComponentVerifierExtension());
     }
 
     @Override
@@ -57,7 +50,8 @@ public class EventbridgeComponent extends DefaultComponent {
         configuration.setEventbusName(remaining);
         EventbridgeEndpoint endpoint = new EventbridgeEndpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getEventbridgeClient() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider())
+                && configuration.getEventbridgeClient() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, Amazon Eventbridge client or accessKey and secretKey must be specified");

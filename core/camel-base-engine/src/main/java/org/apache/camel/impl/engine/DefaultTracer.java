@@ -23,7 +23,6 @@ import org.apache.camel.CamelContextAware;
 import org.apache.camel.Exchange;
 import org.apache.camel.NamedNode;
 import org.apache.camel.NamedRoute;
-import org.apache.camel.Route;
 import org.apache.camel.spi.ExchangeFormatter;
 import org.apache.camel.spi.Tracer;
 import org.apache.camel.support.CamelContextHelper;
@@ -46,8 +45,10 @@ public class DefaultTracer extends ServiceSupport implements CamelContextAware, 
 
     private static final String TRACING_OUTPUT = "%-4.4s [%-12.12s] [%-33.33s]";
 
-    // use a fixed logger name so its easy to spot
+    // use a fixed logger name so easy to spot
     private static final Logger LOG = LoggerFactory.getLogger("org.apache.camel.Tracing");
+
+    private String tracingFormat = TRACING_OUTPUT;
     private CamelContext camelContext;
     private boolean enabled = true;
     private boolean standby;
@@ -63,7 +64,7 @@ public class DefaultTracer extends ServiceSupport implements CamelContextAware, 
         formatter.setShowExchangeId(true);
         formatter.setShowExchangePattern(false);
         formatter.setMultiline(false);
-        formatter.setShowHeaders(false);
+        formatter.setShowHeaders(true);
         formatter.setStyle(DefaultExchangeFormatter.OutputStyle.Default);
         setExchangeFormatter(formatter);
     }
@@ -91,7 +92,7 @@ public class DefaultTracer extends ServiceSupport implements CamelContextAware, 
             String label = URISupport.sanitizeUri(StringHelper.limitLength(node.getLabel(), 50));
 
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format(TRACING_OUTPUT, "   ", routeId, label));
+            sb.append(String.format(tracingFormat, "   ", routeId, label));
             sb.append(" ");
             String data = exchangeFormatter.format(exchange);
             sb.append(data);
@@ -122,24 +123,13 @@ public class DefaultTracer extends ServiceSupport implements CamelContextAware, 
         boolean original = route.getRouteId().equals(exchange.getFromRouteId());
         String arrow = original ? "*-->" : "--->";
 
-        // we need to capture original source:line-number
-        if (original && camelContext.isDebugging()) {
-            int line = route.getInput().getLineNumber();
-            String loc = route.getInput().getLocation();
-        }
-
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(TRACING_OUTPUT, arrow, route.getRouteId(), label));
+        sb.append(String.format(tracingFormat, arrow, route.getRouteId(), label));
         sb.append(" ");
         String data = exchangeFormatter.format(exchange);
         sb.append(data);
         String out = sb.toString();
         dumpTrace(out, route);
-    }
-
-    @Override
-    public void traceAfterRoute(Route route, Exchange exchange) {
-        // noop
     }
 
     @Override
@@ -160,7 +150,7 @@ public class DefaultTracer extends ServiceSupport implements CamelContextAware, 
         String arrow = original ? "*<--" : "<---";
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(TRACING_OUTPUT, arrow, route.getRouteId(), label));
+        sb.append(String.format(tracingFormat, arrow, route.getRouteId(), label));
         sb.append(" ");
         String data = exchangeFormatter.format(exchange);
         sb.append(data);
@@ -283,7 +273,9 @@ public class DefaultTracer extends ServiceSupport implements CamelContextAware, 
 
     @Override
     protected void doStart() throws Exception {
-        // noop
+        if (getCamelContext().getTracingLoggingFormat() != null) {
+            tracingFormat = getCamelContext().getTracingLoggingFormat();
+        }
     }
 
     @Override

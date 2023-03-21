@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -54,8 +54,9 @@ public interface JpaComponentBuilderFactory {
          * Maps an alias to a JPA entity class. The alias can then be used in
          * the endpoint URI (instead of the fully qualified class name).
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt;
+         * type.
          * 
          * Group: common
          * 
@@ -72,7 +73,8 @@ public interface JpaComponentBuilderFactory {
          * configure.
          * 
          * The option is a:
-         * &lt;code&gt;javax.persistence.EntityManagerFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.persistence.EntityManagerFactory&lt;/code&gt;
+         * type.
          * 
          * Group: common
          * 
@@ -80,7 +82,7 @@ public interface JpaComponentBuilderFactory {
          * @return the dsl builder
          */
         default JpaComponentBuilder entityManagerFactory(
-                javax.persistence.EntityManagerFactory entityManagerFactory) {
+                jakarta.persistence.EntityManagerFactory entityManagerFactory) {
             doSetProperty("entityManagerFactory", entityManagerFactory);
             return this;
         }
@@ -132,9 +134,27 @@ public interface JpaComponentBuilderFactory {
          * @param transactionManager the value to set
          * @return the dsl builder
          */
+        @Deprecated
         default JpaComponentBuilder transactionManager(
                 org.springframework.transaction.PlatformTransactionManager transactionManager) {
             doSetProperty("transactionManager", transactionManager);
+            return this;
+        }
+        /**
+         * To use the TransactionStrategy for running the operations in a
+         * transaction.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.jpa.TransactionStrategy&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param transactionStrategy the value to set
+         * @return the dsl builder
+         */
+        default JpaComponentBuilder transactionStrategy(
+                org.apache.camel.component.jpa.TransactionStrategy transactionStrategy) {
+            doSetProperty("transactionStrategy", transactionStrategy);
             return this;
         }
         /**
@@ -220,10 +240,11 @@ public interface JpaComponentBuilderFactory {
                 Object value) {
             switch (name) {
             case "aliases": ((JpaComponent) component).setAliases((java.util.Map) value); return true;
-            case "entityManagerFactory": ((JpaComponent) component).setEntityManagerFactory((javax.persistence.EntityManagerFactory) value); return true;
+            case "entityManagerFactory": ((JpaComponent) component).setEntityManagerFactory((jakarta.persistence.EntityManagerFactory) value); return true;
             case "joinTransaction": ((JpaComponent) component).setJoinTransaction((boolean) value); return true;
             case "sharedEntityManager": ((JpaComponent) component).setSharedEntityManager((boolean) value); return true;
             case "transactionManager": ((JpaComponent) component).setTransactionManager((org.springframework.transaction.PlatformTransactionManager) value); return true;
+            case "transactionStrategy": ((JpaComponent) component).setTransactionStrategy((org.apache.camel.component.jpa.TransactionStrategy) value); return true;
             case "bridgeErrorHandler": ((JpaComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "lazyStartProducer": ((JpaComponent) component).setLazyStartProducer((boolean) value); return true;
             case "autowiredEnabled": ((JpaComponent) component).setAutowiredEnabled((boolean) value); return true;

@@ -18,6 +18,7 @@ package org.apache.camel.component.file.remote.integration;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Exchange;
@@ -50,10 +51,11 @@ public class FtpConsumerPostProcessingOnDisconnectIT extends FtpServerTestSuppor
         context.getRouteController().startRoute("foo");
 
         // Check that expectations are satisfied
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // File is deleted
-        await().atMost(250, TimeUnit.MILLISECONDS).untilAsserted(() -> assertFileNotExists(ftpFile(SAMPLE_FILE_NAME_1)));
+        await().atMost(250, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> assertFileNotExists(service.ftpFile(SAMPLE_FILE_NAME_1)));
     }
 
     @Test
@@ -69,23 +71,23 @@ public class FtpConsumerPostProcessingOnDisconnectIT extends FtpServerTestSuppor
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived(SAMPLE_FILE_PAYLOAD);
         // use mock to assert that the file will be moved there eventually
-        mock.expectedFileExists(ftpFile(movedFile));
+        mock.expectedFileExists(service.ftpFile(movedFile));
 
         context.getRouteController().startRoute("bar");
 
         // Check that expectations are satisfied
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("ftp://admin@localhost:{{ftp.server.port}}?password=admin&delete=true").routeId("foo").noAutoStartup()
                         .process(new Processor() {
                             @Override
-                            public void process(Exchange exchange) throws Exception {
+                            public void process(Exchange exchange) {
                                 service.disconnectAllSessions(); // disconnect all Sessions on FTP server
                             }
                         }).to("mock:result");
@@ -93,7 +95,7 @@ public class FtpConsumerPostProcessingOnDisconnectIT extends FtpServerTestSuppor
                         .noAutoStartup()
                         .process(new Processor() {
                             @Override
-                            public void process(Exchange exchange) throws Exception {
+                            public void process(Exchange exchange) {
                                 service.disconnectAllSessions(); // disconnect all Sessions on FTP server
                             }
                         }).to("mock:result");
@@ -102,7 +104,11 @@ public class FtpConsumerPostProcessingOnDisconnectIT extends FtpServerTestSuppor
     }
 
     private void createSampleFile(String fileName) throws IOException {
-        Files.write(ftpFile(fileName), SAMPLE_FILE_PAYLOAD.getBytes(SAMPLE_FILE_CHARSET));
+        final Path path = service.ftpFile(fileName);
+
+        path.getParent().toFile().mkdirs();
+
+        Files.write(path, SAMPLE_FILE_PAYLOAD.getBytes(SAMPLE_FILE_CHARSET));
     }
 
 }

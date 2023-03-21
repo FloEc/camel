@@ -27,7 +27,6 @@ import java.net.URISyntaxException;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
 import org.apache.camel.Message;
-import org.apache.camel.http.base.HttpHelper;
 import org.apache.camel.util.IOHelper;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.UnsafeUriCharactersEncoder;
@@ -45,10 +44,10 @@ public final class VertxHttpHelper {
         Message message = exchange.getMessage();
         String queryString = (String) message.removeHeader(Exchange.REST_HTTP_QUERY);
         if (ObjectHelper.isEmpty(queryString)) {
-            queryString = message.getHeader(Exchange.HTTP_QUERY, String.class);
+            queryString = message.getHeader(VertxHttpConstants.HTTP_QUERY, String.class);
         }
 
-        String uriString = message.getHeader(Exchange.HTTP_URI, String.class);
+        String uriString = message.getHeader(VertxHttpConstants.HTTP_URI, String.class);
         uriString = exchange.getContext().resolvePropertyPlaceholders(uriString);
 
         if (uriString != null) {
@@ -68,7 +67,7 @@ public final class VertxHttpHelper {
         String uri = (String) message.removeHeader(Exchange.REST_HTTP_URI);
 
         if (ObjectHelper.isEmpty(uri)) {
-            uri = message.getHeader(Exchange.HTTP_URI, String.class);
+            uri = message.getHeader(VertxHttpConstants.HTTP_URI, String.class);
         }
 
         if (uri == null) {
@@ -79,7 +78,7 @@ public final class VertxHttpHelper {
         uri = exchange.getContext().resolvePropertyPlaceholders(uri);
 
         // Append HTTP_PATH header value if is present
-        String path = message.getHeader(Exchange.HTTP_PATH, String.class);
+        String path = message.getHeader(VertxHttpConstants.HTTP_PATH, String.class);
         if (ObjectHelper.isNotEmpty(path)) {
             if (path.startsWith("/")) {
                 path = path.substring(1);
@@ -138,8 +137,8 @@ public final class VertxHttpHelper {
     public static String getCharsetFromExchange(Exchange exchange) {
         String charset = null;
         if (exchange != null) {
-            String contentType = exchange.getMessage().getHeader(Exchange.CONTENT_TYPE, String.class);
-            charset = HttpHelper.getCharsetFromContentType(contentType);
+            String contentType = exchange.getMessage().getHeader(VertxHttpConstants.CONTENT_TYPE, String.class);
+            charset = IOHelper.getCharsetNameFromContentType(contentType);
             if (ObjectHelper.isEmpty(charset)) {
                 charset = exchange.getProperty(ExchangePropertyKey.CHARSET_NAME, String.class);
             }

@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.RuntimeCamelException;
@@ -151,7 +150,7 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
 
         long delta = stop.taken();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Took {} to poll: {}", TimeUtils.printDuration(delta), name);
+            LOG.debug("Took {} to poll: {}", TimeUtils.printDuration(delta, true), name);
         }
 
         // log if we hit the limit
@@ -475,7 +474,7 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
             // register on completion callback that does the completion
             // strategies
             // (for instance to move the file after we have processed it)
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(
+            exchange.getExchangeExtension().addOnCompletion(
                     new GenericFileOnCompletion<>(endpoint, operations, processStrategy, target, absoluteFileName));
 
             LOG.debug("About to process file: {} using exchange: {}", target, exchange);
@@ -592,7 +591,7 @@ public abstract class GenericFileConsumer<T> extends ScheduledBatchPollingConsum
 
         // if it is a file then check we have the file in the idempotent registry
         // already
-        if (endpoint.isIdempotent()) {
+        if (Boolean.TRUE.equals(endpoint.isIdempotent())) {
             if (notUnique(file)) {
                 return false;
             }

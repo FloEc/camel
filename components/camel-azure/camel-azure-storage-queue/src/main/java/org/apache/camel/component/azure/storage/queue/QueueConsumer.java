@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.queue.QueueServiceClient;
 import com.azure.storage.queue.models.QueueMessageItem;
 import com.azure.storage.queue.models.QueueStorageException;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.component.azure.storage.queue.client.QueueClientWrapper;
@@ -128,7 +128,7 @@ public class QueueConsumer extends ScheduledBatchPollingConsumer {
             final Duration timeout = exchange.getIn().getHeader(QueueConstants.TIMEOUT, Duration.class);
 
             // add on completion to handle after work when the exchange is done
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new Synchronization() {
+            exchange.getExchangeExtension().addOnCompletion(new Synchronization() {
                 @Override
                 public void onComplete(Exchange exchange) {
                     // past messageId, popReceipt, timeout for fix exchange override case
@@ -157,7 +157,8 @@ public class QueueConsumer extends ScheduledBatchPollingConsumer {
         final Exchange exchange = createExchange(true);
         final Message message = exchange.getIn();
 
-        message.setBody(messageItem.getMessageText());
+        BinaryData data = messageItem.getBody();
+        message.setBody(data == null ? null : data.toString());
         message.setHeaders(QueueExchangeHeaders.createQueueExchangeHeadersFromQueueMessageItem(messageItem).toMap());
 
         return exchange;

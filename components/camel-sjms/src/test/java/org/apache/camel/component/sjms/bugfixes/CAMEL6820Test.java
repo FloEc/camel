@@ -44,7 +44,7 @@ public class CAMEL6820Test extends JmsTestSupport {
     public void testCamelGenericFileConverterMessage() throws Exception {
         File f = new File(TEST_DATA_DIR);
 
-        // First make sure the directories are empty or purged so we don't get bad data on a 
+        // First make sure the directories are empty or purged so we don't get bad data on a
         // test that is run against an uncleaned target directory
         if (f.exists()) {
             FileUtils.deleteDirectory(new File(TEST_DATA_DIR));
@@ -74,9 +74,9 @@ public class CAMEL6820Test extends JmsTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(FILE_INPUT_URI)
                         .convertBodyTo(InputStream.class)
                         .to(SJMS_QUEUE_URI);

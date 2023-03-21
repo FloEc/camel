@@ -30,12 +30,12 @@ public final class IAM2ClientFactory {
 
     /**
      * Return the correct AWS IAM client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               IamClient
      */
     public static IAM2InternalClient getIamClient(IAM2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new IAM2ClientOptimizedImpl(configuration) : new IAM2ClientStandardImpl(configuration);
     }
 }

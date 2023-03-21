@@ -111,7 +111,7 @@ public class GenericFileOnCompletion<T> implements Synchronization {
      */
     protected void processStrategyCommit(
             GenericFileProcessStrategy<T> processStrategy, Exchange exchange, GenericFile<T> file) {
-        if (endpoint.isIdempotent()) {
+        if (Boolean.TRUE.equals(endpoint.isIdempotent())) {
 
             // use absolute file path as default key, but evaluate if an
             // expression key was configured
@@ -174,7 +174,7 @@ public class GenericFileOnCompletion<T> implements Synchronization {
             String doneFileName = endpoint.createDoneFileName(absoluteFileName);
             StringHelper.notEmpty(doneFileName, "doneFileName", endpoint);
             // we should delete the dynamic done file
-            if (endpoint.getDoneFileName().indexOf("{file:name") > 0 || complete) {
+            if (endpoint.getDoneFileName().contains("{file:name") || complete) {
                 try {
                     // delete done file
                     boolean deleted = operations.deleteFile(doneFileName);

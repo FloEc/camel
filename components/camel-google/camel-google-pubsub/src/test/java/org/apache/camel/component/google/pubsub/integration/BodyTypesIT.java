@@ -71,13 +71,13 @@ public class BodyTypesIT extends PubsubTestSupport {
         try {
             createTopicSubscriptionPair(TOPIC_NAME, SUBSCRIPTION_NAME);
         } catch (Exception e) {
-            // May be ignored because it could have been created. 
+            // May be ignored because it could have been created.
             LOG.warn("Failed to create the subscription pair {}", e.getMessage());
         }
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from(directIn).routeId("Single_Send").to(pubsubTopic).to(sendResult);

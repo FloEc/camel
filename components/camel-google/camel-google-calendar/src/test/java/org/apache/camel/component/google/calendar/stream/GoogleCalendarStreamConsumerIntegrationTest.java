@@ -28,11 +28,11 @@ public class GoogleCalendarStreamConsumerIntegrationTest extends AbstractGoogleC
         mock.expectedMinimumMessageCount(1);
         Thread.sleep(10000);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {

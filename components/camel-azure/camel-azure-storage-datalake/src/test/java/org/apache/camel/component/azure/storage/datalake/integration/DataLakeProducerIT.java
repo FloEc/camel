@@ -29,15 +29,11 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnabledIfSystemProperty(named = "azure.instance.type", matches = "remote")
 public class DataLakeProducerIT extends Base {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DataLakeProducerIT.class);
 
     private String fileName;
     private byte[] fileContent;
@@ -50,7 +46,7 @@ public class DataLakeProducerIT extends Base {
     }
 
     @Test
-    void testConsumer() throws Exception {
+    void testConsumer() {
 
         {
             @SuppressWarnings("unchecked")
@@ -59,6 +55,7 @@ public class DataLakeProducerIT extends Base {
                     null,
                     List.class);
 
+            Assertions.assertThat(filesystems.stream().map(FileSystemItem::getName)).isNotEmpty();
             Assertions.assertThat(filesystems.stream().map(FileSystemItem::getName)).doesNotContain(fileSystemName);
         }
 
@@ -103,13 +100,14 @@ public class DataLakeProducerIT extends Base {
                     null,
                     List.class);
 
+            Assertions.assertThat(filesystems.stream().map(FileSystemItem::getName)).isNotEmpty();
             Assertions.assertThat(filesystems.stream().map(FileSystemItem::getName)).doesNotContain(fileSystemName);
         }
 
     }
 
     @Test
-    void testHeaderPreservation() throws InterruptedException {
+    void testHeaderPreservation() {
         Exchange result = template.send(componentUri(fileSystemName, DataLakeOperationsDefinition.listFileSystem),
                 exchange -> {
                     exchange.getIn().setHeader("DoNotDelete", "keep me");

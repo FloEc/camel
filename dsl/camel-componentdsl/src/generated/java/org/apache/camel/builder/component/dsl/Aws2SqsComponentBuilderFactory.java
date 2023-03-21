@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -113,7 +113,7 @@ public interface Aws2SqsComponentBuilderFactory {
             return this;
         }
         /**
-         * Set the need for overidding the endpoint. This option needs to be
+         * Set the need for overriding the endpoint. This option needs to be
          * used in combination with uriEndpointOverride option.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -127,6 +127,22 @@ public interface Aws2SqsComponentBuilderFactory {
         default Aws2SqsComponentBuilder overrideEndpoint(
                 boolean overrideEndpoint) {
             doSetProperty("overrideEndpoint", overrideEndpoint);
+            return this;
+        }
+        /**
+         * If using a profile credentials provider this parameter will set the
+         * profile name.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param profileCredentialsName the value to set
+         * @return the dsl builder
+         */
+        default Aws2SqsComponentBuilder profileCredentialsName(
+                java.lang.String profileCredentialsName) {
+            doSetProperty("profileCredentialsName", profileCredentialsName);
             return this;
         }
         /**
@@ -242,6 +258,23 @@ public interface Aws2SqsComponentBuilderFactory {
         default Aws2SqsComponentBuilder useDefaultCredentialsProvider(
                 boolean useDefaultCredentialsProvider) {
             doSetProperty("useDefaultCredentialsProvider", useDefaultCredentialsProvider);
+            return this;
+        }
+        /**
+         * Set whether the SQS client should expect to load credentials through
+         * a profile credentials provider.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param useProfileCredentialsProvider the value to set
+         * @return the dsl builder
+         */
+        default Aws2SqsComponentBuilder useProfileCredentialsProvider(
+                boolean useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
             return this;
         }
         /**
@@ -562,6 +595,29 @@ public interface Aws2SqsComponentBuilderFactory {
             return this;
         }
         /**
+         * What to do if sending to AWS SQS has more messages than AWS allows
+         * (currently only maximum 10 message headers is allowed). WARN will log
+         * a WARN about the limit is for each additional header, so the message
+         * can be sent to AWS. WARN_ONCE will only log one time a WARN about the
+         * limit is hit, and drop additional headers, so the message can be sent
+         * to AWS. IGNORE will ignore (no logging) and drop additional headers,
+         * so the message can be sent to AWS. FAIL will cause an exception to be
+         * thrown and the message is not sent to AWS.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: WARN
+         * Group: producer
+         * 
+         * @param messageHeaderExceededLimit the value to set
+         * @return the dsl builder
+         */
+        default Aws2SqsComponentBuilder messageHeaderExceededLimit(
+                java.lang.String messageHeaderExceededLimit) {
+            doSetProperty("messageHeaderExceededLimit", messageHeaderExceededLimit);
+            return this;
+        }
+        /**
          * The operation to do in case the user don't want to send only a
          * message.
          * 
@@ -613,23 +669,6 @@ public interface Aws2SqsComponentBuilderFactory {
          */
         default Aws2SqsComponentBuilder delayQueue(boolean delayQueue) {
             doSetProperty("delayQueue", delayQueue);
-            return this;
-        }
-        /**
-         * To define the queueUrl explicitly. All other parameters, which would
-         * influence the queueUrl, are ignored. This parameter is intended to be
-         * used, to connect to a mock implementation of SQS, for testing
-         * purposes.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: advanced
-         * 
-         * @param queueUrl the value to set
-         * @return the dsl builder
-         */
-        default Aws2SqsComponentBuilder queueUrl(java.lang.String queueUrl) {
-            doSetProperty("queueUrl", queueUrl);
             return this;
         }
         /**
@@ -706,6 +745,23 @@ public interface Aws2SqsComponentBuilderFactory {
          */
         default Aws2SqsComponentBuilder policy(java.lang.String policy) {
             doSetProperty("policy", policy);
+            return this;
+        }
+        /**
+         * To define the queueUrl explicitly. All other parameters, which would
+         * influence the queueUrl, are ignored. This parameter is intended to be
+         * used, to connect to a mock implementation of SQS, for testing
+         * purposes.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: queue
+         * 
+         * @param queueUrl the value to set
+         * @return the dsl builder
+         */
+        default Aws2SqsComponentBuilder queueUrl(java.lang.String queueUrl) {
+            doSetProperty("queueUrl", queueUrl);
             return this;
         }
         /**
@@ -798,6 +854,7 @@ public interface Aws2SqsComponentBuilderFactory {
             case "autoCreateQueue": getOrCreateConfiguration((Sqs2Component) component).setAutoCreateQueue((boolean) value); return true;
             case "configuration": ((Sqs2Component) component).setConfiguration((org.apache.camel.component.aws2.sqs.Sqs2Configuration) value); return true;
             case "overrideEndpoint": getOrCreateConfiguration((Sqs2Component) component).setOverrideEndpoint((boolean) value); return true;
+            case "profileCredentialsName": getOrCreateConfiguration((Sqs2Component) component).setProfileCredentialsName((java.lang.String) value); return true;
             case "protocol": getOrCreateConfiguration((Sqs2Component) component).setProtocol((java.lang.String) value); return true;
             case "proxyProtocol": getOrCreateConfiguration((Sqs2Component) component).setProxyProtocol((software.amazon.awssdk.core.Protocol) value); return true;
             case "queueOwnerAWSAccountId": getOrCreateConfiguration((Sqs2Component) component).setQueueOwnerAWSAccountId((java.lang.String) value); return true;
@@ -805,6 +862,7 @@ public interface Aws2SqsComponentBuilderFactory {
             case "trustAllCertificates": getOrCreateConfiguration((Sqs2Component) component).setTrustAllCertificates((boolean) value); return true;
             case "uriEndpointOverride": getOrCreateConfiguration((Sqs2Component) component).setUriEndpointOverride((java.lang.String) value); return true;
             case "useDefaultCredentialsProvider": getOrCreateConfiguration((Sqs2Component) component).setUseDefaultCredentialsProvider((boolean) value); return true;
+            case "useProfileCredentialsProvider": getOrCreateConfiguration((Sqs2Component) component).setUseProfileCredentialsProvider((boolean) value); return true;
             case "attributeNames": getOrCreateConfiguration((Sqs2Component) component).setAttributeNames((java.lang.String) value); return true;
             case "bridgeErrorHandler": ((Sqs2Component) component).setBridgeErrorHandler((boolean) value); return true;
             case "concurrentConsumers": getOrCreateConfiguration((Sqs2Component) component).setConcurrentConsumers((int) value); return true;
@@ -823,15 +881,16 @@ public interface Aws2SqsComponentBuilderFactory {
             case "lazyStartProducer": ((Sqs2Component) component).setLazyStartProducer((boolean) value); return true;
             case "messageDeduplicationIdStrategy": getOrCreateConfiguration((Sqs2Component) component).setMessageDeduplicationIdStrategy((java.lang.String) value); return true;
             case "messageGroupIdStrategy": getOrCreateConfiguration((Sqs2Component) component).setMessageGroupIdStrategy((java.lang.String) value); return true;
+            case "messageHeaderExceededLimit": getOrCreateConfiguration((Sqs2Component) component).setMessageHeaderExceededLimit((java.lang.String) value); return true;
             case "operation": getOrCreateConfiguration((Sqs2Component) component).setOperation((org.apache.camel.component.aws2.sqs.Sqs2Operations) value); return true;
             case "autowiredEnabled": ((Sqs2Component) component).setAutowiredEnabled((boolean) value); return true;
             case "delayQueue": getOrCreateConfiguration((Sqs2Component) component).setDelayQueue((boolean) value); return true;
-            case "queueUrl": getOrCreateConfiguration((Sqs2Component) component).setQueueUrl((java.lang.String) value); return true;
             case "proxyHost": getOrCreateConfiguration((Sqs2Component) component).setProxyHost((java.lang.String) value); return true;
             case "proxyPort": getOrCreateConfiguration((Sqs2Component) component).setProxyPort((java.lang.Integer) value); return true;
             case "maximumMessageSize": getOrCreateConfiguration((Sqs2Component) component).setMaximumMessageSize((java.lang.Integer) value); return true;
             case "messageRetentionPeriod": getOrCreateConfiguration((Sqs2Component) component).setMessageRetentionPeriod((java.lang.Integer) value); return true;
             case "policy": getOrCreateConfiguration((Sqs2Component) component).setPolicy((java.lang.String) value); return true;
+            case "queueUrl": getOrCreateConfiguration((Sqs2Component) component).setQueueUrl((java.lang.String) value); return true;
             case "receiveMessageWaitTimeSeconds": getOrCreateConfiguration((Sqs2Component) component).setReceiveMessageWaitTimeSeconds((java.lang.Integer) value); return true;
             case "redrivePolicy": getOrCreateConfiguration((Sqs2Component) component).setRedrivePolicy((java.lang.String) value); return true;
             case "accessKey": getOrCreateConfiguration((Sqs2Component) component).setAccessKey((java.lang.String) value); return true;

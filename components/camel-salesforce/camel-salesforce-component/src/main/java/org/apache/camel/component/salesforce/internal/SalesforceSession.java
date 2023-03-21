@@ -97,10 +97,6 @@ public class SalesforceSession extends ServiceSupport {
         this.timeout = timeout;
         this.config = config;
 
-        // strip trailing '/'
-        String loginUrl = config.getLoginUrl();
-        config.setLoginUrl(loginUrl.endsWith("/") ? loginUrl.substring(0, loginUrl.length() - 1) : loginUrl);
-
         this.objectMapper = JsonUtils.createObjectMapper();
         this.listeners = new CopyOnWriteArraySet<>();
     }
@@ -171,6 +167,10 @@ public class SalesforceSession extends ServiceSupport {
             case JWT:
                 fields.put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
                 fields.put("assertion", generateJwtAssertion());
+                break;
+            case CLIENT_CREDENTIALS:
+                fields.put("grant_type", "client_credentials");
+                fields.put("client_secret", config.getClientSecret());
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported login configuration type: " + type);

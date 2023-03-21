@@ -54,7 +54,7 @@ public class FromFtpDoNotDeleteFileIfProcessFailsIT extends FtpServerTestSupport
 
         // give time to NOT delete file
         // assert the file is deleted
-        File file = ftpFile("deletefile/hello.txt").toFile();
+        File file = service.ftpFile("deletefile/hello.txt").toFile();
         await().atMost(200, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertTrue(file.exists(), "The file should NOT have been deleted"));
     }
@@ -73,19 +73,19 @@ public class FromFtpDoNotDeleteFileIfProcessFailsIT extends FtpServerTestSupport
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("deletefile/hello.txt").toFile();
+        File file = service.ftpFile("deletefile/hello.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // use no delay for fast unit testing
                 onException(IllegalArgumentException.class).maximumRedeliveries(2).redeliveryDelay(0).to("mock:error");
 
                 from(getFtpUrl()).process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         throw new IllegalArgumentException("Forced by unittest");
                     }
                 });

@@ -17,15 +17,14 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-yaml-dsl-parent</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-yaml-dsl</artifactId>
@@ -35,6 +34,8 @@
 
     <properties>
         <firstVersion>3.9.0</firstVersion>
+        <title>YAML DSL</title>
+        <label>dsl</label>
         <sourcecheckExcludes>
             **/*.groovy
         </sourcecheckExcludes>
@@ -65,6 +66,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <version>${assertj-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -74,11 +76,11 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
+                    <groupId>org.apache.groovy</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>junit</groupId>
+                    <groupId>org.junit.platform</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
@@ -126,6 +128,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
+            <artifactId>camel-stax</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
             <artifactId>camel-log</artifactId>
             <scope>test</scope>
         </dependency>
@@ -151,7 +158,17 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
+            <artifactId>camel-groovy-dsl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
             <artifactId>camel-joor</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-java-joor-dsl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -164,16 +181,26 @@
             <artifactId>camel-jsonpath</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jackson</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-sql</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovy-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-test</artifactId>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-test-junit5</artifactId>
             <version>${groovy-version}</version>
             <scope>test</scope>
         </dependency>
@@ -184,15 +211,28 @@
             <version>${json-schema-validator-version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>${jackson2-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>${jackson2-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>${commons-dbcp2-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -203,7 +243,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -221,15 +261,28 @@
                 <artifactId>camel-yaml-dsl-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
+                    <!-- camelCase -->
                     <execution>
+                        <id>generate-yaml-schema-camelCase</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-yaml-schema</goal>
                         </goals>
                         <configuration>
-                            <bannedDefinitions>
-                                <bannedDefinition>org.apache.camel.model.FromDefinition</bannedDefinition>
-                            </bannedDefinitions>
+                            <kebabCase>false</kebabCase>
+                            <outputFile>src/generated/resources/schema/camelYamlDsl.json</outputFile>
+                        </configuration>
+                    </execution>
+                    <!-- kebab-case -->
+                    <execution>
+                        <id>generate-yaml-schema-kebab-case</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-yaml-schema</goal>
+                        </goals>
+                        <configuration>
+                            <kebabCase>true</kebabCase>
+                            <outputFile>src/generated/resources/schema/camel-yaml-dsl.json</outputFile>
                         </configuration>
                     </execution>
                 </executions>
@@ -247,7 +300,7 @@
                         </goals>
                         <configuration>
                             <specificationUri>${project.basedir}/src/test/resources/openapi.json</specificationUri>
-                            <outputDirectory>${project.build.outputDirectory}/rest-dsl</outputDirectory>
+                            <outputDirectory>${project.build.testOutputDirectory}/rest-dsl</outputDirectory>
                             <fileName>generated-rest-dsl.yaml</fileName>
                         </configuration>
                     </execution>
@@ -268,18 +321,6 @@
                 <configuration>
                     <invokeDynamic>true</invokeDynamic>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-package-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-spi</id>
-                        <goals>
-                            <goal>generate-spi</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

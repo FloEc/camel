@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -95,14 +95,14 @@ public interface XmlVerifierEndpointBuilderFactory {
          * Sets the crypto context properties. See {link
          * XMLCryptoContext#setProperty(String, Object)}. Possible properties
          * are defined in XMLSignContext an XMLValidateContext (see Supported
-         * Properties). &lt;p&gt; The following properties are set by default to
-         * the value Boolean#TRUE for the XML validation. If you want to switch
-         * these features off you must set the property value to Boolean#FALSE.
-         * &lt;ul&gt; &lt;li&gt;&lt;code&gt;org.jcp.xml.dsig.validateManifests
-         * &lt;li&gt;&lt;code&gt;javax.xml.crypto.dsig.cacheReference.
+         * Properties). The following properties are set by default to the value
+         * Boolean#TRUE for the XML validation. If you want to switch these
+         * features off you must set the property value to Boolean#FALSE.
+         * org.jcp.xml.dsig.validateManifests
+         * javax.xml.crypto.dsig.cacheReference.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: producer
          * 
@@ -118,15 +118,15 @@ public interface XmlVerifierEndpointBuilderFactory {
          * Sets the crypto context properties. See {link
          * XMLCryptoContext#setProperty(String, Object)}. Possible properties
          * are defined in XMLSignContext an XMLValidateContext (see Supported
-         * Properties). &lt;p&gt; The following properties are set by default to
-         * the value Boolean#TRUE for the XML validation. If you want to switch
-         * these features off you must set the property value to Boolean#FALSE.
-         * &lt;ul&gt; &lt;li&gt;&lt;code&gt;org.jcp.xml.dsig.validateManifests
-         * &lt;li&gt;&lt;code&gt;javax.xml.crypto.dsig.cacheReference.
+         * Properties). The following properties are set by default to the value
+         * Boolean#TRUE for the XML validation. If you want to switch these
+         * features off you must set the property value to Boolean#FALSE.
+         * org.jcp.xml.dsig.validateManifests
+         * javax.xml.crypto.dsig.cacheReference.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: producer
          * 
@@ -205,59 +205,9 @@ public interface XmlVerifierEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default XmlVerifierEndpointBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default XmlVerifierEndpointBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * Indicator whether the XML declaration in the outgoing message body
-         * should be omitted. Default value is &lt;code&gt;false. Can be
-         * overwritten by the header
-         * XmlSignatureConstants#HEADER_OMIT_XML_DECLARATION.
+         * should be omitted. Default value is false. Can be overwritten by the
+         * header XmlSignatureConstants#HEADER_OMIT_XML_DECLARATION.
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -274,9 +224,8 @@ public interface XmlVerifierEndpointBuilderFactory {
         }
         /**
          * Indicator whether the XML declaration in the outgoing message body
-         * should be omitted. Default value is &lt;code&gt;false. Can be
-         * overwritten by the header
-         * XmlSignatureConstants#HEADER_OMIT_XML_DECLARATION.
+         * should be omitted. Default value is false. Can be overwritten by the
+         * header XmlSignatureConstants#HEADER_OMIT_XML_DECLARATION.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -349,9 +298,8 @@ public interface XmlVerifierEndpointBuilderFactory {
             return this;
         }
         /**
-         * The character encoding of the resulting signed XML document. If
-         * &lt;code&gt;null then the encoding of the original XML document is
-         * used.
+         * The character encoding of the resulting signed XML document. If null
+         * then the encoding of the original XML document is used.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -371,8 +319,8 @@ public interface XmlVerifierEndpointBuilderFactory {
          * shall be removed from the document set to the output message.
          * Normally, this is only necessary, if the XML signature is enveloped.
          * The default value is Boolean#FALSE. This parameter is forwarded to
-         * XmlSignature2Message. &lt;p&gt; This indicator has no effect if the
-         * output node search is of type
+         * XmlSignature2Message. This indicator has no effect if the output node
+         * search is of type
          * DefaultXmlSignature2Message#OUTPUT_NODE_SEARCH_TYPE_DEFAULT.F.
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -394,8 +342,8 @@ public interface XmlVerifierEndpointBuilderFactory {
          * shall be removed from the document set to the output message.
          * Normally, this is only necessary, if the XML signature is enveloped.
          * The default value is Boolean#FALSE. This parameter is forwarded to
-         * XmlSignature2Message. &lt;p&gt; This indicator has no effect if the
-         * output node search is of type
+         * XmlSignature2Message. This indicator has no effect if the output node
+         * search is of type
          * DefaultXmlSignature2Message#OUTPUT_NODE_SEARCH_TYPE_DEFAULT.F.
          * 
          * The option will be converted to a
@@ -633,11 +581,60 @@ public interface XmlVerifierEndpointBuilderFactory {
             return (XmlVerifierEndpointBuilder) this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedXmlVerifierEndpointBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedXmlVerifierEndpointBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * If you want to restrict the remote access via reference URIs, you can
          * set an own dereferencer. Optional parameter. If not set the provider
          * default dereferencer is used which can resolve URI fragments, HTTP,
-         * file and XPpointer URIs. &lt;p&gt; Attention: The implementation is
-         * provider dependent!.
+         * file and XPpointer URIs. Attention: The implementation is provider
+         * dependent!.
          * 
          * The option is a:
          * &lt;code&gt;javax.xml.crypto.URIDereferencer&lt;/code&gt; type.
@@ -656,8 +653,8 @@ public interface XmlVerifierEndpointBuilderFactory {
          * If you want to restrict the remote access via reference URIs, you can
          * set an own dereferencer. Optional parameter. If not set the provider
          * default dereferencer is used which can resolve URI fragments, HTTP,
-         * file and XPpointer URIs. &lt;p&gt; Attention: The implementation is
-         * provider dependent!.
+         * file and XPpointer URIs. Attention: The implementation is provider
+         * dependent!.
          * 
          * The option will be converted to a
          * &lt;code&gt;javax.xml.crypto.URIDereferencer&lt;/code&gt; type.
@@ -675,6 +672,19 @@ public interface XmlVerifierEndpointBuilderFactory {
     }
 
     public interface XmlVerifierBuilders {
+        /**
+         * XML Security Verify (camel-xmlsecurity)
+         * Verify XML payloads using the XML signature specification.
+         * 
+         * Category: security,transformation
+         * Since: 2.12
+         * Maven coordinates: org.apache.camel:camel-xmlsecurity
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default XmlVerifierHeaderNameBuilder xmlsecurityVerify() {
+            return XmlVerifierHeaderNameBuilder.INSTANCE;
+        }
         /**
          * XML Security Verify (camel-xmlsecurity)
          * Verify XML payloads using the XML signature specification.
@@ -718,6 +728,161 @@ public interface XmlVerifierEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return XmlVerifierEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the XML Security Verify component.
+     */
+    public static class XmlVerifierHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final XmlVerifierHeaderNameBuilder INSTANCE = new XmlVerifierHeaderNameBuilder();
+
+        /**
+         * Header which indicates that either the resulting signature document
+         * in the signature generation case or the resulting output of the
+         * verifier should not contain an XML declaration. If the header is not
+         * specified then a XML declaration is created. There is one exception:
+         * If the verifier result is a plain text this header has no effect.
+         * Possible values of the header are Boolean#TRUE or Boolean#FALSE.
+         * Overwrites the configuration parameter
+         * XmlSignatureConfiguration#setOmitXmlDeclaration(Boolean).
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * XmlSignatureOmitXmlDeclaration}.
+         */
+        public String xmlSignatureOmitXmlDeclaration() {
+            return "XmlSignatureOmitXmlDeclaration";
+        }
+
+        /**
+         * The schema resource URI.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code XmlSignatureSchemaResourceUri}.
+         */
+        public String xmlSignatureSchemaResourceUri() {
+            return "XmlSignatureSchemaResourceUri";
+        }
+
+        /**
+         * XPaths to id attributes.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * XmlSignatureXpathsToIdAttributes}.
+         */
+        public String xmlSignatureXpathsToIdAttributes() {
+            return "XmlSignatureXpathsToIdAttributes";
+        }
+
+        /**
+         * for the 'Id' attribute value of QualifyingProperties element.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * XmlSignatureXAdESQualifyingPropertiesId}.
+         */
+        public String xmlSignatureXAdESQualifyingPropertiesId() {
+            return "XmlSignatureXAdESQualifyingPropertiesId";
+        }
+
+        /**
+         * for the 'Id' attribute value of SignedDataObjectProperties element.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * XmlSignatureXAdESSignedDataObjectPropertiesId}.
+         */
+        public String xmlSignatureXAdESSignedDataObjectPropertiesId() {
+            return "XmlSignatureXAdESSignedDataObjectPropertiesId";
+        }
+
+        /**
+         * for the 'Id' attribute value of SignedSignatureProperties element.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * XmlSignatureXAdESSignedSignaturePropertiesId}.
+         */
+        public String xmlSignatureXAdESSignedSignaturePropertiesId() {
+            return "XmlSignatureXAdESSignedSignaturePropertiesId";
+        }
+
+        /**
+         * for the value of the Encoding element of the DataObjectFormat
+         * element.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * XmlSignatureXAdESDataObjectFormatEncoding}.
+         */
+        public String xmlSignatureXAdESDataObjectFormatEncoding() {
+            return "XmlSignatureXAdESDataObjectFormatEncoding";
+        }
+
+        /**
+         * overwrites the XAdES namespace parameter value.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code XmlSignatureXAdESNamespace}.
+         */
+        public String xmlSignatureXAdESNamespace() {
+            return "XmlSignatureXAdESNamespace";
+        }
+
+        /**
+         * overwrites the XAdES prefix parameter value.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code XmlSignatureXAdESPrefix}.
+         */
+        public String xmlSignatureXAdESPrefix() {
+            return "XmlSignatureXAdESPrefix";
+        }
+
+        /**
+         * The name of the charset.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code CharsetName}.
+         */
+        public String charsetName() {
+            return "CharsetName";
         }
     }
     static XmlVerifierEndpointBuilder endpointBuilder(

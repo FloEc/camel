@@ -141,7 +141,7 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
                                                                                 + "if an existing file existed, if its true, then the existing file is deleted before the move operation.")
     protected boolean eagerDeleteTargetFile = true;
     @UriParam(label = "producer,advanced", description = "Will keep the last modified timestamp from the source file "
-                                                         + "(if any). Will use the Exchange.FILE_LAST_MODIFIED header to located the timestamp. This header can "
+                                                         + "(if any). Will use the FileConstants.FILE_LAST_MODIFIED header to located the timestamp. This header can "
                                                          + "contain either a java.util.Date or long with the timestamp. If the timestamp exists and the option is "
                                                          + "enabled it will set this timestamp on the written file. Note: This option only applies to the file "
                                                          + "producer. You cannot use this option with any of the ftp producers.")
@@ -732,7 +732,7 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
     /**
      * Filters the directory based on Simple language. For example to filter on current date, you can use a simple date
      * pattern such as ${date:now:yyyMMdd}
-     * 
+     *
      * @see #setFilterDirectory(Predicate)
      */
     public void setFilterDirectory(String expression) {
@@ -752,7 +752,7 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
 
     /**
      * Filters the file based on Simple language. For example to filter on file size, you can use ${file:size} > 5000
-     * 
+     *
      * @see #setFilterFile(Predicate)
      */
     public void setFilterFile(String expression) {
@@ -1416,10 +1416,11 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
     }
 
     /**
-     * Will keep the last modified timestamp from the source file (if any). Will use the Exchange.FILE_LAST_MODIFIED
-     * header to located the timestamp. This header can contain either a java.util.Date or long with the timestamp. If
-     * the timestamp exists and the option is enabled it will set this timestamp on the written file. Note: This option
-     * only applies to the file producer. You cannot use this option with any of the ftp producers.
+     * Will keep the last modified timestamp from the source file (if any). Will use the
+     * FileConstants.FILE_LAST_MODIFIED header to located the timestamp. This header can contain either a java.util.Date
+     * or long with the timestamp. If the timestamp exists and the option is enabled it will set this timestamp on the
+     * written file. Note: This option only applies to the file producer. You cannot use this option with any of the ftp
+     * producers.
      */
     public void setKeepLastModified(boolean keepLastModified) {
         this.keepLastModified = keepLastModified;
@@ -1521,7 +1522,7 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
 
         if (flatten) {
             // when flatten the file name should not contain any paths
-            message.setHeader(Exchange.FILE_NAME, file.getFileNameOnly());
+            message.setHeader(FileConstants.FILE_NAME, file.getFileNameOnly());
         } else {
             // compute name to set on header that should be relative to starting
             // directory
@@ -1538,7 +1539,7 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
             }
 
             // adjust filename
-            message.setHeader(Exchange.FILE_NAME, name);
+            message.setHeader(FileConstants.FILE_NAME, name);
         }
     }
 
@@ -1714,8 +1715,8 @@ public abstract class GenericFileEndpoint<T> extends ScheduledPollEndpoint imple
         }
 
         // the static part of the pattern, is that a prefix or suffix?
-        // its a prefix if ${ start token is not at the start of the pattern
-        boolean prefix = pattern.indexOf("${") > 0;
+        // it is a prefix if ${ start token is not at the start of the pattern
+        boolean prefix = pattern.indexOf("${") > 0; // NOSONAR
 
         // remove dynamic parts of the pattern so we only got the static part
         // left

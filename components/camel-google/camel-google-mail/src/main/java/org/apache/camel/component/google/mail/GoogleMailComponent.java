@@ -51,12 +51,20 @@ public class GoogleMailComponent
         return getCamelContext().getTypeConverter().convertTo(GoogleMailApiName.class, apiNameStr);
     }
 
-    public Gmail getClient(GoogleMailConfiguration googleMailConfiguration) {
+    public Gmail getClient(GoogleMailConfiguration config) {
         if (client == null) {
-            client = getClientFactory().makeClient(googleMailConfiguration.getClientId(),
-                    googleMailConfiguration.getClientSecret(),
-                    googleMailConfiguration.getApplicationName(),
-                    googleMailConfiguration.getRefreshToken(), googleMailConfiguration.getAccessToken());
+            if (config.getClientId() != null && !config.getClientId().isBlank()
+                    && config.getClientSecret() != null && !config.getClientSecret().isBlank()) {
+                client = getClientFactory().makeClient(config.getClientId(),
+                        config.getClientSecret(), config.getScopes(),
+                        config.getApplicationName(), config.getRefreshToken(), config.getAccessToken());
+            } else if (config.getServiceAccountKey() != null && !config.getServiceAccountKey().isBlank()) {
+                client = getClientFactory().makeClient(getCamelContext(), config.getServiceAccountKey(),
+                        config.getScopes(), config.getApplicationName(), config.getDelegate());
+            } else {
+                throw new IllegalArgumentException(
+                        "(clientId and clientSecret) or serviceAccountKey are required to create Gmail client");
+            }
         }
         return client;
     }

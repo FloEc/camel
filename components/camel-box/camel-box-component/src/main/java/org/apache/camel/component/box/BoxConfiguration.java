@@ -467,6 +467,11 @@ public class BoxConfiguration {
             return true;
         }
 
+        // Don't check that the classes are equal intentionally to support subclasses
+        if (!(o instanceof BoxConfiguration)) {
+            return false;
+        }
+
         BoxConfiguration that = (BoxConfiguration) o;
 
         return maxCacheEntries == that.maxCacheEntries

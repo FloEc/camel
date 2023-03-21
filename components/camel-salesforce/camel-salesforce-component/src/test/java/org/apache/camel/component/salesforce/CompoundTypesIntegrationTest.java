@@ -23,14 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test support for Salesforce compound data types. This test requires a custom field in the <code>Account</code> object
  * called <code>"Shipping Location"</code> of type <code>Geolocation</code> in decimal units.
- * 
+ *
  * @see <a href=
  *      "https://www.salesforce.com/developer/docs/api/index_Left.htm#CSHID=compound_fields.htm|StartTopic=Content%2Fcompound_fields.htm|SkinName=webhelp">Compound
  *      data types</a>
@@ -90,7 +90,8 @@ public class CompoundTypesIntegrationTest extends AbstractSalesforceTestBase {
 
         } finally {
             // delete the test SObject
-            assertNull(template().requestBody("direct:deleteSObject" + suffix, result.getId()));
+            String id = (String) template().requestBody("direct:deleteSObject" + suffix, result.getId());
+            assertEquals(id, result.getId());
             LOG.debug("Delete successful");
         }
     }

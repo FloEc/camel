@@ -81,6 +81,10 @@ public class KameletDeserializer extends YamlDeserializerBase<KameletDefinition>
                 case "name":
                     name = asText(val);
                     break;
+                case "inheritErrorHandler":
+                case "inherit-error-handler":
+                    target.setInheritErrorHandler(asBoolean(val));
+                    break;
                 case "parameters":
                     parameters = asScalarMap(tuple.getValueNode());
                     break;
@@ -93,7 +97,7 @@ public class KameletDeserializer extends YamlDeserializerBase<KameletDefinition>
             try {
                 name += "?" + URISupport.createQueryString(parameters, false);
             } catch (URISyntaxException e) {
-                throw new YamlDeserializationException(e);
+                throw new YamlDeserializationException(node, "Error creating endpoint query string", e);
             }
         }
 

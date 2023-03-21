@@ -50,7 +50,7 @@ public class FromFtpConsumerTemplateRollbackIT extends FtpServerTestSupport {
     }
 
     @Test
-    public void testConsumerTemplateRollback() throws Exception {
+    public void testConsumerTemplateRollback() {
         try {
             consumer.receiveBody(getFtpUrlInvalid(), 2000, String.class);
             fail("Should fail and rollback");
@@ -74,7 +74,7 @@ public class FromFtpConsumerTemplateRollbackIT extends FtpServerTestSupport {
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("deletefile/hello.txt").toFile();
+        File file = service.ftpFile("deletefile/hello.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 

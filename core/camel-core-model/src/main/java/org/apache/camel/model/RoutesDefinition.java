@@ -17,13 +17,15 @@
 package org.apache.camel.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
@@ -33,8 +35,10 @@ import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.spi.AsEndpointUri;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.Resource;
+import org.apache.camel.spi.ResourceAware;
 import org.apache.camel.support.OrderedComparator;
 import org.apache.camel.support.PatternHelper;
+import org.apache.camel.util.OrderedLocationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +49,10 @@ import org.slf4j.LoggerFactory;
 @XmlRootElement(name = "routes")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinition>
-        implements RouteContainer, CamelContextAware {
+        implements RouteContainer, CamelContextAware, ResourceAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoutesDefinition.class);
 
-    @XmlElementRef
-    private List<RouteDefinition> routes = new ArrayList<>();
     @XmlTransient
     private List<InterceptDefinition> intercepts = new ArrayList<>();
     @XmlTransient
@@ -67,6 +69,9 @@ public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinit
     private ErrorHandlerFactory errorHandlerFactory;
     @XmlTransient
     private Resource resource;
+
+    @XmlElementRef
+    private List<RouteDefinition> routes = new ArrayList<>();
 
     public RoutesDefinition() {
     }
@@ -239,6 +244,7 @@ public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinit
         route.setResource(resource);
 
         // merge global and route scoped together
+        final AtomicReference<ErrorHandlerDefinition> gcErrorHandler = new AtomicReference<>();
         List<OnExceptionDefinition> oe = new ArrayList<>(onExceptions);
         List<InterceptDefinition> icp = new ArrayList<>(intercepts);
         List<InterceptFromDefinition> ifrom = new ArrayList<>(interceptFroms);
@@ -246,11 +252,31 @@ public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinit
         List<OnCompletionDefinition> oc = new ArrayList<>(onCompletions);
         if (getCamelContext() != null) {
             List<RouteConfigurationDefinition> globalConfigurations
-                    = getCamelContext().adapt(ModelCamelContext.class).getRouteConfigurationDefinitions();
+                    = ((ModelCamelContext) getCamelContext()).getRouteConfigurationDefinitions();
             if (globalConfigurations != null) {
+                String[] ids;
+                if (route.getRouteConfigurationId() != null) {
+                    // if the RouteConfigurationId was configured with property placeholder it should be resolved first
+                    // and include properties sources from the template parameters
+                    if (route.getTemplateParameters() != null && route.getRouteConfigurationId().startsWith("{{")) {
+                        OrderedLocationProperties props = new OrderedLocationProperties();
+                        props.putAll("TemplateProperties", new HashMap<>(route.getTemplateParameters()));
+                        camelContext.getPropertiesComponent().setLocalProperties(props);
+                        try {
+                            ids = camelContext.getCamelContextExtension()
+                                    .resolvePropertyPlaceholders(route.getRouteConfigurationId(), true)
+                                    .split(",");
+                        } finally {
+                            camelContext.getPropertiesComponent().setLocalProperties(null);
+                        }
+                    } else {
+                        ids = route.getRouteConfigurationId().split(",");
+                    }
+                } else {
+                    ids = new String[] { "*" };
+                }
+
                 // if there are multiple ids configured then we should apply in that same order
-                String[] ids = route.getRouteConfigurationId() != null
-                        ? route.getRouteConfigurationId().split(",") : new String[] { "*" };
                 for (String id : ids) {
                     // sort according to ordered
                     globalConfigurations.stream().sorted(OrderedComparator.get())
@@ -264,6 +290,12 @@ public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinit
                                 }
                             })
                             .forEach(g -> {
+                                // there can only be one global error handler, so override previous, meaning
+                                // that we will pick the last in the sort (take precedence)
+                                if (g.getErrorHandler() != null) {
+                                    gcErrorHandler.set(g.getErrorHandler());
+                                }
+
                                 String aid = g.getId() == null ? "<default>" : g.getId();
                                 // remember the id that was used on the route
                                 route.addAppliedRouteConfigurationId(aid);
@@ -274,11 +306,24 @@ public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinit
                                 oc.addAll(g.getOnCompletions());
                             });
                 }
+
+                // set error handler before prepare
+                if (errorHandlerFactory == null && gcErrorHandler.get() != null) {
+                    ErrorHandlerDefinition ehd = gcErrorHandler.get();
+                    route.setErrorHandlerFactoryIfNull(ehd.getErrorHandlerType());
+                }
             }
         }
 
+        // if the route does not already have an error handler set then use route configured error handler
+        // if one was configured
+        ErrorHandlerDefinition ehd = null;
+        if (errorHandlerFactory == null && gcErrorHandler.get() != null) {
+            ehd = gcErrorHandler.get();
+        }
+
         // must prepare the route before we can add it to the routes list
-        RouteDefinitionHelper.prepareRoute(getCamelContext(), route, oe, icp, ifrom, ito, oc);
+        RouteDefinitionHelper.prepareRoute(getCamelContext(), route, ehd, oe, icp, ifrom, ito, oc);
 
         if (LOG.isDebugEnabled() && route.getAppliedRouteConfigurationIds() != null) {
             LOG.debug("Route: {} is using route configurations ids: {}", route.getId(),
@@ -370,6 +415,9 @@ public class RoutesDefinition extends OptionalIdentifiedDefinition<RoutesDefinit
         ErrorHandlerFactory handler = getErrorHandlerFactory();
         if (handler != null) {
             route.setErrorHandlerFactoryIfNull(handler);
+        }
+        if (resource != null) {
+            route.setResource(resource);
         }
         return route;
     }

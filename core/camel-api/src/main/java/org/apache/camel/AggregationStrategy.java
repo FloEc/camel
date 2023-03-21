@@ -88,7 +88,7 @@ public interface AggregationStrategy {
 
     /**
      * Indicates if this aggregation strategy uses pre-completion mode.
-     * 
+     *
      * @return <tt>true</tt> if this strategy uses pre-completion mode, or <tt>false</tt> otherwise.
      */
     default boolean canPreComplete() {
@@ -118,6 +118,19 @@ public interface AggregationStrategy {
      *                 aggregation has been done before the completion occurred
      */
     default void onCompletion(Exchange exchange) {
+    }
+
+    /**
+     * The aggregated {@link Exchange} has completed
+     *
+     * <b>Important: </b> This method must <b>not</b> throw any exceptions.
+     *
+     * @param exchange      the current aggregated exchange, or the original {@link org.apache.camel.Exchange} if no
+     *                      aggregation has been done before the completion occurred
+     * @param inputExchange the input exchange (input to the EIP)
+     */
+    default void onCompletion(Exchange exchange, Exchange inputExchange) {
+        onCompletion(exchange);
     }
 
     /**

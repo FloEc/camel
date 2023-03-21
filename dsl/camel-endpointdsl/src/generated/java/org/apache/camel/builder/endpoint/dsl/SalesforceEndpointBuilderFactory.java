@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -60,8 +60,8 @@ public interface SalesforceEndpointBuilderFactory {
         /**
          * Query params for APEX method.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -77,8 +77,8 @@ public interface SalesforceEndpointBuilderFactory {
          * Query params for APEX method.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -95,7 +95,7 @@ public interface SalesforceEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: 53.0
+         * Default: 56.0
          * Group: common
          * 
          * @param apiVersion the value to set
@@ -350,8 +350,8 @@ public interface SalesforceEndpointBuilderFactory {
         /**
          * Replay IDs to start from per channel name.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -367,8 +367,8 @@ public interface SalesforceEndpointBuilderFactory {
          * Replay IDs to start from per channel name.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -602,8 +602,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -618,8 +618,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -635,8 +635,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -651,8 +651,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -669,7 +669,7 @@ public interface SalesforceEndpointBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -686,7 +686,7 @@ public interface SalesforceEndpointBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -702,8 +702,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -718,8 +718,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -735,8 +735,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -751,8 +751,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -1149,6 +1149,43 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceEndpointConsumerBuilder streamQueryResult(
+                Boolean streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceEndpointConsumerBuilder streamQueryResult(
+                String streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
          * Whether to update an existing Push Topic when using the Streaming
          * API, defaults to false.
          * 
@@ -1180,51 +1217,6 @@ public interface SalesforceEndpointBuilderFactory {
          */
         default SalesforceEndpointConsumerBuilder updateTopic(String updateTopic) {
             doSetProperty("updateTopic", updateTopic);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SalesforceEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default SalesforceEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -1266,6 +1258,51 @@ public interface SalesforceEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default SalesforceEndpointConsumerBuilder basic() {
             return (SalesforceEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSalesforceEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSalesforceEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1365,8 +1402,8 @@ public interface SalesforceEndpointBuilderFactory {
         /**
          * Query params for APEX method.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1382,8 +1419,8 @@ public interface SalesforceEndpointBuilderFactory {
          * Query params for APEX method.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1400,7 +1437,7 @@ public interface SalesforceEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: 53.0
+         * Default: 56.0
          * Group: common
          * 
          * @param apiVersion the value to set
@@ -1655,8 +1692,8 @@ public interface SalesforceEndpointBuilderFactory {
         /**
          * Replay IDs to start from per channel name.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1672,8 +1709,8 @@ public interface SalesforceEndpointBuilderFactory {
          * Replay IDs to start from per channel name.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1907,8 +1944,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -1923,8 +1960,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -1940,8 +1977,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -1956,8 +1993,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -1974,7 +2011,7 @@ public interface SalesforceEndpointBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -1991,7 +2028,7 @@ public interface SalesforceEndpointBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -2007,8 +2044,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -2023,8 +2060,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -2040,8 +2077,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -2056,8 +2093,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -2454,6 +2491,43 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceEndpointProducerBuilder streamQueryResult(
+                Boolean streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceEndpointProducerBuilder streamQueryResult(
+                String streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
          * Whether to update an existing Push Topic when using the Streaming
          * API, defaults to false.
          * 
@@ -2550,55 +2624,6 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SalesforceEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default SalesforceEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * Comma separated list of message headers to include as HTTP parameters
          * for Raw operation.
          * 
@@ -2671,6 +2696,55 @@ public interface SalesforceEndpointBuilderFactory {
         default SalesforceEndpointProducerBuilder basic() {
             return (SalesforceEndpointProducerBuilder) this;
         }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSalesforceEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedSalesforceEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
     }
 
     /**
@@ -2700,8 +2774,8 @@ public interface SalesforceEndpointBuilderFactory {
         /**
          * Query params for APEX method.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2717,8 +2791,8 @@ public interface SalesforceEndpointBuilderFactory {
          * Query params for APEX method.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2734,7 +2808,7 @@ public interface SalesforceEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: 53.0
+         * Default: 56.0
          * Group: common
          * 
          * @param apiVersion the value to set
@@ -2983,8 +3057,8 @@ public interface SalesforceEndpointBuilderFactory {
         /**
          * Replay IDs to start from per channel name.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -3000,8 +3074,8 @@ public interface SalesforceEndpointBuilderFactory {
          * Replay IDs to start from per channel name.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -3234,8 +3308,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -3250,8 +3324,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -3267,8 +3341,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -3283,8 +3357,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -3301,7 +3375,7 @@ public interface SalesforceEndpointBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -3318,7 +3392,7 @@ public interface SalesforceEndpointBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -3334,8 +3408,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -3350,8 +3424,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -3367,8 +3441,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -3383,8 +3457,8 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -3772,6 +3846,43 @@ public interface SalesforceEndpointBuilderFactory {
             return this;
         }
         /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceEndpointBuilder streamQueryResult(
+                Boolean streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceEndpointBuilder streamQueryResult(
+                String streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
          * Whether to update an existing Push Topic when using the Streaming
          * API, defaults to false.
          * 
@@ -3827,11 +3938,24 @@ public interface SalesforceEndpointBuilderFactory {
          * Since: 2.12
          * Maven coordinates: org.apache.camel:camel-salesforce
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default SalesforceHeaderNameBuilder salesforce() {
+            return SalesforceHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Salesforce (camel-salesforce)
+         * Communicate with Salesforce using Java DTOs.
+         * 
+         * Category: cloud,api,crm
+         * Since: 2.12
+         * Maven coordinates: org.apache.camel:camel-salesforce
+         * 
          * Syntax: <code>salesforce:operationName:topicName</code>
          * 
-         * Path parameter: operationName
+         * Path parameter: operationName (required)
          * The operation to use
-         * There are 65 enums and the value can be one of: getVersions,
+         * There are 66 enums and the value can be one of: getVersions,
          * getResources, getGlobalObjects, getBasicInfo, getDescription,
          * getSObject, createSObject, updateSObject, deleteSObject,
          * getSObjectWithId, upsertSObject, deleteSObjectWithId, getBlobField,
@@ -3849,7 +3973,7 @@ public interface SalesforceEndpointBuilderFactory {
          * bulk2GetSuccessfulResults, bulk2GetFailedResults,
          * bulk2GetUnprocessedRecords, bulk2CreateQueryJob, bulk2GetQueryJob,
          * bulk2GetAllQueryJobs, bulk2GetQueryJobResults, bulk2AbortQueryJob,
-         * bulk2DeleteQueryJob, raw
+         * bulk2DeleteQueryJob, raw, subscribe
          * 
          * Path parameter: topicName
          * The name of the topic/channel to use
@@ -3870,9 +3994,9 @@ public interface SalesforceEndpointBuilderFactory {
          * 
          * Syntax: <code>salesforce:operationName:topicName</code>
          * 
-         * Path parameter: operationName
+         * Path parameter: operationName (required)
          * The operation to use
-         * There are 65 enums and the value can be one of: getVersions,
+         * There are 66 enums and the value can be one of: getVersions,
          * getResources, getGlobalObjects, getBasicInfo, getDescription,
          * getSObject, createSObject, updateSObject, deleteSObject,
          * getSObjectWithId, upsertSObject, deleteSObjectWithId, getBlobField,
@@ -3890,7 +4014,7 @@ public interface SalesforceEndpointBuilderFactory {
          * bulk2GetSuccessfulResults, bulk2GetFailedResults,
          * bulk2GetUnprocessedRecords, bulk2CreateQueryJob, bulk2GetQueryJob,
          * bulk2GetAllQueryJobs, bulk2GetQueryJobResults, bulk2AbortQueryJob,
-         * bulk2DeleteQueryJob, raw
+         * bulk2DeleteQueryJob, raw, subscribe
          * 
          * Path parameter: topicName
          * The name of the topic/channel to use
@@ -3904,6 +4028,265 @@ public interface SalesforceEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return SalesforceEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Salesforce component.
+     */
+    public static class SalesforceHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final SalesforceHeaderNameBuilder INSTANCE = new SalesforceHeaderNameBuilder();
+
+        /**
+         * The replay id.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceReplayId}.
+         */
+        public String salesforceReplayId() {
+            return "SalesforceReplayId";
+        }
+
+        /**
+         * The change event schema.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceChangeEventSchema}.
+         */
+        public String salesforceChangeEventSchema() {
+            return "SalesforceChangeEventSchema";
+        }
+
+        /**
+         * The event type.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceEventType}.
+         */
+        public String salesforceEventType() {
+            return "SalesforceEventType";
+        }
+
+        /**
+         * The commit timestamp.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceCommitTimestamp}.
+         */
+        public String salesforceCommitTimestamp() {
+            return "SalesforceCommitTimestamp";
+        }
+
+        /**
+         * The commit user.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceCommitUser}.
+         */
+        public String salesforceCommitUser() {
+            return "SalesforceCommitUser";
+        }
+
+        /**
+         * The commit number.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceCommitNumber}.
+         */
+        public String salesforceCommitNumber() {
+            return "SalesforceCommitNumber";
+        }
+
+        /**
+         * The record ids.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceRecordIds}.
+         */
+        public String salesforceRecordIds() {
+            return "SalesforceRecordIds";
+        }
+
+        /**
+         * The change type.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceChangeType}.
+         */
+        public String salesforceChangeType() {
+            return "SalesforceChangeType";
+        }
+
+        /**
+         * The change origin.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceChangeOrigin}.
+         */
+        public String salesforceChangeOrigin() {
+            return "SalesforceChangeOrigin";
+        }
+
+        /**
+         * The transaction key.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceTransactionKey}.
+         */
+        public String salesforceTransactionKey() {
+            return "SalesforceTransactionKey";
+        }
+
+        /**
+         * The sequence number.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceSequenceNumber}.
+         */
+        public String salesforceSequenceNumber() {
+            return "SalesforceSequenceNumber";
+        }
+
+        /**
+         * Is transaction end.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceIsTransactionEnd}.
+         */
+        public String salesforceIsTransactionEnd() {
+            return "SalesforceIsTransactionEnd";
+        }
+
+        /**
+         * The entity name.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceEntityName}.
+         */
+        public String salesforceEntityName() {
+            return "SalesforceEntityName";
+        }
+
+        /**
+         * The platform event schema.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforcePlatformEventSchema}.
+         */
+        public String salesforcePlatformEventSchema() {
+            return "SalesforcePlatformEventSchema";
+        }
+
+        /**
+         * The created date.
+         * 
+         * The option is a: {@code java.time.ZonedDateTime} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceCreatedDate}.
+         */
+        public String salesforceCreatedDate() {
+            return "SalesforceCreatedDate";
+        }
+
+        /**
+         * The topic name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceTopicName}.
+         */
+        public String salesforceTopicName() {
+            return "SalesforceTopicName";
+        }
+
+        /**
+         * The channel.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceChannel}.
+         */
+        public String salesforceChannel() {
+            return "SalesforceChannel";
+        }
+
+        /**
+         * The client id.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SalesforceClientId}.
+         */
+        public String salesforceClientId() {
+            return "SalesforceClientId";
+        }
+
+        /**
+         * Total number of records matching a query.
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * SalesforceQueryResultTotalSize}.
+         */
+        public String salesforceQueryResultTotalSize() {
+            return "SalesforceQueryResultTotalSize";
         }
     }
     static SalesforceEndpointBuilder endpointBuilder(

@@ -38,6 +38,7 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         case "clientsecret":
         case "clientSecret": target.getConfiguration().setClientSecret(property(camelContext, java.lang.String.class, value)); return true;
         case "delay": target.setDelay(property(camelContext, long.class, value)); return true;
+        case "delegate": target.getConfiguration().setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "exceptionhandler":
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
@@ -64,8 +65,11 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         case "scheduler": target.setScheduler(property(camelContext, java.lang.Object.class, value)); return true;
         case "schedulerproperties":
         case "schedulerProperties": target.setSchedulerProperties(property(camelContext, java.util.Map.class, value)); return true;
+        case "scopes": target.getConfiguration().setScopes(property(camelContext, java.util.List.class, value)); return true;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": target.setSendEmptyMessageWhenIdle(property(camelContext, boolean.class, value)); return true;
+        case "serviceaccountkey":
+        case "serviceAccountKey": target.getConfiguration().setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         case "startscheduler":
         case "startScheduler": target.setStartScheduler(property(camelContext, boolean.class, value)); return true;
         case "timeunit":
@@ -96,6 +100,7 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         case "clientsecret":
         case "clientSecret": return java.lang.String.class;
         case "delay": return long.class;
+        case "delegate": return java.lang.String.class;
         case "exceptionhandler":
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
@@ -122,8 +127,11 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         case "scheduler": return java.lang.Object.class;
         case "schedulerproperties":
         case "schedulerProperties": return java.util.Map.class;
+        case "scopes": return java.util.List.class;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return boolean.class;
+        case "serviceaccountkey":
+        case "serviceAccountKey": return java.lang.String.class;
         case "startscheduler":
         case "startScheduler": return boolean.class;
         case "timeunit":
@@ -155,6 +163,7 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         case "clientsecret":
         case "clientSecret": return target.getConfiguration().getClientSecret();
         case "delay": return target.getDelay();
+        case "delegate": return target.getConfiguration().getDelegate();
         case "exceptionhandler":
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
@@ -181,8 +190,11 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         case "scheduler": return target.getScheduler();
         case "schedulerproperties":
         case "schedulerProperties": return target.getSchedulerProperties();
+        case "scopes": return target.getConfiguration().getScopes();
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return target.isSendEmptyMessageWhenIdle();
+        case "serviceaccountkey":
+        case "serviceAccountKey": return target.getConfiguration().getServiceAccountKey();
         case "startscheduler":
         case "startScheduler": return target.isStartScheduler();
         case "timeunit":
@@ -198,6 +210,7 @@ public class GoogleMailStreamEndpointConfigurer extends PropertyConfigurerSuppor
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "schedulerproperties":
         case "schedulerProperties": return java.lang.Object.class;
+        case "scopes": return java.lang.String.class;
         default: return null;
         }
     }

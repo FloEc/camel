@@ -31,7 +31,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.PollingConsumer;
 import org.apache.camel.Processor;
-import org.apache.camel.component.file.consumer.FileConsumerResumeStrategy;
 import org.apache.camel.component.file.strategy.FileMoveExistingStrategy;
 import org.apache.camel.component.file.strategy.FileProcessStrategyFactory;
 import org.apache.camel.spi.Metadata;
@@ -48,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * Read and write files.
  */
 @UriEndpoint(firstVersion = "1.0.0", scheme = "file", title = "File", syntax = "file:directoryName",
-             category = { Category.FILE, Category.CORE })
+             category = { Category.FILE, Category.CORE }, headersClass = FileConstants.class)
 public class FileEndpoint extends GenericFileEndpoint<File> {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileEndpoint.class);
@@ -82,9 +81,6 @@ public class FileEndpoint extends GenericFileEndpoint<File> {
     private String chmod;
     @UriParam(label = "producer,advanced")
     private String chmodDirectory;
-
-    @UriParam(label = "consumer,advanced")
-    private FileConsumerResumeStrategy resumeStrategy;
 
     public FileEndpoint() {
     }
@@ -132,7 +128,7 @@ public class FileEndpoint extends GenericFileEndpoint<File> {
         }
 
         // if idempotent and no repository set then create a default one
-        if (isIdempotentSet() && isIdempotent() && idempotentRepository == null) {
+        if (isIdempotentSet() && Boolean.TRUE.equals(isIdempotent()) && idempotentRepository == null) {
             LOG.info("Using default memory based idempotent repository with cache max size: {}", DEFAULT_IDEMPOTENT_CACHE_SIZE);
             idempotentRepository = MemoryIdempotentRepository.memoryIdempotentRepository(DEFAULT_IDEMPOTENT_CACHE_SIZE);
         }
@@ -362,22 +358,6 @@ public class FileEndpoint extends GenericFileEndpoint<File> {
      */
     public void setExtendedAttributes(String extendedAttributes) {
         this.extendedAttributes = extendedAttributes;
-    }
-
-    public FileConsumerResumeStrategy getResumeStrategy() {
-        return resumeStrategy;
-    }
-
-    /**
-     * Set a resume strategy for files. This makes it possible to define a strategy for resuming reading files after the
-     * last point before stopping the application.
-     *
-     * See the {@link FileConsumerResumeStrategy} for implementation details
-     *
-     * @param resumeStrategy an instance of the resume strategy to be used
-     */
-    public void setResumeStrategy(FileConsumerResumeStrategy resumeStrategy) {
-        this.resumeStrategy = resumeStrategy;
     }
 
     /**

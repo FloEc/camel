@@ -16,10 +16,10 @@
  */
 package org.apache.camel.component.cassandra.integration;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import org.apache.camel.BindToRegistry;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cassandra.CassandraEndpoint;
-import org.apache.camel.spi.Registry;
-import org.apache.camel.support.SimpleRegistry;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,15 +29,11 @@ public class CassandraComponentBeanRefIT extends BaseCassandra {
     public static final String CQL = "insert into camel_user(login, first_name, last_name) values (?, ?, ?)";
     public static final String SESSION_URI = "cql:bean:cassandraSession?cql=" + CQL;
 
-    @Override
-    protected Registry createCamelRegistry() throws Exception {
-        SimpleRegistry registry = new SimpleRegistry();
-        registry.bind("cassandraSession", getSession());
-        return registry;
-    }
+    @BindToRegistry("cassandraSession")
+    private CqlSession session = getSession();
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:inputSession").to(SESSION_URI);
@@ -46,7 +42,7 @@ public class CassandraComponentBeanRefIT extends BaseCassandra {
     }
 
     @Test
-    public void testSession() throws Exception {
+    public void testSession() {
         CassandraEndpoint endpoint = getMandatoryEndpoint(SESSION_URI, CassandraEndpoint.class);
 
         assertEquals(KEYSPACE_NAME, endpoint.getKeyspace());

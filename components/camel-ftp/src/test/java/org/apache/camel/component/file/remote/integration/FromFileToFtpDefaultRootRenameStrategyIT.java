@@ -59,7 +59,7 @@ public class FromFileToFtpDefaultRootRenameStrategyIT extends FtpServerTestSuppo
 
     @Test
     public void testFromFileToFtp() throws Exception {
-        File expectedOnFtpServer = ftpFile("logo.jpeg").toFile();
+        File expectedOnFtpServer = service.ftpFile("logo.jpeg").toFile();
         // the poller won't start for 1.5 seconds, so we check to make sure the
         // file
         // is there first check 1 - is the file there (default root location)
@@ -68,7 +68,7 @@ public class FromFileToFtpDefaultRootRenameStrategyIT extends FtpServerTestSuppo
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         await().atMost(250, TimeUnit.MILLISECONDS).untilAsserted(() -> assertFalse(expectedOnFtpServer.exists()));
     }
@@ -86,9 +86,9 @@ public class FromFileToFtpDefaultRootRenameStrategyIT extends FtpServerTestSuppo
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpPollingUrl()).to("mock:result");
             }
         };

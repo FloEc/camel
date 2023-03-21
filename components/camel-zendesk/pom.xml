@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>components</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-zendesk</artifactId>
@@ -49,19 +49,13 @@
         <dependency>
             <groupId>com.cloudbees.thirdparty</groupId>
             <artifactId>zendesk-java-client</artifactId>
+            <version>${zendesk-client-version}</version>
         </dependency>
 
         <!-- testing -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-test-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- logging -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -84,7 +78,7 @@
                                     <apiName />
                                     <proxyClass>org.zendesk.client.v2.Zendesk</proxyClass>
                                     <fromJavasource>
-                                        <excludeMethods>isClosed|close|getTicketsByStatus|createGroups|importTickets|createMappe
+                                        <excludeMethods>isClosed|close|getTicketsByStatus|createGroups|importTickets|recoverSuspendedTickets|createMapper|getSearchResults
                                         </excludeMethods>
                                     </fromJavasource>
                                     <substitutions>
@@ -183,6 +177,18 @@
                                             <argType>java.lang.String</argType>
                                             <argName>params</argName>
                                             <replacement>parameters</replacement>
+                                        </substitution>
+                                        <substitution>
+                                            <method>getUsersByExternalIds</method>
+                                            <argType>long</argType>
+                                            <argName>externalId</argName>
+                                            <replacement>externalId0</replacement>
+                                        </substitution>
+                                        <substitution>
+                                            <method>getTriggers</method>
+                                            <argType>java.lang.String</argType>
+                                            <argName>categoryId</argName>
+                                            <replacement>categoryId0</replacement>
                                         </substitution>
                                     </substitutions>
                                 </api>

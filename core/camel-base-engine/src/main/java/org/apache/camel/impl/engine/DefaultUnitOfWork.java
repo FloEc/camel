@@ -26,9 +26,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apache.camel.AsyncCallback;
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.PooledExchange;
 import org.apache.camel.Processor;
@@ -37,10 +36,7 @@ import org.apache.camel.spi.InflightRepository;
 import org.apache.camel.spi.Synchronization;
 import org.apache.camel.spi.SynchronizationVetoable;
 import org.apache.camel.spi.UnitOfWork;
-import org.apache.camel.spi.annotations.EagerClassloaded;
-import org.apache.camel.support.DefaultMessage;
 import org.apache.camel.support.EventHelper;
-import org.apache.camel.support.MessageSupport;
 import org.apache.camel.support.UnitOfWorkHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +44,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The default implementation of {@link org.apache.camel.spi.UnitOfWork}
  */
-@EagerClassloaded
 public class DefaultUnitOfWork implements UnitOfWork {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultUnitOfWork.class);
 
@@ -57,7 +52,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
     final boolean allowUseOriginalMessage;
     final boolean useBreadcrumb;
 
-    private final ExtendedCamelContext context;
+    private final CamelContext context;
     private final Deque<Route> routes = new ArrayDeque<>(8);
     private Logger log;
     private Exchange exchange;
@@ -81,13 +76,9 @@ public class DefaultUnitOfWork implements UnitOfWork {
         this.log = LOG;
         this.allowUseOriginalMessage = allowUseOriginalMessage;
         this.useBreadcrumb = useBreadcrumb;
-        this.context = (ExtendedCamelContext) exchange.getContext();
+        this.context = exchange.getContext();
         this.inflightRepository = inflightRepository;
         doOnPrepare(exchange);
-    }
-
-    public static void onClassloaded(Logger log) {
-        log.trace("Loaded DefaultUnitOfWork");
     }
 
     UnitOfWork newInstance(Exchange exchange) {
@@ -109,18 +100,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
         this.exchange = exchange;
 
         if (allowUseOriginalMessage) {
-            // special for JmsMessage as it can cause it to loose headers later.
-            if (exchange.getIn().getClass().getName().equals("org.apache.camel.component.jms.JmsMessage")) {
-                this.originalInMessage = new DefaultMessage(context);
-                this.originalInMessage.setBody(exchange.getIn().getBody());
-                this.originalInMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-            } else {
-                this.originalInMessage = exchange.getIn().copy();
-            }
-            // must preserve exchange on the original in message
-            if (this.originalInMessage instanceof MessageSupport) {
-                ((MessageSupport) this.originalInMessage).setExchange(exchange);
-            }
+            this.originalInMessage = exchange.getIn().copy();
         }
 
         // inject breadcrumb header if enabled
@@ -135,7 +115,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
         }
 
         // fire event
-        if (context.isEventNotificationApplicable()) {
+        if (context.getCamelContextExtension().isEventNotificationApplicable()) {
             try {
                 EventHelper.notifyExchangeCreated(context, exchange);
             } catch (Throwable e) {
@@ -210,14 +190,19 @@ public class DefaultUnitOfWork implements UnitOfWork {
             Synchronization synchronization = it.next();
 
             boolean handover = true;
+            SynchronizationVetoable veto = null;
             if (synchronization instanceof SynchronizationVetoable) {
-                SynchronizationVetoable veto = (SynchronizationVetoable) synchronization;
+                veto = (SynchronizationVetoable) synchronization;
                 handover = veto.allowHandover();
             }
 
             if (handover && (filter == null || filter.test(synchronization))) {
                 log.trace("Handover synchronization {} to: {}", synchronization, target);
-                target.adapt(ExtendedExchange.class).addOnCompletion(synchronization);
+                target.getExchangeExtension().addOnCompletion(synchronization);
+                // Allow the synchronization to do housekeeping before transfer
+                if (veto != null) {
+                    veto.beforeHandover(target);
+                }
                 // remove it if its handed over
                 it.remove();
             } else {
@@ -232,17 +217,16 @@ public class DefaultUnitOfWork implements UnitOfWork {
             log.trace("UnitOfWork done for ExchangeId: {} with {}", exchange.getExchangeId(), exchange);
         }
 
-        boolean failed = exchange.isFailed();
-
         // at first done the synchronizations
         UnitOfWorkHelper.doneSynchronizations(exchange, synchronizations, log);
 
         // unregister from inflight registry, before signalling we are done
         inflightRepository.remove(exchange);
 
-        if (context.isEventNotificationApplicable()) {
+        if (context.getCamelContextExtension().isEventNotificationApplicable()) {
             // then fire event to signal the exchange is done
             try {
+                final boolean failed = exchange.isFailed();
                 if (failed) {
                     EventHelper.notifyExchangeFailed(exchange.getContext(), exchange);
                 } else {
@@ -259,7 +243,11 @@ public class DefaultUnitOfWork implements UnitOfWork {
             // pooled exchange has its own done logic which will reset this uow for reuse
             // so do not call onDone
             try {
-                ((PooledExchange) exchange).done(false);
+                PooledExchange pooled = (PooledExchange) exchange;
+                // only trigger done if we should auto-release
+                if (pooled.isAutoRelease()) {
+                    ((PooledExchange) exchange).done();
+                }
             } catch (Throwable e) {
                 // must catch exceptions to ensure synchronizations is also invoked
                 log.warn("Exception occurred during exchange done. This exception will be ignored.", e);
@@ -272,8 +260,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
     protected void onDone() {
         // MUST clear and set uow to null on exchange after done
         // in case the same exchange is manually reused by Camel end users (should happen seldom)
-        ExtendedExchange ee = (ExtendedExchange) exchange;
-        ee.setUnitOfWork(null);
+        exchange.getExchangeExtension().setUnitOfWork(null);
     }
 
     @Override
@@ -318,7 +305,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
 
     @Override
     public void beginTransactedBy(Object key) {
-        exchange.adapt(ExtendedExchange.class).setTransacted(true);
+        exchange.getExchangeExtension().setTransacted(true);
         getTransactedBy().add(key);
     }
 
@@ -327,7 +314,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
         getTransactedBy().remove(key);
         // we may still be transacted even if we end this section of transaction
         boolean transacted = isTransacted();
-        exchange.adapt(ExtendedExchange.class).setTransacted(transacted);
+        exchange.getExchangeExtension().setTransacted(transacted);
     }
 
     @Override
@@ -346,14 +333,19 @@ public class DefaultUnitOfWork implements UnitOfWork {
     }
 
     @Override
+    public int routeStackLevel() {
+        return routes.size();
+    }
+
+    @Override
     public boolean isBeforeAfterProcess() {
         return false;
     }
 
     @Override
     public AsyncCallback beforeProcess(Processor processor, Exchange exchange, AsyncCallback callback) {
-        // no wrapping needed
-        return callback;
+        // CAMEL-18255: support running afterProcess from the async callback
+        return isBeforeAfterProcess() ? new UnitOfWorkCallback(callback, processor) : callback;
     }
 
     @Override
@@ -372,5 +364,27 @@ public class DefaultUnitOfWork implements UnitOfWork {
     @Override
     public String toString() {
         return "DefaultUnitOfWork";
+    }
+
+    private final class UnitOfWorkCallback implements AsyncCallback {
+
+        private final AsyncCallback delegate;
+        private final Processor processor;
+
+        private UnitOfWorkCallback(AsyncCallback delegate, Processor processor) {
+            this.delegate = delegate;
+            this.processor = processor;
+        }
+
+        @Override
+        public void done(boolean doneSync) {
+            delegate.done(doneSync);
+            afterProcess(processor, exchange, delegate, doneSync);
+        }
+
+        @Override
+        public String toString() {
+            return delegate.toString();
+        }
     }
 }

@@ -24,9 +24,11 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         map.put("methodName", java.lang.String.class);
         map.put("applicationName", java.lang.String.class);
         map.put("clientId", java.lang.String.class);
+        map.put("delegate", java.lang.String.class);
         map.put("inBody", java.lang.String.class);
-        map.put("bridgeErrorHandler", boolean.class);
+        map.put("scopes", java.util.Collection.class);
         map.put("sendEmptyMessageWhenIdle", boolean.class);
+        map.put("bridgeErrorHandler", boolean.class);
         map.put("exceptionHandler", org.apache.camel.spi.ExceptionHandler.class);
         map.put("exchangePattern", org.apache.camel.ExchangePattern.class);
         map.put("pollStrategy", org.apache.camel.spi.PollingConsumerPollStrategy.class);
@@ -48,6 +50,7 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         map.put("accessToken", java.lang.String.class);
         map.put("clientSecret", java.lang.String.class);
         map.put("refreshToken", java.lang.String.class);
+        map.put("serviceAccountKey", java.lang.String.class);
         ALL_OPTIONS = map;
     }
 
@@ -72,6 +75,7 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         case "clientsecret":
         case "clientSecret": target.getConfiguration().setClientSecret(property(camelContext, java.lang.String.class, value)); return true;
         case "delay": target.setDelay(property(camelContext, long.class, value)); return true;
+        case "delegate": target.getConfiguration().setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "exceptionhandler":
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
@@ -96,8 +100,11 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         case "scheduler": target.setScheduler(property(camelContext, java.lang.Object.class, value)); return true;
         case "schedulerproperties":
         case "schedulerProperties": target.setSchedulerProperties(property(camelContext, java.util.Map.class, value)); return true;
+        case "scopes": target.getConfiguration().setScopes(property(camelContext, java.util.Collection.class, value)); return true;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": target.setSendEmptyMessageWhenIdle(property(camelContext, boolean.class, value)); return true;
+        case "serviceaccountkey":
+        case "serviceAccountKey": target.getConfiguration().setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         case "startscheduler":
         case "startScheduler": target.setStartScheduler(property(camelContext, boolean.class, value)); return true;
         case "timeunit":
@@ -133,6 +140,7 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         case "clientsecret":
         case "clientSecret": return java.lang.String.class;
         case "delay": return long.class;
+        case "delegate": return java.lang.String.class;
         case "exceptionhandler":
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
@@ -157,8 +165,11 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         case "scheduler": return java.lang.Object.class;
         case "schedulerproperties":
         case "schedulerProperties": return java.util.Map.class;
+        case "scopes": return java.util.Collection.class;
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return boolean.class;
+        case "serviceaccountkey":
+        case "serviceAccountKey": return java.lang.String.class;
         case "startscheduler":
         case "startScheduler": return boolean.class;
         case "timeunit":
@@ -190,6 +201,7 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         case "clientsecret":
         case "clientSecret": return target.getConfiguration().getClientSecret();
         case "delay": return target.getDelay();
+        case "delegate": return target.getConfiguration().getDelegate();
         case "exceptionhandler":
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
@@ -214,8 +226,11 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         case "scheduler": return target.getScheduler();
         case "schedulerproperties":
         case "schedulerProperties": return target.getSchedulerProperties();
+        case "scopes": return target.getConfiguration().getScopes();
         case "sendemptymessagewhenidle":
         case "sendEmptyMessageWhenIdle": return target.isSendEmptyMessageWhenIdle();
+        case "serviceaccountkey":
+        case "serviceAccountKey": return target.getConfiguration().getServiceAccountKey();
         case "startscheduler":
         case "startScheduler": return target.isStartScheduler();
         case "timeunit":
@@ -231,6 +246,7 @@ public class GoogleMailEndpointConfigurer extends PropertyConfigurerSupport impl
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "schedulerproperties":
         case "schedulerProperties": return java.lang.Object.class;
+        case "scopes": return java.lang.String.class;
         default: return null;
         }
     }

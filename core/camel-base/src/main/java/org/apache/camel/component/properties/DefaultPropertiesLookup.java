@@ -16,12 +16,14 @@
  */
 package org.apache.camel.component.properties;
 
-import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.camel.NoTypeConversionAvailableException;
+import org.apache.camel.PropertiesLookupListener;
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.spi.LoadablePropertiesSource;
 import org.apache.camel.spi.PropertiesSource;
+import org.apache.camel.util.OrderedLocationProperties;
 
 /**
  * Default {@link PropertiesLookup} which lookup properties from a {@link java.util.Properties} with all existing
@@ -54,6 +56,15 @@ public class DefaultPropertiesLookup implements PropertiesLookup {
             Object value = local.get(name);
             if (value != null) {
                 answer = component.getCamelContext().getTypeConverter().mandatoryConvertTo(String.class, value);
+                String loc = location(local, name, "LocalProperties");
+                String defaultValue = null;
+                if (local instanceof OrderedLocationProperties) {
+                    Object val = ((OrderedLocationProperties) local).getDefaultValue(name);
+                    if (val != null) {
+                        defaultValue = component.getCamelContext().getTypeConverter().mandatoryConvertTo(String.class, val);
+                    }
+                }
+                onLookup(name, answer, defaultValue, loc);
             }
         }
 
@@ -63,13 +74,34 @@ public class DefaultPropertiesLookup implements PropertiesLookup {
             Object value = component.getOverrideProperties().get(name);
             if (value != null) {
                 answer = component.getCamelContext().getTypeConverter().mandatoryConvertTo(String.class, value);
+                String loc = location(local, name, "OverrideProperties");
+                onLookup(name, answer, null, loc);
             }
         }
         if (answer == null) {
             // try till first found source
-            Iterator<PropertiesSource> it2 = component.getSources().iterator();
-            while (answer == null && it2.hasNext()) {
-                answer = it2.next().getProperty(name);
+            for (PropertiesSource ps : component.getPropertiesSources()) {
+                answer = ps.getProperty(name);
+                if (answer != null) {
+                    String source = ps.getName();
+                    if (ps instanceof ClasspathPropertiesSource) {
+                        source = "classpath:" + ((LocationPropertiesSource) ps).getLocation().getPath();
+                    } else if (ps instanceof FilePropertiesSource) {
+                        source = "file:" + ((LocationPropertiesSource) ps).getLocation().getPath();
+                    } else if (ps instanceof RefPropertiesSource) {
+                        source = "ref:" + ((LocationPropertiesSource) ps).getLocation().getPath();
+                    } else if (ps instanceof LocationPropertiesSource) {
+                        source = ((LocationPropertiesSource) ps).getLocation().getPath();
+                    } else if (ps instanceof LoadablePropertiesSource) {
+                        Properties prop = ((LoadablePropertiesSource) ps).loadProperties();
+                        if (prop instanceof OrderedLocationProperties) {
+                            OrderedLocationProperties olp = (OrderedLocationProperties) prop;
+                            source = olp.getLocation(name);
+                        }
+                    }
+                    onLookup(name, answer, null, source);
+                    break;
+                }
             }
         }
         // initial properties are last
@@ -78,9 +110,33 @@ public class DefaultPropertiesLookup implements PropertiesLookup {
             Object value = component.getInitialProperties().get(name);
             if (value != null) {
                 answer = component.getCamelContext().getTypeConverter().mandatoryConvertTo(String.class, value);
+                String loc = location(local, name, "InitialProperties");
+                onLookup(name, answer, null, loc);
             }
         }
 
         return answer;
     }
+
+    private void onLookup(String name, String value, String defaultValue, String source) {
+        for (PropertiesLookupListener listener : component.getPropertiesLookupListeners()) {
+            try {
+                listener.onLookup(name, value, defaultValue, source);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
+
+    private static String location(Properties prop, String name, String defaultLocation) {
+        String loc = null;
+        if (prop instanceof OrderedLocationProperties) {
+            loc = ((OrderedLocationProperties) prop).getLocation(name);
+        }
+        if (loc == null) {
+            loc = defaultLocation;
+        }
+        return loc;
+    }
+
 }

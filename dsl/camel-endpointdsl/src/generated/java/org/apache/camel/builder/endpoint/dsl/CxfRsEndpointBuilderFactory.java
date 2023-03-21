@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -48,7 +48,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Set the feature list to the CxfRs endpoint.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.cxf.feature.Feature&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.cxf.feature.Feature&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -64,7 +64,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Set the feature list to the CxfRs endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;org.apache.cxf.feature.Feature&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.cxf.feature.Feature&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -179,7 +179,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Multiple classes can be separated by comma.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -196,7 +196,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Multiple classes can be separated by comma.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -213,7 +213,7 @@ public interface CxfRsEndpointBuilderFactory {
          * incoming XML or JAXB-driven JSON.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -230,7 +230,7 @@ public interface CxfRsEndpointBuilderFactory {
          * incoming XML or JAXB-driven JSON.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -279,21 +279,20 @@ public interface CxfRsEndpointBuilderFactory {
         }
         /**
          * Sets how requests and responses will be mapped to/from Camel. Two
-         * values are possible: &lt;ul&gt; &lt;li&gt;SimpleConsumer: This
-         * binding style processes request parameters, multiparts, etc. and maps
-         * them to IN headers, IN attachments and to the message body. It aims
-         * to eliminate low-level processing of
-         * org.apache.cxf.message.MessageContentsList. It also also adds more
-         * flexibility and simplicity to the response mapping. Only available
-         * for consumers. &lt;li&gt;Default: The default style. For consumers
-         * this passes on a MessageContentsList to the route, requiring
-         * low-level processing in the route. This is the traditional binding
-         * style, which simply dumps the
+         * values are possible: SimpleConsumer: This binding style processes
+         * request parameters, multiparts, etc. and maps them to IN headers, IN
+         * attachments and to the message body. It aims to eliminate low-level
+         * processing of org.apache.cxf.message.MessageContentsList. It also
+         * also adds more flexibility and simplicity to the response mapping.
+         * Only available for consumers. Default: The default style. For
+         * consumers this passes on a MessageContentsList to the route,
+         * requiring low-level processing in the route. This is the traditional
+         * binding style, which simply dumps the
          * org.apache.cxf.message.MessageContentsList coming in from the CXF
          * stack onto the IN message body. The user is then responsible for
          * processing it according to the contract defined by the JAX-RS method
-         * signature. &lt;li&gt;Custom: allows you to specify a custom binding
-         * through the binding option.
+         * signature. Custom: allows you to specify a custom binding through the
+         * binding option.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.cxf.jaxrs.BindingStyle&lt;/code&gt; type.
@@ -311,21 +310,20 @@ public interface CxfRsEndpointBuilderFactory {
         }
         /**
          * Sets how requests and responses will be mapped to/from Camel. Two
-         * values are possible: &lt;ul&gt; &lt;li&gt;SimpleConsumer: This
-         * binding style processes request parameters, multiparts, etc. and maps
-         * them to IN headers, IN attachments and to the message body. It aims
-         * to eliminate low-level processing of
-         * org.apache.cxf.message.MessageContentsList. It also also adds more
-         * flexibility and simplicity to the response mapping. Only available
-         * for consumers. &lt;li&gt;Default: The default style. For consumers
-         * this passes on a MessageContentsList to the route, requiring
-         * low-level processing in the route. This is the traditional binding
-         * style, which simply dumps the
+         * values are possible: SimpleConsumer: This binding style processes
+         * request parameters, multiparts, etc. and maps them to IN headers, IN
+         * attachments and to the message body. It aims to eliminate low-level
+         * processing of org.apache.cxf.message.MessageContentsList. It also
+         * also adds more flexibility and simplicity to the response mapping.
+         * Only available for consumers. Default: The default style. For
+         * consumers this passes on a MessageContentsList to the route,
+         * requiring low-level processing in the route. This is the traditional
+         * binding style, which simply dumps the
          * org.apache.cxf.message.MessageContentsList coming in from the CXF
          * stack onto the IN message body. The user is then responsible for
          * processing it according to the contract defined by the JAX-RS method
-         * signature. &lt;li&gt;Custom: allows you to specify a custom binding
-         * through the binding option.
+         * signature. Custom: allows you to specify a custom binding through the
+         * binding option.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.cxf.jaxrs.BindingStyle&lt;/code&gt; type.
@@ -338,51 +336,6 @@ public interface CxfRsEndpointBuilderFactory {
          */
         default CxfRsEndpointConsumerBuilder bindingStyle(String bindingStyle) {
             doSetProperty("bindingStyle", bindingStyle);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default CxfRsEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default CxfRsEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -411,6 +364,51 @@ public interface CxfRsEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default CxfRsEndpointConsumerBuilder basic() {
             return (CxfRsEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedCxfRsEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedCxfRsEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -797,7 +795,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Set the feature list to the CxfRs endpoint.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.cxf.feature.Feature&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.cxf.feature.Feature&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -813,7 +811,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Set the feature list to the CxfRs endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;org.apache.cxf.feature.Feature&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.cxf.feature.Feature&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -928,7 +926,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Multiple classes can be separated by comma.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -945,7 +943,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Multiple classes can be separated by comma.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -962,7 +960,7 @@ public interface CxfRsEndpointBuilderFactory {
          * incoming XML or JAXB-driven JSON.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -979,7 +977,7 @@ public interface CxfRsEndpointBuilderFactory {
          * incoming XML or JAXB-driven JSON.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1089,55 +1087,6 @@ public interface CxfRsEndpointBuilderFactory {
         default CxfRsEndpointProducerBuilder hostnameVerifier(
                 String hostnameVerifier) {
             doSetProperty("hostnameVerifier", hostnameVerifier);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default CxfRsEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default CxfRsEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -1290,6 +1239,55 @@ public interface CxfRsEndpointBuilderFactory {
         default AdvancedCxfRsEndpointProducerBuilder ignoreDeleteMethodMessageBody(
                 String ignoreDeleteMethodMessageBody) {
             doSetProperty("ignoreDeleteMethodMessageBody", ignoreDeleteMethodMessageBody);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedCxfRsEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedCxfRsEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -1660,7 +1658,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Set the feature list to the CxfRs endpoint.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.cxf.feature.Feature&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.cxf.feature.Feature&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1676,7 +1674,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Set the feature list to the CxfRs endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;org.apache.cxf.feature.Feature&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.cxf.feature.Feature&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1789,7 +1787,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Multiple classes can be separated by comma.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1806,7 +1804,7 @@ public interface CxfRsEndpointBuilderFactory {
          * Multiple classes can be separated by comma.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.Class&lt;java.lang.Object&gt;&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.Class&amp;lt;java.lang.Object&amp;gt;&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1822,7 +1820,7 @@ public interface CxfRsEndpointBuilderFactory {
          * incoming XML or JAXB-driven JSON.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -1839,7 +1837,7 @@ public interface CxfRsEndpointBuilderFactory {
          * incoming XML or JAXB-driven JSON.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2180,13 +2178,27 @@ public interface CxfRsEndpointBuilderFactory {
 
     public interface CxfRsBuilders {
         /**
-         * CXF-RS (camel-cxf)
+         * CXF-RS (camel-cxf-rest)
          * Expose JAX-RS REST services using Apache CXF or connect to external
          * REST services using CXF REST client.
          * 
          * Category: rest
          * Since: 2.0
-         * Maven coordinates: org.apache.camel:camel-cxf
+         * Maven coordinates: org.apache.camel:camel-cxf-rest
+         * 
+         * @return the dsl builder for the headers' name.
+         */
+        default CxfRsHeaderNameBuilder cxfrs() {
+            return CxfRsHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * CXF-RS (camel-cxf-rest)
+         * Expose JAX-RS REST services using Apache CXF or connect to external
+         * REST services using CXF REST client.
+         * 
+         * Category: rest
+         * Since: 2.0
+         * Maven coordinates: org.apache.camel:camel-cxf-rest
          * 
          * Syntax: <code>cxfrs:beanId:address</code>
          * 
@@ -2204,13 +2216,13 @@ public interface CxfRsEndpointBuilderFactory {
             return CxfRsEndpointBuilderFactory.endpointBuilder("cxfrs", path);
         }
         /**
-         * CXF-RS (camel-cxf)
+         * CXF-RS (camel-cxf-rest)
          * Expose JAX-RS REST services using Apache CXF or connect to external
          * REST services using CXF REST client.
          * 
          * Category: rest
          * Since: 2.0
-         * Maven coordinates: org.apache.camel:camel-cxf
+         * Maven coordinates: org.apache.camel:camel-cxf-rest
          * 
          * Syntax: <code>cxfrs:beanId:address</code>
          * 
@@ -2228,6 +2240,231 @@ public interface CxfRsEndpointBuilderFactory {
          */
         default CxfRsEndpointBuilder cxfrs(String componentName, String path) {
             return CxfRsEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the CXF-RS component.
+     */
+    public static class CxfRsHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final CxfRsHeaderNameBuilder INSTANCE = new CxfRsHeaderNameBuilder();
+
+        /**
+         * The name of the operation.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code operationName}.
+         */
+        public String operationName() {
+            return "operationName";
+        }
+
+        /**
+         * The authentication.
+         * 
+         * The option is a: {@code javax.security.auth.Subject} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Authentication}.
+         */
+        public String authentication() {
+            return "Authentication";
+        }
+
+        /**
+         * The http method to use.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code HttpMethod}.
+         */
+        public String httpMethod() {
+            return "HttpMethod";
+        }
+
+        /**
+         * The http path.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code HttpPath}.
+         */
+        public String httpPath() {
+            return "HttpPath";
+        }
+
+        /**
+         * The content type.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Content-Type}.
+         */
+        public String contentType() {
+            return "Content-Type";
+        }
+
+        /**
+         * The http query.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code HttpQuery}.
+         */
+        public String httpQuery() {
+            return "HttpQuery";
+        }
+
+        /**
+         * The http response code.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code HttpResponseCode}.
+         */
+        public String httpResponseCode() {
+            return "HttpResponseCode";
+        }
+
+        /**
+         * The content encoding.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Content-Encoding}.
+         */
+        public String contentEncoding() {
+            return "Content-Encoding";
+        }
+
+        /**
+         * The protocol headers.
+         * 
+         * The option is a: {@code Map} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code
+         * org.apache.cxf.message.Message.PROTOCOL_HEADERS}.
+         */
+        public String orgApacheCxfMessageMessageProtocolHeaders() {
+            return "org.apache.cxf.message.Message.PROTOCOL_HEADERS";
+        }
+
+        /**
+         * The CXF message.
+         * 
+         * The option is a: {@code org.apache.cxf.message.Message} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code CxfMessage}.
+         */
+        public String cxfMessage() {
+            return "CxfMessage";
+        }
+
+        /**
+         * If it is true, the CxfRsProducer will use the HttpClientAPI to invoke
+         * the service. If it is false, the CxfRsProducer will use the
+         * ProxyClientAPI to invoke the service.
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code CxfRsUsingHttpAPI}.
+         */
+        public String cxfRsUsingHttpAPI() {
+            return "CxfRsUsingHttpAPI";
+        }
+
+        /**
+         * The path values.
+         * 
+         * The option is a: {@code Object[]} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code CxfRsVarValues}.
+         */
+        public String cxfRsVarValues() {
+            return "CxfRsVarValues";
+        }
+
+        /**
+         * The response class.
+         * 
+         * The option is a: {@code Class} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code CxfRsResponseClass}.
+         */
+        public String cxfRsResponseClass() {
+            return "CxfRsResponseClass";
+        }
+
+        /**
+         * The response generic type.
+         * 
+         * The option is a: {@code Type} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code CxfRsResponseGenericType}.
+         */
+        public String cxfRsResponseGenericType() {
+            return "CxfRsResponseGenericType";
+        }
+
+        /**
+         * The query map.
+         * 
+         * The option is a: {@code Map<String, String>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code CxfRsQueryMap}.
+         */
+        public String cxfRsQueryMap() {
+            return "CxfRsQueryMap";
+        }
+
+        /**
+         * The stack of MethodInvocationInfo representing resources path when
+         * JAX-RS invocation looks for target.
+         * 
+         * The option is a: {@code
+         * org.apache.cxf.jaxrs.model.OperationResourceInfoStack} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code
+         * CxfRsOperationResourceInfoStack}.
+         */
+        public String cxfRsOperationResourceInfoStack() {
+            return "CxfRsOperationResourceInfoStack";
         }
     }
     static CxfRsEndpointBuilder endpointBuilder(

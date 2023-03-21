@@ -56,7 +56,7 @@ public class FromFtpPreMoveNoopIT extends FtpServerTestSupport {
         mock.assertIsSatisfied();
 
         // and file should be kept there
-        File file = ftpFile("movefile/work/hello.txt").toFile();
+        File file = service.ftpFile("movefile/work/hello.txt").toFile();
         await().atMost(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertTrue(file.exists(), "The file should exists"));
     }
@@ -76,13 +76,13 @@ public class FromFtpPreMoveNoopIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         // assert the file is pre moved
-                        File file = ftpFile("movefile/work/hello.txt").toFile();
+                        File file = service.ftpFile("movefile/work/hello.txt").toFile();
                         assertTrue(file.exists(), "The file should have been moved");
                     }
                 }).to("mock:result");

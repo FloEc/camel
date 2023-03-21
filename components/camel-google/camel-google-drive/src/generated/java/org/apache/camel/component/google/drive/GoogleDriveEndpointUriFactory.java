@@ -19,60 +19,69 @@ public class GoogleDriveEndpointUriFactory extends org.apache.camel.support.comp
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(46);
-        props.add("backoffMultiplier");
-        props.add("permissionId");
-        props.add("apiName");
-        props.add("clientFactory");
-        props.add("initialDelay");
-        props.add("changeId");
-        props.add("mimeType");
-        props.add("content");
-        props.add("scheduler");
-        props.add("bridgeErrorHandler");
-        props.add("useFixedDelay");
-        props.add("mediaContent");
-        props.add("runLoggingLevel");
-        props.add("backoffErrorThreshold");
-        props.add("appId");
-        props.add("replyId");
-        props.add("greedy");
-        props.add("clientSecret");
-        props.add("scheduledExecutorService");
-        props.add("applicationName");
-        props.add("email");
-        props.add("repeatCount");
-        props.add("timeUnit");
-        props.add("propertyKey");
-        props.add("clientId");
-        props.add("sendEmptyMessageWhenIdle");
-        props.add("schedulerProperties");
-        props.add("exchangePattern");
-        props.add("methodName");
+        Set<String> props = new HashSet<>(51);
         props.add("accessToken");
-        props.add("childId");
+        props.add("apiName");
+        props.add("appId");
+        props.add("applicationName");
+        props.add("backoffErrorThreshold");
         props.add("backoffIdleThreshold");
-        props.add("folderId");
-        props.add("parentId");
-        props.add("revisionId");
-        props.add("lazyStartProducer");
+        props.add("backoffMultiplier");
+        props.add("bridgeErrorHandler");
+        props.add("changeId");
+        props.add("childId");
+        props.add("clientFactory");
+        props.add("clientId");
+        props.add("clientSecret");
+        props.add("commentId");
+        props.add("content");
         props.add("contentChannel");
         props.add("delay");
-        props.add("pollStrategy");
-        props.add("startScheduler");
-        props.add("commentId");
-        props.add("scopes");
-        props.add("inBody");
+        props.add("delegate");
+        props.add("driveId");
+        props.add("email");
         props.add("exceptionHandler");
-        props.add("refreshToken");
+        props.add("exchangePattern");
         props.add("fileId");
+        props.add("folderId");
+        props.add("greedy");
+        props.add("inBody");
+        props.add("initialDelay");
+        props.add("lazyStartProducer");
+        props.add("mediaContent");
+        props.add("methodName");
+        props.add("mimeType");
+        props.add("parentId");
+        props.add("permissionId");
+        props.add("pollStrategy");
+        props.add("propertyKey");
+        props.add("refreshToken");
+        props.add("repeatCount");
+        props.add("replyId");
+        props.add("requestId");
+        props.add("revisionId");
+        props.add("runLoggingLevel");
+        props.add("scheduledExecutorService");
+        props.add("scheduler");
+        props.add("schedulerProperties");
+        props.add("scopes");
+        props.add("sendEmptyMessageWhenIdle");
+        props.add("serviceAccountKey");
+        props.add("startScheduler");
+        props.add("teamDriveId");
+        props.add("timeUnit");
+        props.add("useFixedDelay");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         Set<String> secretProps = new HashSet<>(3);
-        secretProps.add("clientSecret");
         secretProps.add("accessToken");
+        secretProps.add("clientSecret");
         secretProps.add("refreshToken");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        Set<String> prefixes = new HashSet<>(1);
+        prefixes.add("scheduler.");
+        MULTI_VALUE_PREFIXES = Collections.unmodifiableSet(prefixes);
     }
 
     @Override
@@ -101,6 +110,11 @@ public class GoogleDriveEndpointUriFactory extends org.apache.camel.support.comp
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

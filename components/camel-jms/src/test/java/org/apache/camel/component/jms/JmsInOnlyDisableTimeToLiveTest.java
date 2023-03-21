@@ -16,21 +16,29 @@
  */
 package org.apache.camel.component.jms;
 
-import javax.jms.ConnectionFactory;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.ConsumerTemplate;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.test.junit5.CamelTestSupport;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.infra.core.CamelContextExtension;
+import org.apache.camel.test.infra.core.DefaultCamelContextExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.apache.camel.component.jms.JmsComponent.jmsComponentAutoAcknowledge;
+public class JmsInOnlyDisableTimeToLiveTest extends AbstractJMSTest {
 
-public class JmsInOnlyDisableTimeToLiveTest extends CamelTestSupport {
-
-    private String urlTimeout = "activemq:queue.in?timeToLive=2000";
-    private String urlTimeToLiveDisabled = "activemq:queue.in?timeToLive=2000&disableTimeToLive=true";
+    @Order(2)
+    @RegisterExtension
+    public static CamelContextExtension camelContextExtension = new DefaultCamelContextExtension();
+    protected CamelContext context;
+    protected ProducerTemplate template;
+    protected ConsumerTemplate consumer;
+    private final String urlTimeout = "activemq:JmsInOnlyDisableTimeToLiveTest.in?timeToLive=2000";
+    private final String urlTimeToLiveDisabled
+            = "activemq:JmsInOnlyDisableTimeToLiveTest.in?timeToLive=2000&disableTimeToLive=true";
 
     @Test
     public void testInOnlyExpired() throws Exception {
@@ -44,17 +52,17 @@ public class JmsInOnlyDisableTimeToLiveTest extends CamelTestSupport {
         // and that the disableTimeToLive is defaulting to false
         template.sendBody("direct:timeout", "World 1");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // wait after the msg has expired
         Thread.sleep(2500);
 
-        resetMocks();
+        MockEndpoint.resetMocks(context);
         getMockEndpoint("mock:end").expectedMessageCount(0);
 
         cool.someBusinessLogic();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -71,31 +79,28 @@ public class JmsInOnlyDisableTimeToLiveTest extends CamelTestSupport {
         //      by the CoolBean
         template.sendBody("direct:disable", "World 2");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // wait after the msg has expired
         Thread.sleep(2500);
 
-        resetMocks();
+        MockEndpoint.resetMocks(context);
         getMockEndpoint("mock:end").expectedBodiesReceived("Hello World 2");
 
         cool.someBusinessLogic();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected CamelContext createCamelContext() throws Exception {
-        CamelContext camelContext = super.createCamelContext();
-        ConnectionFactory connectionFactory = CamelJmsTestHelper.createConnectionFactory();
-        camelContext.addComponent("activemq", jmsComponentAutoAcknowledge(connectionFactory));
-        return camelContext;
+    protected String getComponentName() {
+        return "activemq";
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:timeout")
                         .to(urlTimeout)
                         .to("mock:result");
@@ -104,10 +109,22 @@ public class JmsInOnlyDisableTimeToLiveTest extends CamelTestSupport {
                         .to(urlTimeToLiveDisabled)
                         .to("mock:result");
 
-                from("activemq:queue.out")
+                from("activemq:JmsInOnlyDisableTimeToLiveTest.out")
                         .to("mock:end");
             }
         };
+    }
+
+    @Override
+    public CamelContextExtension getCamelContextExtension() {
+        return camelContextExtension;
+    }
+
+    @BeforeEach
+    void setUpRequirements() {
+        context = camelContextExtension.getContext();
+        template = camelContextExtension.getProducerTemplate();
+        consumer = camelContextExtension.getConsumerTemplate();
     }
 
     public static class MyCoolBean {
@@ -127,7 +144,7 @@ public class JmsInOnlyDisableTimeToLiveTest extends CamelTestSupport {
             // loop to empty queue
             while (true) {
                 // receive the message from the queue, wait at most 2 sec
-                String msg = consumer.receiveBody("activemq:queue.in", 2000, String.class);
+                String msg = consumer.receiveBody("activemq:JmsInOnlyDisableTimeToLiveTest.in", 2000, String.class);
                 if (msg == null) {
                     // no more messages in queue
                     break;
@@ -137,7 +154,7 @@ public class JmsInOnlyDisableTimeToLiveTest extends CamelTestSupport {
                 msg = "Hello " + msg;
 
                 // send it to the next queue
-                producer.sendBodyAndHeader("activemq:queue.out", msg, "number", count++);
+                producer.sendBodyAndHeader("activemq:JmsInOnlyDisableTimeToLiveTest.out", msg, "number", count++);
             }
         }
     }

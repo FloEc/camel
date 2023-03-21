@@ -40,6 +40,7 @@ public class ManagedProcessor extends ManagedPerformanceCounter implements Manag
     private final Processor processor;
     private final ProcessorDefinition<?> definition;
     private final String id;
+    private final int nodeLevel;
     private String stepId;
     private Route route;
     private String sourceLocation;
@@ -48,14 +49,15 @@ public class ManagedProcessor extends ManagedPerformanceCounter implements Manag
         this.context = context;
         this.processor = processor;
         this.definition = definition;
-        this.id = definition.idOrCreate(context.adapt(ExtendedCamelContext.class).getNodeIdFactory());
+        this.nodeLevel = ProcessorDefinitionHelper.getNodeLevel(definition);
+        this.id = definition.idOrCreate(context.getCamelContextExtension().getNodeIdFactory());
         StepDefinition step;
         if (definition instanceof StepDefinition) {
             step = (StepDefinition) definition;
         } else {
             step = ProcessorDefinitionHelper.findFirstParentOfType(StepDefinition.class, definition, true);
         }
-        this.stepId = step != null ? step.idOrCreate(context.adapt(ExtendedCamelContext.class).getNodeIdFactory()) : null;
+        this.stepId = step != null ? step.idOrCreate(context.getCamelContextExtension().getNodeIdFactory()) : null;
         this.sourceLocation = definition.getLocation();
         if (sourceLocation == null) {
             RouteDefinition rd = ProcessorDefinitionHelper.getRoute(definition);
@@ -99,6 +101,11 @@ public class ManagedProcessor extends ManagedPerformanceCounter implements Manag
     @Override
     public Integer getIndex() {
         return definition.getIndex();
+    }
+
+    @Override
+    public int getLevel() {
+        return nodeLevel;
     }
 
     @Override
@@ -163,6 +170,11 @@ public class ManagedProcessor extends ManagedPerformanceCounter implements Manag
     }
 
     @Override
+    public String getProcessorName() {
+        return definition.getShortName();
+    }
+
+    @Override
     public void start() throws Exception {
         if (!context.getStatus().isStarted()) {
             throw new IllegalArgumentException("CamelContext is not started");
@@ -180,7 +192,7 @@ public class ManagedProcessor extends ManagedPerformanceCounter implements Manag
 
     @Override
     public String dumpProcessorAsXml() throws Exception {
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
         return ecc.getModelToXMLDumper().dumpModelAsXml(context, definition);
     }
 }

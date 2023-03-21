@@ -17,16 +17,16 @@
 package org.apache.camel.dsl.yaml.deserializers;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.builder.DeadLetterChannelBuilder;
-import org.apache.camel.builder.DefaultErrorHandlerBuilder;
-import org.apache.camel.builder.ErrorHandlerBuilder;
-import org.apache.camel.builder.ErrorHandlerBuilderRef;
-import org.apache.camel.builder.NoErrorHandlerBuilder;
+import org.apache.camel.ErrorHandlerFactory;
 import org.apache.camel.dsl.yaml.common.YamlDeserializationContext;
 import org.apache.camel.dsl.yaml.common.YamlDeserializerResolver;
 import org.apache.camel.dsl.yaml.common.exception.UnsupportedFieldException;
 import org.apache.camel.dsl.yaml.common.exception.YamlDeserializationException;
+import org.apache.camel.model.errorhandler.DeadLetterChannelDefinition;
+import org.apache.camel.model.errorhandler.DefaultErrorHandlerDefinition;
+import org.apache.camel.model.errorhandler.JtaTransactionErrorHandlerDefinition;
+import org.apache.camel.model.errorhandler.NoErrorHandlerDefinition;
+import org.apache.camel.model.errorhandler.RefErrorHandlerDefinition;
 import org.apache.camel.spi.CamelContextCustomizer;
 import org.apache.camel.spi.annotations.YamlIn;
 import org.apache.camel.spi.annotations.YamlProperty;
@@ -44,26 +44,30 @@ import static org.apache.camel.dsl.yaml.common.YamlDeserializerSupport.setDeseri
 
 @YamlIn
 @YamlType(
+          inline = false,
           nodes = { "error-handler", "errorHandler" },
-          types = ErrorHandlerBuilderRef.class,
           order = YamlDeserializerResolver.ORDER_DEFAULT,
           properties = {
-                  @YamlProperty(name = "ref",
-                                type = "string"),
-                  @YamlProperty(name = "none",
-                                type = "object:org.apache.camel.builder.NoErrorHandlerBuilder"),
-                  @YamlProperty(name = "log",
-                                type = "object:org.apache.camel.builder.DefaultErrorHandlerBuilder"),
                   @YamlProperty(name = "dead-letter-channel",
-                                type = "object:org.apache.camel.builder.DeadLetterChannelBuilder"),
+                                type = "object:org.apache.camel.model.errorhandler.DeadLetterChannelDefinition"),
+                  @YamlProperty(name = "default-error-handler",
+                                type = "object:org.apache.camel.model.errorhandler.DefaultErrorHandlerDefinition"),
+                  @YamlProperty(name = "jta-transaction-error-handler",
+                                type = "object:org.apache.camel.model.errorhandler.JtaTransactionErrorHandlerDefinition"),
+                  @YamlProperty(name = "no-error-handler",
+                                type = "object:org.apache.camel.model.errorhandler.NoErrorHandlerDefinition"),
+                  @YamlProperty(name = "ref-error-handler",
+                                type = "object:org.apache.camel.model.errorhandler.RefErrorHandlerDefinition"),
+                  @YamlProperty(name = "spring-transaction-error-handler",
+                                type = "object:org.apache.camel.model.errorhandler.SpringTransactionErrorHandlerDefinition"),
           })
 public class ErrorHandlerBuilderDeserializer implements ConstructNode {
 
-    private static CamelContextCustomizer customizer(ErrorHandlerBuilder builder) {
+    private static CamelContextCustomizer customizer(ErrorHandlerFactory builder) {
         return new CamelContextCustomizer() {
             @Override
             public void configure(CamelContext camelContext) {
-                camelContext.adapt(ExtendedCamelContext.class).setErrorHandlerFactory(builder);
+                camelContext.getCamelContextExtension().setErrorHandlerFactory(builder);
             }
         };
     }
@@ -80,19 +84,29 @@ public class ErrorHandlerBuilderDeserializer implements ConstructNode {
             setDeserializationContext(val, dc);
 
             switch (key) {
-                case "ref":
-                    return customizer(asType(val, ErrorHandlerBuilderRef.class));
-                case "none":
-                    return customizer(asType(val, NoErrorHandlerBuilder.class));
+                case "deadLetterChannel":
                 case "dead-letter-channel":
-                    return customizer(asType(val, DeadLetterChannelBuilder.class));
-                case "log":
-                    return customizer(asType(val, DefaultErrorHandlerBuilder.class));
+                    return customizer(asType(val, DeadLetterChannelDefinition.class));
+                case "defaultErrorHandler":
+                case "default-error-handler":
+                    return customizer(asType(val, DefaultErrorHandlerDefinition.class));
+                case "jtaTransactionErrorHandler":
+                case "jta-transaction-error-handler":
+                    return customizer(asType(val, JtaTransactionErrorHandlerDefinition.class));
+                case "noErrorHandler":
+                case "no-error-handler":
+                    return customizer(asType(val, NoErrorHandlerDefinition.class));
+                case "refErrorHandler":
+                case "ref-error-handler":
+                    return customizer(asType(val, RefErrorHandlerDefinition.class));
+                case "springTransactionErrorHandler":
+                case "spring-transaction-error-handler":
+                    return customizer(asType(val, JtaTransactionErrorHandlerDefinition.class));
                 default:
                     throw new UnsupportedFieldException(val, key);
             }
         }
 
-        throw new YamlDeserializationException("Unable to determine the error handler type");
+        throw new YamlDeserializationException(node, "Unable to determine the error handler type for the node");
     }
 }

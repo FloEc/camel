@@ -38,7 +38,7 @@ public class Translate2ProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:translateText", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Translate2Constants.OPERATION, Translate2Operations.translateText);
                 exchange.getIn().setHeader(Translate2Constants.SOURCE_LANGUAGE, Translate2LanguageEnum.ITALIAN);
                 exchange.getIn().setHeader(Translate2Constants.TARGET_LANGUAGE, Translate2LanguageEnum.ENGLISH);
@@ -46,7 +46,7 @@ public class Translate2ProducerSpringTest extends CamelSpringTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         String resultGet = exchange.getIn().getBody(String.class);
         assertEquals("Hello", resultGet);
@@ -59,14 +59,14 @@ public class Translate2ProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:translatePojoText", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn()
                         .setBody(TranslateTextRequest.builder().sourceLanguageCode(Translate2LanguageEnum.ITALIAN.toString())
                                 .targetLanguageCode(Translate2LanguageEnum.ENGLISH.toString()).text("ciao").build());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         String resultGet = exchange.getIn().getBody(String.class);
         assertEquals("Hello", resultGet);
@@ -79,12 +79,12 @@ public class Translate2ProducerSpringTest extends CamelSpringTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:translateTextOptions", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody("ciao");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         String resultGet = exchange.getIn().getBody(String.class);
         assertEquals("Hello", resultGet);

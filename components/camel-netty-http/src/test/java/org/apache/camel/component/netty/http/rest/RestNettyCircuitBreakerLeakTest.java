@@ -31,7 +31,7 @@ public class RestNettyCircuitBreakerLeakTest extends BaseNettyTest {
     private RestNettyHttpBinding binding = new RestNettyHttpBinding();
 
     @Test
-    public void testCircuitBreaker() throws Exception {
+    public void testCircuitBreaker() {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
 
         String out = template.requestBody("netty-http:http://localhost:{{port}}/demo/get", null, String.class);
@@ -39,21 +39,21 @@ public class RestNettyCircuitBreakerLeakTest extends BaseNettyTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
 
                 // configure to use netty-http on localhost with the given port
                 restConfiguration().component("netty-http").host("localhost").port(getPort())
                         .endpointProperty("nettyHttpBinding", "#mybinding");
 
-                rest().get("/demo").produces("text/plain")
-                    .route()
-                        .transform().constant("demo page");
+                rest().get("/demo").produces("text/plain").to("direct:demo");
+                from("direct:demo").transform().constant("demo page");
 
-                rest().get("/demo/get").route()
+                rest().get("/demo/get").to("direct:get");
+                from("direct:get")
                     .circuitBreaker()
                         .resilience4jConfiguration().timeoutEnabled(true).timeoutDuration(10000).end()
                             .log("incoming request")

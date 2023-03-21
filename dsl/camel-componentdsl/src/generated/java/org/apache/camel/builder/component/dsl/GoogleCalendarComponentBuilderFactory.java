@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -98,12 +98,28 @@ public interface GoogleCalendarComponentBuilderFactory {
             return this;
         }
         /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleCalendarComponentBuilder delegate(
+                java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
          * Specifies the level of permissions you want a calendar application to
          * have to a user account. You can separate multiple scopes by comma.
          * See https://developers.google.com/google-apps/calendar/auth for more
          * info.
          * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * The option is a:
+         * &lt;code&gt;java.util.List&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Default: https://www.googleapis.com/auth/calendar
          * Group: common
@@ -111,7 +127,8 @@ public interface GoogleCalendarComponentBuilderFactory {
          * @param scopes the value to set
          * @return the dsl builder
          */
-        default GoogleCalendarComponentBuilder scopes(java.lang.String scopes) {
+        default GoogleCalendarComponentBuilder scopes(
+                java.util.List<java.lang.String> scopes) {
             doSetProperty("scopes", scopes);
             return this;
         }
@@ -279,6 +296,22 @@ public interface GoogleCalendarComponentBuilderFactory {
             return this;
         }
         /**
+         * Service account key in json format to authenticate an application as
+         * a service account. Accept base64 adding the prefix base64:.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleCalendarComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
+        /**
          * The email address of the user the application is trying to
          * impersonate in the service account flow.
          * 
@@ -320,7 +353,8 @@ public interface GoogleCalendarComponentBuilderFactory {
             case "applicationName": getOrCreateConfiguration((GoogleCalendarComponent) component).setApplicationName((java.lang.String) value); return true;
             case "clientId": getOrCreateConfiguration((GoogleCalendarComponent) component).setClientId((java.lang.String) value); return true;
             case "configuration": ((GoogleCalendarComponent) component).setConfiguration((org.apache.camel.component.google.calendar.GoogleCalendarConfiguration) value); return true;
-            case "scopes": getOrCreateConfiguration((GoogleCalendarComponent) component).setScopes((java.lang.String) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleCalendarComponent) component).setDelegate((java.lang.String) value); return true;
+            case "scopes": getOrCreateConfiguration((GoogleCalendarComponent) component).setScopes((java.util.List) value); return true;
             case "bridgeErrorHandler": ((GoogleCalendarComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "lazyStartProducer": ((GoogleCalendarComponent) component).setLazyStartProducer((boolean) value); return true;
             case "autowiredEnabled": ((GoogleCalendarComponent) component).setAutowiredEnabled((boolean) value); return true;
@@ -330,6 +364,7 @@ public interface GoogleCalendarComponentBuilderFactory {
             case "emailAddress": getOrCreateConfiguration((GoogleCalendarComponent) component).setEmailAddress((java.lang.String) value); return true;
             case "p12FileName": getOrCreateConfiguration((GoogleCalendarComponent) component).setP12FileName((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleCalendarComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleCalendarComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             case "user": getOrCreateConfiguration((GoogleCalendarComponent) component).setUser((java.lang.String) value); return true;
             default: return false;
             }

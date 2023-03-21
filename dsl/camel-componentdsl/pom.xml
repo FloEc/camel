@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>dsl</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-componentdsl</artifactId>
@@ -31,6 +31,12 @@
 
     <name>Camel :: Component DSL</name>
     <description>The Camel Component DSL</description>
+
+    <properties>
+        <firstVersion>3.1.0</firstVersion>
+        <title>Java Component DSL</title>
+        <label>dsl</label>
+    </properties>
 
     <dependencies>
 
@@ -55,6 +61,10 @@
                 <exclusion>
                     <groupId>org.apache.camel</groupId>
                     <artifactId>camel-threadpoolfactory-vertx</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-microprofile-config</artifactId>
                 </exclusion>
                 <!-- exclude javax.annotation packages as they cause javadoc WARN on java8 vs java11 -->
                 <exclusion>
@@ -94,10 +104,14 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,6 +124,7 @@
                         <id>generate-component-dsl</id>
                         <goals>
                             <goal>generate-component-dsl</goal>
+                            <goal>generate-others-list</goal>
                         </goals>
                         <phase>generate-sources</phase>
                     </execution>
@@ -148,6 +163,10 @@
                         <phase>none</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

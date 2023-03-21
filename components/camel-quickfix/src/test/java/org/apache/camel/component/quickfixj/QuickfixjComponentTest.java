@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.concurrent.CountDownLatch;
@@ -119,11 +118,11 @@ public class QuickfixjComponentTest {
         Thread.currentThread().setContextClassLoader(testClassLoader);
     }
 
-    private void setUpComponent() throws IOException, MalformedURLException, NoSuchMethodException {
+    private void setUpComponent() throws IOException, NoSuchMethodException {
         setUpComponent(false);
     }
 
-    private void setUpComponent(boolean injectQfjPlugins) throws IOException, MalformedURLException, NoSuchMethodException {
+    private void setUpComponent(boolean injectQfjPlugins) throws NoSuchMethodException {
         camelContext = new DefaultCamelContext();
         component = new QuickfixjComponent();
         component.setCamelContext(camelContext);
@@ -147,7 +146,7 @@ public class QuickfixjComponentTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         Thread.currentThread().setContextClassLoader(contextClassLoader);
         if (component != null) {
             component.stop();
@@ -281,7 +280,7 @@ public class QuickfixjComponentTest {
 
         writeSettings(settings, false);
 
-        // will use connector's lazyCreateEngines setting 
+        // will use connector's lazyCreateEngines setting
         component.createEndpoint(getEndpointUri(settingsFile2.getName(), sessionID));
         assertThat(component.getEngines().get(settingsFile2.getName()).isInitialized(), is(true));
         assertThat(component.getEngines().get(settingsFile2.getName()).isStarted(), is(true));
@@ -335,7 +334,7 @@ public class QuickfixjComponentTest {
 
         Consumer consumer = endpoint.createConsumer(new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 QuickfixjEventCategory eventCategory
                         = (QuickfixjEventCategory) exchange.getIn().getHeader(QuickfixjEndpoint.EVENT_CATEGORY_KEY);
                 if (eventCategory == QuickfixjEventCategory.SessionCreated) {
@@ -394,7 +393,7 @@ public class QuickfixjComponentTest {
 
         Consumer consumer = endpoint.createConsumer(new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 QuickfixjEventCategory eventCategory
                         = (QuickfixjEventCategory) exchange.getIn().getHeader(QuickfixjEndpoint.EVENT_CATEGORY_KEY);
                 if (eventCategory == QuickfixjEventCategory.SessionLogon) {

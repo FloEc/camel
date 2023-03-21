@@ -28,10 +28,11 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.health.WritableHealthCheckRepository;
 import org.apache.camel.spi.Synchronization;
 import org.apache.camel.support.ScheduledBatchPollingConsumer;
 import org.apache.camel.support.SynchronizationAdapter;
@@ -69,6 +70,8 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
 
     private String marker;
     private transient String s3ConsumerToString;
+    private WritableHealthCheckRepository healthCheckRepository;
+    private AWS2S3ConsumerHealthCheck consumerHealthCheck;
 
     public AWS2S3Consumer(AWS2S3Endpoint endpoint, Processor processor) {
         super(endpoint, processor);
@@ -78,6 +81,16 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
     protected void doStart() throws Exception {
         super.doStart();
 
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(
+                getEndpoint().getCamelContext(),
+                "components",
+                WritableHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            consumerHealthCheck = new AWS2S3ConsumerHealthCheck(this, getRouteId());
+            healthCheckRepository.addHealthCheck(consumerHealthCheck);
+        }
+
         if (getConfiguration().isMoveAfterRead()) {
             try {
                 getAmazonS3Client()
@@ -86,7 +99,7 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
                 return;
             } catch (AwsServiceException ase) {
                 /* 404 means the bucket doesn't exist */
-                if (!(ase.awsErrorDetails().sdkHttpResponse().statusCode() == 404)) {
+                if (ase.awsErrorDetails().sdkHttpResponse().statusCode() != 404) {
                     throw ase;
                 }
             }
@@ -148,7 +161,7 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
 
             ListObjectsResponse listObjects = getAmazonS3Client().listObjects(listObjectsRequest.build());
 
-            if (listObjects.isTruncated()) {
+            if (Boolean.TRUE.equals(listObjects.isTruncated())) {
                 marker = listObjects.nextMarker();
                 LOG.trace("Returned list is truncated, so setting next marker: {}", marker);
             } else {
@@ -269,7 +282,7 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
             pendingExchanges = total - index - 1;
 
             // add on completion to handle after work when the exchange is done
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new Synchronization() {
+            exchange.getExchangeExtension().addOnCompletion(new Synchronization() {
                 public void onComplete(Exchange exchange) {
                     processCommit(exchange);
                 }
@@ -317,7 +330,9 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
                 }
                 getAmazonS3Client().copyObject(CopyObjectRequest.builder().destinationKey(builder.toString())
                         .destinationBucket(getConfiguration().getDestinationBucket())
-                        .copySource(bucketName + "/" + key).build());
+                        .sourceBucket(bucketName)
+                        .sourceKey(key)
+                        .build());
 
                 LOG.trace("Moved object from bucket {} with key {} to bucket {}...", bucketName, key,
                         getConfiguration().getDestinationBucket());
@@ -408,7 +423,7 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
         if (s3Object.response().lastModified() != null) {
             message.setHeader(AWS2S3Constants.LAST_MODIFIED, s3Object.response().lastModified());
             long ts = s3Object.response().lastModified().getEpochSecond() * 1000;
-            message.setHeader(Exchange.MESSAGE_TIMESTAMP, ts);
+            message.setHeader(AWS2S3Constants.MESSAGE_TIMESTAMP, ts);
         }
 
         /*
@@ -421,7 +436,7 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
             IOHelper.close(s3Object);
         } else {
             if (getConfiguration().isAutocloseBody()) {
-                exchange.adapt(ExtendedExchange.class).addOnCompletion(new SynchronizationAdapter() {
+                exchange.getExchangeExtension().addOnCompletion(new SynchronizationAdapter() {
                     @Override
                     public void onDone(Exchange exchange) {
                         IOHelper.close(s3Object);
@@ -439,5 +454,14 @@ public class AWS2S3Consumer extends ScheduledBatchPollingConsumer {
             s3ConsumerToString = "S3Consumer[" + URISupport.sanitizeUri(getEndpoint().getEndpointUri()) + "]";
         }
         return s3ConsumerToString;
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+        if (healthCheckRepository != null && consumerHealthCheck != null) {
+            healthCheckRepository.removeHealthCheck(consumerHealthCheck);
+            consumerHealthCheck = null;
+        }
+        super.doStop();
     }
 }

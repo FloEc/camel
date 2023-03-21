@@ -22,8 +22,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -98,7 +98,7 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
 
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:marshal")
                         .marshal(new JaxbDataFormat("org.apache.camel.example"))
                         .process(exchange -> latch.countDown());
@@ -155,7 +155,7 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
             });
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     public void unmarshal(final CountDownLatch latch) throws Exception {
@@ -212,11 +212,10 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
 
     /**
      * the individual size of one record is: fooBarSize = 1 -> 104 bytes fooBarSize = 50 -> 2046 bytes
-     * 
-     * @return           the payloads used for this stress test
-     * @throws Exception
+     *
+     * @return the payloads used for this stress test
      */
-    public Foo[] createFoo(int testCount) throws Exception {
+    public Foo[] createFoo(int testCount) {
         Foo[] foos = new Foo[testCount];
         for (int i = 0; i < testCount; i++) {
             Foo foo = new Foo();
@@ -235,7 +234,7 @@ public class DataFormatConcurrentTest extends CamelTestSupport {
 
     /**
      * the individual size of one record is: fooBarSize = 1 -> 104 bytes fooBarSize = 50 -> 2046 bytes
-     * 
+     *
      * @return           the payloads used for this stress test
      * @throws Exception
      */

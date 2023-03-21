@@ -20,8 +20,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jetty9.JettyHttpComponent9;
-import org.eclipse.jetty.util.Jetty;
+import org.apache.camel.component.jetty11.JettyHttpComponent11;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 
@@ -36,13 +35,13 @@ public class JettyHttpEndpointDisconnectTest extends BaseJettyTest {
     private String serverUri = "http://localhost:" + getPort() + "/myservice";
 
     @Test
-    public void testContextShutdownRemovesHttpConnector() throws Exception {
+    public void testContextShutdownRemovesHttpConnector() {
         context.stop();
         assertEquals(0, JettyHttpComponent.CONNECTORS.size(),
                 () -> {
                     StringBuilder sb = new StringBuilder("Connector should have been removed\n");
                     for (String key : JettyHttpComponent.CONNECTORS.keySet()) {
-                        Throwable t = JettyHttpComponent9.connectorCreation.get(key);
+                        Throwable t = JettyHttpComponent11.connectorCreation.get(key);
                         if (t == null) {
                             t = new Throwable("Unable to find connector creation");
                         }
@@ -57,9 +56,9 @@ public class JettyHttpEndpointDisconnectTest extends BaseJettyTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("jetty:" + serverUri).to("mock:result");
             }
         };

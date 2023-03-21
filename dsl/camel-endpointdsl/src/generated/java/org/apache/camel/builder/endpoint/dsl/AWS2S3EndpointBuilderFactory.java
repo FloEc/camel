@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -151,6 +151,22 @@ public interface AWS2S3EndpointBuilderFactory {
             return this;
         }
         /**
+         * The delimiter which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delimiter the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointConsumerBuilder delimiter(String delimiter) {
+            doSetProperty("delimiter", delimiter);
+            return this;
+        }
+        /**
          * Set the need for overidding the endpoint. This option needs to be
          * used in combination with uriEndpointOverride option.
          * 
@@ -229,6 +245,38 @@ public interface AWS2S3EndpointBuilderFactory {
          */
         default AWS2S3EndpointConsumerBuilder policy(String policy) {
             doSetProperty("policy", policy);
+            return this;
+        }
+        /**
+         * The prefix which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param prefix the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointConsumerBuilder prefix(String prefix) {
+            doSetProperty("prefix", prefix);
+            return this;
+        }
+        /**
+         * If using a profile credentials provider this parameter will set the
+         * profile name.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param profileCredentialsName the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointConsumerBuilder profileCredentialsName(
+                String profileCredentialsName) {
+            doSetProperty("profileCredentialsName", profileCredentialsName);
             return this;
         }
         /**
@@ -377,8 +425,7 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -395,8 +442,7 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -413,59 +459,49 @@ public interface AWS2S3EndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: common
          * 
-         * @param bridgeErrorHandler the value to set
+         * @param useProfileCredentialsProvider the value to set
          * @return the dsl builder
          */
-        default AWS2S3EndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+        default AWS2S3EndpointConsumerBuilder useProfileCredentialsProvider(
+                boolean useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: common
          * 
-         * @param bridgeErrorHandler the value to set
+         * @param useProfileCredentialsProvider the value to set
          * @return the dsl builder
          */
-        default AWS2S3EndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+        default AWS2S3EndpointConsumerBuilder useProfileCredentialsProvider(
+                String useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
             return this;
         }
         /**
          * Delete objects from S3 after they have been retrieved. The delete is
          * only performed if the Exchange is committed. If a rollback occurs,
-         * the object is not deleted. &lt;p/&gt; If this option is false, then
-         * the same objects will be retrieve over and over again on the polls.
-         * Therefore you need to use the Idempotent Consumer EIP in the route to
-         * filter out duplicates. You can filter using the
-         * AWS2S3Constants#BUCKET_NAME and AWS2S3Constants#KEY headers, or only
-         * the AWS2S3Constants#KEY header.
+         * the object is not deleted. If this option is false, then the same
+         * objects will be retrieve over and over again on the polls. Therefore
+         * you need to use the Idempotent Consumer EIP in the route to filter
+         * out duplicates. You can filter using the AWS2S3Constants#BUCKET_NAME
+         * and AWS2S3Constants#KEY headers, or only the AWS2S3Constants#KEY
+         * header.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -483,12 +519,12 @@ public interface AWS2S3EndpointBuilderFactory {
         /**
          * Delete objects from S3 after they have been retrieved. The delete is
          * only performed if the Exchange is committed. If a rollback occurs,
-         * the object is not deleted. &lt;p/&gt; If this option is false, then
-         * the same objects will be retrieve over and over again on the polls.
-         * Therefore you need to use the Idempotent Consumer EIP in the route to
-         * filter out duplicates. You can filter using the
-         * AWS2S3Constants#BUCKET_NAME and AWS2S3Constants#KEY headers, or only
-         * the AWS2S3Constants#KEY header.
+         * the object is not deleted. If this option is false, then the same
+         * objects will be retrieve over and over again on the polls. Therefore
+         * you need to use the Idempotent Consumer EIP in the route to filter
+         * out duplicates. You can filter using the AWS2S3Constants#BUCKET_NAME
+         * and AWS2S3Constants#KEY headers, or only the AWS2S3Constants#KEY
+         * header.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -502,22 +538,6 @@ public interface AWS2S3EndpointBuilderFactory {
         default AWS2S3EndpointConsumerBuilder deleteAfterRead(
                 String deleteAfterRead) {
             doSetProperty("deleteAfterRead", deleteAfterRead);
-            return this;
-        }
-        /**
-         * The delimiter which is used in the
-         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
-         * objects we are interested in.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param delimiter the value to set
-         * @return the dsl builder
-         */
-        default AWS2S3EndpointConsumerBuilder delimiter(String delimiter) {
-            doSetProperty("delimiter", delimiter);
             return this;
         }
         /**
@@ -750,9 +770,9 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Gets the maximum number of messages as a limit to poll at each
-         * polling. &lt;p/&gt; Gets the maximum number of messages as a limit to
-         * poll at each polling. The default value is 10. Use 0 or a negative
-         * number to set it as unlimited.
+         * polling. Gets the maximum number of messages as a limit to poll at
+         * each polling. The default value is 10. Use 0 or a negative number to
+         * set it as unlimited.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -769,9 +789,9 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Gets the maximum number of messages as a limit to poll at each
-         * polling. &lt;p/&gt; Gets the maximum number of messages as a limit to
-         * poll at each polling. The default value is 10. Use 0 or a negative
-         * number to set it as unlimited.
+         * polling. Gets the maximum number of messages as a limit to poll at
+         * each polling. The default value is 10. Use 0 or a negative number to
+         * set it as unlimited.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -824,22 +844,6 @@ public interface AWS2S3EndpointBuilderFactory {
          */
         default AWS2S3EndpointConsumerBuilder moveAfterRead(String moveAfterRead) {
             doSetProperty("moveAfterRead", moveAfterRead);
-            return this;
-        }
-        /**
-         * The prefix which is used in the
-         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
-         * objects we are interested in.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param prefix the value to set
-         * @return the dsl builder
-         */
-        default AWS2S3EndpointConsumerBuilder prefix(String prefix) {
-            doSetProperty("prefix", prefix);
             return this;
         }
         /**
@@ -1217,8 +1221,8 @@ public interface AWS2S3EndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -1239,8 +1243,8 @@ public interface AWS2S3EndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -1482,6 +1486,51 @@ public interface AWS2S3EndpointBuilderFactory {
             return this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAWS2S3EndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAWS2S3EndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -1706,6 +1755,22 @@ public interface AWS2S3EndpointBuilderFactory {
             return this;
         }
         /**
+         * The delimiter which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delimiter the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointProducerBuilder delimiter(String delimiter) {
+            doSetProperty("delimiter", delimiter);
+            return this;
+        }
+        /**
          * Set the need for overidding the endpoint. This option needs to be
          * used in combination with uriEndpointOverride option.
          * 
@@ -1784,6 +1849,38 @@ public interface AWS2S3EndpointBuilderFactory {
          */
         default AWS2S3EndpointProducerBuilder policy(String policy) {
             doSetProperty("policy", policy);
+            return this;
+        }
+        /**
+         * The prefix which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param prefix the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointProducerBuilder prefix(String prefix) {
+            doSetProperty("prefix", prefix);
+            return this;
+        }
+        /**
+         * If using a profile credentials provider this parameter will set the
+         * profile name.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param profileCredentialsName the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointProducerBuilder profileCredentialsName(
+                String profileCredentialsName) {
+            doSetProperty("profileCredentialsName", profileCredentialsName);
             return this;
         }
         /**
@@ -1932,8 +2029,7 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1950,8 +2046,7 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1965,6 +2060,41 @@ public interface AWS2S3EndpointBuilderFactory {
         default AWS2S3EndpointProducerBuilder useDefaultCredentialsProvider(
                 String useDefaultCredentialsProvider) {
             doSetProperty("useDefaultCredentialsProvider", useDefaultCredentialsProvider);
+            return this;
+        }
+        /**
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param useProfileCredentialsProvider the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointProducerBuilder useProfileCredentialsProvider(
+                boolean useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
+            return this;
+        }
+        /**
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param useProfileCredentialsProvider the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointProducerBuilder useProfileCredentialsProvider(
+                String useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
             return this;
         }
         /**
@@ -2075,55 +2205,6 @@ public interface AWS2S3EndpointBuilderFactory {
          */
         default AWS2S3EndpointProducerBuilder keyName(String keyName) {
             doSetProperty("keyName", keyName);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default AWS2S3EndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default AWS2S3EndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -2475,6 +2556,55 @@ public interface AWS2S3EndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAWS2S3EndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAWS2S3EndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * Define if KMS must be used or not.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -2537,6 +2667,37 @@ public interface AWS2S3EndpointBuilderFactory {
         default AdvancedAWS2S3EndpointProducerBuilder useCustomerKey(
                 String useCustomerKey) {
             doSetProperty("useCustomerKey", useCustomerKey);
+            return this;
+        }
+        /**
+         * Define if SSE S3 must be used or not.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param useSSES3 the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAWS2S3EndpointProducerBuilder useSSES3(boolean useSSES3) {
+            doSetProperty("useSSES3", useSSES3);
+            return this;
+        }
+        /**
+         * Define if SSE S3 must be used or not.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param useSSES3 the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAWS2S3EndpointProducerBuilder useSSES3(String useSSES3) {
+            doSetProperty("useSSES3", useSSES3);
             return this;
         }
     }
@@ -2653,6 +2814,22 @@ public interface AWS2S3EndpointBuilderFactory {
             return this;
         }
         /**
+         * The delimiter which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delimiter the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointBuilder delimiter(String delimiter) {
+            doSetProperty("delimiter", delimiter);
+            return this;
+        }
+        /**
          * Set the need for overidding the endpoint. This option needs to be
          * used in combination with uriEndpointOverride option.
          * 
@@ -2729,6 +2906,38 @@ public interface AWS2S3EndpointBuilderFactory {
          */
         default AWS2S3EndpointBuilder policy(String policy) {
             doSetProperty("policy", policy);
+            return this;
+        }
+        /**
+         * The prefix which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only consume
+         * objects we are interested in.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param prefix the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointBuilder prefix(String prefix) {
+            doSetProperty("prefix", prefix);
+            return this;
+        }
+        /**
+         * If using a profile credentials provider this parameter will set the
+         * profile name.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param profileCredentialsName the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointBuilder profileCredentialsName(
+                String profileCredentialsName) {
+            doSetProperty("profileCredentialsName", profileCredentialsName);
             return this;
         }
         /**
@@ -2877,8 +3086,7 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -2895,8 +3103,7 @@ public interface AWS2S3EndpointBuilderFactory {
         }
         /**
          * Set whether the S3 client should expect to load credentials through a
-         * default credentials provider or to expect static credentials to be
-         * passed in.
+         * default credentials provider.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -2910,6 +3117,41 @@ public interface AWS2S3EndpointBuilderFactory {
         default AWS2S3EndpointBuilder useDefaultCredentialsProvider(
                 String useDefaultCredentialsProvider) {
             doSetProperty("useDefaultCredentialsProvider", useDefaultCredentialsProvider);
+            return this;
+        }
+        /**
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param useProfileCredentialsProvider the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointBuilder useProfileCredentialsProvider(
+                boolean useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
+            return this;
+        }
+        /**
+         * Set whether the S3 client should expect to load credentials through a
+         * profile credentials provider.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param useProfileCredentialsProvider the value to set
+         * @return the dsl builder
+         */
+        default AWS2S3EndpointBuilder useProfileCredentialsProvider(
+                String useProfileCredentialsProvider) {
+            doSetProperty("useProfileCredentialsProvider", useProfileCredentialsProvider);
             return this;
         }
         /**
@@ -3008,6 +3250,20 @@ public interface AWS2S3EndpointBuilderFactory {
          * Since: 3.2
          * Maven coordinates: org.apache.camel:camel-aws2-s3
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default AWS2S3HeaderNameBuilder aws2S3() {
+            return AWS2S3HeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * AWS S3 Storage Service (camel-aws2-s3)
+         * Store and retrieve objects from AWS S3 Storage Service using AWS SDK
+         * version 2.x.
+         * 
+         * Category: cloud,file
+         * Since: 3.2
+         * Maven coordinates: org.apache.camel:camel-aws2-s3
+         * 
          * Syntax: <code>aws2-s3://bucketNameOrArn</code>
          * 
          * Path parameter: bucketNameOrArn (required)
@@ -3040,6 +3296,451 @@ public interface AWS2S3EndpointBuilderFactory {
          */
         default AWS2S3EndpointBuilder aws2S3(String componentName, String path) {
             return AWS2S3EndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the AWS S3 Storage Service component.
+     */
+    public static class AWS2S3HeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final AWS2S3HeaderNameBuilder INSTANCE = new AWS2S3HeaderNameBuilder();
+
+        /**
+         * The bucket Name which this object will be stored or which will be
+         * used for the current operation or in which this object is contained.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3BucketName}.
+         */
+        public String awsS3BucketName() {
+            return "AwsS3BucketName";
+        }
+
+        /**
+         * The bucket Destination Name which will be used for the current
+         * operation.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AwsS3BucketDestinationName}.
+         */
+        public String awsS3BucketDestinationName() {
+            return "AwsS3BucketDestinationName";
+        }
+
+        /**
+         * The optional Cache-Control HTTP header which allows the user to
+         * specify caching behavior along the HTTP request/reply chain.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ContentControl}.
+         */
+        public String awsS3ContentControl() {
+            return "AwsS3ContentControl";
+        }
+
+        /**
+         * The optional Content-Disposition HTTP header, which specifies
+         * presentational information such as the recommended filename for the
+         * object to be saved as.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ContentDisposition}.
+         */
+        public String awsS3ContentDisposition() {
+            return "AwsS3ContentDisposition";
+        }
+
+        /**
+         * The optional Content-Encoding HTTP header specifying what content
+         * encodings have been applied to the object and what decoding
+         * mechanisms must be applied in order to obtain the media-type
+         * referenced by the Content-Type field.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ContentEncoding}.
+         */
+        public String awsS3ContentEncoding() {
+            return "AwsS3ContentEncoding";
+        }
+
+        /**
+         * The Content-Length HTTP header indicating the size of the associated
+         * object in bytes.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ContentLength}.
+         */
+        public String awsS3ContentLength() {
+            return "AwsS3ContentLength";
+        }
+
+        /**
+         * The base64 encoded 128-bit MD5 digest of the associated object
+         * (content - not including headers) according to RFC 1864. This data is
+         * used as a message integrity check to verify that the data received by
+         * Amazon S3 is the same data that the caller sent.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ContentMD5}.
+         */
+        public String awsS3ContentMD5() {
+            return "AwsS3ContentMD5";
+        }
+
+        /**
+         * The Content-Type HTTP header, which indicates the type of content
+         * stored in the associated object. The value of this header is a
+         * standard MIME type.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ContentType}.
+         */
+        public String awsS3ContentType() {
+            return "AwsS3ContentType";
+        }
+
+        /**
+         * (producer) The ETag value for the newly uploaded object. (consumer)
+         * The hex encoded 128-bit MD5 digest of the associated object according
+         * to RFC 1864. This data is used as an integrity check to verify that
+         * the data received by the caller is the same data that was sent by
+         * Amazon S3.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ETag}.
+         */
+        public String awsS3ETag() {
+            return "AwsS3ETag";
+        }
+
+        /**
+         * The key under which this object is stored or will be stored or which
+         * will be used for the current operation.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3Key}.
+         */
+        public String awsS3Key() {
+            return "AwsS3Key";
+        }
+
+        /**
+         * The Destination key which will be used for the current operation.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AwsS3DestinationKey}.
+         */
+        public String awsS3DestinationKey() {
+            return "AwsS3DestinationKey";
+        }
+
+        /**
+         * The value of the Last-Modified header, indicating the date and time
+         * at which Amazon S3 last recorded a modification to the associated
+         * object.
+         * 
+         * The option is a: {@code Date} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3LastModified}.
+         */
+        public String awsS3LastModified() {
+            return "AwsS3LastModified";
+        }
+
+        /**
+         * The storage class of this object.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3StorageClass}.
+         */
+        public String awsS3StorageClass() {
+            return "AwsS3StorageClass";
+        }
+
+        /**
+         * (producer) The optional version ID of the newly uploaded object.
+         * (consumer) The version ID of the associated Amazon S3 object if
+         * available. Version IDs are only assigned to objects when an object is
+         * uploaded to an Amazon S3 bucket that has object versioning enabled.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3VersionId}.
+         */
+        public String awsS3VersionId() {
+            return "AwsS3VersionId";
+        }
+
+        /**
+         * The canned acl that will be applied to the object. see
+         * software.amazon.awssdk.services.s3.model.ObjectCannedACL for allowed
+         * values.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AwsS3CannedAcl}.
+         */
+        public String awsS3CannedAcl() {
+            return "AwsS3CannedAcl";
+        }
+
+        /**
+         * A well constructed Amazon S3 Access Control List object.
+         * 
+         * The option is a: {@code
+         * software.amazon.awssdk.services.s3.model.BucketCannedACL} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AwsS3Acl}.
+         */
+        public String awsS3Acl() {
+            return "AwsS3Acl";
+        }
+
+        /**
+         * The operation to perform. Permitted values are copyObject,
+         * deleteObject, listBuckets, deleteBucket, listObjects.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3Operation}.
+         */
+        public String awsS3Operation() {
+            return "AwsS3Operation";
+        }
+
+        /**
+         * Sets the server-side encryption algorithm when encrypting the object
+         * using AWS-managed keys. For example use AES256.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3ServerSideEncryption}.
+         */
+        public String awsS3ServerSideEncryption() {
+            return "AwsS3ServerSideEncryption";
+        }
+
+        /**
+         * If the object expiration is configured (see PUT Bucket lifecycle),
+         * the response includes this header.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code AwsS3ExpirationTime}.
+         */
+        public String awsS3ExpirationTime() {
+            return "AwsS3ExpirationTime";
+        }
+
+        /**
+         * Amazon S3 can return this if your request involves a bucket that is
+         * either a source or destination in a replication rule.
+         * 
+         * The option is a: {@code
+         * software.amazon.awssdk.services.s3.model.ReplicationStatus} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code AwsS3ReplicationStatus}.
+         */
+        public String awsS3ReplicationStatus() {
+            return "AwsS3ReplicationStatus";
+        }
+
+        /**
+         * The position of the first byte to get.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AwsS3RangeStart}.
+         */
+        public String awsS3RangeStart() {
+            return "AwsS3RangeStart";
+        }
+
+        /**
+         * The position of the last byte to get.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AwsS3RangeEnd}.
+         */
+        public String awsS3RangeEnd() {
+            return "AwsS3RangeEnd";
+        }
+
+        /**
+         * The expiration time of the download link in milliseconds.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * AwsS3DowloadLinkExpirationTime}.
+         */
+        public String awsS3DowloadLinkExpirationTime() {
+            return "AwsS3DowloadLinkExpirationTime";
+        }
+
+        /**
+         * Whether the download link is browser compatible.
+         * 
+         * The option is a: {@code boolean} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * AwsS3DownloadLinkBrowserCompatible}.
+         */
+        public String awsS3DownloadLinkBrowserCompatible() {
+            return "AwsS3DownloadLinkBrowserCompatible";
+        }
+
+        /**
+         * The headers that are needed by the service (not needed when
+         * BrowserCompatible is true).
+         * 
+         * The option is a: {@code Map<String, List<String>>} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * AwsS3DownloadLinkHttpRequestHeaders}.
+         */
+        public String awsS3DownloadLinkHttpRequestHeaders() {
+            return "AwsS3DownloadLinkHttpRequestHeaders";
+        }
+
+        /**
+         * The request payload that is needed by the service (not needed when
+         * BrowserCompatible is true).
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * AwsS3DownloadLinkSignedPayload}.
+         */
+        public String awsS3DownloadLinkSignedPayload() {
+            return "AwsS3DownloadLinkSignedPayload";
+        }
+
+        /**
+         * A map of metadata to be stored or stored with the object in S3. More
+         * details about metadata
+         * https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.htmlhere.
+         * 
+         * The option is a: {@code Map<String, String>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3Metadata}.
+         */
+        public String awsS3Metadata() {
+            return "AwsS3Metadata";
+        }
+
+        /**
+         * The timestamp of the message.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code MessageTimestamp}.
+         */
+        public String messageTimestamp() {
+            return "MessageTimestamp";
+        }
+
+        /**
+         * The prefix which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only list
+         * objects we are interested in.
+         * 
+         * The option is a: {@code } type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3Prefix}.
+         */
+        public String awsS3Prefix() {
+            return "AwsS3Prefix";
+        }
+
+        /**
+         * The delimiter which is used in the
+         * com.amazonaws.services.s3.model.ListObjectsRequest to only list
+         * objects we are interested in.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AwsS3Delimiter}.
+         */
+        public String awsS3Delimiter() {
+            return "AwsS3Delimiter";
         }
     }
     static AWS2S3EndpointBuilder endpointBuilder(

@@ -95,6 +95,8 @@ converted body can be null.
 
 |bodyOneLine | String | Converts the body to a String and removes all line-breaks so the string is in one line.
 
+|originalBody | Object | The original incoming body (only available if allowUseOriginalMessage=true).
+
 |mandatoryBodyAs(_type_) |Type |Converts the body to the given type determined by its
 classname, and expects the body to be not null.
 
@@ -168,9 +170,12 @@ the ?method=methodname syntax that is used by the xref:components::bean-componen
 component. Camel will by default lookup a bean by the given name. However if you need to refer
 to a bean class (such as calling a static method) then you can prefix with type, such as `bean:type:fqnClassName`.
 
-|`properties:key:default` |String |Lookup a property with the given key. If the key does
+|properties:key:default |String |Lookup a property with the given key. If the key does
 not exists or has no value, then an optional default value can be
 specified.
+
+|propertiesExist:key |String |Checks whether a property placeholder with the given key exists or not.
+The result can be negated by prefixing the key with `!`.
 
 |routeId |String |Returns the id of the current route the
 Exchange is being routed.
@@ -208,6 +213,12 @@ similar to the collate method in Groovy.
 the first number of items. This can be used with the
 Splitter EIP to split a message body and skip the first N number of items.
 
+|join(separator,prefix,exp) | String | The join function iterates the message body (by default) and joins
+the data into a string. The separator is by default a comma. The prefix is optional.
+
+The join uses the message body as source by default. It is possible to refer to another
+source (simple language) such as a header via the exp parameter. For example `join('&','id=','$\{header.ids}')`.
+
 |messageHistory |String |The message history of the current exchange how it has
 been routed. This is similar to the route stack-trace message history
 the error handler logs in case of an unhandled exception.
@@ -215,6 +226,13 @@ the error handler logs in case of an unhandled exception.
 |messageHistory(false) |String |As messageHistory but without the exchange details (only
 includes the route stack-trace). This can be used if you do not want to
 log sensitive data from the message itself.
+
+|uuid(type) |String |Returns an UUID using the Camel `UuidGenerator`.
+You can choose between `default`, `classic`, `short` and `simple` as the type.
+If no type is given the default is used. It is also possible to use a custom `UuidGenerator`
+and bind the bean to the xref:manual::registry.adoc[Registry] with an id. For example `${uuid(myGenerator}`
+where the ID is _myGenerator_.
+
 |=======================================================================
 
 == OGNL expression support
@@ -224,8 +242,8 @@ When using *OGNL* then `camel-bean` JAR is required to be on the classpath.
 Camel's OGNL support is for invoking methods only. You cannot access
 fields. Camel support accessing the length field of Java arrays.
 
-The xref:simple-language.adoc[Simple] and xref:simple-language.adoc[Bean] language now
-supports a Camel OGNL notation for invoking beans in a chain like
+The xref:simple-language.adoc[Simple] and xref:simple-language.adoc[Bean] languages now
+support a Camel OGNL notation for invoking beans in a chain like
 fashion. Suppose the Message IN body contains a POJO which has a `getAddress()`
 method.
 
@@ -353,7 +371,7 @@ simple("${body.address.zip} > 1000")
 
 The parser is limited to only support a single operator.
 
-To enable it the left value must be enclosed in $\{ }. The syntax is:
+To enable it the left value must be enclosed in `${ }`. The syntax is:
 
 [source]
 --------------------------
@@ -361,7 +379,7 @@ ${leftValue} OP rightValue
 --------------------------
 
 Where the `rightValue` can be a String literal enclosed in `' '`,
-`null`, a constant value or another expression enclosed in `$\{ }`.
+`null`, a constant value or another expression enclosed in `${ }`.
 
 IMPORTANT: There *must* be spaces around the operator.
 
@@ -679,7 +697,7 @@ from("direct:hello")
     .to("mock:reply");
 ----
 
-Notice that we must use $\{ } placeholders in the expression now to
+Notice that we must use ${ } placeholders in the expression now to
 allow Camel to parse it correctly.
 
 And this sample uses the date command to output current date.

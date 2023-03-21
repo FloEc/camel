@@ -16,13 +16,13 @@
  */
 package org.apache.camel.component.mail;
 
-import java.io.IOException;
 import java.util.Properties;
 
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.spi.ExchangeFactory;
@@ -49,16 +49,17 @@ public class MailConsumerAuthenticatorTest {
         execute("imap");
     }
 
-    private void execute(String protocol) throws Exception, IOException {
+    private void execute(String protocol) throws Exception {
         MailAuthenticator authenticator = new MyAuthenticator();
 
         JavaMailSender sender = Mockito.mock(JavaMailSender.class);
         Processor processor = Mockito.mock(Processor.class);
+        CamelContext camelContext = Mockito.mock(CamelContext.class);
         ExtendedCamelContext ecc = Mockito.mock(ExtendedCamelContext.class);
         ExchangeFactory ef = Mockito.mock(ExchangeFactory.class);
 
         MailEndpoint endpoint = new MailEndpoint();
-        endpoint.setCamelContext(ecc);
+        endpoint.setCamelContext(camelContext);
         MailConfiguration configuration = new MailConfiguration();
         configuration.setAuthenticator(authenticator);
         configuration.configureProtocol(protocol);
@@ -71,7 +72,7 @@ public class MailConsumerAuthenticatorTest {
         Session session = Session.getDefaultInstance(props, authenticator);
 
         when(sender.getSession()).thenReturn(session);
-        when(ecc.adapt(ExtendedCamelContext.class)).thenReturn(ecc);
+        when(camelContext.getCamelContextExtension()).thenReturn(ecc);
         when(ecc.getExchangeFactory()).thenReturn(ef);
         when(ef.newExchangeFactory(any())).thenReturn(ef);
 

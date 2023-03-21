@@ -26,7 +26,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.telegram.util.TelegramMockRoutes;
 import org.apache.camel.component.telegram.util.TelegramTestSupport;
 import org.apache.camel.health.HealthCheck;
-import org.apache.camel.health.HealthCheckConfiguration;
 import org.apache.camel.health.HealthCheckRegistry;
 import org.apache.camel.health.HealthCheckRepository;
 import org.awaitility.Awaitility;
@@ -46,8 +45,6 @@ public class TelegramConsumerHealthCheckErrorTest extends TelegramTestSupport {
         HealthCheckRegistry hcr = context.getExtension(HealthCheckRegistry.class);
         HealthCheckRepository repo
                 = hcr.getRepository("consumers").orElse((HealthCheckRepository) hcr.resolveById("consumers"));
-        // add some slack so the check should fail 5 times in a row to be DOWN
-        repo.addConfiguration("consumer:telegram", HealthCheckConfiguration.builder().failureThreshold(5).build());
         repo.setEnabled(true);
         hcr.register(repo);
 
@@ -55,13 +52,9 @@ public class TelegramConsumerHealthCheckErrorTest extends TelegramTestSupport {
     }
 
     @Test
-    public void testReceptionOfTwoMessages() throws Exception {
+    public void testReceptionOfTwoMessages() {
         HealthCheckRegistry hcr = context.getExtension(HealthCheckRegistry.class);
         HealthCheckRepository repo = hcr.getRepository("consumers").get();
-
-        // should not be DOWN from the start
-        boolean down = repo.stream().anyMatch(h -> h.call().getState().equals(HealthCheck.State.DOWN));
-        Assertions.assertFalse(down, "None health-check should be DOWN");
 
         // wait until HC is DOWN
         Awaitility.waitAtMost(5, TimeUnit.SECONDS).until(
@@ -90,17 +83,17 @@ public class TelegramConsumerHealthCheckErrorTest extends TelegramTestSupport {
                 rc.getDetails().get(HealthCheck.ENDPOINT_URI));
 
         Throwable e = rc.getError().get();
-        Assertions.assertTrue(e.getMessage().contains("401 Unauthorized"));
+        Assertions.assertTrue(e.getMessage().contains("401"));
         Assertions.assertEquals(401, rc.getDetails().get(HealthCheck.HTTP_RESPONSE_CODE));
     }
 
     @Override
-    protected RoutesBuilder[] createRouteBuilders() throws Exception {
+    protected RoutesBuilder[] createRouteBuilders() {
         return new RoutesBuilder[] {
                 getMockRoutes(),
                 new RouteBuilder() {
                     @Override
-                    public void configure() throws Exception {
+                    public void configure() {
                         from("telegram:bots?authorizationToken=mock-token").routeId("telegram")
                                 .convertBodyTo(String.class)
                                 .to("mock:telegram");

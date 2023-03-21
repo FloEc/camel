@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -53,8 +53,8 @@ public interface MybatisComponentBuilderFactory {
             extends
                 ComponentBuilder<MyBatisComponent> {
         /**
-         * Location of MyBatis xml configuration file. &lt;p/&gt; The default
-         * value is: SqlMapConfig.xml loaded from the classpath.
+         * Location of MyBatis xml configuration file. The default value is:
+         * SqlMapConfig.xml loaded from the classpath.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 

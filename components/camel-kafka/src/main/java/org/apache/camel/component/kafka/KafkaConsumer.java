@@ -23,8 +23,17 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.camel.Processor;
+import org.apache.camel.Suspendable;
+import org.apache.camel.component.kafka.consumer.errorhandler.KafkaConsumerListener;
+import org.apache.camel.health.HealthCheckAware;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.health.WritableHealthCheckRepository;
+import org.apache.camel.resume.ConsumerListenerAware;
+import org.apache.camel.resume.ResumeAware;
+import org.apache.camel.resume.ResumeStrategy;
 import org.apache.camel.spi.StateRepository;
 import org.apache.camel.support.BridgeExceptionHandlerToErrorHandler;
 import org.apache.camel.support.DefaultConsumer;
@@ -35,16 +44,21 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KafkaConsumer extends DefaultConsumer {
+public class KafkaConsumer extends DefaultConsumer
+        implements ResumeAware<ResumeStrategy>, HealthCheckAware, ConsumerListenerAware<KafkaConsumerListener>,
+        Suspendable {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumer.class);
 
     protected ExecutorService executor;
     private final KafkaEndpoint endpoint;
+    private KafkaConsumerHealthCheck consumerHealthCheck;
+    private WritableHealthCheckRepository healthCheckRepository;
     // This list helps to work around the infinite loop of KAFKA-1894
     private final List<KafkaFetchRecords> tasks = new ArrayList<>();
     private volatile boolean stopOffsetRepo;
-    private PollExceptionStrategy pollExceptionStrategy;
+    private ResumeStrategy resumeStrategy;
+    private KafkaConsumerListener consumerListener;
 
     public KafkaConsumer(KafkaEndpoint endpoint, Processor processor) {
         super(endpoint, processor);
@@ -52,13 +66,28 @@ public class KafkaConsumer extends DefaultConsumer {
     }
 
     @Override
+    public void setResumeStrategy(ResumeStrategy resumeStrategy) {
+        this.resumeStrategy = resumeStrategy;
+    }
+
+    @Override
+    public ResumeStrategy getResumeStrategy() {
+        return resumeStrategy;
+    }
+
+    @Override
+    public KafkaConsumerListener getConsumerListener() {
+        return consumerListener;
+    }
+
+    @Override
+    public void setConsumerListener(KafkaConsumerListener consumerListener) {
+        this.consumerListener = consumerListener;
+    }
+
+    @Override
     protected void doBuild() throws Exception {
         super.doBuild();
-        if (endpoint.getComponent().getPollExceptionStrategy() != null) {
-            pollExceptionStrategy = endpoint.getComponent().getPollExceptionStrategy();
-        } else {
-            pollExceptionStrategy = new DefaultPollExceptionStrategy(endpoint.getConfiguration().getPollOnError());
-        }
     }
 
     @Override
@@ -94,6 +123,17 @@ public class KafkaConsumer extends DefaultConsumer {
                 endpoint.getConfiguration().isBreakOnFirstError());
         super.doStart();
 
+        // health-check is optional so discover and resolve
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(
+                endpoint.getCamelContext(),
+                "components",
+                WritableHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            consumerHealthCheck = new KafkaConsumerHealthCheck(this, getRouteId());
+            healthCheckRepository.addHealthCheck(consumerHealthCheck);
+        }
+
         // is the offset repository already started?
         StateRepository<String, String> repo = endpoint.getConfiguration().getOffsetRepository();
         if (repo instanceof ServiceSupport) {
@@ -117,7 +157,8 @@ public class KafkaConsumer extends DefaultConsumer {
         BridgeExceptionHandlerToErrorHandler bridge = new BridgeExceptionHandlerToErrorHandler(this);
         for (int i = 0; i < endpoint.getConfiguration().getConsumersCount(); i++) {
             KafkaFetchRecords task = new KafkaFetchRecords(
-                    this, pollExceptionStrategy, bridge, topic, pattern, i + "", getProps());
+                    this, bridge, topic, pattern, i + "", getProps(), consumerListener);
+
             executor.submit(task);
 
             tasks.add(task);
@@ -126,7 +167,16 @@ public class KafkaConsumer extends DefaultConsumer {
 
     @Override
     protected void doStop() throws Exception {
-        LOG.info("Stopping Kafka consumer on topic: {}", endpoint.getConfiguration().getTopic());
+        if (endpoint.getConfiguration().isTopicIsPattern()) {
+            LOG.info("Stopping Kafka consumer on topic pattern: {}", endpoint.getConfiguration().getTopic());
+        } else {
+            LOG.info("Stopping Kafka consumer on topic: {}", endpoint.getConfiguration().getTopic());
+        }
+
+        if (healthCheckRepository != null && consumerHealthCheck != null) {
+            healthCheckRepository.removeHealthCheck(consumerHealthCheck);
+            consumerHealthCheck = null;
+        }
 
         if (executor != null) {
             if (getEndpoint() != null && getEndpoint().getCamelContext() != null) {
@@ -163,5 +213,34 @@ public class KafkaConsumer extends DefaultConsumer {
         }
 
         super.doStop();
+    }
+
+    @Override
+    protected void doSuspend() throws Exception {
+        for (KafkaFetchRecords task : tasks) {
+            LOG.info("Pausing Kafka record fetcher task running client ID {}", task.healthState().getClientId());
+            task.pause();
+        }
+
+        super.doSuspend();
+    }
+
+    @Override
+    protected void doResume() throws Exception {
+        for (KafkaFetchRecords task : tasks) {
+            LOG.info("Resuming Kafka record fetcher task running client ID {}", task.healthState().getClientId());
+            task.resume();
+        }
+
+        super.doResume();
+    }
+
+    public List<TaskHealthState> healthStates() {
+        return tasks.stream().map(t -> t.healthState()).collect(Collectors.toList());
+    }
+
+    @Override
+    public String adapterFactoryService() {
+        return "kafka-adapter-factory";
     }
 }

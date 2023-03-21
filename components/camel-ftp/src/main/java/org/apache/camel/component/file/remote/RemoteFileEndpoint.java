@@ -68,6 +68,8 @@ public abstract class RemoteFileEndpoint<T> extends GenericFileEndpoint<T> {
     private boolean download = true;
 
     public RemoteFileEndpoint() {
+        // ftp must be synchronous as the ftp-client is not thread-safe
+        setSynchronous(true);
         // no args constructor for spring bean endpoint configuration
         // for ftp we need to use higher interval/checkout that for files
         setReadLockTimeout(20000);
@@ -80,6 +82,8 @@ public abstract class RemoteFileEndpoint<T> extends GenericFileEndpoint<T> {
     public RemoteFileEndpoint(String uri, RemoteFileComponent<T> component, RemoteFileConfiguration configuration) {
         super(uri, component);
         this.configuration = configuration;
+        // ftp must be synchronous as the ftp-client is not thread-safe
+        setSynchronous(true);
         // for ftp we need to use higher interval/checkout that for files
         setReadLockTimeout(20000);
         setReadLockCheckInterval(5000);
@@ -143,7 +147,7 @@ public abstract class RemoteFileEndpoint<T> extends GenericFileEndpoint<T> {
         }
 
         // if idempotent and no repository set then create a default one
-        if (isIdempotentSet() && isIdempotent() && idempotentRepository == null) {
+        if (isIdempotentSet() && Boolean.TRUE.equals(isIdempotent()) && idempotentRepository == null) {
             LOG.info("Using default memory based idempotent repository with cache max size: {}", DEFAULT_IDEMPOTENT_CACHE_SIZE);
             idempotentRepository = MemoryIdempotentRepository.memoryIdempotentRepository(DEFAULT_IDEMPOTENT_CACHE_SIZE);
         }
@@ -180,12 +184,16 @@ public abstract class RemoteFileEndpoint<T> extends GenericFileEndpoint<T> {
     /**
      * Validates this endpoint if its configured properly.
      *
-     * @throws Exception is thrown if endpoint is invalid configured for its mandatory options
+     * @throws IllegalArgumentException is thrown if endpoint is invalid configured for its mandatory options
      */
     protected void afterPropertiesSet() {
         RemoteFileConfiguration config = getConfiguration();
         StringHelper.notEmpty(config.getHost(), "host");
         StringHelper.notEmpty(config.getProtocol(), "protocol");
+
+        if (!isSynchronous()) {
+            throw new IllegalArgumentException("Using synchronous=false is not supported for camel-ftp");
+        }
     }
 
     @Override

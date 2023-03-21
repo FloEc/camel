@@ -20,20 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.Expression;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.ExpressionBuilder;
-import org.apache.camel.processor.errorhandler.RedeliveryPolicy;
 import org.apache.camel.spi.AsPredicate;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.support.ExpressionToPredicateAdapter;
@@ -46,34 +45,7 @@ import org.apache.camel.util.ObjectHelper;
 @XmlRootElement(name = "onException")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OnExceptionDefinition extends OutputDefinition<OnExceptionDefinition> {
-    @XmlElement(name = "exception", required = true)
-    private List<String> exceptions = new ArrayList<>();
-    @XmlElement(name = "onWhen")
-    @AsPredicate
-    private WhenDefinition onWhen;
-    @XmlElement(name = "retryWhile")
-    @AsPredicate
-    private ExpressionSubElementDefinition retryWhile;
-    @XmlElement(name = "redeliveryPolicy")
-    private RedeliveryPolicyDefinition redeliveryPolicyType;
-    @XmlAttribute(name = "redeliveryPolicyRef")
-    private String redeliveryPolicyRef;
-    @XmlElement(name = "handled")
-    @AsPredicate
-    private ExpressionSubElementDefinition handled;
-    @XmlElement(name = "continued")
-    @AsPredicate
-    private ExpressionSubElementDefinition continued;
-    @XmlAttribute(name = "onRedeliveryRef")
-    private String onRedeliveryRef;
-    @XmlAttribute(name = "onExceptionOccurredRef")
-    private String onExceptionOccurredRef;
-    @XmlAttribute(name = "useOriginalMessage")
-    @Metadata(javaType = "java.lang.Boolean")
-    private String useOriginalMessage;
-    @XmlAttribute(name = "useOriginalBody")
-    @Metadata(javaType = "java.lang.Boolean")
-    private String useOriginalBody;
+
     @XmlTransient
     private Predicate handledPolicy;
     @XmlTransient
@@ -86,6 +58,40 @@ public class OnExceptionDefinition extends OutputDefinition<OnExceptionDefinitio
     private Processor onExceptionOccurred;
     @XmlTransient
     private boolean routeScoped = true;
+
+    @XmlElement(name = "exception", required = true)
+    private List<String> exceptions = new ArrayList<>();
+    @XmlElement(name = "onWhen")
+    @AsPredicate
+    private WhenDefinition onWhen;
+    @XmlElement(name = "retryWhile")
+    @AsPredicate
+    @Metadata(label = "advanced")
+    private ExpressionSubElementDefinition retryWhile;
+    @XmlElement(name = "redeliveryPolicy")
+    private RedeliveryPolicyDefinition redeliveryPolicyType;
+    @XmlAttribute(name = "redeliveryPolicyRef")
+    @Metadata(label = "advanced")
+    private String redeliveryPolicyRef;
+    @XmlElement(name = "handled")
+    @AsPredicate
+    private ExpressionSubElementDefinition handled;
+    @XmlElement(name = "continued")
+    @AsPredicate
+    @Metadata(label = "advanced")
+    private ExpressionSubElementDefinition continued;
+    @XmlAttribute(name = "onRedeliveryRef")
+    @Metadata(label = "advanced")
+    private String onRedeliveryRef;
+    @XmlAttribute(name = "onExceptionOccurredRef")
+    @Metadata(label = "advanced")
+    private String onExceptionOccurredRef;
+    @XmlAttribute(name = "useOriginalMessage")
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean")
+    private String useOriginalMessage;
+    @XmlAttribute(name = "useOriginalBody")
+    @Metadata(label = "advanced", javaType = "java.lang.Boolean")
+    private String useOriginalBody;
 
     public OnExceptionDefinition() {
     }
@@ -365,9 +371,8 @@ public class OnExceptionDefinition extends OutputDefinition<OnExceptionDefinitio
     }
 
     /**
-     * Allow synchronous delayed redelivery.
+     * Allow asynchronous delayed redelivery.
      *
-     * @see    RedeliveryPolicy#setAsyncDelayedRedelivery(boolean)
      * @return the builder
      */
     public OnExceptionDefinition asyncDelayedRedelivery() {
@@ -376,7 +381,7 @@ public class OnExceptionDefinition extends OutputDefinition<OnExceptionDefinitio
     }
 
     /**
-     * Sets the logging level to use when retries has exhausted
+     * Sets the logging level to use when retries have been exhausted
      *
      * @param  retriesExhaustedLogLevel the logging level
      * @return                          the builder
@@ -624,7 +629,7 @@ public class OnExceptionDefinition extends OutputDefinition<OnExceptionDefinitio
     }
 
     /**
-     * Sets a reference to a {@link RedeliveryPolicy} to lookup in the {@link org.apache.camel.spi.Registry} to be used.
+     * Sets a reference to a redelivery policy to lookup in the {@link org.apache.camel.spi.Registry} to be used.
      *
      * @param  redeliveryPolicyRef reference to use for lookup
      * @return                     the builder

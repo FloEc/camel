@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -36,14 +35,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EventNotifierEventsTest {
 
-    private static List<CamelEvent> events = new ArrayList<>();
+    private final List<CamelEvent> events = new ArrayList<>();
 
     private CamelContext context;
     private ProducerTemplate template;
 
     @BeforeEach
     public void setUp() throws Exception {
-        events.clear();
         context = createCamelContext();
         context.addRoutes(createRouteBuilder());
         template = context.createProducerTemplate();
@@ -70,7 +68,7 @@ public class EventNotifierEventsTest {
     @Test
     public void testExchangeDone() throws Exception {
         // not optimized as this requires exchange events
-        assertTrue(context.adapt(ExtendedCamelContext.class).isEventNotificationApplicable());
+        assertTrue(context.getCamelContextExtension().isEventNotificationApplicable());
 
         MockEndpoint mock = context.getEndpoint("mock:result", MockEndpoint.class);
         mock.expectedMessageCount(1);
@@ -100,7 +98,7 @@ public class EventNotifierEventsTest {
         assertIsInstanceOf(ExchangeCompletedEvent.class, events.get(18));
 
         // this is the sent using the produce template to start the test
-        assertIsInstanceOf(ExchangeSentEvent.class, events.get(17));
+        assertIsInstanceOf(ExchangeSentEvent.class, events.get(19));
 
         context.stop();
 
@@ -120,7 +118,7 @@ public class EventNotifierEventsTest {
     @Test
     public void testExchangeFailed() throws Exception {
         // not optimized as this requires exchange events
-        assertTrue(context.adapt(ExtendedCamelContext.class).isEventNotificationApplicable());
+        assertTrue(context.getCamelContextExtension().isEventNotificationApplicable());
 
         try {
             template.sendBody("direct:fail", "Hello World");
@@ -146,6 +144,7 @@ public class EventNotifierEventsTest {
         assertIsInstanceOf(ExchangeSendingEvent.class, events.get(12));
         assertIsInstanceOf(ExchangeCreatedEvent.class, events.get(13));
         assertIsInstanceOf(ExchangeFailedEvent.class, events.get(14));
+
         // this is the sent using the produce template to start the test
         assertIsInstanceOf(ExchangeSentEvent.class, events.get(15));
 
@@ -167,7 +166,7 @@ public class EventNotifierEventsTest {
     @Test
     public void testSuspendResume() throws Exception {
         // not optimized as this requires exchange events
-        assertTrue(context.adapt(ExtendedCamelContext.class).isEventNotificationApplicable());
+        assertTrue(context.getCamelContextExtension().isEventNotificationApplicable());
 
         assertEquals(12, events.size());
         assertIsInstanceOf(CamelEvent.CamelContextInitializingEvent.class, events.get(0));

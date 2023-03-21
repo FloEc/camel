@@ -22,7 +22,6 @@ import java.util.function.BiFunction;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
 import org.apache.camel.spi.CamelEvent;
@@ -501,6 +500,123 @@ public final class EventHelper {
         return answer;
     }
 
+    public static boolean notifyContextReloading(CamelContext context, Object source) {
+        ManagementStrategy management = context.getManagementStrategy();
+        if (management == null) {
+            return false;
+        }
+
+        EventFactory factory = management.getEventFactory();
+        if (factory == null) {
+            return false;
+        }
+
+        List<EventNotifier> notifiers = management.getStartedEventNotifiers();
+        if (notifiers == null || notifiers.isEmpty()) {
+            return false;
+        }
+
+        boolean answer = false;
+        CamelEvent event = null;
+        for (EventNotifier notifier : notifiers) {
+            if (notifier.isDisabled()) {
+                continue;
+            }
+            if (notifier.isIgnoreRouteEvents()) {
+                continue;
+            }
+
+            if (event == null) {
+                // only create event once
+                event = factory.createCamelContextReloading(context, source);
+                if (event == null) {
+                    // factory could not create event so exit
+                    return false;
+                }
+            }
+            answer |= doNotifyEvent(notifier, event);
+        }
+        return answer;
+    }
+
+    public static boolean notifyContextReloaded(CamelContext context, Object source) {
+        ManagementStrategy management = context.getManagementStrategy();
+        if (management == null) {
+            return false;
+        }
+
+        EventFactory factory = management.getEventFactory();
+        if (factory == null) {
+            return false;
+        }
+
+        List<EventNotifier> notifiers = management.getStartedEventNotifiers();
+        if (notifiers == null || notifiers.isEmpty()) {
+            return false;
+        }
+
+        boolean answer = false;
+        CamelEvent event = null;
+        for (EventNotifier notifier : notifiers) {
+            if (notifier.isDisabled()) {
+                continue;
+            }
+            if (notifier.isIgnoreRouteEvents()) {
+                continue;
+            }
+
+            if (event == null) {
+                // only create event once
+                event = factory.createCamelContextReloaded(context, source);
+                if (event == null) {
+                    // factory could not create event so exit
+                    return false;
+                }
+            }
+            answer |= doNotifyEvent(notifier, event);
+        }
+        return answer;
+    }
+
+    public static boolean notifyContextReloadFailure(CamelContext context, Object source, Throwable cause) {
+        ManagementStrategy management = context.getManagementStrategy();
+        if (management == null) {
+            return false;
+        }
+
+        EventFactory factory = management.getEventFactory();
+        if (factory == null) {
+            return false;
+        }
+
+        List<EventNotifier> notifiers = management.getStartedEventNotifiers();
+        if (notifiers == null || notifiers.isEmpty()) {
+            return false;
+        }
+
+        boolean answer = false;
+        CamelEvent event = null;
+        for (EventNotifier notifier : notifiers) {
+            if (notifier.isDisabled()) {
+                continue;
+            }
+            if (notifier.isIgnoreRouteEvents()) {
+                continue;
+            }
+
+            if (event == null) {
+                // only create event once
+                event = factory.createCamelContextReloadFailure(context, source, cause);
+                if (event == null) {
+                    // factory could not create event so exit
+                    return false;
+                }
+            }
+            answer |= doNotifyEvent(notifier, event);
+        }
+        return answer;
+    }
+
     public static boolean notifyExchangeCreated(CamelContext context, Exchange exchange) {
         ManagementStrategy management = context.getManagementStrategy();
         if (management == null) {
@@ -517,7 +633,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -563,7 +679,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -609,7 +725,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -657,7 +773,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -705,7 +821,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -751,7 +867,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -797,7 +913,7 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
             // do not generate events for an notify event
             return false;
         }
@@ -843,8 +959,8 @@ public final class EventHelper {
             return false;
         }
 
-        if (((ExtendedExchange) exchange).isNotifyEvent()) {
-            // do not generate events for an notify event
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
+            // do not generate events for notify event
             return false;
         }
 
@@ -1341,6 +1457,52 @@ public final class EventHelper {
         return answer;
     }
 
+    public static boolean notifyExchangeAsyncProcessingStartedEvent(CamelContext context, Exchange exchange) {
+        ManagementStrategy management = context.getManagementStrategy();
+        if (management == null) {
+            return false;
+        }
+
+        EventFactory factory = management.getEventFactory();
+        if (factory == null) {
+            return false;
+        }
+
+        List<EventNotifier> notifiers = management.getStartedEventNotifiers();
+        if (notifiers == null || notifiers.isEmpty()) {
+            return false;
+        }
+
+        if (exchange.getExchangeExtension().isNotifyEvent()) {
+            // do not generate events for an notify event
+            return false;
+        }
+
+        boolean answer = false;
+        CamelEvent event = null;
+        // optimise for loop using index access to avoid creating iterator object
+        for (int i = 0; i < notifiers.size(); i++) {
+            EventNotifier notifier = notifiers.get(i);
+            if (notifier.isDisabled()) {
+                continue;
+            }
+            if (notifier.isIgnoreExchangeEvents() || notifier.isIgnoreExchangeAsyncProcessingStartedEvents()) {
+                continue;
+            }
+
+            if (event == null) {
+                // only create event once
+                event = factory.createCamelExchangeAsyncProcessingStartedEvent(exchange);
+                if (event == null) {
+                    // factory could not create event so exit
+                    return false;
+                }
+            }
+            answer |= doNotifyEvent(notifier, event);
+        }
+        return answer;
+    }
+
     private static boolean doNotifyEvent(EventNotifier notifier, CamelEvent event) {
         if (!notifier.isEnabled(event)) {
             LOG.trace("Notifier: {} is not enabled for the event: {}", notifier, event);
@@ -1355,5 +1517,4 @@ public final class EventHelper {
 
         return true;
     }
-
 }

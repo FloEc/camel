@@ -19,6 +19,7 @@ package org.apache.camel.component.azure.storage.blob.integration;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +31,11 @@ import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import com.azure.storage.blob.models.PageList;
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.models.PageRange;
+import com.azure.storage.blob.models.PageRangeItem;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import org.apache.camel.Exchange;
 import org.apache.camel.component.azure.storage.blob.BlobBlock;
@@ -54,7 +57,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BlobOperationsIT extends Base {
@@ -226,6 +232,37 @@ class BlobOperationsIT extends Base {
     }
 
     @Test
+    void testUploadBlockBlobAsStreamWithBlobSizeHeader() throws Exception {
+        final BlobClientWrapper blobClientWrapper = blobContainerClientWrapper.getBlobClientWrapper("upload_test_file");
+        final BlobOperations operations = new BlobOperations(configuration, blobClientWrapper);
+
+        final File fileToUpload
+                = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("upload_test_file")).getFile());
+        final Exchange exchange = new DefaultExchange(context);
+        exchange.getIn().setBody(new FileInputStream(fileToUpload));
+        exchange.getIn().setHeader(BlobConstants.BLOB_UPLOAD_SIZE, fileToUpload.length());
+
+        final BlobOperationResponse response = operations.uploadBlockBlob(exchange);
+
+        assertNotNull(response);
+        assertTrue((boolean) response.getBody());
+        // check for eTag and md5 to make sure is uploaded
+        assertNotNull(response.getHeaders().get(BlobConstants.E_TAG));
+        assertNotNull(response.getHeaders().get(BlobConstants.CONTENT_MD5));
+
+        // check that the size header got removed
+        assertNull(exchange.getIn().getHeader(BlobConstants.BLOB_UPLOAD_SIZE));
+
+        // check content
+        final BlobOperationResponse getBlobResponse = operations.getBlob(null);
+
+        assertEquals("awesome camel to upload!",
+                IOUtils.toString((InputStream) getBlobResponse.getBody(), Charset.defaultCharset()));
+
+        blobClientWrapper.delete(null, null, null);
+    }
+
+    @Test
     void testCommitAndStageBlockBlob() throws Exception {
         final BlobClientWrapper blobClientWrapper = blobContainerClientWrapper.getBlobClientWrapper("upload_test_file");
         final BlobOperations operations = new BlobOperations(configuration, blobClientWrapper);
@@ -331,7 +368,6 @@ class BlobOperationsIT extends Base {
 
         byte[] dataBytes = new byte[1024]; // we set range for the page from 0-511
         new SecureRandom().nextBytes(dataBytes);
-        final String data = new String(dataBytes, StandardCharsets.UTF_8);
         final InputStream dataStream = new ByteArrayInputStream(dataBytes);
 
         final PageRange pageRange = new PageRange().setStart(0).setEnd(1023);
@@ -367,7 +403,6 @@ class BlobOperationsIT extends Base {
 
         byte[] dataBytes = new byte[512]; // we set range for the page from 0-511
         new SecureRandom().nextBytes(dataBytes);
-        final String data = new String(dataBytes, StandardCharsets.UTF_8);
         final InputStream dataStream = new ByteArrayInputStream(dataBytes);
 
         final PageRange pageRange = new PageRange().setStart(0).setEnd(511);
@@ -396,7 +431,6 @@ class BlobOperationsIT extends Base {
 
         byte[] dataBytes = new byte[512]; // we set range for the page from 0-511
         new SecureRandom().nextBytes(dataBytes);
-        final String data = new String(dataBytes, StandardCharsets.UTF_8);
         final InputStream dataStream = new ByteArrayInputStream(dataBytes);
 
         final PageRange pageRange = new PageRange().setStart(0).setEnd(511);
@@ -412,10 +446,17 @@ class BlobOperationsIT extends Base {
 
         assertNotNull(response);
 
-        final PageList pageList = (PageList) response.getBody();
+        final PagedIterable<?> pagedIterable = (PagedIterable<?>) response.getBody();
+        List<?> pageRangeItems = pagedIterable.stream().collect(Collectors.toList());
 
-        assertEquals(pageRange.getStart(), pageList.getPageRange().get(0).getStart());
-        assertEquals(pageRange.getEnd(), pageList.getPageRange().get(0).getEnd());
+        assertEquals(1, pageRangeItems.size());
+        assertInstanceOf(PageRangeItem.class, pageRangeItems.get(0));
+
+        PageRangeItem pageRangeItem = (PageRangeItem) pageRangeItems.get(0);
+
+        assertEquals(pageRange.getStart(), pageRangeItem.getRange().getOffset());
+        assertEquals(pageRange.getEnd(), pageRangeItem.getRange().getLength() - 1);
+        assertFalse(pageRangeItem.isClear());
 
         blobClientWrapper.delete(null, null, null);
     }

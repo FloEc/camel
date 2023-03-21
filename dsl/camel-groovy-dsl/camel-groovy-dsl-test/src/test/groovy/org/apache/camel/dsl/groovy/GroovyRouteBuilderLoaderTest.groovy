@@ -27,8 +27,8 @@ import org.apache.camel.impl.engine.DefaultChannel
 import org.apache.camel.language.bean.BeanLanguage
 import org.apache.camel.model.FromDefinition
 import org.apache.camel.model.ToDefinition
-import org.apache.camel.model.rest.GetVerbDefinition
-import org.apache.camel.model.rest.PostVerbDefinition
+import org.apache.camel.model.rest.GetDefinition
+import org.apache.camel.model.rest.PostDefinition
 import org.apache.camel.processor.FatalFallbackErrorHandler
 import org.apache.camel.processor.SendProcessor
 import org.apache.camel.spi.HeaderFilterStrategy
@@ -84,8 +84,8 @@ class GroovyRouteBuilderLoaderTest extends Specification {
             with(context.restDefinitions.find {it.path == '/my/path'}) {
                 verbs.size() == 1
 
-                with(verbs.first(), GetVerbDefinition) {
-                    uri == '/get'
+                with(verbs.first(), GetDefinition) {
+                    path == '/get'
                     consumes == 'application/json'
                     produces == 'application/json'
 
@@ -98,8 +98,8 @@ class GroovyRouteBuilderLoaderTest extends Specification {
             with(context.restDefinitions.find {it.path == '/post'}) {
                 verbs.size() == 1
 
-                with(verbs.first(), PostVerbDefinition) {
-                    uri == null
+                with(verbs.first(), PostDefinition) {
+                    path == null
                     consumes == 'application/json'
                     produces == 'application/json'
 
@@ -161,7 +161,7 @@ class GroovyRouteBuilderLoaderTest extends Specification {
             loadRoute('/routes/routes-with-dataformats-configuration.groovy')
 
         then:
-            with(context.resolveDataFormat('json-jackson'), JacksonDataFormat) {
+            with(context.resolveDataFormat('jackson'), JacksonDataFormat) {
                 unmarshalType == Map.class
                 prettyPrint
             }

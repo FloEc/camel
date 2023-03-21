@@ -24,6 +24,7 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.PollingConsumerPollStrategy;
 import org.apache.camel.support.service.ServiceSupport;
 import org.junit.jupiter.api.Test;
@@ -38,10 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class FtpConsumerThrowExceptionOnLoginFailedIT extends FtpServerTestSupport {
 
-    private CountDownLatch latch = new CountDownLatch(1);
+    private final CountDownLatch latch = new CountDownLatch(1);
 
     @BindToRegistry("myPoll")
-    private MyPoll poll = new MyPoll();
+    private final MyPoll poll = new MyPoll();
 
     private String getFtpUrl() {
         return "ftp://dummy@localhost:{{ftp.server.port}}/badlogin?password=cantremember"
@@ -54,7 +55,7 @@ public class FtpConsumerThrowExceptionOnLoginFailedIT extends FtpServerTestSuppo
 
         assertTrue(latch.await(5, TimeUnit.SECONDS));
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         // consumer should be stopped
         Consumer consumer = context.getRoute("foo").getConsumer();
@@ -63,10 +64,10 @@ public class FtpConsumerThrowExceptionOnLoginFailedIT extends FtpServerTestSuppo
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).routeId("foo").to("mock:result");
             }
         };
@@ -84,7 +85,7 @@ public class FtpConsumerThrowExceptionOnLoginFailedIT extends FtpServerTestSuppo
         }
 
         @Override
-        public boolean rollback(Consumer consumer, Endpoint endpoint, int retryCounter, Exception cause) throws Exception {
+        public boolean rollback(Consumer consumer, Endpoint endpoint, int retryCounter, Exception cause) {
             GenericFileOperationFailedException e = assertIsInstanceOf(GenericFileOperationFailedException.class, cause);
             assertEquals(530, e.getCode());
 

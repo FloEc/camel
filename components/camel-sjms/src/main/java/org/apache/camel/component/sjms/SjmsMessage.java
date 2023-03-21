@@ -19,12 +19,12 @@ package org.apache.camel.component.sjms;
 import java.io.File;
 import java.util.Map;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Queue;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.RuntimeExchangeException;
@@ -35,6 +35,8 @@ import org.apache.camel.support.ExchangeHelper;
 import org.apache.camel.util.ObjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.camel.support.MessageHelper.copyBody;
 
 /**
  * Represents a {@link org.apache.camel.Message} for working with JMS
@@ -113,7 +115,7 @@ public class SjmsMessage extends DefaultMessage {
         }
 
         // copy body and fault flag
-        setBody(that.getBody());
+        copyBody(that, this);
 
         // we have already cleared the headers
         if (that.hasHeaders()) {
@@ -269,7 +271,7 @@ public class SjmsMessage extends DefaultMessage {
     @Override
     protected String createMessageId() {
         if (jmsMessage == null) {
-            LOG.trace("No javax.jms.Message set so generating a new message id");
+            LOG.trace("No jakarta.jms.Message set so generating a new message id");
             return super.createMessageId();
         }
         try {

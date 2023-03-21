@@ -33,7 +33,7 @@ public class StopWatchTestExecutionListener extends AbstractTestExecutionListene
 
     /**
      * Returns the precedence that is used by Spring to choose the appropriate execution order of test listeners.
-     * 
+     *
      * See {@link SpringTestExecutionListenerSorter#getPrecedence(Class)} for more.
      */
     @Override
@@ -63,7 +63,7 @@ public class StopWatchTestExecutionListener extends AbstractTestExecutionListene
 
             log.info("********************************************************************************");
             log.info("Testing done: {} ({})", testContext.getTestMethod().getName(), testContext.getTestClass().getName());
-            log.info("Took: {} ({} millis)", TimeUtils.printDuration(time), time);
+            log.info("Took: {} ({} millis)", TimeUtils.printDuration(time, true), time);
             log.info("********************************************************************************");
 
             threadStopWatch.remove();

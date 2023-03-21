@@ -39,7 +39,7 @@ public class SqlProducerOutputTypeSelectOneNoResultTest extends CamelTestSupport
     public void setUp() throws Exception {
         db = new EmbeddedDatabaseBuilder()
                 .setName(getClass().getSimpleName())
-                .setType(EmbeddedDatabaseType.DERBY)
+                .setType(EmbeddedDatabaseType.H2)
                 .addScript("sql/createAndPopulateDatabase5.sql")
                 .build();
 
@@ -51,7 +51,9 @@ public class SqlProducerOutputTypeSelectOneNoResultTest extends CamelTestSupport
     public void tearDown() throws Exception {
         super.tearDown();
 
-        db.shutdown();
+        if (db != null) {
+            db.shutdown();
+        }
     }
 
     @Test
@@ -63,7 +65,7 @@ public class SqlProducerOutputTypeSelectOneNoResultTest extends CamelTestSupport
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 getContext().getComponent("sql", SqlComponent.class).setDataSource(db);

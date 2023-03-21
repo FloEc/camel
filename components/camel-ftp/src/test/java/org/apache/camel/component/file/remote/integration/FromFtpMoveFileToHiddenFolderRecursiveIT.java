@@ -43,23 +43,23 @@ public class FromFtpMoveFileToHiddenFolderRecursiveIT extends FtpServerTestSuppo
     public void testPollFileAndShouldBeMoved() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedBodiesReceivedInAnyOrder("Hello", "Bye", "Goodday");
-        mock.expectedFileExists(ftpFile(".done/hello.txt"));
-        mock.expectedFileExists(ftpFile("bye/.done/bye.txt"));
-        mock.expectedFileExists(ftpFile("goodday/.done/goodday.txt"));
+        mock.expectedFileExists(service.ftpFile(".done/hello.txt"));
+        mock.expectedFileExists(service.ftpFile("bye/.done/bye.txt"));
+        mock.expectedFileExists(service.ftpFile("goodday/.done/goodday.txt"));
 
         mock.assertIsSatisfied();
     }
 
-    private void prepareFtpServer() throws Exception {
+    private void prepareFtpServer() {
         template.sendBodyAndHeader(getFtpUrl(), "Hello", Exchange.FILE_NAME, "hello.txt");
         template.sendBodyAndHeader(getFtpUrl(), "Bye", Exchange.FILE_NAME, "bye/bye.txt");
         template.sendBodyAndHeader(getFtpUrl(), "Goodday", Exchange.FILE_NAME, "goodday/goodday.txt");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

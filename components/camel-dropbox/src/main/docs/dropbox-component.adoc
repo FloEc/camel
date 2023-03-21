@@ -24,10 +24,10 @@ component has the following features:
 * As a producer, download files, move files between remote directories,
 delete files/dir, upload files and search files by queries
 
-In order to work with Dropbox API you need to obtain an *accessToken*
-and a *clientIdentifier.* +
+In order to work with Dropbox API you need to obtain an *accessToken*,
+ *expireIn*, *refreshToken*, *apiKey*, *apiSecret* and a *clientIdentifier.* +
 You can refer to the
-https://www.dropbox.com/developers/core/start/java[Dropbox
+https://dropbox.tech/developers/migrating-app-permissions-and-access-tokens[Dropbox
 documentation] that explains how to get them.
 
 Maven users will need to add the following dependency to their `pom.xml`
@@ -86,6 +86,9 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Del operation
 
@@ -107,24 +110,15 @@ Below are listed the options for this operation:
 [source,java]
 ----
 from("direct:start")
-  .to("dropbox://del?accessToken=XXX&clientIdentifier=XXX&remotePath=/root/folder1")
+  .to("dropbox://del?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/root/folder1")
   .to("mock:result");
 
 from("direct:start")
-  .to("dropbox://del?accessToken=XXX&clientIdentifier=XXX&remotePath=/root/folder1/file1.tar.gz")
+  .to("dropbox://del?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/root/folder1/file1.tar.gz")
   .to("mock:result");
 ----
-
-=== Result Message Headers
-
-The following headers are set on message result:
-
-[width="100%",cols="50%,50%",options="header",]
-|===
-|Property |Value
-
-|`DELETED_PATH` |name of the path deleted on dropbox
-|===
 
 === Result Message Body
 
@@ -157,29 +151,19 @@ Below are listed the options for this operation:
 [source,java]
 ----
 from("direct:start")
-  .to("dropbox://get?accessToken=XXX&clientIdentifier=XXX&remotePath=/root/folder1/file1.tar.gz")
+  .to("dropbox://get?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/root/folder1/file1.tar.gz")
   .to("file:///home/kermit/?fileName=file1.tar.gz");
 
 from("direct:start")
-  .to("dropbox://get?accessToken=XXX&clientIdentifier=XXX&remotePath=/root/folder1")
+  .to("dropbox://get?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/root/folder1")
   .to("mock:result");
 
-from("dropbox://get?accessToken=XXX&clientIdentifier=XXX&remotePath=/root/folder1")
+from("dropbox://get?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/root/folder1")
   .to("file:///home/kermit/");
 ----
-
-=== Result Message Headers
-
-The following headers are set on message result:
-
-[width="100%",cols="50%,50%",options="header",]
-|===
-|Property |Value
-
-|`DOWNLOADED_FILE` |in case of single file download, path of the remote file downloaded
-
-|`DOWNLOADED_FILES` |in case of multiple files download, path of the remote files downloaded
-|===
 
 === Result Message Body
 
@@ -189,9 +173,9 @@ The following objects are set on message body result:
 |===
 |Object type |Description
 
-|`ByteArrayOutputStream` |in case of single file download, stream representing the file downloaded
+|`byte[]` or `CachedOutputStream`  if stream caching is enabled |in case of single file download, stream representing the file downloaded
 
-|`Map<String, ByteArrayOutputStream>` |in case of multiple files download, a map with as key the path of the
+|`Map<String, byte[]>` or `Map<String, CachedOutputStream>` if stream caching is enabled |in case of multiple files download, a map with as key the path of the
 remote file downloaded and as value the stream representing the file
 downloaded
 |===
@@ -218,20 +202,10 @@ Below are listed the options for this operation:
 [source,java]
 ----
 from("direct:start")
-  .to("dropbox://move?accessToken=XXX&clientIdentifier=XXX&remotePath=/root/folder1&newRemotePath=/root/folder2")
+  .to("dropbox://move?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/root/folder1&newRemotePath=/root/folder2")
   .to("mock:result");
 ----
-
-=== Result Message Headers
-
-The following headers are set on message result:
-
-[width="100%",cols="50%,50%",options="header",]
-|===
-|Property |Value
-
-|`MOVED_PATH` |name of the path moved on dropbox
-|===
 
 === Result Message Body
 
@@ -279,10 +253,12 @@ Caused by: java.lang.IllegalArgumentException: 'path': bad path: must start with
 
 [source,java]
 ----
-from("direct:start").to("dropbox://put?accessToken=XXX&clientIdentifier=XXX&uploadMode=add&localPath=/root/folder1")
+from("direct:start").to("dropbox://put?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&uploadMode=add&localPath=/root/folder1")
   .to("mock:result");
 
-from("direct:start").to("dropbox://put?accessToken=XXX&clientIdentifier=XXX&uploadMode=add&localPath=/root/folder1&remotePath=/root/folder2")
+from("direct:start").to("dropbox://put?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&uploadMode=add&localPath=/root/folder1&remotePath=/root/folder2")
   .to("mock:result");
 ----
 
@@ -292,26 +268,14 @@ And to upload a single file with content from the message body
 ----
 from("direct:start")
    .setHeader(DropboxConstants.HEADER_PUT_FILE_NAME, constant("myfile.txt"))
-   .to("dropbox://put?accessToken=XXX&clientIdentifier=XXX&uploadMode=add&remotePath=/root/folder2")
+   .to("dropbox://put?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&uploadMode=add&remotePath=/root/folder2")
    .to("mock:result");
 ----
 
 The name of the file can be provided in the header `DropboxConstants.HEADER_PUT_FILE_NAME`
 or `Exchange.FILE_NAME` in that order of precedence. If no header has been provided then the message id (uuid) is
 used as the file name.
-
-=== Result Message Headers
-
-The following headers are set on message result:
-
-[width="100%",cols="50%,50%",options="header",]
-|===
-|Property |Value
-
-|`UPLOADED_FILE` |in case of single file upload, path of the remote path uploaded
-
-|`UPLOADED_FILES` |in case of multiple files upload, string with the remote paths uploaded
-|===
 
 === Result Message Body
 
@@ -352,25 +316,16 @@ or as a header `CamelDropboxQuery` on the Camel message.
 
 [source,java]
 ----
-from("dropbox://search?accessToken=XXX&clientIdentifier=XXX&remotePath=/XXX&query=XXX")
+from("dropbox://search?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/XXX&query=XXX")
   .to("mock:result");
 
 from("direct:start")
   .setHeader("CamelDropboxQuery", constant("XXX"))
-  .to("dropbox://search?accessToken=XXX&clientIdentifier=XXX&remotePath=/XXX")
+  .to("dropbox://search?accessToken=XXX&clientIdentifier=XXX&expireIn=1000&refreshToken=XXXX"
+      +"&apiKey=XXXXX&apiSecret=XXXXXX&remotePath=/XXX")
   .to("mock:result");
 ----
-
-=== Result Message Headers
-
-The following headers are set on message result:
-
-[width="100%",cols="50%,50%",options="header",]
-|===
-|Property |Value
-
-|`FOUNDED_FILES` |list of file path founded
-|===
 
 === Result Message Body
 
@@ -380,13 +335,8 @@ The following objects are set on message body result:
 |===
 |Object type |Description
 
-|`List<DbxEntry>` |list of file path founded. For more information on this object refer to
-Dropbox documentation,
+|`List<com.dropbox.core.v2.files.SearchMatchV2>` |list of file path founded. For more information on this object refer to
+https://javadoc.io/doc/com.dropbox.core/dropbox-core-sdk/latest/com/dropbox/core/v2/files/SearchMatchV2.html[Dropbox documentation].
 |===
-
-
-
- 
-
 
 include::spring-boot:partial$starter.adoc[]

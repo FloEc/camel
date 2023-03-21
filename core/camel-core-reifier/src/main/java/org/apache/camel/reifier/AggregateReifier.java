@@ -18,13 +18,10 @@ package org.apache.camel.reifier;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.BiFunction;
 
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.AsyncProcessor;
-import org.apache.camel.CamelContextAware;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
@@ -33,8 +30,6 @@ import org.apache.camel.model.OptimisticLockRetryPolicyDefinition;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.processor.aggregate.AggregateController;
 import org.apache.camel.processor.aggregate.AggregateProcessor;
-import org.apache.camel.processor.aggregate.AggregationStrategyBeanAdapter;
-import org.apache.camel.processor.aggregate.AggregationStrategyBiFunctionAdapter;
 import org.apache.camel.processor.aggregate.OptimisticLockRetryPolicy;
 import org.apache.camel.spi.AggregationRepository;
 import org.apache.camel.spi.ExecutorServiceManager;
@@ -58,11 +53,15 @@ public class AggregateReifier extends ProcessorReifier<AggregateDefinition> {
         Processor childProcessor = this.createChildProcessor(true);
 
         // wrap the aggregate route in a unit of work processor
-        AsyncProcessor target = camelContext.adapt(ExtendedCamelContext.class).getInternalProcessorFactory()
+        AsyncProcessor target = camelContext.getCamelContextExtension().getInternalProcessorFactory()
                 .addUnitOfWorkProcessorAdvice(camelContext, childProcessor, route);
 
         Expression correlation = createExpression(definition.getExpression());
-        AggregationStrategy strategy = createAggregationStrategy();
+        AggregationStrategy strategy = getConfiguredAggregationStrategy(definition);
+        // strategy is required
+        if (strategy == null) {
+            throw new IllegalArgumentException("AggregationStrategy must be set on " + definition);
+        }
 
         boolean parallel = parseBoolean(definition.getParallelProcessing(), false);
         boolean shutdownThreadPool = willCreateNewThreadPool(definition, parallel);
@@ -82,28 +81,28 @@ public class AggregateReifier extends ProcessorReifier<AggregateDefinition> {
         if (repository != null) {
             answer.setAggregationRepository(repository);
         }
-
-        if (definition.getAggregateController() == null && definition.getAggregateControllerRef() != null) {
-            definition
-                    .setAggregateController(mandatoryLookup(definition.getAggregateControllerRef(), AggregateController.class));
+        AggregateController controller = createAggregateController();
+        if (controller != null) {
+            answer.setAggregateController(controller);
         }
 
         // this EIP supports using a shared timeout checker thread pool or
         // fallback to create a new thread pool
         boolean shutdownTimeoutThreadPool = false;
-        ScheduledExecutorService timeoutThreadPool = definition.getTimeoutCheckerExecutorService();
-        if (timeoutThreadPool == null && definition.getTimeoutCheckerExecutorServiceRef() != null) {
+        ScheduledExecutorService timeoutThreadPool = definition.getTimeoutCheckerExecutorServiceBean();
+        if (timeoutThreadPool == null && definition.getTimeoutCheckerExecutorService() != null) {
             // lookup existing thread pool
-            timeoutThreadPool = lookup(definition.getTimeoutCheckerExecutorServiceRef(), ScheduledExecutorService.class);
+            timeoutThreadPool
+                    = lookupByNameAndType(definition.getTimeoutCheckerExecutorService(), ScheduledExecutorService.class);
             if (timeoutThreadPool == null) {
                 // then create a thread pool assuming the ref is a thread pool
                 // profile id
                 timeoutThreadPool = camelContext.getExecutorServiceManager().newScheduledThreadPool(this,
                         AggregateProcessor.AGGREGATE_TIMEOUT_CHECKER,
-                        definition.getTimeoutCheckerExecutorServiceRef());
+                        definition.getTimeoutCheckerExecutorService());
                 if (timeoutThreadPool == null) {
                     throw new IllegalArgumentException(
-                            "ExecutorServiceRef " + definition.getTimeoutCheckerExecutorServiceRef()
+                            "ExecutorServiceRef " + definition.getTimeoutCheckerExecutorService()
                                                        + " not found in registry (as an ScheduledExecutorService instance) or as a thread pool profile.");
                 }
                 shutdownTimeoutThreadPool = true;
@@ -197,9 +196,7 @@ public class AggregateReifier extends ProcessorReifier<AggregateDefinition> {
         } else {
             answer.setOptimisticLockRetryPolicy(definition.getOptimisticLockRetryPolicy());
         }
-        if (definition.getAggregateController() != null) {
-            answer.setAggregateController(definition.getAggregateController());
-        }
+
         Long completionTimeoutCheckerInterval = parseDuration(definition.getCompletionTimeoutCheckerInterval());
         if (completionTimeoutCheckerInterval != null) {
             answer.setCompletionTimeoutCheckerInterval(completionTimeoutCheckerInterval);
@@ -230,48 +227,20 @@ public class AggregateReifier extends ProcessorReifier<AggregateDefinition> {
         return policy;
     }
 
-    private AggregationStrategy createAggregationStrategy() {
-        AggregationStrategy strategy = definition.getAggregationStrategy();
-        if (strategy == null && definition.getStrategyRef() != null) {
-            Object aggStrategy = lookup(definition.getStrategyRef(), Object.class);
-            if (aggStrategy instanceof AggregationStrategy) {
-                strategy = (AggregationStrategy) aggStrategy;
-            } else if (aggStrategy instanceof BiFunction) {
-                AggregationStrategyBiFunctionAdapter adapter
-                        = new AggregationStrategyBiFunctionAdapter((BiFunction) aggStrategy);
-                if (definition.getStrategyMethodAllowNull() != null) {
-                    adapter.setAllowNullNewExchange(parseBoolean(definition.getStrategyMethodAllowNull(), false));
-                    adapter.setAllowNullOldExchange(parseBoolean(definition.getStrategyMethodAllowNull(), false));
-                }
-                strategy = adapter;
-            } else if (aggStrategy != null) {
-                AggregationStrategyBeanAdapter adapter
-                        = new AggregationStrategyBeanAdapter(aggStrategy, definition.getAggregationStrategyMethodName());
-                if (definition.getStrategyMethodAllowNull() != null) {
-                    adapter.setAllowNullNewExchange(parseBoolean(definition.getStrategyMethodAllowNull(), false));
-                    adapter.setAllowNullOldExchange(parseBoolean(definition.getStrategyMethodAllowNull(), false));
-                }
-                strategy = adapter;
-            } else {
-                throw new IllegalArgumentException(
-                        "Cannot find AggregationStrategy in Registry with name: " + definition.getStrategyRef());
-            }
-        }
-
-        if (strategy == null) {
-            throw new IllegalArgumentException("AggregationStrategy or AggregationStrategyRef must be set on " + this);
-        }
-        CamelContextAware.trySetCamelContext(strategy, camelContext);
-
-        return strategy;
-    }
-
     private AggregationRepository createAggregationRepository() {
-        AggregationRepository repository = definition.getAggregationRepository();
-        if (repository == null && definition.getAggregationRepositoryRef() != null) {
-            repository = mandatoryLookup(definition.getAggregationRepositoryRef(), AggregationRepository.class);
+        AggregationRepository repository = definition.getAggregationRepositoryBean();
+        if (repository == null && definition.getAggregationRepository() != null) {
+            repository = mandatoryLookup(definition.getAggregationRepository(), AggregationRepository.class);
         }
         return repository;
+    }
+
+    private AggregateController createAggregateController() {
+        AggregateController controller = definition.getAggregateControllerBean();
+        if (controller == null && definition.getAggregateController() != null) {
+            controller = mandatoryLookup(definition.getAggregateController(), AggregateController.class);
+        }
+        return controller;
     }
 
 }

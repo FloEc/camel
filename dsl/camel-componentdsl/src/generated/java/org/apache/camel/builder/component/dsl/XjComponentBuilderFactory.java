@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -129,8 +129,8 @@ public interface XjComponentBuilderFactory {
         /**
          * To set custom Saxon configuration properties.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -158,6 +158,24 @@ public interface XjComponentBuilderFactory {
         default XjComponentBuilder saxonExtensionFunctions(
                 java.lang.String saxonExtensionFunctions) {
             doSetProperty("saxonExtensionFunctions", saxonExtensionFunctions);
+            return this;
+        }
+        /**
+         * Feature for XML secure processing (see javax.xml.XMLConstants). This
+         * is enabled by default. However, when using Saxon Professional you may
+         * need to turn this off to allow Saxon to be able to use Java extension
+         * functions.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: advanced
+         * 
+         * @param secureProcessing the value to set
+         * @return the dsl builder
+         */
+        default XjComponentBuilder secureProcessing(boolean secureProcessing) {
+            doSetProperty("secureProcessing", secureProcessing);
             return this;
         }
         /**
@@ -251,6 +269,7 @@ public interface XjComponentBuilderFactory {
             case "saxonConfiguration": ((XJComponent) component).setSaxonConfiguration((net.sf.saxon.Configuration) value); return true;
             case "saxonConfigurationProperties": ((XJComponent) component).setSaxonConfigurationProperties((java.util.Map) value); return true;
             case "saxonExtensionFunctions": ((XJComponent) component).setSaxonExtensionFunctions((java.lang.String) value); return true;
+            case "secureProcessing": ((XJComponent) component).setSecureProcessing((boolean) value); return true;
             case "transformerFactoryClass": ((XJComponent) component).setTransformerFactoryClass((java.lang.String) value); return true;
             case "transformerFactoryConfigurationStrategy": ((XJComponent) component).setTransformerFactoryConfigurationStrategy((org.apache.camel.component.xslt.TransformerFactoryConfigurationStrategy) value); return true;
             case "uriResolver": ((XJComponent) component).setUriResolver((javax.xml.transform.URIResolver) value); return true;

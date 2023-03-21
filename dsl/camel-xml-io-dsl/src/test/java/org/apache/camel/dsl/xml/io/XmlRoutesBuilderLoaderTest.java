@@ -41,7 +41,7 @@ public class XmlRoutesBuilderLoaderTest {
 
         Resource resource = ResourceHelper.fromString("in-memory.xml", content);
         RouteBuilder builder = (RouteBuilder) new XmlRoutesBuilderLoader().loadRoutesBuilder(resource);
-        builder.setContext(new DefaultCamelContext());
+        builder.setCamelContext(new DefaultCamelContext());
         builder.configure();
 
         assertFalse(builder.getRouteCollection().getRoutes().isEmpty());
@@ -52,7 +52,7 @@ public class XmlRoutesBuilderLoaderTest {
         String content = ""
                          + "<rests xmlns=\"http://camel.apache.org/schema/spring\">"
                          + "  <rest id=\"bar\" path=\"/say/hello\">"
-                         + "    <get uri=\"/bar\">"
+                         + "    <get path=\"/bar\">"
                          + "      <to uri=\"mock:bar\"/>"
                          + "    </get>"
                          + "  </rest>"
@@ -60,7 +60,7 @@ public class XmlRoutesBuilderLoaderTest {
 
         Resource resource = ResourceHelper.fromString("in-memory.xml", content);
         RouteBuilder builder = (RouteBuilder) new XmlRoutesBuilderLoader().loadRoutesBuilder(resource);
-        builder.setContext(new DefaultCamelContext());
+        builder.setCamelContext(new DefaultCamelContext());
         builder.configure();
 
         assertFalse(builder.getRestCollection().getRests().isEmpty());
@@ -82,9 +82,48 @@ public class XmlRoutesBuilderLoaderTest {
 
         Resource resource = ResourceHelper.fromString("in-memory.xml", content);
         RouteBuilder builder = (RouteBuilder) new XmlRoutesBuilderLoader().loadRoutesBuilder(resource);
-        builder.setContext(new DefaultCamelContext());
+        builder.setCamelContext(new DefaultCamelContext());
         builder.configure();
 
         assertFalse(builder.getRouteTemplateCollection().getRouteTemplates().isEmpty());
+    }
+
+    @Test
+    public void canLoadTemplatedRoutes() throws Exception {
+        String content = ""
+                         + "<templatedRoutes>"
+                         + "    <templatedRoute routeTemplateRef=\"myTemplate\" routeId=\"my-route\">"
+                         + "        <parameter name=\"foo\" value=\"fooVal\"/>"
+                         + "        <parameter name=\"bar\" value=\"barVal\"/>"
+                         + "    </templatedRoute>"
+                         + "</templatedRoutes>";
+
+        Resource resource = ResourceHelper.fromString("in-memory.xml", content);
+        RouteBuilder builder = (RouteBuilder) new XmlRoutesBuilderLoader().loadRoutesBuilder(resource);
+        builder.setCamelContext(new DefaultCamelContext());
+        builder.configure();
+
+        assertFalse(builder.getTemplatedRouteCollection().getTemplatedRoutes().isEmpty());
+    }
+
+    @Test
+    public void canLoadRouteConfigurations() throws Exception {
+        String content = ""
+                         + "<routeConfigurations xmlns=\"http://camel.apache.org/schema/spring\">"
+                         + "  <routeConfiguration>"
+                         + "    <onException>"
+                         + "      <exception>java.lang.Exception</exception>"
+                         + "      <handled><constant>true</constant></handled>"
+                         + "      <log message=\"XML WARN: ${exception.message}\"/>"
+                         + "    </onException>"
+                         + "  </routeConfiguration>"
+                         + "</routeConfigurations>";
+        Resource resource = ResourceHelper.fromString("in-memory.xml", content);
+        RouteBuilder builder = (RouteBuilder) new XmlRoutesBuilderLoader().loadRoutesBuilder(resource);
+        DefaultCamelContext camelContext = new DefaultCamelContext();
+        builder.setCamelContext(camelContext);
+        builder.configuration();
+
+        assertFalse(camelContext.getRouteConfigurationDefinitions().isEmpty());
     }
 }

@@ -52,7 +52,8 @@ public class JavaScriptRoutesBuilderLoaderTest {
     @Test
     void componentsCanBeCustomized() throws Exception {
         try (DefaultCamelContext context = new DefaultCamelContext()) {
-            Resource resource = context.getResourceLoader().resolveResource("/routes/routes-with-component-configuration.js");
+            Resource resource = context.getResourceLoader()
+                    .resolveResource("/routes/routes-with-component-configuration.js");
             context.getRoutesLoader().loadRoutes(resource);
 
             assertThat(context.getComponent("seda", SedaComponent.class)).satisfies(c -> {
@@ -64,7 +65,8 @@ public class JavaScriptRoutesBuilderLoaderTest {
     @Test
     void contextCanBeCustomized() throws Exception {
         try (DefaultCamelContext context = new DefaultCamelContext()) {
-            Resource resource = context.getResourceLoader().resolveResource("/routes/routes-with-context-configuration.js");
+            Resource resource = context.getResourceLoader()
+                    .resolveResource("/routes/routes-with-context-configuration.js");
             context.getRoutesLoader().loadRoutes(resource);
 
             assertThat(context.isTypeConverterStatisticsEnabled()).isTrue();
@@ -91,7 +93,8 @@ public class JavaScriptRoutesBuilderLoaderTest {
     @Test
     void restCanBeConfigured() throws Exception {
         try (DefaultCamelContext context = new DefaultCamelContext()) {
-            Resource resource = context.getResourceLoader().resolveResource("/routes/routes-with-rest-configuration.js");
+            Resource resource = context.getResourceLoader()
+                    .resolveResource("/routes/routes-with-rest-configuration.js");
             context.getRoutesLoader().loadRoutes(resource);
 
             assertThat(context.getRestConfiguration()).satisfies(c -> {
@@ -108,18 +111,28 @@ public class JavaScriptRoutesBuilderLoaderTest {
             context.getRoutesLoader().loadRoutes(resource);
 
             assertThat(context.getRestDefinitions()).hasSize(1);
-            assertThat(context.getRouteDefinitions()).hasSize(1);
+            assertThat(context.getRouteDefinitions()).hasSize(2);
 
             assertThat(context.getRestDefinitions()).first().satisfies(d -> {
                 assertThat(d.getProduces()).isEqualTo("text/plain");
                 assertThat(d.getVerbs()).first().satisfies(v -> {
-                    assertThat(v.getUri()).isEqualTo("/say/hello");
+                    assertThat(v.getPath()).isEqualTo("/say/hello");
                 });
             });
             assertThat(context.getRouteDefinitions()).first().satisfies(d -> {
                 assertThat(d.getInput()).isInstanceOf(FromDefinition.class);
                 assertThat(d.getOutputs()).first().isInstanceOf(TransformDefinition.class);
             });
+        }
+    }
+
+    @Test
+    void modulesCanBeImported() throws Exception {
+        try (DefaultCamelContext context = new DefaultCamelContext()) {
+            Resource resource = context.getResourceLoader().resolveResource("/routes/routes-with-modules.js");
+            context.getRoutesLoader().loadRoutes(resource);
+
+            assertThat(context.getRouteDefinitions()).hasSize(1);
         }
     }
 }

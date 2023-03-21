@@ -21,7 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,6 +32,7 @@ import java.net.URLDecoder;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,7 +57,10 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.twdata.maven.mojoexecutor.MojoExecutor;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.inspector.TrustedTagInspector;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
@@ -123,7 +127,7 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
     @Parameter
     String basePath;
 
-    @Parameter(defaultValue = "3.0.25")
+    @Parameter(defaultValue = "3.0.36")
     String swaggerCodegenMavenPluginVersion;
 
     @Parameter(defaultValue = "${project}", readonly = true)
@@ -171,8 +175,8 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
 
         final DestinationGenerator destinationGeneratorObject;
         try {
-            destinationGeneratorObject = destinationGeneratorClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            destinationGeneratorObject = destinationGeneratorClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new MojoExecutionException(
                     "The given destinationGenerator class (" + destinationGenerator
                                              + ") cannot be instantiated, make sure that it is declared as public and that all dependencies are present on the COMPILE classpath scope of the project",
@@ -225,7 +229,7 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
                         version(swaggerCodegenMavenPluginVersion)),
                 goal("generate"),
                 configuration(
-                        elements.toArray(new MojoExecutor.Element[elements.size()])),
+                        elements.toArray(new MojoExecutor.Element[0])),
                 executionEnvironment(
                         mavenProject,
                         mavenSession,
@@ -242,7 +246,7 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
         for (final Dependency dep : mavenProject.getDependencies()) {
             if ("org.apache.camel".equals(dep.getGroupId()) || "org.apache.camel.springboot".equals(dep.getGroupId())) {
                 final String aid = dep.getArtifactId();
-                final Optional<String> comp = Arrays.asList(DEFAULT_REST_CONSUMER_COMPONENTS).stream()
+                final Optional<String> comp = Arrays.stream(DEFAULT_REST_CONSUMER_COMPONENTS)
                         .filter(c -> aid.startsWith("camel-" + c)).findFirst();
                 if (comp.isPresent()) {
                     return comp.get();
@@ -339,7 +343,9 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
 
         String suffix = ".yaml";
         if (specificationUri.regionMatches(true, specificationUri.length() - suffix.length(), suffix, 0, suffix.length())) {
-            Yaml loader = new Yaml();
+            LoaderOptions options = new LoaderOptions();
+            options.setTagInspector(new TrustedTagInspector());
+            Yaml loader = new Yaml(new SafeConstructor(options));
             Map map = loader.load(is);
             JsonNode node = mapper.convertValue(map, JsonNode.class);
             return (OasDocument) Library.readDocument(node);
@@ -390,17 +396,14 @@ abstract class AbstractGenerateMojo extends AbstractMojo {
     }
 
     private Map<String, String> parse(String urlEncodedAuthStr) {
-        Map<String, String> auths = new HashMap<String, String>();
+        Map<String, String> auths = new HashMap<>();
         if (isNotEmpty(urlEncodedAuthStr)) {
             String[] parts = urlEncodedAuthStr.split(",");
             for (String part : parts) {
                 String[] kvPair = part.split(":");
                 if (kvPair.length == 2) {
-                    try {
-                        auths.put(URLDecoder.decode(kvPair[0], "UTF-8"), URLDecoder.decode(kvPair[1], "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        getLog().warn(e.getMessage());
-                    }
+                    auths.put(URLDecoder.decode(kvPair[0], StandardCharsets.UTF_8),
+                            URLDecoder.decode(kvPair[1], StandardCharsets.UTF_8));
                 }
             }
         }

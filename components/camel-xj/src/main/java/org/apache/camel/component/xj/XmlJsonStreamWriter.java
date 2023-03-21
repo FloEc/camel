@@ -55,7 +55,7 @@ public class XmlJsonStreamWriter implements XMLStreamWriter {
 
     /**
      * Creates a new XmlJsonStreamWriter instance
-     * 
+     *
      * @param jsonGenerator the {@link JsonGenerator} to use to write the json document
      */
     public XmlJsonStreamWriter(JsonGenerator jsonGenerator) {
@@ -312,7 +312,7 @@ public class XmlJsonStreamWriter implements XMLStreamWriter {
         }
 
         void addChild(TreeElement treeElement) {
-            if (this.childs == Collections.EMPTY_LIST) {
+            if (this.childs.equals(Collections.emptyList())) {
                 this.childs = new ArrayList<>(1);
             }
 

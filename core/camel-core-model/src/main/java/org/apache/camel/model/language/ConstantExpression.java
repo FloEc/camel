@@ -16,11 +16,10 @@
  */
 package org.apache.camel.model.language;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.spi.Metadata;
 
@@ -30,12 +29,7 @@ import org.apache.camel.spi.Metadata;
 @Metadata(firstVersion = "1.5.0", label = "language,core", title = "Constant")
 @XmlRootElement(name = "constant")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ConstantExpression extends ExpressionDefinition {
-
-    @XmlAttribute(name = "resultType")
-    private String resultTypeName;
-    @XmlTransient
-    private Class<?> resultType;
+public class ConstantExpression extends TypedExpressionDefinition {
 
     public ConstantExpression() {
     }
@@ -44,31 +38,24 @@ public class ConstantExpression extends ExpressionDefinition {
         super(expression);
     }
 
+    private ConstantExpression(Builder builder) {
+        super(builder);
+    }
+
     @Override
     public String getLanguage() {
         return "constant";
     }
 
-    public Class<?> getResultType() {
-        return resultType;
-    }
-
     /**
-     * Sets the class of the constant type
+     * {@code Builder} is a specific builder for {@link ConstantExpression}.
      */
-    public void setResultType(Class<?> resultType) {
-        this.resultType = resultType;
-    }
+    @XmlTransient
+    public static class Builder extends AbstractBuilder<Builder, ConstantExpression> {
 
-    public String getResultTypeName() {
-        return resultTypeName;
+        @Override
+        public ConstantExpression end() {
+            return new ConstantExpression(this);
+        }
     }
-
-    /**
-     * Sets the class name of the constant type
-     */
-    public void setResultTypeName(String resultTypeName) {
-        this.resultTypeName = resultTypeName;
-    }
-
 }

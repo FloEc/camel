@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>components</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-spring-xml</artifactId>
@@ -36,10 +36,7 @@
         <firstVersion>3.9.0</firstVersion>
         <label>spring</label>
         <supportLevel>Stable</supportLevel>
-        <camel.osgi.import>
-            javax.xml.bind*;version="[2.2,3.0)",
-            *
-        </camel.osgi.import>
+        <title>Spring XML</title>
 
         <camel.surefire.forkCount>4</camel.surefire.forkCount>
         <camel.surefire.parallel>false</camel.surefire.parallel>
@@ -78,16 +75,19 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
+            <version>${awaitility-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
+            <version>${spring-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
+            <version>${spring-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -130,28 +130,28 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
+            <version>${spring-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
+            <version>${derby-version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>${hamcrest-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta-annotation-api-version}</version>
         </dependency>
 
-        <!-- logging for testing -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- xmlunit, assertj and woostox are used for a few tests -->
-        <dependency>
-            <groupId>org.xmlunit</groupId>
-            <artifactId>xmlunit-core</artifactId>
-            <version>${xmlunit-version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!-- assertj and woostox are used for a few tests -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -282,18 +282,6 @@
                                 </resource>
                             </resources>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Push the execution order of the maven-bundle-plugin further to the end. That's why we add it here again. -->
-            <plugin>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-bundle-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>bundle-manifest</id>
-                        <phase>prepare-package</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -615,8 +603,8 @@
                         <link>http://download.oracle.com/javase/7/docs/api/</link>
                         <link>http://download.oracle.com/javaee/7/api/</link>
                         <link>http://static.springsource.org/spring/docs/${spring-version}/javadoc-api/</link>
-                        <link>http://camel.apache.org/maven/current/camel-core-model/apidocs/</link>
-                        <link>http://camel.apache.org/maven/current/camel-core-engine/apidocs/</link>
+                        <link>http://javadoc.io/doc/org.apache.camel/camel-core-model/latest/</link>
+                        <link>http://javadoc.io/doc/org.apache.camel/camel-core-engine/latest/</link>
                     </links>
                     <linksource>true</linksource>
                     <maxmemory>256m</maxmemory>

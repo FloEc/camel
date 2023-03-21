@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.AvailablePortFinder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -90,7 +91,7 @@ public class InterfacesTest extends BaseJettyTest {
             assertEquals("remote", remoteResponse);
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -108,15 +109,15 @@ public class InterfacesTest extends BaseJettyTest {
             assertEquals("allInterfaces", remoteResponse);
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
 
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("jetty:http://localhost:" + port1 + "/testRoute").setBody().constant("local").to("mock:endpoint");
 
                 from("jetty:http://localhost:" + port2 + "/testRoute").setBody().constant("local-differentPort")

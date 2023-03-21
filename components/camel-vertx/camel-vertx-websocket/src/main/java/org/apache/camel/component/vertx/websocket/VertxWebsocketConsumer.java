@@ -16,20 +16,21 @@
  */
 package org.apache.camel.component.vertx.websocket;
 
+import java.util.Map;
+
+import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
-import org.apache.camel.AsyncCallback;
+import io.vertx.core.net.impl.ConnectionBase;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.support.DefaultConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implements a Vert.x Handler to handle WebSocket upgrade
  */
 public class VertxWebsocketConsumer extends DefaultConsumer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(VertxWebsocketConsumer.class);
 
     private final VertxWebsocketEndpoint endpoint;
 
@@ -59,22 +60,79 @@ public class VertxWebsocketConsumer extends DefaultConsumer {
         return endpoint.getComponent();
     }
 
-    public void onMessage(String connectionKey, Object message, SocketAddress remote) {
+    public void onMessage(String connectionKey, Object message, SocketAddress remote, RoutingContext routingContext) {
         Exchange exchange = createExchange(true);
-        exchange.getMessage().setHeader(VertxWebsocketConstants.REMOTE_ADDRESS, remote);
-        exchange.getMessage().setHeader(VertxWebsocketConstants.CONNECTION_KEY, connectionKey);
         exchange.getMessage().setBody(message);
-
-        // use default consumer callback
-        AsyncCallback cb = defaultConsumerCallback(exchange, true);
-        getAsyncProcessor().process(exchange, cb);
+        populateExchangeHeaders(exchange, connectionKey, remote, routingContext, VertxWebsocketEvent.MESSAGE);
+        processExchange(exchange, routingContext);
     }
 
-    public void onException(String connectionKey, Throwable cause, SocketAddress remote) {
+    public void onException(String connectionKey, Throwable cause, SocketAddress remote, RoutingContext routingContext) {
+        if (cause == ConnectionBase.CLOSED_EXCEPTION) {
+            // Ignore as VertxWebsocketHost registers a closeHandler to trap WebSocket close events
+            return;
+        }
+
         Exchange exchange = createExchange(false);
-        exchange.getMessage().setHeader(VertxWebsocketConstants.REMOTE_ADDRESS, remote);
-        exchange.getMessage().setHeader(VertxWebsocketConstants.CONNECTION_KEY, connectionKey);
+        populateExchangeHeaders(exchange, connectionKey, remote, routingContext, VertxWebsocketEvent.ERROR);
+
         getExceptionHandler().handleException("Error processing exchange", exchange, cause);
         releaseExchange(exchange, false);
+    }
+
+    public void onOpen(String connectionKey, SocketAddress remote, RoutingContext routingContext, ServerWebSocket webSocket) {
+        Exchange exchange = createExchange(true);
+        populateExchangeHeaders(exchange, connectionKey, remote, routingContext, VertxWebsocketEvent.OPEN);
+        exchange.getMessage().setBody(webSocket);
+        processExchange(exchange, routingContext);
+    }
+
+    public void onClose(String connectionKey, SocketAddress remote, RoutingContext routingContext) {
+        Exchange exchange = createExchange(true);
+        populateExchangeHeaders(exchange, connectionKey, remote, routingContext, VertxWebsocketEvent.CLOSE);
+        processExchange(exchange, routingContext);
+    }
+
+    protected void populateExchangeHeaders(
+            Exchange exchange, String connectionKey, SocketAddress remote, RoutingContext routingContext,
+            VertxWebsocketEvent event) {
+        Message message = exchange.getMessage();
+        Map<String, Object> headers = message.getHeaders();
+        message.setHeader(VertxWebsocketConstants.REMOTE_ADDRESS, remote);
+        message.setHeader(VertxWebsocketConstants.CONNECTION_KEY, connectionKey);
+        message.setHeader(VertxWebsocketConstants.EVENT, event);
+        routingContext.queryParams()
+                .forEach((name, value) -> VertxWebsocketHelper.appendHeader(headers, name, value));
+        routingContext.pathParams()
+                .forEach((name, value) -> VertxWebsocketHelper.appendHeader(headers, name, value));
+    }
+
+    protected void processExchange(Exchange exchange, RoutingContext routingContext) {
+        routingContext.vertx().executeBlocking(
+                promise -> {
+                    try {
+                        createUoW(exchange);
+                    } catch (Exception e) {
+                        promise.fail(e);
+                        return;
+                    }
+
+                    getAsyncProcessor().process(exchange, c -> {
+                        promise.complete();
+                    });
+                },
+                false,
+                result -> {
+                    try {
+                        if (result.failed()) {
+                            Throwable cause = result.cause();
+                            getExceptionHandler().handleException(cause);
+                            routingContext.fail(cause);
+                        }
+                    } finally {
+                        doneUoW(exchange);
+                        releaseExchange(exchange, false);
+                    }
+                });
     }
 }

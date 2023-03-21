@@ -32,7 +32,7 @@ public class MinaSslContextParametersTcpTest extends BaseMinaTest {
                 "mina:tcp://localhost:" + getPort() + "?sync=false&minaLogger=true&sslContextParameters=#sslContextParameters",
                 body, "cheese", 123);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
@@ -47,8 +47,8 @@ public class MinaSslContextParametersTcpTest extends BaseMinaTest {
             public void configure() {
                 fromF("mina:tcp://localhost:%s?sync=false&minaLogger=true&sslContextParameters=#sslContextParameters",
                         getPort())
-                                .to("log:before?showAll=true")
-                                .to("mock:result").to("log:after?showAll=true");
+                        .to("log:before?showAll=true")
+                        .to("mock:result").to("log:after?showAll=true");
             }
         };
     }

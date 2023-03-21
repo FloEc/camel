@@ -38,6 +38,7 @@ import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -70,7 +71,7 @@ public final class AWSSDKClientUtils {
 
     /**
      * Generic AWS v2 client builder
-     * 
+     *
      * @param  property              the system property used to figure out if it's local service or not
      * @param  name                  the service name
      * @param  clientBuilderSupplier A supplier type for creating the builder class
@@ -103,6 +104,10 @@ public final class AWSSDKClientUtils {
             clientBuilder.credentialsProvider(new SystemPropertiesAWSCredentialsProvider());
         }
 
+        if (clientBuilder instanceof S3ClientBuilder) {
+            ((S3ClientBuilder) clientBuilder).forcePathStyle(true);
+        }
+
         Object o = clientBuilder.build();
         if (yClass.isInstance(o)) {
             return (Y) o;
@@ -113,7 +118,7 @@ public final class AWSSDKClientUtils {
 
     /**
      * Generic AWS v2 client builder
-     * 
+     *
      * @param  name                  the service name
      * @param  clientBuilderSupplier A supplier type for creating the builder class
      * @param  yClass                The client type to be generated

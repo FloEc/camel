@@ -1,7 +1,7 @@
 = Route Template
 
-A Route template is as its name implies a template for a route, which are used
-to create routes from a set of input parameters. Another way of think is that
+A Route template is as its name implies a template for a route, which is used
+to create routes from a set of input parameters. In other words,
 route templates are parameterized routes.
 
 _Route template_ + _input parameters_ => _route_
@@ -34,7 +34,7 @@ public class MyRouteTemplates extends RouteBuilder {
 }
 ----
 
-And in XML DSL
+And in Spring XML DSL
 
 [source,xml]
 ----
@@ -52,10 +52,28 @@ And in XML DSL
 </camelContext>
 ----
 
+And in XML DSL
+
+[source,xml]
+----
+<routeTemplates xmlns="http://camel.apache.org/schema/spring">
+    <routeTemplate id="myTemplate">
+        <templateParameter name="name"/>
+        <templateParameter name="greeting"/>
+        <templateParameter name="myPeriod" defaultValue="3s"/>
+        <route>
+            <from uri="timer:{{name}}?period={{myPeriod}}"/>
+            <setBody><simple>{{greeting}} ${body}</simple></setBody>
+            <log message="${body}"/>
+        </route>
+    </routeTemplate>
+</routeTemplates>
+----
+
 In the examples above there was one route template, but you can define as many as you want.
-Each template must have an unique id. The template parameters are used for defining the parameters
+Each template must have a unique id. The template parameters are used for defining the parameters
 the template accepts. As you can see there are 3 parameters: name, greeting, and myPeriod. The first two
-parameters are mandatory, where as myPeriod is optional as it has a default value of 3s.
+parameters are mandatory, whereas myPeriod is optional as it has a default value of 3s.
 
 The template parameters are then used in the route as regular property placeholders with the `{{ }}` syntax.
 Notice how we use `{\{name}}` and `{\{greeting}}` in the timer endpoint and the simple language.
@@ -78,7 +96,7 @@ Template parameters take precedence over regular property placeholders.
 
 To create routes from route templates, then you should use `org.apache.camel.builder.TemplatedRouteBuilder`.
 
-In the following you can see how this is done with the builder as shown below:
+In the following code snippet, you can see how this is done with the builder:
 
 [source,java]
 ----
@@ -95,6 +113,75 @@ TemplatedRouteBuilder.builder(context, "myTemplate")
     .add();
 ----
 
+And in Java DSL
+
+[source,java]
+----
+templatedRoute("myTemplate")
+        .parameter("name", "one")
+        .parameter("greeting", "Hello");
+templatedRoute("myTemplate")
+        .parameter("name", "two")
+        .parameter("greeting", "Bonjour")
+        .parameter("myPeriod", "5s");
+----
+
+And in Spring XML DSL
+
+[source,xml]
+----
+<camelContext>
+  <templatedRoute routeTemplateRef="myTemplate">
+    <parameter name="name" value="one"/>
+    <parameter name="greeting" value="Hello"/>
+  </templatedRoute>
+  <templatedRoute routeTemplateRef="myTemplate">
+    <parameter name="name" value="two"/>
+    <parameter name="greeting" value="Bonjour"/>
+    <parameter name="myPeriod" value="5s"/>
+  </templatedRoute>
+</camelContext>
+----
+
+And in XML DSL
+
+[source,xml]
+----
+<templatedRoutes xmlns="http://camel.apache.org/schema/spring">
+  <templatedRoute routeTemplateRef="myTemplate">
+    <parameter name="name" value="one"/>
+    <parameter name="greeting" value="Hello"/>
+  </templatedRoute>
+  <templatedRoute routeTemplateRef="myTemplate">
+    <parameter name="name" value="two"/>
+    <parameter name="greeting" value="Bonjour"/>
+    <parameter name="myPeriod" value="5s"/>
+  </templatedRoute>
+</templatedRoutes>
+----
+
+And in YAML DSL
+
+[source,yaml]
+----
+- templated-route:
+    route-template-ref: "myTemplate"
+    parameters:
+      - name: "name"
+        value: "one"
+      - name: "greeting"
+        value: "Hello"
+- templated-route:
+    route-template-ref: "myTemplate"
+    parameters:
+      - name: "name"
+        value: "two"
+      - name: "greeting"
+        value: "Bonjour"
+      - name: "myPeriod"
+        value: "5s"
+----
+
 The returned value from `add` is the route id of the new route that was added.
 However `null` is returned if the route is not yet created and added, which can happen if `CamelContext` is
 not started yet.
@@ -102,7 +189,7 @@ not started yet.
 If no route id is provided, then Camel will auto assign a route id. In the example above then Camel would
 assign route ids such as `route1`, `route2` to these routes.
 
-If you want to specify a route id, then use `routeId` as follows, where the name is myCoolRoute:
+If you want to specify a route id, then use `routeId` as follows, where the id is set to myCoolRoute:
 
 [source,java]
 ----
@@ -114,6 +201,141 @@ TemplatedRouteBuilder.builder(context, "myTemplate")
     .add();
 ----
 
+And in Java DSL
+
+[source,java]
+----
+templatedRoute("myTemplate")
+        .routeId("myCoolRoute")
+        .parameter("name", "one")
+        .parameter("greeting", "hello")
+        .parameter("myPeriod", "5s");
+----
+
+And in Spring XML DSL
+
+[source,xml]
+----
+<camelContext>
+  <templatedRoute routeTemplateRef="myTemplate" routeId="myCoolRoute">
+    <parameter name="name" value="one"/>
+    <parameter name="greeting" value="hello"/>
+    <parameter name="myPeriod" value="5s"/>
+  </templatedRoute>
+</camelContext>
+----
+
+And in XML DSL
+
+[source,xml]
+----
+<templatedRoutes xmlns="http://camel.apache.org/schema/spring">
+  <templatedRoute routeTemplateRef="myTemplate" routeId="myCoolRoute">
+    <parameter name="name" value="one"/>
+    <parameter name="greeting" value="hello"/>
+    <parameter name="myPeriod" value="5s"/>
+  </templatedRoute>
+</templatedRoutes>
+----
+
+And in YAML DSL
+
+[source,yaml]
+----
+- templated-route:
+    route-template-ref: "myTemplate"
+    route-id: "myCoolRoute"
+    parameters:
+      - name: "name"
+        value: "one"
+      - name: "greeting"
+        value: "hello"
+      - name: "myPeriod"
+        value: "5s"
+----
+
+=== Using hardcoded node IDs in route templates
+
+If route templates contains hardcoded node IDs then routes created from templates will use the same IDs
+and therefore if 2 or more routes are created from the same template, you will have _duplicate id detected_ error.
+
+Given the route template below, then it has hardcoded ID (_new-order_) in node calling the http services.
+
+[source,java]
+----
+public class MyRouteTemplates extends RouteBuilder {
+
+    @Override
+    public void configure() throws Exception {
+        routeTemplate("orderTemplate")
+            .templateParameter("queue")
+            .from("jms:{{queue}}")
+                .to("http:orderserver.acme.com/neworder").id("new-order")
+                .log("Processing order");
+    }
+}
+----
+
+When creating routes from templates, you can then provide a _prefix_ which are used for all node IDs.
+This allows to create 2 or more routes without _duplicate id_ errors.
+
+For example in the following we create a new route _myCoolRoute_ from the _myTemplate_ template, and
+use a prefix of _web_.
+
+And in Java DSL
+
+[source,java]
+----
+templatedRoute("orderTemplate")
+        .routeId("webOrder")
+        .prefixId("web")
+        .parameter("queue", "order.web");
+----
+
+Then we can create a 2nd route:
+
+[source,java]
+----
+templatedRoute("orderTemplate")
+        .routeId("ftpOrder")
+        .prefixId("ftp")
+        .parameter("queue", "order.ftp");
+----
+
+And in Spring XML DSL
+
+[source,xml]
+----
+<camelContext>
+  <templatedRoute routeTemplateRef="orderTemplate" routeId="webOrder" prefixId="web">
+    <parameter name="queue" value="web"/>
+  </templatedRoute>
+</camelContext>
+----
+
+And in XML DSL
+
+[source,xml]
+----
+<templatedRoutes xmlns="http://camel.apache.org/schema/spring">
+  <templatedRoute routeTemplateRef="orderTemplate" routeId="webOrder" prefixId="web">
+    <parameter name="queue" value="web"/>
+  </templatedRoute>
+</templatedRoutes>
+----
+
+And in YAML DSL
+
+[source,yaml]
+----
+- templated-route:
+    route-template-ref: "orderTemplate"
+    route-id: "webOrder"
+    prefix-id: "web"
+    parameters:
+      - name: "queue"
+        value: "web"
+----
 
 == Binding beans to route template
 
@@ -139,19 +361,19 @@ The template has two parameters to specify the AWS region and the S3 bucket. To 
 then a `software.amazon.awssdk.services.s3.S3Client` bean is needed.
 
 To create this bean we specify this with the `templateBean` DSL where we specify the bean id as `myClient`.
-The type of the bean can be specified (`S3Client.class`) however its optional
-(can be use if you need to let beans be discovered by type and not name).
+The type of the bean can be specified (`S3Client.class`) however it is optional
+(can be used if you need to let beans be discovered by type and not by name).
 
 This ensures that the code creating the bean is executed later ( when Camel is creating a route from the template),
 then the code must be specified as a _supplier_. Because we want during creation of the bean access to template parameters,
 we use a Camel `BeanSupplier` which gives access to `RouteTemplateContext` that is the _rtc_ variable in the code above.
 
-*Important:* the local bean with id `myClient` *must* be referred to using Camel's property placeholder syntax, eg `{\{myClient}}`
+IMPORTANT: The local bean with id `myClient` *must* be referred to using Camel's property placeholder syntax, eg `{\{myClient}}`
 in the route template, as shown above with the _to_ endpoint. This is because the local
-bean must be made unique and Camel will internally re-assign the bean id to use an unique id instead of `myClient`. And this is done with the help
+bean must be made unique and Camel will internally re-assign the bean id to use a unique id instead of `myClient`. And this is done with the help
 of the property placeholder functionality.
 
-If multiple routes is created from this template, then each of the created routes, have their own
+If multiple routes are created from this template, then each of the created routes, have their own
 S3Client bean created.
 
 === Binding beans to route templates from template builder
@@ -194,6 +416,86 @@ TemplatedRouteBuilder.builder(context, "s3template")
 
 As you can see the binding is similar to when using `templateBean` directly in the route template.
 
+And in Java DSL
+
+[source,java]
+----
+templatedRoute("s3template")
+        .parameter("region", "US-EAST-1")
+        .parameter("bucket", "myBucket")
+        .bean("myClient", S3Client.class,
+                rtc -> S3Client.builder() // <1>
+                    .region(rtc.getProperty("region", Region.class))
+                    .build())
+        .routeId("mys3route");
+----
+<1> Note that the third parameter of the `bean` method is not directly the bean but rather a factory method that will be used to create the bean, here we use a lambda expression as factory method.
+
+And in Spring XML DSL
+
+[source,xml]
+----
+<camelContext>
+  <templatedRoute routeTemplateRef="s3template" routeId="mys3route">
+    <parameter name="region" value="US-EAST-1"/>
+    <parameter name="bucket" value="myBucket"/>
+    <bean name="myClient" type="groovy"> <!--1-->
+        <script>
+            import software.amazon.awssdk.services.s3.S3Client
+            S3Client.builder()
+                .region(rtc.getProperty("region", Region.class))
+                .build()
+        </script>
+    </bean>
+  </templatedRoute>
+</camelContext>
+----
+<1> For non-Java DSL, in case of a complex bean factory, you can still rely on a language like `groovy` to define your bean factory inside a `script` element.
+
+And in XML DSL
+
+[source,xml]
+----
+<templatedRoutes xmlns="http://camel.apache.org/schema/spring">
+  <templatedRoute routeTemplateRef="s3template" routeId="mys3route">
+    <parameter name="region" value="US-EAST-1"/>
+    <parameter name="bucket" value="myBucket"/>
+    <bean name="myClient" type="groovy"> <!--1-->
+        <script>
+            import software.amazon.awssdk.services.s3.S3Client
+            S3Client.builder()
+                .region(rtc.getProperty("region", Region.class))
+                .build()
+        </script>
+    </bean>
+  </templatedRoute>
+</templatedRoutes>
+----
+<1> For non-Java DSL, in case of a complex bean factory, you can still rely on a language like `groovy` to define your bean factory inside a `script` element.
+
+And in YAML DSL
+
+[source,yaml]
+----
+- templated-route:
+    route-template-ref: "s3template"
+    route-id: "mys3route"
+    parameters:
+      - name: "region"
+        value: "US-EAST-1"
+      - name: "bucket"
+        value: "myBucket"
+    beans:
+      - name: "myClient"
+        type: "groovy"
+        script: | # <1>
+            import software.amazon.awssdk.services.s3.S3Client
+            S3Client.builder()
+                .region(rtc.getProperty("region", Region.class))
+                .build()
+----
+<1> For non-Java DSL, in case of a complex bean factory, you can still rely on a language like `groovy` to define your bean factory as value of the `script` key.
+
 Instead of binding the beans from the template builder, you could also create the bean outside the template,
 and bind it by reference.
 
@@ -210,9 +512,20 @@ TemplatedRouteBuilder.builder(context, "s3template")
     .add();
 ----
 
+And in Java DSL
+
+[source,java]
+----
+templatedRoute("s3template")
+        .parameter("region", "US-EAST-1")
+        .parameter("bucket", "myBucket")
+        .bean("myClient", S3Client.class, rtc -> myClient)
+        .routeId("mys3route");
+----
+
 You should prefer to create the local beans directly from within the template (if possible) because this
-ensures the route template has this out of the box. Otherwise the bean must be created or provided every time
-a new route is created from the route template. However the latter gives freedom to create the bean in any other custom way.
+ensures the route template has this out of the box. Otherwise, the bean must be created or provided every time
+a new route is created from the route template. However, the latter gives freedom to create the bean in any other custom way.
 
 === Binding beans to route templates using bean types
 
@@ -258,11 +571,11 @@ With Java DSL you can also refer to the bean class using type safe way:
 
 [source,java]
 ----
-    .templateBean("myBar")
-        .typeClass(MyBar.class)
-        .property("name", "{{bar}}")
-        .property("address", "{{street}}")
-    .end()
+.templateBean("myBar")
+    .typeClass(MyBar.class)
+    .property("name", "{{bar}}")
+    .property("address", "{{street}}")
+.end()
 ----
 
 In XML DSL you would do:
@@ -287,7 +600,7 @@ In XML DSL you would do:
 
 === Binding beans to route templates using scripting languages
 
-You can use scripting languages like groovy, joor, mvel which creates the bean.
+You can use scripting languages like groovy, joor, mvel to create the bean.
 This allows to define route templates with the scripting language built-in (such as groovy).
 
 For example creating the AWS S3 client can be done as shown in Java (with inlined groovy code):
@@ -539,11 +852,11 @@ camel.route-template[1].result=cheese
 The SPI interface `org.apache.camel.spi.RouteTemplateParameterSource` can be used to implement custom sources that
 are used during startup of Camel to create routes via the templates with parameters from the custom source(s).
 
-For example a custom source can be implemented that reads parameters from a shared database that Camel uses during staring
-by creating routes. This allows to externalize these parameters and as well to easily add more routes with varying parameters.
+For example a custom source can be implemented to read parameters from a shared database that Camel uses during startup
+to create routes. This allows to externalize these parameters and as well to easily add more routes with varying parameters.
 
 To let Camel discover custom sources then register the source into the Camel registry.
 
 == See Also
 
-See the example https://github.com/apache/camel-examples/tree/master/examples/routetemplate[camel-example-routetemplate].
+See the example https://github.com/apache/camel-examples/tree/main/examples/routetemplate[camel-examples/examples/routetemplate/].

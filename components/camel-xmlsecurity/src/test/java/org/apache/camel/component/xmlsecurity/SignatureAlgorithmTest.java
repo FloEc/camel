@@ -89,8 +89,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
 
     static {
         boolean includeNewLine = true;
-        if (TestSupport.getJavaMajorVersion() >= 9
-                || TestSupport.isJava18_261_later() && !TestSupport.isJavaVendor("Azul")) {
+        if (!TestSupport.isJavaVendor("Azul")) {
             includeNewLine = false;
         }
         payload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -143,9 +142,9 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder[] createRouteBuilders() throws Exception {
+    protected RouteBuilder[] createRouteBuilders() {
         return new RouteBuilder[] { new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:hmacsha1")
                         .to("xmlsecurity-sign:hmacsha1?keyAccessor=#secretKeyAccessor"
@@ -155,7 +154,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:hmacsha224")
                         .to("xmlsecurity-sign:hmacsha224?keyAccessor=#secretKeyAccessor"
@@ -164,7 +163,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:hmacsha256")
                         .to("xmlsecurity-sign:hmacsha256?keyAccessor=#secretKeyAccessor"
@@ -173,7 +172,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:hmacsha384")
                         .to("xmlsecurity-sign:hmacsha384?keyAccessor=#secretKeyAccessor"
@@ -182,7 +181,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:hmacsha512")
                         .to("xmlsecurity-sign:hmacsha512?keyAccessor=#secretKeyAccessor"
@@ -191,7 +190,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:hmacripemd160")
                         .to("xmlsecurity-sign:hmacripemd160?keyAccessor=#secretKeyAccessor"
@@ -200,7 +199,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha1")
                         .to("xmlsecurity-sign:rsasha1?keyAccessor=#accessor"
@@ -209,7 +208,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha224")
                         .to("xmlsecurity-sign:rsasha224?keyAccessor=#accessor"
@@ -218,7 +217,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha256")
                         .to("xmlsecurity-sign:rsasha256?keyAccessor=#accessor"
@@ -227,7 +226,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha384")
                         .to("xmlsecurity-sign:rsasha384?keyAccessor=#accessor"
@@ -236,7 +235,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha512")
                         .to("xmlsecurity-sign:rsasha512?keyAccessor=#accessor"
@@ -245,7 +244,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsaripemd160")
                         .to("xmlsecurity-sign:rsaripemd160?keyAccessor=#accessor"
@@ -254,7 +253,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha1_mgf1")
                         .to("xmlsecurity-sign:rsasha1_mgf1?keyAccessor=#accessor"
@@ -263,7 +262,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha224_mgf1")
                         .to("xmlsecurity-sign:rsasha224_mgf1?keyAccessor=#accessor"
@@ -272,7 +271,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha256_mgf1")
                         .to("xmlsecurity-sign:rsasha256_mgf1?keyAccessor=#accessor"
@@ -281,7 +280,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha384_mgf1")
                         .to("xmlsecurity-sign:rsasha384_mgf1?keyAccessor=#accessor"
@@ -290,7 +289,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
                 // END SNIPPET: signature and digest algorithm
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: signature and digest algorithm
                 from("direct:rsasha512_mgf1")
                         .to("xmlsecurity-sign:rsasha512_mgf1?keyAccessor=#accessor"
@@ -308,42 +307,42 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
     public void testHMACSHA1() throws Exception {
         setupMock();
         sendBody("direct:hmacsha1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHMACSHA224() throws Exception {
         setupMock();
         sendBody("direct:hmacsha224", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHMACSHA256() throws Exception {
         setupMock();
         sendBody("direct:hmacsha256", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHMACSHA384() throws Exception {
         setupMock();
         sendBody("direct:hmacsha384", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHMACSHA512() throws Exception {
         setupMock();
         sendBody("direct:hmacsha512", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHMACRIPEMD160() throws Exception {
         setupMock();
         sendBody("direct:hmacripemd160", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     //
@@ -353,77 +352,77 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
     public void testRSASHA1() throws Exception {
         setupMock();
         sendBody("direct:rsasha1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA224() throws Exception {
         setupMock();
         sendBody("direct:rsasha224", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA256() throws Exception {
         setupMock();
         sendBody("direct:rsasha256", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA384() throws Exception {
         setupMock();
         sendBody("direct:rsasha384", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA512() throws Exception {
         setupMock();
         sendBody("direct:rsasha512", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSARIPEMD160() throws Exception {
         setupMock();
         sendBody("direct:rsaripemd160", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA1MGF1() throws Exception {
         setupMock();
         sendBody("direct:rsasha1_mgf1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA224MGF1() throws Exception {
         setupMock();
         sendBody("direct:rsasha224_mgf1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA256MGF1() throws Exception {
         setupMock();
         sendBody("direct:rsasha256_mgf1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA384MGF1() throws Exception {
         setupMock();
         sendBody("direct:rsasha384_mgf1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testRSASHA512MGF1() throws Exception {
         setupMock();
         sendBody("direct:rsasha512_mgf1", payload);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     private MockEndpoint setupMock() {
@@ -463,7 +462,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
             } else {
                 template.sendBodyAndHeaders("direct:in", payload, headers);
             }
-            assertMockEndpointsSatisfied();
+            MockEndpoint.assertIsSatisfied(SignatureAlgorithmTest.this.context);
             return mock.getReceivedExchanges().get(0);
         } finally {
             context.stop();
@@ -478,7 +477,7 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
         super.setUp();
     }
 
-    public void setUpKeys(String algorithm, int keylength) throws Exception {
+    public void setUpKeys(String algorithm, int keylength) {
         keyPair = getKeyPair(algorithm, keylength);
     }
 
@@ -519,12 +518,12 @@ public class SignatureAlgorithmTest extends CamelTestSupport {
         KeyAccessor accessor = new KeyAccessor() {
 
             @Override
-            public KeySelector getKeySelector(Message message) throws Exception {
+            public KeySelector getKeySelector(Message message) {
                 return KeySelector.singletonKeySelector(key);
             }
 
             @Override
-            public KeyInfo getKeyInfo(Message mess, Node messageBody, KeyInfoFactory keyInfoFactory) throws Exception {
+            public KeyInfo getKeyInfo(Message mess, Node messageBody, KeyInfoFactory keyInfoFactory) {
                 return null;
             }
         };

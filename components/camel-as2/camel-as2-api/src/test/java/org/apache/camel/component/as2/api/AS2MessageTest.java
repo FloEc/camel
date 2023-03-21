@@ -16,15 +16,30 @@
  */
 package org.apache.camel.component.as2.api;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.*;
 
+import com.helger.as2lib.client.AS2Client;
+import com.helger.as2lib.client.AS2ClientRequest;
+import com.helger.as2lib.client.AS2ClientResponse;
+import com.helger.as2lib.client.AS2ClientSettings;
+import com.helger.as2lib.crypto.ECompressionType;
+import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt;
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign;
+import com.helger.mail.cte.EContentTransferEncoding;
+import com.helger.security.keystore.EKeyStoreType;
 import org.apache.camel.component.as2.api.entity.AS2DispositionModifier;
 import org.apache.camel.component.as2.api.entity.AS2DispositionType;
 import org.apache.camel.component.as2.api.entity.AS2MessageDispositionNotificationEntity;
@@ -43,6 +58,7 @@ import org.apache.camel.component.as2.api.util.EntityUtils;
 import org.apache.camel.component.as2.api.util.HttpMessageUtils;
 import org.apache.camel.component.as2.api.util.MicUtils;
 import org.apache.camel.component.as2.api.util.MicUtils.ReceivedContentMic;
+import org.apache.camel.component.as2.api.util.SigningUtils;
 import org.apache.camel.test.AvailablePortFinder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -75,6 +91,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +101,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AS2MessageTest {
 
@@ -118,6 +137,11 @@ public class AS2MessageTest {
     private static final String METHOD = "POST";
     private static final String TARGET_HOST = "localhost";
     private static final int TARGET_PORT = AvailablePortFinder.getNextAvailable();
+    private static final Duration HTTP_SOCKET_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration HTTP_CONNECTION_TIMEOUT = Duration.ofSeconds(5);
+    private static final Integer HTTP_CONNECTION_POOL_SIZE = 5;
+    private static final Duration HTTP_CONNECTION_POOL_TTL = Duration.ofMinutes(15);
+    private static final Certificate[] VALIDATE_SIGNING_CERTIFICATE_CHAIN = null;
     private static final String RECIPIENT_DELIVERY_ADDRESS = "http://localhost:" + TARGET_PORT + "/handle-receipts";
     private static final String AS2_VERSION = "1.1";
     private static final String USER_AGENT = "Camel AS2 Endpoint";
@@ -144,6 +168,10 @@ public class AS2MessageTest {
     private static X509Certificate signingCert;
     private static List<X509Certificate> certList;
 
+    private static File keystoreFile;
+
+    private static ApplicationEDIEntity ediEntity;
+
     private AS2SignedDataGenerator gen;
 
     @BeforeAll
@@ -168,6 +196,17 @@ public class AS2MessageTest {
         signingKP = kpg.generateKeyPair();
         signingCert = Utils.makeCertificate(signingKP, signingDN, issueKP, issueDN);
 
+        //
+        // initialize as2-lib keystore file
+        //
+        KeyStore ks = KeyStore.getInstance(EKeyStoreType.PKCS12.getID());
+        ks.load(null, "test".toCharArray());
+        ks.setKeyEntry("openas2a_alias", issueKP.getPrivate(), "test".toCharArray(), new X509Certificate[] { issueCert });
+        ks.setKeyEntry("openas2b_alias", signingKP.getPrivate(), "test".toCharArray(), new X509Certificate[] { signingCert });
+        keystoreFile = Files.createTempFile("camel-as2", "keystore-p12").toFile();
+        keystoreFile.deleteOnExit();
+        ks.store(new FileOutputStream(keystoreFile), "test".toCharArray());
+
         certList = new ArrayList<>();
 
         certList.add(signingCert);
@@ -177,7 +216,8 @@ public class AS2MessageTest {
 
         testServer = new AS2ServerConnection(
                 AS2_VERSION, "MyServer-HTTP/1.1", SERVER_FQDN, TARGET_PORT, AS2SignatureAlgorithm.SHA256WITHRSA,
-                certList.toArray(new Certificate[0]), signingKP.getPrivate(), decryptingKP.getPrivate(), MDN_MESSAGE_TEMPLATE);
+                certList.toArray(new Certificate[0]), signingKP.getPrivate(), decryptingKP.getPrivate(), MDN_MESSAGE_TEMPLATE,
+                VALIDATE_SIGNING_CERTIFICATE_CHAIN);
         testServer.listen("*", new HttpRequestHandler() {
             @Override
             public void handle(HttpRequest request, HttpResponse response, HttpContext context)
@@ -186,7 +226,9 @@ public class AS2MessageTest {
                     org.apache.camel.component.as2.api.entity.EntityParser.parseAS2MessageEntity(request);
                     context.setAttribute(AS2ServerManager.SUBJECT, SUBJECT);
                     context.setAttribute(AS2ServerManager.FROM, AS2_NAME);
-                    LOG.debug(AS2Utils.printMessage(request));
+                    LOG.debug("{}", AS2Utils.printMessage(request));
+                    ediEntity = HttpMessageUtils.extractEdiPayload(request, new HttpMessageUtils.DecrpytingAndSigningInfo(
+                            testServer.getValidateSigningCertificateChain(), testServer.getDecryptingPrivateKey()));
                 } catch (Exception e) {
                     throw new HttpException("Failed to parse AS2 Message Entity", e);
                 }
@@ -241,13 +283,10 @@ public class AS2MessageTest {
 
     @Test
     public void plainEDIMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
-                AS2MessageStructure.PLAIN, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII),
+                AS2MessageStructure.PLAIN, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII),
                 null, null, null, null, null, DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, null, null,
                 "file.txt");
 
@@ -281,15 +320,58 @@ public class AS2MessageTest {
         assertTrue(ediEntity.isMainBody(), "Entity not set as main body of request");
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "false,false,false", "false,false,true", "false,true,false", "false,true,true", "true,false,false",
+            "true,false,true", "true,true,false", "true,true,true" })
+    void binaryContentTransferEncodingTest(boolean encrypt, boolean sign, boolean compress) {
+        // test with as2-lib because Camel AS2 client doesn't support binary content transfer encoding at the moment
+        // inspired from https://github.com/phax/as2-lib/wiki/Submodule-as2%E2%80%90lib#as2-client
+
+        // Start client configuration
+        final AS2ClientSettings aSettings = new AS2ClientSettings();
+        aSettings.setKeyStore(EKeyStoreType.PKCS12, keystoreFile, "test");
+
+        // Fixed sender
+        aSettings.setSenderData(AS2_NAME, FROM, "openas2a_alias");
+
+        // Fixed receiver
+        aSettings.setReceiverData(AS2_NAME, "openas2b_alias", "http://" + TARGET_HOST + ":" + TARGET_PORT + "/");
+        aSettings.setReceiverCertificate(issueCert);
+
+        // AS2 stuff
+        aSettings.setPartnershipName(aSettings.getSenderAS2ID() + "_" + aSettings.getReceiverAS2ID());
+
+        // Build client request
+        final AS2ClientRequest aRequest = new AS2ClientRequest("AS2 test message from as2-lib");
+        aRequest.setData(EDI_MESSAGE, StandardCharsets.US_ASCII);
+        aRequest.setContentType(AS2MediaType.APPLICATION_EDIFACT);
+
+        // reproduce https://issues.apache.org/jira/projects/CAMEL/issues/CAMEL-15111
+        aSettings.setEncryptAndSign(encrypt ? ECryptoAlgorithmCrypt.CRYPT_AES128_GCM : null,
+                sign ? ECryptoAlgorithmSign.DIGEST_SHA_512 : null);
+        if (compress) {
+            aSettings.setCompress(ECompressionType.ZLIB, false);
+        }
+        aRequest.setContentTransferEncoding(EContentTransferEncoding.BINARY);
+
+        // Send message
+        ediEntity = null;
+        final AS2ClientResponse aResponse = new AS2Client().sendSynchronous(aSettings, aRequest);
+
+        // Assertions
+        if (aResponse.hasException()) {
+            fail(aResponse.getException());
+        }
+        assertEquals(EDI_MESSAGE, ediEntity.getEdiMessage().replaceAll("\r", ""));
+    }
+
     @Test
     public void multipartSignedMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
-                AS2MessageStructure.SIGNED, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII),
+                AS2MessageStructure.SIGNED, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII),
                 null, AS2SignatureAlgorithm.SHA256WITHRSA, certList.toArray(new Certificate[0]), signingKP.getPrivate(),
                 null, DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, null, null, "file.txt");
 
@@ -437,16 +519,13 @@ public class AS2MessageTest {
     }
 
     public void envelopedMessageTest(AS2EncryptionAlgorithm encryptionAlgorithm) throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
-        LOG.info("Key Algoritm: " + signingKP.getPrivate().getAlgorithm());
+        LOG.info("Key Algorithm: {}", signingKP.getPrivate().getAlgorithm());
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
                 AS2MessageStructure.ENCRYPTED,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), null,
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), null,
                 AS2SignatureAlgorithm.SHA256WITHRSA, certList.toArray(new Certificate[0]), signingKP.getPrivate(), null,
                 DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, encryptionAlgorithm,
                 certList.toArray(new Certificate[0]), "file.txt");
@@ -495,16 +574,13 @@ public class AS2MessageTest {
     }
 
     public void envelopedAndSignedMessageTest(AS2EncryptionAlgorithm encryptionAlgorithm) throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
-        LOG.info("Key Algoritm: " + signingKP.getPrivate().getAlgorithm());
+        LOG.info("Key Algorithm: {}", signingKP.getPrivate().getAlgorithm());
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
                 AS2MessageStructure.SIGNED_ENCRYPTED,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), null,
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), null,
                 AS2SignatureAlgorithm.SHA256WITHRSA, certList.toArray(new Certificate[0]), signingKP.getPrivate(), null,
                 DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, encryptionAlgorithm,
                 certList.toArray(new Certificate[0]), "file.txt");
@@ -565,13 +641,10 @@ public class AS2MessageTest {
 
     @Test
     public void signatureVerificationTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
-                AS2MessageStructure.SIGNED, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII),
+                AS2MessageStructure.SIGNED, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII),
                 null, AS2SignatureAlgorithm.SHA256WITHRSA, certList.toArray(new Certificate[0]), signingKP.getPrivate(),
                 null, DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, null, null, "file.txt");
 
@@ -589,19 +662,16 @@ public class AS2MessageTest {
         assertNotNull(signatureEntity, "Multipart signed entity does not contain signature entity");
 
         // Validate Signature
-        assertTrue(multipartSignedEntity.isValid(), "Signature is invalid");
+        assertTrue(SigningUtils.isValid(multipartSignedEntity, new Certificate[] { signingCert }), "Signature is invalid");
 
     }
 
     @Test
     public void mdnMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
-                AS2MessageStructure.PLAIN, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII),
+                AS2MessageStructure.PLAIN, ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII),
                 null, null, null, null, null, DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, null, null,
                 "file.txt");
 
@@ -622,18 +692,18 @@ public class AS2MessageTest {
                 = (DispositionNotificationMultipartReportEntity) responseSignedDataEntity;
         assertEquals(2, reportEntity.getPartCount(), "Unexpected number of body parts in report");
         MimeEntity firstPart = reportEntity.getPart(0);
-        assertEquals(ContentType.create(AS2MimeType.TEXT_PLAIN, AS2Charset.US_ASCII).toString(),
+        assertEquals(ContentType.create(AS2MimeType.TEXT_PLAIN, StandardCharsets.US_ASCII).toString(),
                 firstPart.getContentTypeValue(),
                 "Unexpected content type in first body part of report");
         MimeEntity secondPart = reportEntity.getPart(1);
-        assertEquals(ContentType.create(AS2MimeType.MESSAGE_DISPOSITION_NOTIFICATION, AS2Charset.US_ASCII).toString(),
+        assertEquals(ContentType.create(AS2MimeType.MESSAGE_DISPOSITION_NOTIFICATION, StandardCharsets.US_ASCII).toString(),
                 secondPart.getContentTypeValue(),
                 "Unexpected content type in second body part of report");
         ApplicationPkcs7SignatureEntity signatureEntity = responseSignedEntity.getSignatureEntity();
         assertNotNull(signatureEntity, "Signature Entity");
 
         // Validate Signature
-        assertTrue(responseSignedEntity.isValid(), "Signature is invalid");
+        assertTrue(SigningUtils.isValid(responseSignedEntity, new Certificate[] { signingCert }), "Signature is invalid");
     }
 
     @Test
@@ -645,7 +715,7 @@ public class AS2MessageTest {
 
         // Create plain edi request message to acknowledge
         ApplicationEDIEntity ediEntity = EntityUtils.createEDIEntity(EDI_MESSAGE,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), null, false, "filename.txt");
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), null, false, "filename.txt");
         HttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("POST", REQUEST_URI);
         HttpMessageUtils.setHeaderValue(request, AS2Header.SUBJECT, SUBJECT);
         String httpdate = DATE_GENERATOR.getCurrentDate();
@@ -675,7 +745,7 @@ public class AS2MessageTest {
                 request,
                 response, DispositionMode.AUTOMATIC_ACTION_MDN_SENT_AUTOMATICALLY, AS2DispositionType.PROCESSED,
                 dispositionModifier, failureFields, errorFields, warningFields, extensionFields, null, "boundary", true,
-                null, "Got ya message!");
+                null, "Got ya message!", null);
 
         // Send MDN
         HttpCoreContext httpContext = mdnManager.send(mdn, RECIPIENT_DELIVERY_ADDRESS);
@@ -700,25 +770,22 @@ public class AS2MessageTest {
         assertArrayEquals(errorFields, mdnEntity.getErrorFields(), "Unexpected value for Error Fields");
         assertArrayEquals(warningFields, mdnEntity.getWarningFields(), "Unexpected value for Warning Fields");
         assertEquals(extensionFields, mdnEntity.getExtensionFields(), "Unexpected value for Extension Fields");
-        ReceivedContentMic expectedMic = MicUtils.createReceivedContentMic(request, null);
+        ReceivedContentMic expectedMic = MicUtils.createReceivedContentMic(request, null, null);
         ReceivedContentMic mdnMic = mdnEntity.getReceivedContentMic();
         assertEquals(expectedMic.getEncodedMessageDigest(), mdnMic.getEncodedMessageDigest(),
                 "Unexpected value for Received Content Mic");
-        LOG.debug("\r\n" + AS2Utils.printMessage(mndRequest));
+        LOG.debug("\r\n{}", AS2Utils.printMessage(mndRequest));
     }
 
     @Test
     public void compressedMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
-        LOG.info("Key Algoritm: " + signingKP.getPrivate().getAlgorithm());
+        LOG.info("Key Algorithm: {}", signingKP.getPrivate().getAlgorithm());
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
                 AS2MessageStructure.PLAIN_COMPRESSED,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), null,
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), null,
                 null, null, null, AS2CompressionAlgorithm.ZLIB,
                 DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, null,
                 null, "file.txt");
@@ -762,16 +829,13 @@ public class AS2MessageTest {
 
     @Test
     public void compressedAndSignedMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
-        LOG.info("Key Algoritm: " + signingKP.getPrivate().getAlgorithm());
+        LOG.info("Key Algorithm: {}", signingKP.getPrivate().getAlgorithm());
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
                 AS2MessageStructure.SIGNED_COMPRESSED,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), "base64",
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), "base64",
                 AS2SignatureAlgorithm.SHA256WITHRSA, certList.toArray(new Certificate[0]), signingKP.getPrivate(),
                 AS2CompressionAlgorithm.ZLIB,
                 DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS, null,
@@ -831,16 +895,13 @@ public class AS2MessageTest {
 
     @Test
     public void envelopedAndCompressedMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
-        LOG.info("Key Algoritm: " + signingKP.getPrivate().getAlgorithm());
+        LOG.info("Key Algorithm: {}", signingKP.getPrivate().getAlgorithm());
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
                 AS2MessageStructure.ENCRYPTED_COMPRESSED,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), "base64", null, null, null,
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), "base64", null, null, null,
                 AS2CompressionAlgorithm.ZLIB, DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS,
                 AS2EncryptionAlgorithm.AES128_CBC, certList.toArray(new Certificate[0]), "file.txt");
 
@@ -893,16 +954,13 @@ public class AS2MessageTest {
 
     @Test
     public void envelopedCompressedAndSignedMessageTest() throws Exception {
-        AS2ClientConnection clientConnection = new AS2ClientConnection(
-                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
-                TARGET_HOST, TARGET_PORT);
-        AS2ClientManager clientManager = new AS2ClientManager(clientConnection);
+        AS2ClientManager clientManager = createDefaultClientManager();
 
-        LOG.info("Key Algoritm: " + signingKP.getPrivate().getAlgorithm());
+        LOG.info("Key Algorithm: {}", signingKP.getPrivate().getAlgorithm());
 
         HttpCoreContext httpContext = clientManager.send(EDI_MESSAGE, REQUEST_URI, SUBJECT, FROM, AS2_NAME, AS2_NAME,
                 AS2MessageStructure.ENCRYPTED_COMPRESSED_SIGNED,
-                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, AS2Charset.US_ASCII), null,
+                ContentType.create(AS2MediaType.APPLICATION_EDIFACT, StandardCharsets.US_ASCII), null,
                 AS2SignatureAlgorithm.SHA256WITHRSA, certList.toArray(new Certificate[0]), signingKP.getPrivate(),
                 AS2CompressionAlgorithm.ZLIB, DISPOSITION_NOTIFICATION_TO, SIGNED_RECEIPT_MIC_ALGORITHMS,
                 AS2EncryptionAlgorithm.AES128_CBC, certList.toArray(new Certificate[0]), "file.txt");
@@ -968,4 +1026,53 @@ public class AS2MessageTest {
         assertFalse(signatureEntity.isMainBody(), "First mime type set as main body of request");
     }
 
+    @ParameterizedTest
+    @CsvSource({ "false,false", "false,true", "true,false", "true,true" })
+    void compressionSignatureOrderTest(boolean encrypt, boolean compressBeforeSign) {
+        // test with as2-lib because Camel AS2 client doesn't support different orders at the moment
+        // inspired from https://github.com/phax/as2-lib/wiki/Submodule-as2%E2%80%90lib#as2-client
+
+        // Start client configuration
+        final AS2ClientSettings aSettings = new AS2ClientSettings();
+        aSettings.setKeyStore(EKeyStoreType.PKCS12, keystoreFile, "test");
+
+        // Fixed sender
+        aSettings.setSenderData(AS2_NAME, FROM, "openas2a_alias");
+
+        // Fixed receiver
+        aSettings.setReceiverData(AS2_NAME, "openas2b_alias", "http://" + TARGET_HOST + ":" + TARGET_PORT + "/");
+        aSettings.setReceiverCertificate(issueCert);
+
+        // AS2 stuff
+        aSettings.setPartnershipName(aSettings.getSenderAS2ID() + "_" + aSettings.getReceiverAS2ID());
+
+        // Build client request
+        final AS2ClientRequest aRequest = new AS2ClientRequest("AS2 test message from as2-lib");
+        aRequest.setData(EDI_MESSAGE, StandardCharsets.US_ASCII);
+        aRequest.setContentType(AS2MediaType.APPLICATION_EDIFACT);
+
+        // reproduce https://issues.apache.org/jira/browse/CAMEL-18842
+        aSettings.setEncryptAndSign(encrypt ? ECryptoAlgorithmCrypt.CRYPT_AES128_GCM : null,
+                ECryptoAlgorithmSign.DIGEST_SHA_512);
+        aSettings.setCompress(ECompressionType.ZLIB, compressBeforeSign);
+        aRequest.setContentTransferEncoding(EContentTransferEncoding.BINARY);
+
+        // Send message
+        ediEntity = null;
+        final AS2ClientResponse aResponse = new AS2Client().sendSynchronous(aSettings, aRequest);
+
+        // Assertions
+        if (aResponse.hasException()) {
+            fail(aResponse.getException());
+        }
+        assertEquals(EDI_MESSAGE, ediEntity.getEdiMessage().replaceAll("\r", ""));
+    }
+
+    private AS2ClientManager createDefaultClientManager() throws IOException {
+        AS2ClientConnection clientConnection = new AS2ClientConnection(
+                AS2_VERSION, USER_AGENT, CLIENT_FQDN,
+                TARGET_HOST, TARGET_PORT, HTTP_SOCKET_TIMEOUT, HTTP_CONNECTION_TIMEOUT, HTTP_CONNECTION_POOL_SIZE,
+                HTTP_CONNECTION_POOL_TTL);
+        return new AS2ClientManager(clientConnection);
+    }
 }

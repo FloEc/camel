@@ -124,15 +124,15 @@ class EventHubsConsumerIT extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("azure-eventhubs:?"
                      + "connectionString=RAW({{connectionString}})"
                      + "&blobContainerName=" + containerName + "&eventPosition=#eventPosition"
                      + "&blobAccountName={{blobAccountName}}&blobAccessKey=RAW({{blobAccessKey}})")
-                             .to(result);
+                        .to(result);
 
             }
         };

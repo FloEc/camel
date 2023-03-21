@@ -17,22 +17,15 @@
 package org.apache.camel.processor;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
-import org.apache.camel.spi.annotations.EagerClassloaded;
 import org.slf4j.Logger;
 
 /**
  * Helper for processing {@link org.apache.camel.Exchange} in a
  * <a href="http://camel.apache.org/pipes-and-filters.html">pipeline</a>.
  */
-@EagerClassloaded
 public final class PipelineHelper {
 
     private PipelineHelper() {
-    }
-
-    public static void onClassloaded(Logger log) {
-        log.trace("Loaded PipelineHelper");
     }
 
     /**
@@ -45,9 +38,9 @@ public final class PipelineHelper {
      *                  occurred.
      */
     public static boolean continueProcessing(Exchange exchange, String message, Logger log) {
-        ExtendedExchange ee = (ExtendedExchange) exchange;
-        boolean stop = ee.isFailed() || ee.isRollbackOnly() || ee.isRollbackOnlyLast()
-                || ee.isErrorHandlerHandledSet() && ee.isErrorHandlerHandled();
+        boolean stop = exchange.isFailed() || exchange.isRollbackOnly() || exchange.isRollbackOnlyLast()
+                || exchange.getExchangeExtension().isErrorHandlerHandledSet()
+                        && exchange.getExchangeExtension().isErrorHandlerHandled();
         if (stop) {
             // The errorErrorHandler is only set if satisfactory handling was done
             // by the error handler. It's still an exception, the exchange still failed.
@@ -60,7 +53,8 @@ public final class PipelineHelper {
                 if (exchange.getException() != null) {
                     sb.append(" Exception: ").append(exchange.getException());
                 }
-                if (ee.isErrorHandlerHandledSet() && ee.isErrorHandlerHandled()) {
+                if (exchange.getExchangeExtension().isErrorHandlerHandledSet()
+                        && exchange.getExchangeExtension().isErrorHandlerHandled()) {
                     sb.append(" Handled by the error handler.");
                 }
                 log.debug(sb.toString());
@@ -70,7 +64,7 @@ public final class PipelineHelper {
         }
 
         // check for stop
-        if (ee.isRouteStop()) {
+        if (exchange.isRouteStop()) {
             if (log.isDebugEnabled()) {
                 log.debug("ExchangeId: {} is marked to stop routing: {}", exchange.getExchangeId(), exchange);
             }

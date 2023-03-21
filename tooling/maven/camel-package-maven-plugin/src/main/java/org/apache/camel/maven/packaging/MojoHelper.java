@@ -32,6 +32,9 @@ public final class MojoHelper {
                 return Collections.singletonList(dir.resolve("camel-as2-component"));
             case "camel-avro-rpc":
                 return Collections.singletonList(dir.resolve("camel-avro-rpc-component"));
+            case "camel-cxf":
+                return Arrays.asList(dir.resolve("camel-cxf-soap"),
+                        dir.resolve("camel-cxf-rest"));
             case "camel-salesforce":
                 return Collections.singletonList(dir.resolve("camel-salesforce-component"));
             case "camel-olingo2":
@@ -49,26 +52,26 @@ public final class MojoHelper {
             case "camel-azure":
                 return Arrays.asList(dir.resolve("camel-azure-eventhubs"), dir.resolve("camel-azure-storage-blob"),
                         dir.resolve("camel-azure-storage-datalake"), dir.resolve("camel-azure-cosmosdb"),
-                        dir.resolve("camel-azure-storage-queue"), dir.resolve("camel-azure-servicebus"));
+                        dir.resolve("camel-azure-storage-queue"), dir.resolve("camel-azure-servicebus"),
+                        dir.resolve("camel-azure-key-vault"));
             case "camel-google":
                 return Arrays.asList(dir.resolve("camel-google-bigquery"), dir.resolve("camel-google-calendar"),
                         dir.resolve("camel-google-drive"), dir.resolve("camel-google-mail"), dir.resolve("camel-google-pubsub"),
                         dir.resolve("camel-google-sheets"),
-                        dir.resolve("camel-google-storage"), dir.resolve("camel-google-functions"));
+                        dir.resolve("camel-google-storage"), dir.resolve("camel-google-functions"),
+                        dir.resolve("camel-google-secret-manager"));
             case "camel-debezium":
                 return Arrays.asList(dir.resolve("camel-debezium-mongodb"), dir.resolve("camel-debezium-mysql"),
-                        dir.resolve("camel-debezium-postgres"), dir.resolve("camel-debezium-sqlserver"));
+                        dir.resolve("camel-debezium-postgres"), dir.resolve("camel-debezium-sqlserver"),
+                        dir.resolve("camel-debezium-oracle"), dir.resolve("camel-debezium-db2"));
             case "camel-microprofile":
                 return Arrays.asList(dir.resolve("camel-microprofile-config"),
                         dir.resolve("camel-microprofile-fault-tolerance"),
-                        dir.resolve("camel-microprofile-health"), dir.resolve("camel-microprofile-metrics"));
+                        dir.resolve("camel-microprofile-health"));
             case "camel-test":
-                return Arrays.asList(dir.resolve("camel-test"),
-                        dir.resolve("camel-test-cdi"),
-                        dir.resolve("camel-testcontainers"), dir.resolve("camel-testcontainers-junit5"),
-                        dir.resolve("camel-testcontainers-spring"), dir.resolve("camel-testcontainers-spring-junit5"),
-                        dir.resolve("camel-test-junit5"), dir.resolve("camel-test-spring"),
-                        dir.resolve("camel-test-spring-junit5"));
+                return Arrays.asList(dir.resolve("camel-test-junit5"),
+                        dir.resolve("camel-test-spring-junit5"),
+                        dir.resolve("camel-test-main-junit5"));
             case "camel-aws":
                 return Arrays.asList(dir.resolve("camel-aws2-athena"), dir.resolve("camel-aws2-cw"),
                         dir.resolve("camel-aws2-ddb"), dir.resolve("camel-aws2-ec2"),
@@ -79,19 +82,26 @@ public final class MojoHelper {
                         dir.resolve("camel-aws2-msk"), dir.resolve("camel-aws2-s3"), dir.resolve("camel-aws2-ses"),
                         dir.resolve("camel-aws2-sns"),
                         dir.resolve("camel-aws2-sqs"), dir.resolve("camel-aws2-sts"), dir.resolve("camel-aws2-translate"),
-                        dir.resolve("camel-aws-xray"), dir.resolve("camel-aws-secrets-manager"));
+                        dir.resolve("camel-aws-xray"), dir.resolve("camel-aws-secrets-manager"),
+                        dir.resolve("camel-aws-cloudtrail"));
             case "camel-vertx":
                 return Arrays.asList(dir.resolve("camel-vertx"),
                         dir.resolve("camel-vertx-http"),
-                        dir.resolve("camel-vertx-kafka").resolve("camel-vertx-kafka-component"),
                         dir.resolve("camel-vertx-websocket"));
             case "camel-huawei":
-                return Arrays.asList(dir.resolve("camel-huaweicloud-functiongraph"),
-                        dir.resolve("camel-huaweicloud-smn"),
-                        dir.resolve("camel-huaweicloud-iam"),
+                return Arrays.asList(dir.resolve("camel-huaweicloud-frs"),
                         dir.resolve("camel-huaweicloud-dms"),
+                        dir.resolve("camel-huaweicloud-functiongraph"),
+                        dir.resolve("camel-huaweicloud-iam"),
                         dir.resolve("camel-huaweicloud-imagerecognition"),
-                        dir.resolve("camel-huaweicloud-obs"));
+                        dir.resolve("camel-huaweicloud-obs"),
+                        dir.resolve("camel-huaweicloud-smn"));
+            case "camel-knative":
+                return Collections.singletonList(dir.resolve("camel-knative-component"));
+            case "camel-groovy-dsl":
+                return Collections.singletonList(dir.resolve("camel-groovy-dsl"));
+            case "camel-yaml-dsl":
+                return Collections.singletonList(dir.resolve("camel-yaml-dsl"));
             default:
                 return Collections.singletonList(dir);
         }

@@ -91,7 +91,7 @@ public class ProducerTest extends SplunkMockTestSupport {
         splunkEvent.addPair("key22", "value2");
         splunkEvent.addPair("key33", "value3");
         template.sendBody("direct:stream", splunkEvent);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         Producer streamProducer = streamEndpoint.createProducer();
         assertIsInstanceOf(StreamDataWriter.class, ((SplunkProducer) streamProducer).getDataWriter());
     }
@@ -105,7 +105,7 @@ public class ProducerTest extends SplunkMockTestSupport {
         splunkEvent.addPair("key2", "value2");
         splunkEvent.addPair("key3", "value1");
         template.sendBody("direct:submit", splunkEvent);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         Producer submitProducer = submitEndpoint.createProducer();
         assertIsInstanceOf(SubmitDataWriter.class, ((SplunkProducer) submitProducer).getDataWriter());
     }
@@ -119,7 +119,7 @@ public class ProducerTest extends SplunkMockTestSupport {
         splunkEvent.addPair("key2", "value2");
         splunkEvent.addPair("key3", "value3");
         template.sendBody("direct:tcp", splunkEvent);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         Producer tcpProducer = tcpEndpoint.createProducer();
         assertIsInstanceOf(TcpDataWriter.class, ((SplunkProducer) tcpProducer).getDataWriter());
     }
@@ -154,13 +154,13 @@ public class ProducerTest extends SplunkMockTestSupport {
     }
 
     @Test
-    public void testBodyWithoutRawOption() throws Exception {
+    public void testBodyWithoutRawOption() {
         assertThrows(CamelExecutionException.class,
                 () -> template.sendBody("direct:tcp", "foobar"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:stream").to(

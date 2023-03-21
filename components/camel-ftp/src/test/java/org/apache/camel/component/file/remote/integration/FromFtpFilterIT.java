@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 public class FromFtpFilterIT extends FtpServerTestSupport {
 
     @BindToRegistry("myFilter")
-    private MyFileFilter filter = new MyFileFilter<>();
+    private final MyFileFilter<Object> filter = new MyFileFilter<>();
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/filter?password=admin&binary=false&filter=#myFilter";
@@ -60,16 +60,16 @@ public class FromFtpFilterIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };
     }
 
     // START SNIPPET: e1
-    public class MyFileFilter<T> implements GenericFileFilter<T> {
+    public static class MyFileFilter<T> implements GenericFileFilter<T> {
         @Override
         public boolean accept(GenericFile<T> file) {
             // we don't accept any files starting with skip in the name

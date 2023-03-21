@@ -45,14 +45,14 @@ public class JdbcAggregateSerializedHeadersTest extends AbstractJdbcAggregationT
 
         LOG.info("Sending all " + SIZE + " message done. Now waiting for aggregation to complete.");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 repo.setAllowSerializedHeaders(true);
                 from("seda:start?size=" + SIZE)
                         .to("log:input?groupSize=500")

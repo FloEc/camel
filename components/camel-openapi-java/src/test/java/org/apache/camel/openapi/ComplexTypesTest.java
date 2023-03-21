@@ -34,7 +34,9 @@ import org.apache.camel.impl.engine.DefaultClassResolver;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestDefinition;
 import org.apache.camel.openapi.model.SampleComplexRequestType;
+import org.apache.camel.openapi.model.SampleComplexRequestTypeWithSchemaAnnotation;
 import org.apache.camel.openapi.model.SampleComplexResponseType;
+import org.apache.camel.openapi.model.SampleComplexResponseTypeWithSchemaAnnotation;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -51,7 +53,7 @@ public class ComplexTypesTest extends CamelTestSupport {
     private final DummyRestConsumerFactory factory = new DummyRestConsumerFactory();
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {
@@ -71,9 +73,10 @@ public class ComplexTypesTest extends CamelTestSupport {
                     .message("Receives a complex object as parameter")
                     .endResponseMessage()
                     .outType(SampleComplexResponseType.InnerClass.class)
-                    .route()
-                    .routeId("complex request type")
-                    .log("/complex request invoked");
+                    .to("direct:request");
+                from("direct:request")
+                        .routeId("complex request type")
+                        .log("/complex request invoked");
 
                 rest().get("/complexResponse")
                     .description("Demo complex response type")
@@ -86,10 +89,45 @@ public class ComplexTypesTest extends CamelTestSupport {
                     .code(200)
                     .message("Returns a complex object")
                     .endResponseMessage()
-                    .route()
-                    .routeId("complex response type")
-                    .log("/complex invoked")
-                    .setBody(constant(new SampleComplexResponseType()));
+                    .to("direct:response");
+
+                from("direct:response")
+                        .routeId("complex response type")
+                        .log("/complex invoked")
+                        .setBody(constant(new SampleComplexResponseType()));
+
+                rest().post("/complexRequestWithSchemaAnnotation")
+                        .description("Demo complex request type")
+                        .type(SampleComplexRequestTypeWithSchemaAnnotation.class)
+                        .consumes("application/json")
+                        .produces("text/plain")
+                        .bindingMode(RestBindingMode.json)
+                        .responseMessage()
+                        .code(200)
+                        .message("Receives a complex object as parameter")
+                        .endResponseMessage()
+                        .outType(SampleComplexResponseTypeWithSchemaAnnotation.InnerClass.class)
+                        .to("direct:requestWithSchemaAnnotation");
+                from("direct:requestWithSchemaAnnotation")
+                        .routeId("complex request type with schema annotation")
+                        .log("/complex request invoked");
+
+                rest().get("/complexResponseWithSchemaAnnotation")
+                        .description("Demo complex response type")
+                        .type(SampleComplexRequestType.InnerClass.class)
+                        .consumes("application/json")
+                        .outType(SampleComplexResponseTypeWithSchemaAnnotation.class)
+                        .produces("application/json")
+                        .bindingMode(RestBindingMode.json)
+                        .responseMessage()
+                        .code(200)
+                        .message("Returns a complex object")
+                        .endResponseMessage()
+                        .to("direct:responseWithSchemaAnnotation");
+                from("direct:responseWithSchemaAnnotation")
+                        .routeId("complex response type with schema annotation")
+                        .log("/complex invoked")
+                        .setBody(constant(new SampleComplexResponseTypeWithSchemaAnnotation()));
             }
         };
     }
@@ -114,12 +152,36 @@ public class ComplexTypesTest extends CamelTestSupport {
         checkSchemaGeneration("/complexResponse", "2.0", "V2SchemaForComplexTypesResponse.json");
     }
 
+    @Test
+    public void testV3SchemaForComplexTypesWithSchemaAnnotationRequest() throws Exception {
+        checkSchemaGeneration("/complexRequestWithSchemaAnnotation", "3.0",
+                "V3SchemaForComplexTypesRequestWithSchemaAnnotation.json");
+    }
+
+    @Test
+    public void testV2SchemaForComplexTypesWithSchemaAnnotationRequest() throws Exception {
+        checkSchemaGeneration("/complexRequestWithSchemaAnnotation", "2.0",
+                "V2SchemaForComplexTypesRequestWithSchemaAnnotation.json");
+    }
+
+    @Test
+    public void testV3SchemaForComplexTypesWithSchemaAnnotationResponse() throws Exception {
+        checkSchemaGeneration("/complexResponseWithSchemaAnnotation", "3.0",
+                "V3SchemaForComplexTypesResponseWithSchemaAnnotation.json");
+    }
+
+    @Test
+    public void testV2SchemaForComplexTypesWithSchemaAnnotationResponse() throws Exception {
+        checkSchemaGeneration("/complexResponseWithSchemaAnnotation", "2.0",
+                "V2SchemaForComplexTypesResponseWithSchemaAnnotation.json");
+    }
+
     private void checkSchemaGeneration(String uri, String apiVersion, String schemaResource) throws Exception {
         BeanConfig config = getBeanConfig(apiVersion);
 
         List<RestDefinition> rests = context.getRestDefinitions().stream()
                 // So we get the security schema and the route schema
-                .filter(def -> def.getVerbs().isEmpty() || def.getVerbs().get(0).getUri().equals(uri))
+                .filter(def -> def.getVerbs().isEmpty() || def.getVerbs().get(0).getPath().equals(uri))
                 .collect(Collectors.toList());
 
         RestOpenApiReader reader = new RestOpenApiReader();
@@ -140,8 +202,8 @@ public class ComplexTypesTest extends CamelTestSupport {
         assertNotNull(is);
         String expected = new BufferedReader(
                 new InputStreamReader(is, StandardCharsets.UTF_8))
-                        .lines()
-                        .collect(Collectors.joining("\n"));
+                .lines()
+                .collect(Collectors.joining("\n"));
         is.close();
 
         assertEquals(expected, json);
@@ -163,7 +225,7 @@ public class ComplexTypesTest extends CamelTestSupport {
         input = input.replaceAll("\"openapi\" : \"3\\..*\",", "\"openapi\" : \"3.x\",");
         input = input.replaceAll("\"swagger\" : \"2\\..*\",", "\"swagger\" : \"2.x\",");
         input = input.replaceAll("\"operationId\" : \"verb.*\",", "\"operationId\" : \"verb\",");
-        input = input.replaceAll("\"x-camelContextId\" : \"camel.*\",", "\"x-camelContextId\" : \"camel\",");
+        input = input.replaceAll("\"x-camelContextId\" : \"camel.*\"", "\"x-camelContextId\" : \"camel\"");
         return input;
     }
 }

@@ -16,10 +16,11 @@
  */
 package org.apache.camel.model.language;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.spi.Metadata;
 
@@ -30,6 +31,7 @@ import org.apache.camel.spi.Metadata;
 @XmlRootElement(name = "language")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class LanguageExpression extends ExpressionDefinition {
+
     @XmlAttribute(required = true)
     private String language;
 
@@ -39,6 +41,11 @@ public class LanguageExpression extends ExpressionDefinition {
     public LanguageExpression(String language, String expression) {
         setLanguage(language);
         setExpression(expression);
+    }
+
+    private LanguageExpression(Builder builder) {
+        super(builder);
+        this.language = builder.language;
     }
 
     @Override
@@ -51,5 +58,27 @@ public class LanguageExpression extends ExpressionDefinition {
      */
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    /**
+     * {@code Builder} is a specific builder for {@link LanguageExpression}.
+     */
+    @XmlTransient
+    public static class Builder extends AbstractBuilder<Builder, LanguageExpression> {
+
+        private String language;
+
+        /**
+         * The name of the language to use
+         */
+        public Builder language(String language) {
+            this.language = language;
+            return this;
+        }
+
+        @Override
+        public LanguageExpression end() {
+            return new LanguageExpression(this);
+        }
     }
 }

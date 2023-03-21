@@ -19,7 +19,6 @@ package org.apache.camel.reifier.rest;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Route;
 import org.apache.camel.model.rest.RestBindingDefinition;
 import org.apache.camel.model.rest.RestBindingMode;
@@ -64,7 +63,7 @@ public class RestBindingReifier extends AbstractReifier {
         Map<String, String> corsHeaders = config.getCorsHeaders();
 
         if ("off".equals(mode)) {
-            // binding mode is off, so create a off mode binding processor
+            // binding mode is off, so create off mode binding processor
             return new RestBindingAdvice(
                     camelContext, null, null, null, null,
                     parseString(definition.getConsumes()), parseString(definition.getProduces()), mode, skip, validation, cors,
@@ -86,7 +85,7 @@ public class RestBindingReifier extends AbstractReifier {
                             "JsonDataFormat name: " + name + " must not be an existing bean instance from the registry");
                 }
             } else {
-                name = "json-jackson";
+                name = "jackson";
             }
             // this will create a new instance as the name was not already
             // pre-created
@@ -129,7 +128,7 @@ public class RestBindingReifier extends AbstractReifier {
 
             if (jaxb != null) {
                 // to setup JAXB we need to use camel-jaxb
-                camelContext.adapt(ExtendedCamelContext.class).getRestBindingJaxbDataFormatFactory().setupJaxb(
+                camelContext.getCamelContextExtension().getRestBindingJaxbDataFormatFactory().setupJaxb(
                         camelContext, config,
                         parseString(definition.getType()), definition.getTypeClass(),
                         parseString(definition.getOutType()), definition.getOutTypeClass(),
@@ -161,9 +160,9 @@ public class RestBindingReifier extends AbstractReifier {
             clazz = camelContext.getClassResolver().resolveMandatoryClass(typeName);
         }
         if (clazz != null) {
-            camelContext.adapt(ExtendedCamelContext.class).getBeanIntrospection().setProperty(camelContext, json,
+            camelContext.getCamelContextExtension().getBeanIntrospection().setProperty(camelContext, json,
                     "unmarshalType", clazz);
-            camelContext.adapt(ExtendedCamelContext.class).getBeanIntrospection().setProperty(camelContext, json, "useList",
+            camelContext.getCamelContextExtension().getBeanIntrospection().setProperty(camelContext, json, "useList",
                     useList);
         }
 
@@ -182,9 +181,9 @@ public class RestBindingReifier extends AbstractReifier {
         }
 
         if (outClazz != null) {
-            camelContext.adapt(ExtendedCamelContext.class).getBeanIntrospection().setProperty(camelContext, outJson,
+            camelContext.getCamelContextExtension().getBeanIntrospection().setProperty(camelContext, outJson,
                     "unmarshalType", outClazz);
-            camelContext.adapt(ExtendedCamelContext.class).getBeanIntrospection().setProperty(camelContext, outJson, "useList",
+            camelContext.getCamelContextExtension().getBeanIntrospection().setProperty(camelContext, outJson, "useList",
                     outUseList);
         }
 

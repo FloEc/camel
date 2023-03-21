@@ -35,7 +35,6 @@ import javax.crypto.CipherOutputStream;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.StreamCache;
 import org.apache.camel.spi.StreamCachingStrategy;
@@ -127,6 +126,41 @@ public final class FileInputStreamCache extends InputStream implements StreamCac
         return getInputStream().read();
     }
 
+    @Override
+    public int read(byte[] b) throws IOException {
+        return getInputStream().read(b);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        return getInputStream().read(b, off, len);
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+        return getInputStream().skip(n);
+    }
+
+    @Override
+    public byte[] readAllBytes() throws IOException {
+        return getInputStream().readAllBytes();
+    }
+
+    @Override
+    public byte[] readNBytes(int len) throws IOException {
+        return getInputStream().readNBytes(len);
+    }
+
+    @Override
+    public int readNBytes(byte[] b, int off, int len) throws IOException {
+        return getInputStream().readNBytes(b, off, len);
+    }
+
+    @Override
+    public long transferTo(OutputStream out) throws IOException {
+        return getInputStream().transferTo(out);
+    }
+
     protected InputStream getInputStream() throws IOException {
         if (stream == null) {
             stream = createInputStream(file);
@@ -154,10 +188,10 @@ public final class FileInputStreamCache extends InputStream implements StreamCac
 
     /**
      * Manages the temporary file for the file input stream caches.
-     * 
+     *
      * Collects all FileInputStreamCache instances of the temporary file. Counts the number of exchanges which have a
      * FileInputStreamCache instance of the temporary file. Deletes the temporary file, if all exchanges are done.
-     * 
+     *
      * @see CachedOutputStream
      */
     static class TempFileManager {
@@ -237,13 +271,13 @@ public final class FileInputStreamCache extends InputStream implements StreamCac
                     // are aggregated later in the main route. Here, the cached streams of the sub-routes must be closed with
                     // the Unit of Work of the main route.
                     // streamCacheUnitOfWork.getRoute() != null means that the unit of work is still active and the done method
-                    // was not yet called: It can happen that streamCacheUnitOfWork.getRoute() == null in the split or 
+                    // was not yet called: It can happen that streamCacheUnitOfWork.getRoute() == null in the split or
                     // multi-cast case when there is a timeout on the main route and an exchange of the sub-route is added after
                     // the timeout. This we have to avoid because the stream cache would never be closed then.
                     streamCacheUnitOfWork.addSynchronization(onCompletion);
                 } else {
                     // add on completion so we can cleanup after the exchange is done such as deleting temporary files
-                    exchange.adapt(ExtendedExchange.class).addOnCompletion(onCompletion);
+                    exchange.getExchangeExtension().addOnCompletion(onCompletion);
                 }
             }
         }

@@ -77,7 +77,7 @@ public class ProxyProtocolTest {
 
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
 
                 // route variation that proxies from http://localhost:port to
                 // http://localhost:originPort/path
@@ -155,7 +155,7 @@ public class ProxyProtocolTest {
         final ShutdownStrategy shutdownStrategy = context.getShutdownStrategy();
         shutdownStrategy.setTimeout(100);
         shutdownStrategy.setTimeUnit(TimeUnit.MILLISECONDS);
-        shutdownStrategy.shutdownForced(context, context.getRouteStartupOrder());
+        shutdownStrategy.shutdownForced(context, context.getCamelContextExtension().getRouteStartupOrder());
 
         context.stop();
     }
@@ -194,7 +194,7 @@ public class ProxyProtocolTest {
     }
 
     @AfterAll
-    public static void verifyNoLeaks() throws Exception {
+    public static void verifyNoLeaks() {
         // Force GC to bring up leaks
         System.gc();
         // Kick leak detection logging

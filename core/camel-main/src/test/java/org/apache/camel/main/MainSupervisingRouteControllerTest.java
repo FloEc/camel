@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -42,7 +41,7 @@ public class MainSupervisingRouteControllerTest {
         // lets make a simple route
         Main main = new Main();
         main.configure().addRoutesBuilder(new MyRoute());
-        main.configure().withRouteControllerLoggingLevel(LoggingLevel.OFF)
+        main.configure()
                 .withRouteControllerSuperviseEnabled(true)
                 .withRouteControllerBackOffDelay(25)
                 .withRouteControllerBackOffMaxAttempts(3)

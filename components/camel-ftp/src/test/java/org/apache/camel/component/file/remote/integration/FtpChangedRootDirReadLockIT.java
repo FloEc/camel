@@ -18,11 +18,14 @@ package org.apache.camel.component.file.remote.integration;
 
 import java.io.FileOutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  */
 public class FtpChangedRootDirReadLockIT extends FtpServerTestSupport {
-
     private static final Logger LOG = LoggerFactory.getLogger(FtpChangedRootDirReadLockIT.class);
+
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}"
@@ -45,13 +50,13 @@ public class FtpChangedRootDirReadLockIT extends FtpServerTestSupport {
     public void testChangedReadLock() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedFileExists(testFile("slowfile.dat"));
+        mock.expectedFileExists(testDirectory.resolve("slowfile.dat"));
 
         writeSlowFile();
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        List<String> lines = Files.readAllLines(testFile("slowfile.dat"));
+        List<String> lines = Files.readAllLines(testDirectory.resolve("slowfile.dat"));
         assertEquals(20, lines.size(), "There should be 20 lines in the file");
         for (int i = 0; i < 20; i++) {
             assertEquals("Line " + i, lines.get(i));
@@ -62,7 +67,7 @@ public class FtpChangedRootDirReadLockIT extends FtpServerTestSupport {
         LOG.debug("Writing slow file...");
 
         createDirectory(service.getFtpRootDir() + "/");
-        FileOutputStream fos = new FileOutputStream(ftpFile("slowfile.dat").toFile(), true);
+        FileOutputStream fos = new FileOutputStream(service.ftpFile("slowfile.dat").toFile(), true);
         for (int i = 0; i < 20; i++) {
             fos.write(("Line " + i + LS).getBytes());
             LOG.debug("Writing line " + i);
@@ -75,11 +80,11 @@ public class FtpChangedRootDirReadLockIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from(getFtpUrl()).to(fileUri(), "mock:result");
+            public void configure() {
+                from(getFtpUrl()).to(TestSupport.fileUri(testDirectory), "mock:result");
             }
         };
     }

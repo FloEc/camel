@@ -31,10 +31,10 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.spi.Synchronization;
 import org.apache.camel.support.DefaultProducer;
 import org.apache.camel.support.PropertyBindingSupport;
+import org.apache.camel.support.SynchronizationAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +76,7 @@ public class JdbcProducer extends DefaultProducer {
     private void processingSqlBySettingAutoCommit(Exchange exchange) throws Exception {
         String sql = exchange.getIn().getBody(String.class);
         Connection conn = null;
-        Boolean autoCommit = null;
+        boolean autoCommit = false;
         boolean shouldCloseResources = true;
 
         try {
@@ -138,7 +138,7 @@ public class JdbcProducer extends DefaultProducer {
             final String preparedQuery
                     = getEndpoint().getPrepareStatementStrategy().prepareQuery(sql, getEndpoint().isAllowNamedParameters());
 
-            Boolean shouldRetrieveGeneratedKeys
+            boolean shouldRetrieveGeneratedKeys
                     = exchange.getIn().getHeader(JdbcConstants.JDBC_RETRIEVE_GENERATED_KEYS, false, Boolean.class);
 
             if (shouldRetrieveGeneratedKeys) {
@@ -157,6 +157,8 @@ public class JdbcProducer extends DefaultProducer {
             } else {
                 ps = conn.prepareStatement(preparedQuery);
             }
+
+            bindParameters(exchange, ps);
 
             int expectedCount = ps.getParameterMetaData().getParameterCount();
 
@@ -198,16 +200,20 @@ public class JdbcProducer extends DefaultProducer {
         try {
             // We might need to leave it open to allow post-processing of the result set. This is why we
             // are not using try-with-resources here.
-            Statement stmt = conn.createStatement();
+            final Statement stmt = conn.createStatement();
+            // ensure statement is closed (to not leak) when exchange is done
+            exchange.getExchangeExtension().addOnCompletion(new SynchronizationAdapter() {
+                @Override
+                public void onDone(Exchange exchange) {
+                    closeQuietly(stmt);
+                }
+            });
 
-            if (parameters != null && !parameters.isEmpty()) {
-                Map<String, Object> copy = new HashMap<>(parameters);
-                PropertyBindingSupport.bindProperties(exchange.getContext(), stmt, copy);
-            }
+            bindParameters(exchange, stmt);
 
             LOG.debug("Executing JDBC Statement: {}", sql);
 
-            Boolean shouldRetrieveGeneratedKeys
+            boolean shouldRetrieveGeneratedKeys
                     = exchange.getIn().getHeader(JdbcConstants.JDBC_RETRIEVE_GENERATED_KEYS, false, Boolean.class);
 
             boolean stmtExecutionResult;
@@ -248,6 +254,13 @@ public class JdbcProducer extends DefaultProducer {
         return shouldCloseResources;
     }
 
+    private void bindParameters(Exchange exchange, Statement stmt) {
+        if (parameters != null && !parameters.isEmpty()) {
+            Map<String, Object> copy = new HashMap<>(parameters);
+            PropertyBindingSupport.bindProperties(exchange.getContext(), stmt, copy);
+        }
+    }
+
     private void closeQuietly(ResultSet rs) {
         if (rs != null) {
             try {
@@ -272,8 +285,8 @@ public class JdbcProducer extends DefaultProducer {
         }
     }
 
-    private void resetAutoCommit(Connection con, Boolean autoCommit) {
-        if (con != null && autoCommit != null) {
+    private void resetAutoCommit(Connection con, boolean autoCommit) {
+        if (con != null) {
             try {
                 con.setAutoCommit(autoCommit);
             } catch (Throwable sqle) {
@@ -332,7 +345,7 @@ public class JdbcProducer extends DefaultProducer {
                     .setBody(new StreamListIterator(
                             getEndpoint().getCamelContext(), getEndpoint().getOutputClass(), getEndpoint().getBeanRowMapper(),
                             iterator));
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new ResultSetIteratorCompletion(iterator));
+            exchange.getExchangeExtension().addOnCompletion(new ResultSetIteratorCompletion(iterator));
             // do not close resources as we are in streaming mode
             answer = false;
         } else if (outputType == JdbcOutputType.SelectList) {

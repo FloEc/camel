@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GrpcConsumerExceptionTest extends CamelTestSupport {
 
@@ -58,7 +59,9 @@ public class GrpcConsumerExceptionTest extends CamelTestSupport {
 
     @AfterEach
     public void stopGrpcChannels() {
-        syncRequestChannel.shutdown().shutdownNow();
+        if (syncRequestChannel != null) {
+            syncRequestChannel.shutdown().shutdownNow();
+        }
     }
 
     @Test
@@ -72,7 +75,7 @@ public class GrpcConsumerExceptionTest extends CamelTestSupport {
     @Test
     public void testExchangeExceptionHandling() {
         LOG.info("gRPC exchange exception handling test start");
-        assertDoesNotThrow(() -> runExchangeExceptionHandlingTest());
+        assertDoesNotThrow(this::runExchangeExceptionHandlingTest);
     }
 
     private void runExchangeExceptionHandlingTest() throws InterruptedException {
@@ -82,23 +85,23 @@ public class GrpcConsumerExceptionTest extends CamelTestSupport {
         PongResponseStreamObserver responseObserver = new PongResponseStreamObserver(latch);
 
         nonBlockingStub.pingSyncSync(pingRequest, responseObserver);
-        latch.await(5, TimeUnit.SECONDS);
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {
                 from("grpc://localhost:" + GRPC_SYNC_REQUEST_TEST_PORT
                      + "/org.apache.camel.component.grpc.PingPong?synchronous=true")
-                             .throwException(CamelException.class, "GRPC Camel exception message");
+                        .throwException(CamelException.class, "GRPC Camel exception message");
 
             }
         };
     }
 
-    public class PongResponseStreamObserver implements StreamObserver<PongResponse> {
+    static class PongResponseStreamObserver implements StreamObserver<PongResponse> {
         private PongResponse pongResponse;
         private final CountDownLatch latch;
 

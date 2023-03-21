@@ -17,7 +17,6 @@
 package org.apache.camel.component.jetty;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URISyntaxException;
@@ -94,7 +93,7 @@ public class HttpsRouteTest extends BaseJettyTest {
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
         SSLContextParameters sslContextParameters = new SSLContextParameters();
-        sslContextParameters.setSecureSocketProtocol("TLSv1.2");
+        sslContextParameters.setSecureSocketProtocol("TLSv1.3");
         context.setSSLContextParameters(sslContextParameters);
         ((SSLContextParametersAware) context.getComponent("https")).setUseGlobalSslContextParameters(true);
         return context;
@@ -142,7 +141,7 @@ public class HttpsRouteTest extends BaseJettyTest {
     }
 
     @Test
-    public void testEndpointWithoutHttps() throws Exception {
+    public void testEndpointWithoutHttps() {
         MockEndpoint mockEndpoint = resolveMandatoryEndpoint("mock:a", MockEndpoint.class);
         assertThrows(RuntimeCamelException.class,
                 () -> template.sendBodyAndHeader("http://localhost:" + port1 + "/test", expectedBody, "Content-Type",
@@ -156,7 +155,7 @@ public class HttpsRouteTest extends BaseJettyTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         URL url = new URL("https://localhost:" + port1 + "/hello");
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        SSLContext ssl = SSLContext.getInstance("TLSv1.2");
+        SSLContext ssl = SSLContext.getInstance("TLSv1.3");
         ssl.init(null, null, null);
         connection.setSSLSocketFactory(ssl.getSocketFactory());
         InputStream is = connection.getInputStream();
@@ -176,7 +175,7 @@ public class HttpsRouteTest extends BaseJettyTest {
                 "expected SocketException on use of http");
     }
 
-    protected void invokeHttpEndpoint() throws IOException {
+    protected void invokeHttpEndpoint() {
         template.sendBodyAndHeader(getHttpProducerScheme() + "localhost:" + port1 + "/test", expectedBody, "Content-Type",
                 "application/xml");
         template.sendBodyAndHeader(getHttpProducerScheme() + "localhost:" + port2 + "/test", expectedBody, "Content-Type",
@@ -188,28 +187,28 @@ public class HttpsRouteTest extends BaseJettyTest {
         sslContextFactory.setKeyStorePassword(pwd);
         URL keyStoreUrl = this.getClass().getClassLoader().getResource("jsse/localhost.p12");
         try {
-            sslContextFactory.setKeyStorePath(keyStoreUrl.toURI().getPath());
+            sslContextFactory.setKeyStorePath("file://" + keyStoreUrl.toURI().getPath());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
         sslContextFactory.setTrustStoreType("PKCS12");
-        sslContextFactory.setProtocol("TLSv1.2");
+        sslContextFactory.setProtocol("TLSv1.3");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() throws URISyntaxException {
                 JettyHttpComponent componentJetty = (JettyHttpComponent) context.getComponent("jetty");
                 componentJetty.setSslPassword(pwd);
                 componentJetty.setSslKeyPassword(pwd);
                 URL keyStoreUrl = this.getClass().getClassLoader().getResource("jsse/localhost.p12");
-                componentJetty.setKeystore(keyStoreUrl.toURI().getPath());
+                componentJetty.setKeystore("file://" + keyStoreUrl.toURI().getPath());
 
                 from("jetty:https://localhost:" + port1 + "/test").to("mock:a");
 
                 Processor proc = new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         exchange.getMessage().setBody("<b>Hello World</b>");
                     }
                 };

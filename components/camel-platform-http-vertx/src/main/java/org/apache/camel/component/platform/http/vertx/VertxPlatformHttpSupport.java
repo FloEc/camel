@@ -48,7 +48,9 @@ public final class VertxPlatformHttpSupport {
     private VertxPlatformHttpSupport() {
     }
 
-    static Object toHttpResponse(HttpServerResponse response, Message message, HeaderFilterStrategy headerFilterStrategy) {
+    static Object toHttpResponse(
+            HttpServerResponse response, Message message, HeaderFilterStrategy headerFilterStrategy,
+            boolean muteExceptions) {
         final Exchange exchange = message.getExchange();
         final TypeConverter tc = exchange.getContext().getTypeConverter();
 
@@ -61,7 +63,7 @@ public final class VertxPlatformHttpSupport {
                 final String key = entry.getKey();
                 final Object value = entry.getValue();
                 // use an iterator as there can be multiple values. (must not use a delimiter)
-                final Iterator<?> it = ObjectHelper.createIterator(value, null);
+                final Iterator<?> it = ObjectHelper.createIterator(value, null, true);
 
                 String firstValue = null;
                 List<String> values = null;
@@ -93,22 +95,28 @@ public final class VertxPlatformHttpSupport {
         final Exception exception = exchange.getException();
 
         if (exception != null) {
-            // we failed due an exception so print it as plain text
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw);
-            exception.printStackTrace(pw);
+            if (muteExceptions) {
+                body = ""; // do not include stacktrace in body
+                // force content type to be text/plain as that is what the stacktrace is
+                message.setHeader(Exchange.CONTENT_TYPE, "text/plain; charset=utf-8");
+            } else {
+                // we failed due an exception so print it as plain text
+                final StringWriter sw = new StringWriter();
+                final PrintWriter pw = new PrintWriter(sw);
+                exception.printStackTrace(pw);
 
-            // the body should then be the stacktrace
-            body = ByteBuffer.wrap(sw.toString().getBytes(StandardCharsets.UTF_8));
-            // force content type to be text/plain as that is what the stacktrace is
-            message.setHeader(Exchange.CONTENT_TYPE, "text/plain; charset=utf-8");
+                // the body should then be the stacktrace
+                body = ByteBuffer.wrap(sw.toString().getBytes(StandardCharsets.UTF_8));
+                // force content type to be text/plain as that is what the stacktrace is
+                message.setHeader(Exchange.CONTENT_TYPE, "text/plain; charset=utf-8");
+            }
 
             // and mark the exception as failure handled, as we handled it by returning it as the response
             ExchangeHelper.setFailureHandled(exchange);
         }
 
         // set the content-length if it can be determined, or chunked encoding
-        final Integer length = determineContentLength(exchange, body);
+        final Integer length = determineContentLength(body);
         if (length != null) {
             response.putHeader("Content-Length", String.valueOf(length));
         } else {
@@ -124,7 +132,7 @@ public final class VertxPlatformHttpSupport {
         return body;
     }
 
-    static Integer determineContentLength(Exchange camelExchange, Object body) {
+    static Integer determineContentLength(Object body) {
         if (body instanceof byte[]) {
             return ((byte[]) body).length;
         } else if (body instanceof ByteBuffer) {
@@ -156,9 +164,10 @@ public final class VertxPlatformHttpSupport {
         return codeToUse;
     }
 
-    static void writeResponse(RoutingContext ctx, Exchange camelExchange, HeaderFilterStrategy headerFilterStrategy)
+    static void writeResponse(
+            RoutingContext ctx, Exchange camelExchange, HeaderFilterStrategy headerFilterStrategy, boolean muteExceptions)
             throws Exception {
-        final Object body = toHttpResponse(ctx.response(), camelExchange.getMessage(), headerFilterStrategy);
+        final Object body = toHttpResponse(ctx.response(), camelExchange.getMessage(), headerFilterStrategy, muteExceptions);
         final HttpServerResponse response = ctx.response();
 
         if (body == null) {

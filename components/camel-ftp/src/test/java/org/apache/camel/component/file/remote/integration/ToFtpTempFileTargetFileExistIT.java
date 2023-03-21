@@ -47,7 +47,7 @@ public class ToFtpTempFileTargetFileExistIT extends FtpServerTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived("Hello Again World");
-        mock.expectedFileExists(ftpFile("tempfile/foo/bar/message.txt"), "Hello Again World");
+        mock.expectedFileExists(service.ftpFile("tempfile/foo/bar/message.txt"), "Hello Again World");
 
         template.sendBody("direct:start", "Hello Again World");
 
@@ -66,14 +66,14 @@ public class ToFtpTempFileTargetFileExistIT extends FtpServerTestSupport {
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("tempfile/foo/bar/message.txt").toFile();
+        File file = service.ftpFile("tempfile/foo/bar/message.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to(getFtpUrl()).to("mock:result");
             }
         };

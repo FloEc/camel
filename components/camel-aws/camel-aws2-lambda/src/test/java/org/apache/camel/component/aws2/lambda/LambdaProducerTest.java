@@ -63,7 +63,7 @@ public class LambdaProducerTest extends CamelTestSupport {
     private MockEndpoint mock;
 
     @Test
-    public void lambdaCreateFunctionTest() throws Exception {
+    public void lambdaCreateFunctionTest() {
 
         Exchange exchange = template.send("direct:createFunction", ExchangePattern.InOut, new Processor() {
             @Override
@@ -90,11 +90,11 @@ public class LambdaProducerTest extends CamelTestSupport {
     }
 
     @Test
-    public void lambdaDeleteFunctionTest() throws Exception {
+    public void lambdaDeleteFunctionTest() {
 
         Exchange exchange = template.send("direct:deleteFunction", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
 
             }
         });
@@ -102,11 +102,11 @@ public class LambdaProducerTest extends CamelTestSupport {
     }
 
     @Test
-    public void lambdaGetFunctionTest() throws Exception {
+    public void lambdaGetFunctionTest() {
 
         Exchange exchange = template.send("direct:getFunction", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
 
             }
         });
@@ -115,11 +115,11 @@ public class LambdaProducerTest extends CamelTestSupport {
     }
 
     @Test
-    public void lambdaGetFunctionPojoTest() throws Exception {
+    public void lambdaGetFunctionPojoTest() {
 
         Exchange exchange = template.send("direct:getFunctionPojo", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody(GetFunctionRequest.builder().functionName("GetHelloWithName").build());
             }
         });
@@ -128,10 +128,10 @@ public class LambdaProducerTest extends CamelTestSupport {
     }
 
     @Test
-    public void lambdaListFunctionsTest() throws Exception {
+    public void lambdaListFunctionsTest() {
         Exchange exchange = template.send("direct:listFunctions", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
 
             }
         });
@@ -142,10 +142,10 @@ public class LambdaProducerTest extends CamelTestSupport {
     }
 
     @Test
-    public void lambdaInvokeFunctionTest() throws Exception {
+    public void lambdaInvokeFunctionTest() {
         Exchange exchange = template.send("direct:invokeFunction", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setBody("{\"name\":\"Camel\"}");
             }
         });
@@ -158,13 +158,13 @@ public class LambdaProducerTest extends CamelTestSupport {
     public void lambdaCreateEventSourceMappingTest() throws Exception {
         Exchange exchange = template.send("direct:createEventSourceMapping", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.EVENT_SOURCE_ARN,
                         "arn:aws:sqs:eu-central-1:643534317684:testqueue");
                 exchange.getIn().setHeader(Lambda2Constants.EVENT_SOURCE_BATCH_SIZE, 100);
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateEventSourceMappingResponse result = exchange.getMessage().getBody(CreateEventSourceMappingResponse.class);
         assertEquals("arn:aws:lambda:eu-central-1:643534317684:function:GetHelloWithName", result.functionArn());
@@ -174,11 +174,11 @@ public class LambdaProducerTest extends CamelTestSupport {
     public void lambdaDeleteEventSourceMappingTest() throws Exception {
         Exchange exchange = template.send("direct:deleteEventSourceMapping", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.EVENT_SOURCE_UUID, "a1239494949382882383");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteEventSourceMappingResponse result = exchange.getMessage().getBody(DeleteEventSourceMappingResponse.class);
         assertTrue(result.state().equalsIgnoreCase("Deleting"));
@@ -188,10 +188,10 @@ public class LambdaProducerTest extends CamelTestSupport {
     public void lambdaListEventSourceMappingTest() throws Exception {
         Exchange exchange = template.send("direct:listEventSourceMapping", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListEventSourceMappingsResponse result = exchange.getMessage().getBody(ListEventSourceMappingsResponse.class);
         assertEquals("arn:aws:lambda:eu-central-1:643534317684:function:GetHelloWithName",
@@ -203,12 +203,12 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:listTags", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.RESOURCE_ARN,
                         "arn:aws:lambda:eu-central-1:643534317684:function:GetHelloWithName");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListTagsResponse result = (ListTagsResponse) exchange.getMessage().getBody();
         assertEquals("lambda-tag", result.tags().get("test"));
@@ -219,7 +219,7 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:tagResource", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 Map<String, String> tags = new HashMap<>();
                 tags.put("test", "added-tag");
                 exchange.getIn().setHeader(Lambda2Constants.RESOURCE_ARN,
@@ -227,7 +227,7 @@ public class LambdaProducerTest extends CamelTestSupport {
                 exchange.getIn().setHeader(Lambda2Constants.RESOURCE_TAGS, tags);
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         TagResourceResponse result = (TagResourceResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -238,7 +238,7 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:untagResource", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 List<String> tagKeys = new ArrayList<>();
                 tagKeys.add("test");
                 exchange.getIn().setHeader(Lambda2Constants.RESOURCE_ARN,
@@ -246,7 +246,7 @@ public class LambdaProducerTest extends CamelTestSupport {
                 exchange.getIn().setHeader(Lambda2Constants.RESOURCE_TAG_KEYS, tagKeys);
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         UntagResourceResponse result = (UntagResourceResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -257,11 +257,11 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:publishVersion", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.VERSION_DESCRIPTION, "This is my description");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         PublishVersionResponse result = (PublishVersionResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -274,11 +274,11 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:listVersions", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.VERSION_DESCRIPTION, "This is my description");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListVersionsByFunctionResponse result = (ListVersionsByFunctionResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -291,13 +291,13 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:createAlias", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.FUNCTION_ALIAS_DESCRIPTION, "an alias");
                 exchange.getIn().setHeader(Lambda2Constants.FUNCTION_ALIAS_NAME, "alias");
                 exchange.getIn().setHeader(Lambda2Constants.FUNCTION_VERSION, "1");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateAliasResponse result = (CreateAliasResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -311,11 +311,11 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:deleteAlias", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.FUNCTION_ALIAS_NAME, "alias");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteAliasResponse result = (DeleteAliasResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -326,11 +326,11 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:getAlias", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.FUNCTION_ALIAS_NAME, "alias");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         GetAliasResponse result = (GetAliasResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -344,11 +344,11 @@ public class LambdaProducerTest extends CamelTestSupport {
 
         Exchange exchange = template.send("direct:listAliases", ExchangePattern.InOut, new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Lambda2Constants.FUNCTION_VERSION, "1");
             }
         });
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListAliasesResponse result = (ListAliasesResponse) exchange.getMessage().getBody();
         assertNotNull(result);
@@ -358,10 +358,10 @@ public class LambdaProducerTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:createFunction")
                         .to("aws2-lambda://GetHelloWithName?awsLambdaClient=#awsLambdaClient&operation=createFunction")
                         .to("mock:result");

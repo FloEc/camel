@@ -36,6 +36,8 @@ import org.apache.camel.builder.Builder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.spi.Debugger;
+import org.apache.camel.spi.FactoryFinder;
 import org.apache.camel.support.DefaultExchange;
 import org.apache.camel.support.PredicateAssertHelper;
 import org.slf4j.Logger;
@@ -557,25 +559,6 @@ public final class TestSupport {
     }
 
     /**
-     * Tells whether the current Java version is 1.8 and build_no 261 and later.
-     *
-     * @return <tt>true</tt> if its Java 1.8.0_261 and later, <tt>false</tt> if its not (for example Java 1.8.0_251)
-     */
-    // CHECKSTYLE:OFF
-    public static boolean isJava18_261_later() {
-        boolean ret;
-        String version = System.getProperty("java.version");
-        try {
-            ret = version != null && version.startsWith("1.8.0_")
-                && Integer.parseInt(version.substring(6)) >= 261;
-        } catch (NumberFormatException ex) {
-            ret = false;
-        }
-        return ret;
-    }
-    // CHECKSTYLE:ON
-
-    /**
      * Tells whether the current Java version is 1.9.
      *
      * @return <tt>true</tt> if its Java 1.9, <tt>false</tt> if its not (for example Java 1.8 or older)
@@ -589,7 +572,7 @@ public final class TestSupport {
      * Returns the current major Java version e.g 8.
      * <p/>
      * Uses <tt>java.specification.version</tt> from the system properties to determine the major version.
-     * 
+     *
      * @return the current major Java version.
      */
     public static int getJavaMajorVersion() {
@@ -601,4 +584,24 @@ public final class TestSupport {
         }
     }
 
+    /**
+     * Indicates whether the component {@code camel-debug} is present in the classpath of the test.
+     *
+     * @return {@code true} if it is present, {@code false} otherwise.
+     */
+    public static boolean isCamelDebugPresent() {
+        // Needs to be detected before initializing and starting the camel context
+        return Thread.currentThread()
+                .getContextClassLoader()
+                .getResource(String.format("%s%s", FactoryFinder.DEFAULT_PATH, Debugger.FACTORY))
+               != null;
+    }
+
+    public static String fileUri(Path testDirectory) {
+        return "file:" + testDirectory;
+    }
+
+    public static String fileUri(Path testDirectory, String query) {
+        return "file:" + testDirectory + (query.startsWith("?") ? "" : "/") + query;
+    }
 }

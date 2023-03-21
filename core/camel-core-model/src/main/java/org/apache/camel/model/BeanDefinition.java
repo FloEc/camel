@@ -16,11 +16,11 @@
  */
 package org.apache.camel.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.BeanScope;
 import org.apache.camel.spi.Metadata;
@@ -33,6 +33,12 @@ import org.apache.camel.util.ObjectHelper;
 @XmlRootElement(name = "bean")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class BeanDefinition extends NoOutputDefinition<BeanDefinition> {
+
+    @XmlTransient
+    private Class<?> beanClass;
+    @XmlTransient
+    private Object bean;
+
     @XmlAttribute
     private String ref;
     @XmlAttribute
@@ -40,16 +46,8 @@ public class BeanDefinition extends NoOutputDefinition<BeanDefinition> {
     @XmlAttribute
     private String beanType;
     @XmlAttribute
-    @Metadata(defaultValue = "true", javaType = "java.lang.Boolean")
-    @Deprecated
-    private String cache;
-    @XmlAttribute
-    @Metadata(defaultValue = "Singleton", enums = "Singleton,Request,Prototype")
+    @Metadata(label = "advanced", defaultValue = "Singleton", enums = "Singleton,Request,Prototype")
     private String scope;
-    @XmlTransient
-    private Class<?> beanClass;
-    @XmlTransient
-    private Object bean;
 
     public BeanDefinition() {
     }
@@ -149,27 +147,6 @@ public class BeanDefinition extends NoOutputDefinition<BeanDefinition> {
      */
     public void setBeanType(Class<?> beanType) {
         this.beanClass = beanType;
-    }
-
-    @Deprecated
-    public String getCache() {
-        if (scope == null || BeanScope.Singleton.name().equals(scope)) {
-            return "true";
-        } else {
-            return "false";
-        }
-    }
-
-    /**
-     * Use singleton option instead
-     */
-    @Deprecated
-    public void setCache(String cache) {
-        if ("true".equals(cache)) {
-            scope = BeanScope.Singleton.name();
-        } else {
-            scope = BeanScope.Prototype.name();
-        }
     }
 
     public String getScope() {

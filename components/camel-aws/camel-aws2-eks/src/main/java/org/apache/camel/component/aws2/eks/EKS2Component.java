@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon EKS SDK v2.
  */
 @Component("aws2-eks")
 public class EKS2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(EKS2Component.class);
-
     @Metadata
     private EKS2Configuration configuration = new EKS2Configuration();
 
@@ -43,8 +38,6 @@ public class EKS2Component extends DefaultComponent {
 
     public EKS2Component(CamelContext context) {
         super(context);
-
-        registerExtension(new EKS2ComponentVerifierExtension());
     }
 
     @Override
@@ -52,7 +45,7 @@ public class EKS2Component extends DefaultComponent {
         EKS2Configuration configuration = this.configuration != null ? this.configuration.copy() : new EKS2Configuration();
         EKS2Endpoint endpoint = new EKS2Endpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getEksClient() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider()) && configuration.getEksClient() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, Amazon eks client or accessKey and secretKey must be specified");

@@ -57,12 +57,12 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listKeys", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.listAccessKeys);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListAccessKeysResponse resultGet = (ListAccessKeysResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.accessKeyMetadata().size());
@@ -75,13 +75,13 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createUser", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.createUser);
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateUserResponse resultGet = (CreateUserResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.user().userName());
@@ -93,13 +93,13 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createUserPojo", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.createUser);
                 exchange.getIn().setBody(CreateUserRequest.builder().userName("test").build());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateUserResponse resultGet = (CreateUserResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.user().userName());
@@ -111,13 +111,13 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:deleteUser", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.deleteUser);
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteUserResponse resultGet = (DeleteUserResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -129,12 +129,12 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listUsers", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.listUsers);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListUsersResponse resultGet = (ListUsersResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.users().size());
@@ -147,13 +147,13 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createAccessKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.createAccessKey);
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateAccessKeyResponse resultGet = (CreateAccessKeyResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.accessKey().accessKeyId());
@@ -166,14 +166,14 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:deleteAccessKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.deleteAccessKey);
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "test");
                 exchange.getIn().setHeader(IAM2Constants.ACCESS_KEY_ID, "1");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteAccessKeyResponse resultGet = (DeleteAccessKeyResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -185,13 +185,13 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:getUser", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.getUser);
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         GetUserResponse resultGet = (GetUserResponse) exchange.getIn().getBody();
         assertEquals("test", resultGet.user().userName());
@@ -203,14 +203,14 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:updateAccessKey", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.updateAccessKey);
                 exchange.getIn().setHeader(IAM2Constants.ACCESS_KEY_ID, "1");
                 exchange.getIn().setHeader(IAM2Constants.ACCESS_KEY_STATUS, StatusType.INACTIVE.name());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         UpdateAccessKeyResponse resultGet = (UpdateAccessKeyResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -222,14 +222,14 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createGroup", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.createGroup);
                 exchange.getIn().setHeader(IAM2Constants.GROUP_NAME, "Test");
                 exchange.getIn().setHeader(IAM2Constants.GROUP_PATH, "/test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateGroupResponse resultGet = (CreateGroupResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -242,13 +242,13 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createGroup", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.deleteGroup);
                 exchange.getIn().setHeader(IAM2Constants.GROUP_NAME, "Test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteGroupResponse resultGet = (DeleteGroupResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -259,12 +259,12 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listGroups", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.listGroups);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListGroupsResponse resultGet = (ListGroupsResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -277,14 +277,14 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:addUserToGroup", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.addUserToGroup);
                 exchange.getIn().setHeader(IAM2Constants.GROUP_NAME, "Test");
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "Test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         AddUserToGroupResponse resultGet = (AddUserToGroupResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
@@ -295,24 +295,24 @@ public class IAMProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:removeUserFromGroup", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(IAM2Constants.OPERATION, IAM2Operations.removeUserFromGroup);
                 exchange.getIn().setHeader(IAM2Constants.GROUP_NAME, "Test");
                 exchange.getIn().setHeader(IAM2Constants.USERNAME, "Test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         RemoveUserFromGroupResponse resultGet = (RemoveUserFromGroupResponse) exchange.getIn().getBody();
         assertNotNull(resultGet);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:listKeys").to("aws2-iam://test?iamClient=#amazonIAMClient&operation=listAccessKeys")
                         .to("mock:result");
                 from("direct:createUser").to("aws2-iam://test?iamClient=#amazonIAMClient&operation=createUser")

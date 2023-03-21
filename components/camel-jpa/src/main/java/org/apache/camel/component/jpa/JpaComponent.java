@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
@@ -45,8 +45,11 @@ public class JpaComponent extends DefaultComponent {
 
     @Metadata
     private EntityManagerFactory entityManagerFactory;
+    @Deprecated
     @Metadata
     private PlatformTransactionManager transactionManager;
+    @Metadata
+    private TransactionStrategy transactionStrategy;
     @Metadata(defaultValue = "true")
     private boolean joinTransaction = true;
     @Metadata
@@ -55,6 +58,7 @@ public class JpaComponent extends DefaultComponent {
     private Map<String, Class<?>> aliases = new HashMap<>();
 
     public JpaComponent() {
+        // default constructor
     }
 
     // Properties
@@ -70,15 +74,30 @@ public class JpaComponent extends DefaultComponent {
         this.entityManagerFactory = entityManagerFactory;
     }
 
+    @Deprecated
     public PlatformTransactionManager getTransactionManager() {
         return transactionManager;
     }
 
     /**
      * To use the {@link PlatformTransactionManager} for managing transactions.
+     *
+     * @deprecated - use {@link #setTransactionStrategy(TransactionStrategy)} instead
      */
+    @Deprecated
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;
+    }
+
+    public TransactionStrategy getTransactionStrategy() {
+        return transactionStrategy;
+    }
+
+    /**
+     * To use the {@link TransactionStrategy} for running the operations in a transaction.
+     */
+    public void setTransactionStrategy(TransactionStrategy transactionStrategy) {
+        this.transactionStrategy = transactionStrategy;
     }
 
     public boolean isJoinTransaction() {
@@ -162,10 +181,7 @@ public class JpaComponent extends DefaultComponent {
         return endpoint;
     }
 
-    @Override
-    protected void doInit() throws Exception {
-        super.doInit();
-
+    private void initEntityManagerFactory() {
         // lookup entity manager factory and use it if only one provided
         if (entityManagerFactory == null) {
             Map<String, EntityManagerFactory> map
@@ -183,7 +199,9 @@ public class JpaComponent extends DefaultComponent {
         } else {
             LOG.info("Using EntityManagerFactory configured: {}", entityManagerFactory);
         }
+    }
 
+    private void initTransactionManager() {
         // lookup transaction manager and use it if only one provided
         if (transactionManager == null) {
             Map<String, PlatformTransactionManager> map
@@ -215,6 +233,19 @@ public class JpaComponent extends DefaultComponent {
                 }
             }
         }
+    }
+
+    @Override
+    protected void doInit() throws Exception {
+        super.doInit();
+        initEntityManagerFactory();
+
+        if (transactionStrategy != null) {
+            LOG.info("Using TransactionStrategy configured: {}", transactionStrategy);
+            return;
+        }
+
+        initTransactionManager();
 
         // warn about missing configuration
         if (entityManagerFactory == null) {

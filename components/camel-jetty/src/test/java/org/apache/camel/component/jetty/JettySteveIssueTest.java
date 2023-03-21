@@ -35,13 +35,13 @@ public class JettySteveIssueTest extends BaseJettyTest {
 
         template.requestBody(serverUri + "?x=foo", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("jetty:" + serverUri).setBody().simple("<html><body>${in.header.x}</body></html>").to("mock:result");
             }
         };

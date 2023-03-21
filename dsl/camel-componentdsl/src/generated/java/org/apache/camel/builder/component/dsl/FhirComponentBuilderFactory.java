@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -351,8 +351,7 @@ public interface FhirComponentBuilderFactory {
             return this;
         }
         /**
-         * Request that the server modify the response using the
-         * &lt;code&gt;_summary param.
+         * Request that the server modify the response using the _summary param.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -453,7 +452,7 @@ public interface FhirComponentBuilderFactory {
             return this;
         }
         /**
-         * Username to use for basic authentication.
+         * Password to use for basic authentication.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 

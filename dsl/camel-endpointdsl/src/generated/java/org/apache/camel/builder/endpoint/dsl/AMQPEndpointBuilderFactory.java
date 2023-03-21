@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -65,8 +65,8 @@ public interface AMQPEndpointBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -74,7 +74,7 @@ public interface AMQPEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AMQPEndpointConsumerBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -83,7 +83,7 @@ public interface AMQPEndpointBuilderFactory {
          * configured either on the component or endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -158,7 +158,7 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -178,7 +178,7 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -1268,6 +1268,60 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
+         * The consumer type of the reply consumer (when doing request/reply),
+         * which can be one of: Simple, Default, or Custom. The consumer type
+         * determines which Spring JMS listener to use. Default will use
+         * org.springframework.jms.listener.DefaultMessageListenerContainer,
+         * Simple will use
+         * org.springframework.jms.listener.SimpleMessageListenerContainer. When
+         * Custom is specified, the MessageListenerContainerFactory defined by
+         * the messageListenerContainerFactory option will determine what
+         * org.springframework.jms.listener.AbstractMessageListenerContainer to
+         * use.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.jms.ConsumerType&lt;/code&gt;
+         * type.
+         * 
+         * Default: Default
+         * Group: consumer (advanced)
+         * 
+         * @param replyToConsumerType the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAMQPEndpointConsumerBuilder replyToConsumerType(
+                org.apache.camel.component.jms.ConsumerType replyToConsumerType) {
+            doSetProperty("replyToConsumerType", replyToConsumerType);
+            return this;
+        }
+        /**
+         * The consumer type of the reply consumer (when doing request/reply),
+         * which can be one of: Simple, Default, or Custom. The consumer type
+         * determines which Spring JMS listener to use. Default will use
+         * org.springframework.jms.listener.DefaultMessageListenerContainer,
+         * Simple will use
+         * org.springframework.jms.listener.SimpleMessageListenerContainer. When
+         * Custom is specified, the MessageListenerContainerFactory defined by
+         * the messageListenerContainerFactory option will determine what
+         * org.springframework.jms.listener.AbstractMessageListenerContainer to
+         * use.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.jms.ConsumerType&lt;/code&gt;
+         * type.
+         * 
+         * Default: Default
+         * Group: consumer (advanced)
+         * 
+         * @param replyToConsumerType the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAMQPEndpointConsumerBuilder replyToConsumerType(
+                String replyToConsumerType) {
+            doSetProperty("replyToConsumerType", replyToConsumerType);
+            return this;
+        }
+        /**
          * Whether a JMS consumer is allowed to send a reply message to the same
          * destination that the consumer is using to consume from. This prevents
          * an endless loop by consuming and sending back the same message to
@@ -1588,8 +1642,8 @@ public interface AMQPEndpointBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1597,7 +1651,7 @@ public interface AMQPEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedAMQPEndpointConsumerBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -1606,7 +1660,7 @@ public interface AMQPEndpointBuilderFactory {
          * underlying JMS exceptions.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -1817,7 +1871,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -1834,7 +1888,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -1852,8 +1906,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -1871,8 +1925,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
@@ -1891,7 +1945,7 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option is a:
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -1909,7 +1963,7 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -1926,7 +1980,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option is a:
@@ -1944,7 +1998,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option will be converted to a
@@ -2261,18 +2315,18 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -2290,18 +2344,18 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -2628,8 +2682,8 @@ public interface AMQPEndpointBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2637,7 +2691,7 @@ public interface AMQPEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AMQPEndpointProducerBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -2646,7 +2700,7 @@ public interface AMQPEndpointBuilderFactory {
          * configured either on the component or endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -2721,7 +2775,7 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -2741,7 +2795,7 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -2849,8 +2903,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies the delivery mode to be used. Possible values are those
-         * defined by javax.jms.DeliveryMode. NON_PERSISTENT = 1 and PERSISTENT
-         * = 2.
+         * defined by jakarta.jms.DeliveryMode. NON_PERSISTENT = 1 and
+         * PERSISTENT = 2.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
@@ -2865,8 +2919,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies the delivery mode to be used. Possible values are those
-         * defined by javax.jms.DeliveryMode. NON_PERSISTENT = 1 and PERSISTENT
-         * = 2.
+         * defined by jakarta.jms.DeliveryMode. NON_PERSISTENT = 1 and
+         * PERSISTENT = 2.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
@@ -2989,55 +3043,6 @@ public interface AMQPEndpointBuilderFactory {
         default AMQPEndpointProducerBuilder formatDateHeadersToIso8601(
                 String formatDateHeadersToIso8601) {
             doSetProperty("formatDateHeadersToIso8601", formatDateHeadersToIso8601);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default AMQPEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default AMQPEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -3747,6 +3752,55 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAMQPEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedAMQPEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
          * Sets the cache level by name for the reply consumer when doing
          * request/reply over JMS. This option only applies when using fixed
          * reply queues (not temporary). Camel will by default use:
@@ -4079,8 +4133,8 @@ public interface AMQPEndpointBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -4088,7 +4142,7 @@ public interface AMQPEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedAMQPEndpointProducerBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -4097,7 +4151,7 @@ public interface AMQPEndpointBuilderFactory {
          * underlying JMS exceptions.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -4308,7 +4362,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -4325,7 +4379,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -4343,8 +4397,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -4362,8 +4416,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
@@ -4382,7 +4436,7 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option is a:
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -4400,7 +4454,7 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -4417,7 +4471,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option is a:
@@ -4435,7 +4489,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option will be converted to a
@@ -4752,18 +4806,18 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -4781,18 +4835,18 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -5120,8 +5174,8 @@ public interface AMQPEndpointBuilderFactory {
          * The connection factory to be use. A connection factory must be
          * configured either on the component or endpoint.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -5129,7 +5183,7 @@ public interface AMQPEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AMQPEndpointBuilder connectionFactory(
-                javax.jms.ConnectionFactory connectionFactory) {
+                jakarta.jms.ConnectionFactory connectionFactory) {
             doSetProperty("connectionFactory", connectionFactory);
             return this;
         }
@@ -5138,7 +5192,7 @@ public interface AMQPEndpointBuilderFactory {
          * configured either on the component or endpoint.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ConnectionFactory&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ConnectionFactory&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -5211,7 +5265,7 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -5231,7 +5285,7 @@ public interface AMQPEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows you to force the use of a specific javax.jms.Message
+         * Allows you to force the use of a specific jakarta.jms.Message
          * implementation for sending JMS messages. Possible values are: Bytes,
          * Map, Object, Stream, Text. By default, Camel would determine which
          * JMS message type to use from the In body type. This option allows you
@@ -5688,8 +5742,8 @@ public interface AMQPEndpointBuilderFactory {
          * Specifies the JMS Exception Listener that is to be notified of any
          * underlying JMS exceptions.
          * 
-         * The option is a: &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt;
-         * type.
+         * The option is a:
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -5697,7 +5751,7 @@ public interface AMQPEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedAMQPEndpointBuilder exceptionListener(
-                javax.jms.ExceptionListener exceptionListener) {
+                jakarta.jms.ExceptionListener exceptionListener) {
             doSetProperty("exceptionListener", exceptionListener);
             return this;
         }
@@ -5706,7 +5760,7 @@ public interface AMQPEndpointBuilderFactory {
          * underlying JMS exceptions.
          * 
          * The option will be converted to a
-         * &lt;code&gt;javax.jms.ExceptionListener&lt;/code&gt; type.
+         * &lt;code&gt;jakarta.jms.ExceptionListener&lt;/code&gt; type.
          * 
          * Group: advanced
          * 
@@ -5917,7 +5971,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -5933,7 +5987,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * Specifies whether Camel should auto map the received JMS message to a
-         * suited payload type, such as javax.jms.TextMessage to a String etc.
+         * suited payload type, such as jakarta.jms.TextMessage to a String etc.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -5950,8 +6004,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
@@ -5969,8 +6023,8 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * The number of messages per task. -1 is unlimited. If you use a range
-         * for concurrent consumers (eg min &lt; max), then this option can be
-         * used to set a value to eg 100 to control how fast the consumers will
+         * for concurrent consumers (eg min max), then this option can be used
+         * to set a value to eg 100 to control how fast the consumers will
          * shrink when less work is required.
          * 
          * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
@@ -5989,7 +6043,7 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option is a:
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -6007,7 +6061,7 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * To use a custom Spring
          * org.springframework.jms.support.converter.MessageConverter so you can
-         * be in control how to map to/from a javax.jms.Message.
+         * be in control how to map to/from a jakarta.jms.Message.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.springframework.jms.support.converter.MessageConverter&lt;/code&gt; type.
@@ -6024,7 +6078,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option is a:
@@ -6042,7 +6096,7 @@ public interface AMQPEndpointBuilderFactory {
         }
         /**
          * To use the given MessageCreatedStrategy which are invoked when Camel
-         * creates new instances of javax.jms.Message objects when Camel is
+         * creates new instances of jakarta.jms.Message objects when Camel is
          * sending a JMS message.
          * 
          * The option will be converted to a
@@ -6353,18 +6407,18 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -6382,18 +6436,18 @@ public interface AMQPEndpointBuilderFactory {
         /**
          * If enabled and you are using Request Reply messaging (InOut) and an
          * Exchange failed on the consumer side, then the caused Exception will
-         * be send back in response as a javax.jms.ObjectMessage. If the client
-         * is Camel, the returned Exception is rethrown. This allows you to use
-         * Camel JMS as a bridge in your routing - for example, using persistent
-         * queues to enable robust routing. Notice that if you also have
-         * transferExchange enabled, this option takes precedence. The caught
-         * exception is required to be serializable. The original Exception on
-         * the consumer side can be wrapped in an outer exception such as
-         * org.apache.camel.RuntimeCamelException when returned to the producer.
-         * Use this with caution as the data is using Java Object serialization
-         * and requires the received to be able to deserialize the data at Class
-         * level, which forces a strong coupling between the producers and
-         * consumer!.
+         * be send back in response as a jakarta.jms.ObjectMessage. If the
+         * client is Camel, the returned Exception is rethrown. This allows you
+         * to use Camel JMS as a bridge in your routing - for example, using
+         * persistent queues to enable robust routing. Notice that if you also
+         * have transferExchange enabled, this option takes precedence. The
+         * caught exception is required to be serializable. The original
+         * Exception on the consumer side can be wrapped in an outer exception
+         * such as org.apache.camel.RuntimeCamelException when returned to the
+         * producer. Use this with caution as the data is using Java Object
+         * serialization and requires the received to be able to deserialize the
+         * data at Class level, which forces a strong coupling between the
+         * producers and consumer!.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -6698,6 +6752,19 @@ public interface AMQPEndpointBuilderFactory {
          * Since: 1.2
          * Maven coordinates: org.apache.camel:camel-amqp
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default AMQPHeaderNameBuilder amqp() {
+            return AMQPHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * AMQP (camel-amqp)
+         * Messaging with AMQP protocol using Apache QPid Client.
+         * 
+         * Category: messaging
+         * Since: 1.2
+         * Maven coordinates: org.apache.camel:camel-amqp
+         * 
          * Syntax: <code>amqp:destinationType:destinationName</code>
          * 
          * Path parameter: destinationType
@@ -6741,6 +6808,242 @@ public interface AMQPEndpointBuilderFactory {
          */
         default AMQPEndpointBuilder amqp(String componentName, String path) {
             return AMQPEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the AMQP component.
+     */
+    public static class AMQPHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final AMQPHeaderNameBuilder INSTANCE = new AMQPHeaderNameBuilder();
+
+        /**
+         * The destination.
+         * 
+         * The option is a: {@code jakarta.jms.Destination} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code JmsDestination}.
+         */
+        public String jmsDestination() {
+            return "JmsDestination";
+        }
+
+        /**
+         * The name of the queue or topic to use as destination.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code JmsDestinationName}.
+         */
+        public String jmsDestinationName() {
+            return "JmsDestinationName";
+        }
+
+        /**
+         * The JMS group ID.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSXGroupID}.
+         */
+        public String jMSXGroupID() {
+            return "JMSXGroupID";
+        }
+
+        /**
+         * The JMS unique message ID.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSMessageID}.
+         */
+        public String jMSMessageID() {
+            return "JMSMessageID";
+        }
+
+        /**
+         * The JMS correlation ID.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSCorrelationID}.
+         */
+        public String jMSCorrelationID() {
+            return "JMSCorrelationID";
+        }
+
+        /**
+         * The JMS correlation ID as bytes.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSCorrelationIDAsBytes}.
+         */
+        public String jMSCorrelationIDAsBytes() {
+            return "JMSCorrelationIDAsBytes";
+        }
+
+        /**
+         * The JMS delivery mode.
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSDeliveryMode}.
+         */
+        public String jMSDeliveryMode() {
+            return "JMSDeliveryMode";
+        }
+
+        /**
+         * The JMS destination.
+         * 
+         * The option is a: {@code jakarta.jms.Destination} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSDestination}.
+         */
+        public String jMSDestination() {
+            return "JMSDestination";
+        }
+
+        /**
+         * The JMS expiration.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSExpiration}.
+         */
+        public String jMSExpiration() {
+            return "JMSExpiration";
+        }
+
+        /**
+         * The JMS priority (with 0 as the lowest priority and 9 as the
+         * highest).
+         * 
+         * The option is a: {@code int} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSPriority}.
+         */
+        public String jMSPriority() {
+            return "JMSPriority";
+        }
+
+        /**
+         * Is the JMS message redelivered.
+         * 
+         * The option is a: {@code boolean} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSRedelivered}.
+         */
+        public String jMSRedelivered() {
+            return "JMSRedelivered";
+        }
+
+        /**
+         * The JMS timestamp.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSTimestamp}.
+         */
+        public String jMSTimestamp() {
+            return "JMSTimestamp";
+        }
+
+        /**
+         * The JMS reply-to destination.
+         * 
+         * The option is a: {@code jakarta.jms.Destination} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSReplyTo}.
+         */
+        public String jMSReplyTo() {
+            return "JMSReplyTo";
+        }
+
+        /**
+         * The JMS type.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSType}.
+         */
+        public String jMSType() {
+            return "JMSType";
+        }
+
+        /**
+         * The XUser id.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JMSXUserID}.
+         */
+        public String jMSXUserID() {
+            return "JMSXUserID";
+        }
+
+        /**
+         * The message type.
+         * 
+         * The option is a: {@code
+         * org.apache.camel.component.jms.JmsMessageType} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code JmsMessageType}.
+         */
+        public String jmsMessageType() {
+            return "JmsMessageType";
+        }
+
+        /**
+         * The timeout for waiting for a reply when using the InOut Exchange
+         * Pattern (in milliseconds).
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Default: 20_000
+         * Group: producer
+         * 
+         * @return the name of the header {@code JmsRequestTimeout}.
+         */
+        public String jmsRequestTimeout() {
+            return "JmsRequestTimeout";
         }
     }
     static AMQPEndpointBuilder endpointBuilder(String componentName, String path) {

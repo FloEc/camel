@@ -19,37 +19,39 @@ public class Sns2EndpointUriFactory extends org.apache.camel.support.component.E
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
         Set<String> props = new HashSet<>(24);
-        props.add("serverSideEncryptionEnabled");
-        props.add("autoCreateTopic");
-        props.add("proxyProtocol");
-        props.add("secretKey");
-        props.add("subject");
-        props.add("messageDeduplicationIdStrategy");
-        props.add("subscribeSNStoSQS");
-        props.add("uriEndpointOverride");
-        props.add("queueUrl");
-        props.add("messageStructure");
-        props.add("useDefaultCredentialsProvider");
-        props.add("proxyHost");
-        props.add("trustAllCertificates");
-        props.add("proxyPort");
-        props.add("lazyStartProducer");
-        props.add("messageGroupIdStrategy");
-        props.add("headerFilterStrategy");
         props.add("accessKey");
-        props.add("topicNameOrArn");
-        props.add("overrideEndpoint");
-        props.add("kmsMasterKeyId");
-        props.add("region");
         props.add("amazonSNSClient");
+        props.add("autoCreateTopic");
+        props.add("headerFilterStrategy");
+        props.add("kmsMasterKeyId");
+        props.add("lazyStartProducer");
+        props.add("messageDeduplicationIdStrategy");
+        props.add("messageGroupIdStrategy");
+        props.add("messageStructure");
+        props.add("overrideEndpoint");
         props.add("policy");
+        props.add("proxyHost");
+        props.add("proxyPort");
+        props.add("proxyProtocol");
+        props.add("queueUrl");
+        props.add("region");
+        props.add("secretKey");
+        props.add("serverSideEncryptionEnabled");
+        props.add("subject");
+        props.add("subscribeSNStoSQS");
+        props.add("topicNameOrArn");
+        props.add("trustAllCertificates");
+        props.add("uriEndpointOverride");
+        props.add("useDefaultCredentialsProvider");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         Set<String> secretProps = new HashSet<>(2);
-        secretProps.add("secretKey");
         secretProps.add("accessKey");
+        secretProps.add("secretKey");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        MULTI_VALUE_PREFIXES = Collections.emptySet();
     }
 
     @Override
@@ -77,6 +79,11 @@ public class Sns2EndpointUriFactory extends org.apache.camel.support.component.E
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

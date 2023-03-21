@@ -16,37 +16,43 @@
  */
 package org.apache.camel.component.jms;
 
-import javax.jms.ConnectionFactory;
-
 import org.apache.camel.CamelContext;
+import org.apache.camel.ConsumerTemplate;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.test.junit5.CamelTestSupport;
+import org.apache.camel.test.infra.core.CamelContextExtension;
+import org.apache.camel.test.infra.core.DefaultCamelContextExtension;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.apache.camel.component.jms.JmsComponent.jmsComponentAutoAcknowledge;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class JmsTransferExceptionTest extends CamelTestSupport {
+public class JmsTransferExceptionTest extends AbstractJMSTest {
 
+    @Order(2)
+    @RegisterExtension
+    public static CamelContextExtension camelContextExtension = new DefaultCamelContextExtension();
     private static int counter;
+    protected CamelContext context;
+    protected ProducerTemplate template;
+    protected ConsumerTemplate consumer;
 
     protected String getUri() {
-        return "activemq:queue:foo?transferException=true";
+        return "activemq:queue:JmsTransferExceptionTest?transferException=true";
     }
 
-    @Override
     @BeforeEach
     public void setUp() throws Exception {
         counter = 0;
-        super.setUp();
     }
 
     @Test
-    public void testOk() throws Exception {
+    public void testOk() {
         Object out = template.requestBody(getUri(), "Hello World");
         assertEquals("Bye World", out);
 
@@ -59,7 +65,7 @@ public class JmsTransferExceptionTest extends CamelTestSupport {
         // then we expect our producer template to throw
         // an exception with the remote exception as cause
         String uri = getUri();
-        RuntimeCamelException e = assertThrows(RuntimeCamelException.class, () -> template.requestBody(uri, "Kabom"),
+        RuntimeCamelException e = assertThrows(RuntimeCamelException.class, () -> template.requestBody(uri, "Kaboom"),
                 "Should have thrown an exception");
 
         assertEquals("Boom", e.getCause().getMessage());
@@ -70,20 +76,15 @@ public class JmsTransferExceptionTest extends CamelTestSupport {
     }
 
     @Override
-    protected CamelContext createCamelContext() throws Exception {
-        CamelContext camelContext = super.createCamelContext();
-
-        ConnectionFactory connectionFactory = CamelJmsTestHelper.createConnectionFactory();
-        camelContext.addComponent("activemq", jmsComponentAutoAcknowledge(connectionFactory));
-
-        return camelContext;
+    protected String getComponentName() {
+        return "activemq";
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 errorHandler(defaultErrorHandler().maximumRedeliveries(2));
 
                 from(getUri())
@@ -91,7 +92,7 @@ public class JmsTransferExceptionTest extends CamelTestSupport {
                             counter++;
 
                             String body = exchange.getIn().getBody(String.class);
-                            if (body.equals("Kabom")) {
+                            if (body.equals("Kaboom")) {
                                 throw new IllegalArgumentException("Boom");
                             }
                             exchange.getMessage().setBody("Bye World");
@@ -100,4 +101,15 @@ public class JmsTransferExceptionTest extends CamelTestSupport {
         };
     }
 
+    @Override
+    public CamelContextExtension getCamelContextExtension() {
+        return camelContextExtension;
+    }
+
+    @BeforeEach
+    void setUpRequirements() {
+        context = camelContextExtension.getContext();
+        template = camelContextExtension.getProducerTemplate();
+        consumer = camelContextExtension.getConsumerTemplate();
+    }
 }

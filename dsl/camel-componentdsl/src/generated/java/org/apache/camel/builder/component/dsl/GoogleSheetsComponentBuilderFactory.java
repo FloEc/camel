@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -94,6 +94,36 @@ public interface GoogleSheetsComponentBuilderFactory {
         default GoogleSheetsComponentBuilder configuration(
                 org.apache.camel.component.google.sheets.GoogleSheetsConfiguration configuration) {
             doSetProperty("configuration", configuration);
+            return this;
+        }
+        /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsComponentBuilder delegate(java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
+         * Sheets scopes.
+         * 
+         * The option is a:
+         * &lt;code&gt;java.util.Collection&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param scopes the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsComponentBuilder scopes(
+                java.util.Collection<java.lang.String> scopes) {
+            doSetProperty("scopes", scopes);
             return this;
         }
         /**
@@ -246,6 +276,21 @@ public interface GoogleSheetsComponentBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Sets .json file with credentials for Service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleSheetsComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     class GoogleSheetsComponentBuilderImpl
@@ -273,6 +318,8 @@ public interface GoogleSheetsComponentBuilderFactory {
             case "applicationName": getOrCreateConfiguration((GoogleSheetsComponent) component).setApplicationName((java.lang.String) value); return true;
             case "clientId": getOrCreateConfiguration((GoogleSheetsComponent) component).setClientId((java.lang.String) value); return true;
             case "configuration": ((GoogleSheetsComponent) component).setConfiguration((org.apache.camel.component.google.sheets.GoogleSheetsConfiguration) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleSheetsComponent) component).setDelegate((java.lang.String) value); return true;
+            case "scopes": getOrCreateConfiguration((GoogleSheetsComponent) component).setScopes((java.util.Collection) value); return true;
             case "bridgeErrorHandler": ((GoogleSheetsComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "splitResult": getOrCreateConfiguration((GoogleSheetsComponent) component).setSplitResult((boolean) value); return true;
             case "lazyStartProducer": ((GoogleSheetsComponent) component).setLazyStartProducer((boolean) value); return true;
@@ -281,6 +328,7 @@ public interface GoogleSheetsComponentBuilderFactory {
             case "accessToken": getOrCreateConfiguration((GoogleSheetsComponent) component).setAccessToken((java.lang.String) value); return true;
             case "clientSecret": getOrCreateConfiguration((GoogleSheetsComponent) component).setClientSecret((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleSheetsComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleSheetsComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             default: return false;
             }
         }

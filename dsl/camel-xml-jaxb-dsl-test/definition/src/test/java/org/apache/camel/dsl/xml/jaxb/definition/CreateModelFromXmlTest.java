@@ -29,6 +29,7 @@ import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.spi.NamespaceAware;
+import org.apache.camel.xml.jaxb.JaxbHelper;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.camel.model.ProcessorDefinitionHelper.filterTypeInOutputs;
@@ -89,17 +90,16 @@ public class CreateModelFromXmlTest extends ContextTestSupport {
     }
 
     private RoutesDefinition createModelFromXml(String camelContextResource, boolean fromString) throws Exception {
-        ExtendedCamelContext ecc = context.adapt(ExtendedCamelContext.class);
+        ExtendedCamelContext ecc = context.getCamelContextExtension();
 
         InputStream inputStream = getClass().getResourceAsStream(camelContextResource);
 
         if (fromString) {
             String xml = context.getTypeConverter().convertTo(String.class, inputStream);
-            InputStream isxml = context.getTypeConverter().convertTo(InputStream.class, xml);
-            return (RoutesDefinition) ecc.getXMLRoutesDefinitionLoader().loadRoutesDefinition(context, isxml);
+            inputStream = context.getTypeConverter().convertTo(InputStream.class, xml);
         }
 
-        return (RoutesDefinition) ecc.getXMLRoutesDefinitionLoader().loadRoutesDefinition(context, inputStream);
+        return JaxbHelper.loadRoutesDefinition(context, inputStream);
     }
 
     private void assertNamespacesPresent(RoutesDefinition routesDefinition, Map<String, String> expectedNamespaces) {

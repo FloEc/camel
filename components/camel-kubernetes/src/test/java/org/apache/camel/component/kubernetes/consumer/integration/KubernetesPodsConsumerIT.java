@@ -88,7 +88,7 @@ public class KubernetesPodsConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(1)
-    public void createPod() throws Exception {
+    void createPod() throws Exception {
         mockResultEndpoint.expectedMessageCount(2);
         mockResultEndpoint.expectedHeaderValuesReceivedInAnyOrder(KubernetesConstants.KUBERNETES_EVENT_ACTION, "ADDED",
                 "ADDED", "ADDED");
@@ -103,7 +103,7 @@ public class KubernetesPodsConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(2)
-    public void deletePod() throws Exception {
+    void deletePod() throws Exception {
         mockResultEndpoint.expectedMessageCount(1);
         mockResultEndpoint.expectedHeaderValuesReceivedInAnyOrder(KubernetesConstants.KUBERNETES_EVENT_ACTION,
                 "ADDED", "ADDED", "ADDED");
@@ -120,10 +120,10 @@ public class KubernetesPodsConsumerIT extends KubernetesTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:createPod").toF("kubernetes-pods://%s?oauthToken=%s&operation=createPod", host, authToken);
                 from("direct:deletePod").toF("kubernetes-pods://%s?oauthToken=%s&operation=deletePod", host, authToken);
                 fromF("kubernetes-pods://%s?oauthToken=%s&namespace=default&labelKey=this&labelValue=rocks", host, authToken)
@@ -135,7 +135,7 @@ public class KubernetesPodsConsumerIT extends KubernetesTestSupport {
 
     public class KubernetesProcessor implements Processor {
         @Override
-        public void process(Exchange exchange) throws Exception {
+        public void process(Exchange exchange) {
             Message in = exchange.getIn();
             Pod pod = exchange.getIn().getBody(Pod.class);
             log.info("Got event with pod name: " + pod.getMetadata().getName() + " and action "

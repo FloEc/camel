@@ -21,10 +21,9 @@ import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.camel.language.simple.SimpleLanguage.simple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SpanProcessorsTest extends CamelOpenTelemetryTestSupport {
+class SpanProcessorsTest extends CamelOpenTelemetryTestSupport {
 
     private static final SpanTestData[] TEST_DATA = {
             new SpanTestData().setLabel("seda:b server").setUri("seda://b").setOperation("b")
@@ -37,16 +36,17 @@ public class SpanProcessorsTest extends CamelOpenTelemetryTestSupport {
             new SpanTestData().setLabel("direct:start server").setUri("direct://start").setOperation("start")
     };
 
-    public SpanProcessorsTest() {
+    SpanProcessorsTest() {
         super(TEST_DATA);
     }
 
     @Test
-    public void testRoute() throws Exception {
+    void testRoute() {
         Exchange result = template.request("direct:start",
                 exchange -> {
                     exchange.getIn().setBody("Hello");
-                    exchange.getIn().setHeader("request-header", simple("request-header-value"));
+                    exchange.getIn().setHeader("request-header",
+                            context.resolveLanguage("simple").createExpression("request-header-value"));
                 });
 
         verify();
@@ -54,10 +54,10 @@ public class SpanProcessorsTest extends CamelOpenTelemetryTestSupport {
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to("seda:a").routeId("start");
 
                 from("seda:a").routeId("a")

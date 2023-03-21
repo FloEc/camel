@@ -82,13 +82,13 @@ public class ExampleAggregationStrategy implements AggregationStrategy {
         // this is just an example, for real-world use-cases the
         // aggregation strategy would be specific to the use-case
 
-        if (newExchange == null) {
-            return oldExchange;
+        if (resource == null) {
+            return original;
         }
-        Object oldBody = oldExchange.getIn().getBody();
-        Object newBody = newExchange.getIn().getBody();
-        oldExchange.getIn().setBody(oldBody + ":" + newBody);
-        return oldExchange;
+        Object oldBody = original.getIn().getBody();
+        Object newBody = resource.getIn().getBody();
+        original.getIn().setBody(oldBody + ":" + newBody);
+        return original;
     }
 
 }
@@ -117,8 +117,8 @@ In XML DSL you use `pollEnrich` as follows:
 <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
   <route>
     <from uri="direct:start"/>
-    <pollEnrich timeout="10000" strategyRef="myStrategy">
-      <constant>"file:inbox?fileName=data.txt"</constant>
+    <pollEnrich timeout="10000" aggregationStrategy="myStrategy">
+      <constant>file:inbox?fileName=data.txt</constant>
     </pollEnrich>
     <to uri="mock:result"/>
   </route>
@@ -134,7 +134,7 @@ for example download a file from xref:ROOT:aws2-s3-component.adoc[AWS S3] as the
 ----
 <rest path="/report">
     <description>Report REST API</description>
-    <get uri="/{id}/payload">
+    <get path="/{id}/payload">
         <route id="report-payload-download">
             <pollEnrich>
                 <constant>aws-s3:xavier-dev?amazonS3Client=#s3client&amp;deleteAfterRead=false&amp;fileName=report-file.pdf</constant>

@@ -44,13 +44,13 @@ public class StsGetFederationTokenIT extends Aws2StsBase {
         template.send("direct:getFederationToken", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(STS2Constants.OPERATION, "getFederationToken");
                 exchange.getIn().setHeader(STS2Constants.FEDERATED_NAME, "test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         assertEquals(1, result.getExchanges().size());
         assertNotNull(
                 result.getExchanges().get(0).getIn().getBody(GetFederationTokenResponse.class).credentials().accessKeyId());
@@ -60,10 +60,10 @@ public class StsGetFederationTokenIT extends Aws2StsBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint
                         = "aws2-sts://default?operation=getFederationToken";
                 from("direct:getFederationToken").to(awsEndpoint).to("mock:result");

@@ -66,14 +66,14 @@ public class FromFtpTwoSlashesIssueIT extends FtpServerTestSupport {
         producer.stop();
 
         // assert file is created
-        File file = ftpFile("hello.txt").toFile();
+        File file = service.ftpFile("hello.txt").toFile();
         assertTrue(file.exists(), "The file should exists");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

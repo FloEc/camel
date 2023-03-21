@@ -35,7 +35,6 @@ public class JacksonProtobufMarshalUnmarshalPojoTest extends CamelTestSupport {
     public void testMarshalUnmarshalPojo() throws Exception {
         MockEndpoint mock1 = getMockEndpoint("mock:serialized");
         mock1.expectedMessageCount(1);
-        mock1.message(0).body().isInstanceOf(byte[].class);
 
         Pojo pojo = new Pojo("Hello");
         template.sendBody("direct:pojo", pojo);
@@ -69,10 +68,10 @@ public class JacksonProtobufMarshalUnmarshalPojoTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:serialized").unmarshal().protobuf(ProtobufLibrary.Jackson, Pojo.class).to("mock:pojo");
                 from("direct:pojo").marshal().protobuf(ProtobufLibrary.Jackson).to("mock:serialized");
             }

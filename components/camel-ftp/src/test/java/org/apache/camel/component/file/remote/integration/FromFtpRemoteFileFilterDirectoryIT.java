@@ -32,7 +32,7 @@ import org.junit.jupiter.api.condition.OS;
 public class FromFtpRemoteFileFilterDirectoryIT extends FtpServerTestSupport {
 
     @BindToRegistry("myFilter")
-    private MyFileFilter filter = new MyFileFilter<>();
+    private final MyFileFilter<Object> filter = new MyFileFilter<>();
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/filefilter?password=admin&recursive=true&filter=#myFilter";
@@ -58,7 +58,7 @@ public class FromFtpRemoteFileFilterDirectoryIT extends FtpServerTestSupport {
         mock.assertIsSatisfied();
     }
 
-    private void prepareFtpServer() throws Exception {
+    private void prepareFtpServer() {
         // prepares the FTP Server by creating files on the server that we want
         // to unit
         // test that we can pool
@@ -68,16 +68,16 @@ public class FromFtpRemoteFileFilterDirectoryIT extends FtpServerTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).convertBodyTo(String.class).to("mock:result");
             }
         };
     }
 
     // START SNIPPET: e1
-    public class MyFileFilter<T> implements GenericFileFilter<T> {
+    public static class MyFileFilter<T> implements GenericFileFilter<T> {
 
         @Override
         public boolean accept(GenericFile<T> file) {

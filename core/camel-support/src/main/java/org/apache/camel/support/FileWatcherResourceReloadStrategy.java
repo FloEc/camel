@@ -140,7 +140,10 @@ public class FileWatcherResourceReloadStrategy extends ResourceReloadStrategySup
 
         File dir = new File(folder);
         if (dir.exists() && dir.isDirectory()) {
-            LOG.info("Starting ReloadStrategy to watch directory: {}", dir);
+            String msg = startupMessage(dir);
+            if (msg != null) {
+                LOG.info(msg);
+            }
 
             WatchEvent.Modifier modifier = null;
 
@@ -160,7 +163,7 @@ public class FileWatcherResourceReloadStrategy extends ResourceReloadStrategySup
                     }
                 }
                 if (modifier != null) {
-                    LOG.info(
+                    LOG.debug(
                             "On Mac OS X the JDK WatchService is slow by default so enabling SensitivityWatchEventModifier.HIGH as workaround");
                 } else {
                     LOG.warn(
@@ -190,6 +193,10 @@ public class FileWatcherResourceReloadStrategy extends ResourceReloadStrategySup
         }
     }
 
+    protected String startupMessage(File dir) {
+        return "Starting ReloadStrategy to watch directory: " + dir;
+    }
+
     private WatchKey registerPathToWatcher(WatchEvent.Modifier modifier, Path path, WatchService watcher) throws IOException {
         WatchKey key;
         if (modifier != null) {
@@ -217,7 +224,7 @@ public class FileWatcherResourceReloadStrategy extends ResourceReloadStrategySup
         super.doStop();
 
         if (executorService != null) {
-            getCamelContext().getExecutorServiceManager().shutdownGraceful(executorService);
+            getCamelContext().getExecutorServiceManager().shutdown(executorService);
             executorService = null;
         }
 
@@ -278,7 +285,7 @@ public class FileWatcherResourceReloadStrategy extends ResourceReloadStrategySup
                         if (accept) {
                             LOG.debug("Accepted Modified/Created file: {}", name);
                             try {
-                                ExtendedCamelContext ecc = getCamelContext().adapt(ExtendedCamelContext.class);
+                                ExtendedCamelContext ecc = getCamelContext().getCamelContextExtension();
                                 // must use file resource loader as we cannot load from classpath
                                 Resource resource = ecc.getResourceLoader().resolveResource("file:" + name);
                                 getResourceReload().onReload(name, resource);

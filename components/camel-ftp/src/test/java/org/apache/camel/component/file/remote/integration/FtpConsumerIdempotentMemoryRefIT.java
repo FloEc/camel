@@ -19,6 +19,7 @@ package org.apache.camel.component.file.remote.integration;
 import org.apache.camel.BindToRegistry;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.support.processor.idempotent.MemoryIdempotentRepository;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ public class FtpConsumerIdempotentMemoryRefIT extends FtpServerTestSupport {
     }
 
     @BindToRegistry("myConsumerIdemRepo")
-    public MemoryIdempotentRepository addRepo() throws Exception {
+    public MemoryIdempotentRepository addRepo() {
         repo = new MemoryIdempotentRepository();
         repo.setCacheSize(5);
         return repo;
@@ -55,7 +56,7 @@ public class FtpConsumerIdempotentMemoryRefIT extends FtpServerTestSupport {
         sendFile(getFtpUrl(), "Hello D", "d.txt");
         sendFile(getFtpUrl(), "Hello E", "e.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         assertTrue(notify.matchesWaitTime());
 
         assertEquals(5, repo.getCache().size());
@@ -65,7 +66,7 @@ public class FtpConsumerIdempotentMemoryRefIT extends FtpServerTestSupport {
         assertTrue(repo.contains("d.txt"));
         assertTrue(repo.contains("e.txt"));
 
-        resetMocks();
+        MockEndpoint.resetMocks(context);
         notify = new NotifyBuilder(context).whenDone(2).create();
 
         getMockEndpoint("mock:result").expectedMessageCount(2);
@@ -77,16 +78,16 @@ public class FtpConsumerIdempotentMemoryRefIT extends FtpServerTestSupport {
         sendFile(getFtpUrl(), "Hello F", "f.txt");
         sendFile(getFtpUrl(), "Hello G", "g.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         assertTrue(notify.matchesWaitTime());
 
         assertEquals(5, repo.getCache().size());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("log:result").to("mock:result");
             }
         };

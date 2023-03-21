@@ -36,7 +36,7 @@ public class NettyHttpGetWithParamAsExchangeHeaderTest extends BaseNettyTest {
 
         template.requestBody(serverUri + "&one=einz&two=twei", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class NettyHttpGetWithParamAsExchangeHeaderTest extends BaseNettyTest {
 
         template.requestBody(serverUri + "&message=Keine%20g%C3%BCltige%20GPS-Daten!", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -61,46 +61,46 @@ public class NettyHttpGetWithParamAsExchangeHeaderTest extends BaseNettyTest {
 
         template.requestBody(serverUri + "&message=Keine+g%C6ltige+GPS-Daten%21", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHttpGetWithSpaceEncodedInParams() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedHeaderReceived("message", " World");
+        mock.expectedHeaderReceived("message", "Wor ld");
         mock.expectedHeaderReceived(Exchange.HTTP_METHOD, "GET");
 
         // parameter starts with a space using %20 as decimal encoded
-        template.requestBody(serverUri + "&message=%20World", null, Object.class);
+        template.requestBody(serverUri + "&message=Wor%20ld", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHttpGetWithSpaceInParams() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedHeaderReceived("message", " World");
+        mock.expectedHeaderReceived("message", "Wor ld");
         mock.expectedHeaderReceived(Exchange.HTTP_METHOD, "GET");
 
         // parameter starts with a space
-        template.requestBody(serverUri + "&message= World", null, Object.class);
+        template.requestBody(serverUri + "&message=Wor ld", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testHttpGetWithSpaceAsPlusInParams() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedHeaderReceived("message", " World");
+        mock.expectedHeaderReceived("message", "Wor ld");
         mock.expectedHeaderReceived(Exchange.HTTP_METHOD, "GET");
 
         // parameter starts with a space
-        template.requestBody(serverUri + "&message=+World", null, Object.class);
+        template.requestBody(serverUri + "&message=Wor+ld", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class NettyHttpGetWithParamAsExchangeHeaderTest extends BaseNettyTest {
 
         template.requestBodyAndHeader(serverUri, null, Exchange.HTTP_QUERY, "one=uno&two=dos");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -126,13 +126,13 @@ public class NettyHttpGetWithParamAsExchangeHeaderTest extends BaseNettyTest {
 
         template.requestBody(serverUri, "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(serverUri).to("mock:result");
             }
         };

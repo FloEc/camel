@@ -16,10 +16,18 @@
  */
 package org.apache.camel.component.google.mail;
 
+import java.util.Collection;
+
 import com.google.api.services.gmail.Gmail;
+import org.apache.camel.CamelContext;
 
 public interface GoogleMailClientFactory {
 
-    Gmail makeClient(String clientId, String clientSecret, String applicationName, String refreshToken, String accessToken);
+    Gmail makeClient(
+            String clientId, String clientSecret, Collection<String> scopes, String applicationName, String refreshToken,
+            String accessToken);
 
+    Gmail makeClient(
+            CamelContext camelContext, String serviceAccountKey, Collection<String> scopes, String applicationName,
+            String delegate);
 }

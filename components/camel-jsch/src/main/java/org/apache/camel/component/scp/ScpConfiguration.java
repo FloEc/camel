@@ -41,10 +41,10 @@ public class ScpConfiguration extends RemoteFileConfiguration {
     @UriParam(label = "security", secret = true)
     private String privateKeyFilePassphrase;
     @UriParam(enums = "no,yes", defaultValue = "no")
-    private String strictHostKeyChecking;
+    private String strictHostKeyChecking = "no";
     @UriParam(defaultValue = DEFAULT_MOD)
     private String chmod = DEFAULT_MOD;
-    // comma separated list of ciphers. 
+    // comma separated list of ciphers.
     // null means default jsch list will be used
     @UriParam(label = "security,advanced")
     private String ciphers;

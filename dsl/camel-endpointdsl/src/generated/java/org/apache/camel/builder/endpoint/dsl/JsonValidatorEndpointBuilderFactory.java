@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -195,6 +195,17 @@ public interface JsonValidatorEndpointBuilderFactory {
             doSetProperty("headerName", headerName);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint for the JSON Schema Validator component.
+     */
+    public interface AdvancedJsonValidatorEndpointBuilder
+            extends
+                EndpointProducerBuilder {
+        default JsonValidatorEndpointBuilder basic() {
+            return (JsonValidatorEndpointBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -209,12 +220,12 @@ public interface JsonValidatorEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default JsonValidatorEndpointBuilder lazyStartProducer(
+        default AdvancedJsonValidatorEndpointBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -234,30 +245,19 @@ public interface JsonValidatorEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default JsonValidatorEndpointBuilder lazyStartProducer(
+        default AdvancedJsonValidatorEndpointBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
-    }
-
-    /**
-     * Advanced builder for endpoint for the JSON Schema Validator component.
-     */
-    public interface AdvancedJsonValidatorEndpointBuilder
-            extends
-                EndpointProducerBuilder {
-        default JsonValidatorEndpointBuilder basic() {
-            return (JsonValidatorEndpointBuilder) this;
-        }
         /**
-         * To use a custom ValidatorErrorHandler. &lt;p/&gt; The default error
-         * handler captures the errors and throws an exception.
+         * To use a custom ValidatorErrorHandler. The default error handler
+         * captures the errors and throws an exception.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.jsonvalidator.JsonValidatorErrorHandler&lt;/code&gt; type.
@@ -273,8 +273,8 @@ public interface JsonValidatorEndpointBuilderFactory {
             return this;
         }
         /**
-         * To use a custom ValidatorErrorHandler. &lt;p/&gt; The default error
-         * handler captures the errors and throws an exception.
+         * To use a custom ValidatorErrorHandler. The default error handler
+         * captures the errors and throws an exception.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.jsonvalidator.JsonValidatorErrorHandler&lt;/code&gt; type.

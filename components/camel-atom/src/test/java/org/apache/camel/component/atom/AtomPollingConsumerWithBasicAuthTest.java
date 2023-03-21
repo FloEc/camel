@@ -17,39 +17,44 @@
 package org.apache.camel.component.atom;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.apache.camel.test.AvailablePortFinder;
+import org.apache.camel.test.infra.jetty.services.JettyConfiguration;
+import org.apache.camel.test.infra.jetty.services.JettyConfigurationBuilder;
+import org.apache.camel.test.infra.jetty.services.JettyEmbeddedService;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 @DisabledOnOs(OS.AIX)
 public class AtomPollingConsumerWithBasicAuthTest extends AtomPollingConsumerTest {
+    private static final int PORT = AvailablePortFinder.getNextAvailable();
+
+    @RegisterExtension
+    public JettyEmbeddedService service = new JettyEmbeddedService(
+            JettyConfigurationBuilder.bareTemplate()
+                    .withPort(PORT)
+                    .withServletConfiguration()
+                    .addServletConfiguration(new JettyConfiguration.ServletHandlerConfiguration.ServletConfiguration<>(
+                            new MyHttpServlet(),
+                            JettyConfiguration.ServletHandlerConfiguration.ServletConfiguration.ROOT_PATH_SPEC))
+                    .addBasicAuthUser("camel", "camelPass", "Private!")
+                    .build()
+                    .build());
 
     @Override
     protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {
-                from("atom:http://localhost:" + JettyTestServer.getInstance().port
+                from("atom:http://localhost:" + PORT
                      + "/?splitEntries=false&username=camel&password=camelPass")
-                             .to("mock:result");
+                        .to("mock:result");
 
                 // this is a bit weird syntax that normally is not used using the feedUri parameter
-                from("atom:?feedUri=http://localhost:" + JettyTestServer.getInstance().port
+                from("atom:?feedUri=http://localhost:" + PORT
                      + "/&splitEntries=false&username=camel&password=camelPass")
-                             .to("mock:result2");
+                        .to("mock:result2");
             }
         };
     }
-
-    @BeforeAll
-    static void startServer() {
-        JettyTestServer.getInstance().startServer();
-    }
-
-    @AfterAll
-    static void stopServer() {
-        JettyTestServer.getInstance().stopServer();
-    }
-
 }

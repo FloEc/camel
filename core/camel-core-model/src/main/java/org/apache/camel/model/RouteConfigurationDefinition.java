@@ -20,11 +20,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+import org.apache.camel.ErrorHandlerFactory;
+import org.apache.camel.model.errorhandler.RefErrorHandlerDefinition;
 import org.apache.camel.spi.Metadata;
 
 /**
@@ -33,10 +36,11 @@ import org.apache.camel.spi.Metadata;
 @Metadata(label = "configuration")
 @XmlRootElement(name = "routeConfiguration")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class RouteConfigurationDefinition extends OptionalIdentifiedDefinition<RouteConfigurationDefinition> {
+public class RouteConfigurationDefinition extends OptionalIdentifiedDefinition<RouteConfigurationDefinition>
+        implements PreconditionContainer {
 
-    // TODO: Model for ErrorHandler (requires to move error handler model from spring-xml, blueprint to core)
-
+    @XmlElement
+    private ErrorHandlerDefinition errorHandler;
     @XmlElement(name = "intercept")
     private List<InterceptDefinition> intercepts = new ArrayList<>();
     @XmlElement(name = "interceptFrom")
@@ -47,6 +51,9 @@ public class RouteConfigurationDefinition extends OptionalIdentifiedDefinition<R
     private List<OnExceptionDefinition> onExceptions = new ArrayList<>();
     @XmlElement(name = "onCompletion")
     private List<OnCompletionDefinition> onCompletions = new ArrayList<>();
+    @XmlAttribute
+    @Metadata(label = "advanced")
+    private String precondition;
 
     public RouteConfigurationDefinition() {
     }
@@ -64,6 +71,14 @@ public class RouteConfigurationDefinition extends OptionalIdentifiedDefinition<R
     @Override
     public String getLabel() {
         return "RoutesConfiguration " + getId();
+    }
+
+    public ErrorHandlerDefinition getErrorHandler() {
+        return errorHandler;
+    }
+
+    public void setErrorHandler(ErrorHandlerDefinition errorHandler) {
+        this.errorHandler = errorHandler;
     }
 
     public List<OnExceptionDefinition> getOnExceptions() {
@@ -106,8 +121,64 @@ public class RouteConfigurationDefinition extends OptionalIdentifiedDefinition<R
         this.interceptSendTos = interceptSendTos;
     }
 
+    /**
+     * The predicate of the precondition in simple language to evaluate in order to determine if this route
+     * configuration should be included or not.
+     */
+    @Override
+    public String getPrecondition() {
+        return precondition;
+    }
+
+    /**
+     * The predicate of the precondition in simple language to evaluate in order to determine if this route
+     * configuration should be included or not.
+     */
+    @Override
+    public void setPrecondition(String precondition) {
+        this.precondition = precondition;
+    }
+
     // Fluent API
     // -------------------------------------------------------------------------
+
+    /**
+     * Sets the error handler to use, for routes that has not already been configured with an error handler.
+     *
+     * @param  ref reference to existing error handler
+     * @return     the builder
+     */
+    public RouteConfigurationDefinition errorHandler(String ref) {
+        ErrorHandlerDefinition def = new ErrorHandlerDefinition();
+        def.setErrorHandlerType(new RefErrorHandlerDefinition(ref));
+        setErrorHandler(def);
+        return this;
+    }
+
+    /**
+     * Sets the error handler to use, for routes that has not already been configured with an error handler.
+     *
+     * @param  errorHandler the error handler
+     * @return              the builder
+     */
+    public RouteConfigurationDefinition errorHandler(ErrorHandlerFactory errorHandler) {
+        ErrorHandlerDefinition def = new ErrorHandlerDefinition();
+        def.setErrorHandlerType(errorHandler);
+        setErrorHandler(def);
+        return this;
+    }
+
+    /**
+     * Sets the predicate of the precondition in simple language to evaluate in order to determine if this route
+     * configuration should be included or not.
+     *
+     * @param  precondition the predicate corresponding to the test to evaluate.
+     * @return              the builder
+     */
+    public RouteConfigurationDefinition precondition(String precondition) {
+        setPrecondition(precondition);
+        return this;
+    }
 
     /**
      * <a href="http://camel.apache.org/exception-clause.html">Exception clause</a> for catching certain exceptions and

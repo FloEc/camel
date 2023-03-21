@@ -48,14 +48,14 @@ public class FtpRecursiveDepthIT extends FtpServerTestSupport {
                 Exchange.FILE_NAME, "b.txt");
 
         // only expect 2 of the 6 sent, those at depth 2
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl() + "&minDepth=2&maxDepth=2").convertBodyTo(String.class).to("mock:result");
             }
         };

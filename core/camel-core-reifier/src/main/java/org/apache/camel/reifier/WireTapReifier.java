@@ -22,13 +22,12 @@ import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Endpoint;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
+import org.apache.camel.LineNumberAware;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.ProcessorDefinitionHelper;
 import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.model.SetHeaderDefinition;
 import org.apache.camel.model.WireTapDefinition;
 import org.apache.camel.processor.SendDynamicProcessor;
 import org.apache.camel.processor.SendProcessor;
@@ -46,17 +45,17 @@ public class WireTapReifier extends ToDynamicReifier<WireTapDefinition<?>> {
 
     @Override
     public Processor createProcessor() throws Exception {
+        // must use InOnly for WireTap
+        definition.setPattern(ExchangePattern.InOnly.name());
+
         // executor service is mandatory for wire tap
         boolean shutdownThreadPool = willCreateNewThreadPool(definition, true);
         ExecutorService threadPool = getConfiguredExecutorService("WireTap", definition, true);
 
-        // must use InOnly for WireTap
-        definition.setPattern(ExchangePattern.InOnly.name());
-
         // optimize to only use dynamic processor if really needed
         String uri;
         if (definition.getEndpointProducerBuilder() != null) {
-            uri = definition.getEndpointProducerBuilder().getUri();
+            uri = definition.getEndpointProducerBuilder().getRawUri();
         } else {
             uri = StringHelper.notEmpty(definition.getUri(), "uri", this);
         }
@@ -69,14 +68,16 @@ public class WireTapReifier extends ToDynamicReifier<WireTapDefinition<?>> {
 
         SendDynamicProcessor dynamicSendProcessor = null;
         SendProcessor sendProcessor = null;
-        boolean simple = LanguageSupport.hasSimpleFunction(definition.getUri());
+        boolean simple = LanguageSupport.hasSimpleFunction(uri);
         boolean dynamic = parseBoolean(definition.getDynamicUri(), true);
-        if (dynamic && simple) {
-            // dynamic so we need the dynamic send processor
+        boolean invalid = parseBoolean(definition.getIgnoreInvalidEndpoint(), false);
+        if (dynamic && simple || invalid) {
+            // dynamic or ignore-invalid so we need the dynamic send processor
             dynamicSendProcessor = (SendDynamicProcessor) super.createProcessor();
         } else {
             // static so we can use a plain send processor
             Endpoint endpoint = CamelContextHelper.resolveEndpoint(camelContext, uri, null);
+            LineNumberAware.trySetLineNumberAware(endpoint, definition);
             sendProcessor = new SendProcessor(endpoint);
         }
 
@@ -85,7 +86,7 @@ public class WireTapReifier extends ToDynamicReifier<WireTapDefinition<?>> {
         Processor childProcessor = wrapInErrorHandler(producer);
 
         // and wrap in unit of work
-        AsyncProcessor target = camelContext.adapt(ExtendedCamelContext.class).getInternalProcessorFactory()
+        AsyncProcessor target = camelContext.getCamelContextExtension().getInternalProcessorFactory()
                 .addUnitOfWorkProcessorAdvice(camelContext, childProcessor, route);
 
         // is true by default
@@ -95,31 +96,12 @@ public class WireTapReifier extends ToDynamicReifier<WireTapDefinition<?>> {
                 dynamicSendProcessor, target, uri,
                 parse(ExchangePattern.class, definition.getPattern()), isCopy,
                 threadPool, shutdownThreadPool, dynamic);
-        Processor newExchangeProcessor = definition.getNewExchangeProcessor();
-        String ref = parseString(definition.getNewExchangeProcessorRef());
-        if (ref != null) {
-            newExchangeProcessor = mandatoryLookup(ref, Processor.class);
+
+        Processor prepare = definition.getOnPrepareProcessor();
+        if (prepare == null && definition.getOnPrepare() != null) {
+            prepare = mandatoryLookup(definition.getOnPrepare(), Processor.class);
         }
-        if (newExchangeProcessor != null) {
-            answer.addNewExchangeProcessor(newExchangeProcessor);
-        }
-        if (definition.getNewExchangeExpression() != null) {
-            answer.setNewExchangeExpression(createExpression(definition.getNewExchangeExpression()));
-        }
-        if (definition.getHeaders() != null && !definition.getHeaders().isEmpty()) {
-            for (SetHeaderDefinition header : definition.getHeaders()) {
-                Processor processor = createProcessor(header);
-                answer.addNewExchangeProcessor(processor);
-            }
-        }
-        Processor onPrepare = definition.getOnPrepare();
-        ref = parseString(definition.getOnPrepareRef());
-        if (ref != null) {
-            onPrepare = mandatoryLookup(ref, Processor.class);
-        }
-        if (onPrepare != null) {
-            answer.setOnPrepare(onPrepare);
-        }
+        answer.setOnPrepare(prepare);
 
         return answer;
     }

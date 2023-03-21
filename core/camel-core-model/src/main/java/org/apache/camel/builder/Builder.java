@@ -22,6 +22,7 @@ import org.apache.camel.model.language.ConstantExpression;
 import org.apache.camel.model.language.ExchangePropertyExpression;
 import org.apache.camel.model.language.HeaderExpression;
 import org.apache.camel.model.language.JoorExpression;
+import org.apache.camel.model.language.JqExpression;
 import org.apache.camel.model.language.JsonPathExpression;
 import org.apache.camel.model.language.LanguageExpression;
 import org.apache.camel.model.language.MethodCallExpression;
@@ -43,48 +44,6 @@ public final class Builder {
      * Utility classes should not have a public constructor.
      */
     private Builder() {
-    }
-
-    /**
-     * Returns a <a href="http://camel.apache.org/bean-language.html">bean expression</a> value builder.
-     * <p/>
-     * This method accepts dual parameters. Either an bean instance or a reference to a bean (String).
-     *
-     * @param      beanOrBeanRef either an instanceof a bean or a reference to bean to lookup in the Registry
-     * @return                   the builder
-     * @deprecated               use {@link #method(Object)}
-     */
-    @Deprecated
-    public static ValueBuilder bean(final Object beanOrBeanRef) {
-        return method(beanOrBeanRef, null);
-    }
-
-    /**
-     * Returns a <a href="http://camel.apache.org/bean-language.html">bean expression</a> value builder.
-     * <p/>
-     * This method accepts dual parameters. Either an bean instance or a reference to a bean (String).
-     *
-     * @param      beanOrBeanRef either an instanceof a bean or a reference to bean to lookup in the Registry
-     * @param      method        the method name
-     * @return                   the builder
-     * @deprecated               use {@link #method(Class, String)} (Object, String)}
-     */
-    @Deprecated
-    public static ValueBuilder bean(Object beanOrBeanRef, String method) {
-        return method(beanOrBeanRef, method);
-    }
-
-    /**
-     * Returns a <a href="http://camel.apache.org/bean-language.html">bean expression</a> value builder
-     *
-     * @param      beanType the bean class which will be invoked
-     * @param      method   name of method to invoke
-     * @return              the builder
-     * @deprecated          use {@link #method(Class, String)}
-     */
-    @Deprecated
-    public static ValueBuilder bean(Class<?> beanType, String method) {
-        return method(beanType, method);
     }
 
     /**
@@ -222,6 +181,23 @@ public final class Builder {
      */
     public static ValueBuilder joor(String value, Class<?> resultType) {
         JoorExpression exp = new JoorExpression(value);
+        exp.setResultType(resultType);
+        return new ValueBuilder(exp);
+    }
+
+    /**
+     * Returns a JQ expression value builder
+     */
+    public static ValueBuilder jq(String value) {
+        JqExpression exp = new JqExpression(value);
+        return new ValueBuilder(exp);
+    }
+
+    /**
+     * Returns a JQ expression value builder
+     */
+    public static ValueBuilder jq(String value, Class<?> resultType) {
+        JqExpression exp = new JqExpression(value);
         exp.setResultType(resultType);
         return new ValueBuilder(exp);
     }

@@ -72,7 +72,7 @@ public class DefaultFluentProducerTemplate extends ServiceSupport implements Flu
     public DefaultFluentProducerTemplate(CamelContext context) {
         this.context = context;
         this.eventNotifierEnabled = true;
-        this.resultProcessors = new ClassValue<Processor>() {
+        this.resultProcessors = new ClassValue<>() {
             @Override
             protected Processor computeValue(Class<?> type) {
                 return new ConvertBodyProcessor(type);
@@ -174,18 +174,11 @@ public class DefaultFluentProducerTemplate extends ServiceSupport implements Flu
     }
 
     @Override
-    public FluentProducerTemplate clearAll() {
-        clearBody();
-        clearHeaders();
-        return this;
-    }
-
-    @Override
     public FluentProducerTemplate withHeaders(Map<String, Object> headers) {
         DefaultFluentProducerTemplate clone = checkCloned();
 
         if (clone.processorSupplier != null) {
-            throw new IllegalArgumentException("Cannot use both withBody and withProcessor with FluentProducerTemplate");
+            throw new IllegalArgumentException("Cannot use both withHeaders and withProcessor with FluentProducerTemplate");
         }
 
         Map<String, Object> map = clone.headers;
@@ -202,7 +195,7 @@ public class DefaultFluentProducerTemplate extends ServiceSupport implements Flu
         DefaultFluentProducerTemplate clone = checkCloned();
 
         if (clone.processorSupplier != null) {
-            throw new IllegalArgumentException("Cannot use both withBody and withProcessor with FluentProducerTemplate");
+            throw new IllegalArgumentException("Cannot use both withHeader and withProcessor with FluentProducerTemplate");
         }
 
         Map<String, Object> map = clone.headers;
@@ -211,16 +204,6 @@ public class DefaultFluentProducerTemplate extends ServiceSupport implements Flu
             clone.headers = map;
         }
         map.put(key, value);
-        return clone;
-    }
-
-    @Override
-    public FluentProducerTemplate clearHeaders() {
-        DefaultFluentProducerTemplate clone = checkCloned();
-
-        if (clone.headers != null) {
-            clone.headers.clear();
-        }
         return clone;
     }
 
@@ -240,21 +223,13 @@ public class DefaultFluentProducerTemplate extends ServiceSupport implements Flu
         DefaultFluentProducerTemplate clone = checkCloned();
 
         if (clone.processorSupplier != null) {
-            throw new IllegalArgumentException("Cannot use both withBody and withProcessor with FluentProducerTemplate");
+            throw new IllegalArgumentException("Cannot use both withBodyAs and withProcessor with FluentProducerTemplate");
         }
 
         Object b = type != null
                 ? clone.context.getTypeConverter().convertTo(type, body)
                 : body;
         clone.body = b;
-        return clone;
-    }
-
-    @Override
-    public FluentProducerTemplate clearBody() {
-        DefaultFluentProducerTemplate clone = checkCloned();
-
-        clone.body = null;
         return clone;
     }
 
@@ -619,7 +594,6 @@ public class DefaultFluentProducerTemplate extends ServiceSupport implements Flu
 
     @Override
     protected void doStop() throws Exception {
-        clearAll();
         this.endpoint = null;
         this.endpointUri = null;
         this.exchangeSupplier = null;

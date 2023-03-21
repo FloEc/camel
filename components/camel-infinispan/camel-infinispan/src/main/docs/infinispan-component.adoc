@@ -50,6 +50,10 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
+
 == Camel Operations
 This section lists all available operations, along with their header information.
 
@@ -100,6 +104,7 @@ This section lists all available operations, along with their header information
 
 * *Required Headers*: 
 ** CamelInfinispanKey
+Resulting value is returned in the exchange *body*.
 
 .Contains Key Operation
 [cols="40%,60%a", options="header"]
@@ -121,8 +126,9 @@ This section lists all available operations, along with their header information
 |===
 
 * *Required Headers*: 
-** CamelInfinispanKey
-
+** CamelInfinispanValue
+* *Result Header*
+** CamelInfinispanOperationResult
 
 .Remove Operations
 [cols="40%,60%a", options="header"]
@@ -196,33 +202,12 @@ This section lists all available operations, along with their header information
 
 * *Required Headers*:
 ** CamelInfinispanQueryBuilder
-* *Result Header*: 
-** CamelInfinispanOperationResult
+Resulting value is returned in the exchange *body*.
 
 [NOTE]
 ====
 Write methods like put(key, value) and remove(key) do not return the previous value by default.
 ====
-
-== Message Headers
-
-[width="100%",cols="10%,10%,10%,10%,60%",options="header",]
-|=======================================================================
-|Name |Default Value |Type |Context |Description
-|CamelInfinispanCacheName |`null` |String |Shared |The cache participating in the operation or event.
-|CamelInfinispanOperation |`PUT` |InfinispanOperation |Producer |The operation to perform.
-|CamelInfinispanMap |`null` |Map |Producer |A Map to use in case of CamelInfinispanOperationPutAll operation
-|CamelInfinispanKey |`null` |Object |Shared |The key to perform the operation to or the key generating the event.
-|CamelInfinispanValue |`null` |Object |Producer |The value to use for the operation.
-|CamelInfinispanEventType |`null` |String |Consumer |The type of the received event. 
-|CamelInfinispanLifespanTime |`null` |long |Producer |The Lifespan time of a value inside the cache. Negative values are interpreted as infinity.
-|CamelInfinispanTimeUnit |`null` |String |Producer |The Time Unit of an entry Lifespan Time.
-|CamelInfinispanMaxIdleTime |`null` |long |Producer |The maximum amount of time an entry is allowed to be idle for before it is considered as expired.
-|CamelInfinispanMaxIdleTimeUnit |`null` |String |Producer |The Time Unit of an entry Max Idle Time.
-|CamelInfinispanQueryBuilder |null |InfinispanQueryBuilder |Producer |The QueryBuilde to use for QUERY command, if not present the command defaults to InifinispanConfiguration's one
-|CamelInfinispanOperationResultHeader |null |String |Producer |Store the operation result in a header instead of the message body
-|=======================================================================
-
 
 == Examples
 
@@ -247,7 +232,7 @@ from("direct:start")
     .setHeader(InfinispanConstants.OPERATION).constant(InfinispanOperation.GET)
     .setHeader(InfinispanConstants.KEY).constant("123")
     .setHeader(InfinispanConstants.LIFESPAN_TIME).constant(100L) // <1>
-    .setHeader(InfinispanConstants.LIFESPAN_TIME_UNIT.constant(TimeUnit.MILLISECONDS.toString()) // <2>
+    .setHeader(InfinispanConstants.LIFESPAN_TIME_UNIT).constant(TimeUnit.MILLISECONDS.toString()) // <2>
     .to("infinispan:myCacheName");
 ----
 <1> Set the lifespan of the entry
@@ -327,7 +312,7 @@ context.addRoutes(new RouteBuilder() {
 <camelContext xmlns="http://camel.apache.org/schema/spring">
     <route>
         <from uri="direct:start" />
-        <idempotentConsumer messageIdRepositoryRef="infinispanRepo"> <3>
+        <idempotentConsumer idempotentRepository="infinispanRepo"> <3>
             <header>MessageID</header>
             <to uri="mock:result" />
         </idempotentConsumer>
@@ -359,7 +344,7 @@ context.addRoutes(new RouteBuilder() {
                 .aggregate(header("MessageID"))
                 .completionSize(3)
                 .aggregationRepository(repo) // <3>
-                .aggregationStrategyRef("myStrategy")
+                .aggregationStrategy("myStrategy")
                 .to("mock:result");
     }
 });
@@ -383,9 +368,9 @@ context.addRoutes(new RouteBuilder() {
 <camelContext xmlns="http://camel.apache.org/schema/spring">
     <route>
         <from uri="direct:start" />
-        <aggregate strategyRef="myStrategy"   
+        <aggregate aggregationStrategy="myStrategy"   
                    completionSize="3"
-                   aggregationRepositoryRef="infinispanRepo"> <3>
+                   aggregationRepository="infinispanRepo"> <3>
             <correlationExpression>
                 <header>MessageID</header>
             </correlationExpression>

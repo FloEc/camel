@@ -16,8 +16,6 @@
  */
 package org.apache.camel.component.thrift;
 
-import java.io.IOException;
-
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.thrift.generated.Calculator;
@@ -55,7 +53,7 @@ public class ThriftConsumerZlibCompressionTest extends CamelTestSupport {
     private TTransport transport;
 
     @BeforeEach
-    public void startThriftZlibClient() throws IOException, TTransportException {
+    public void startThriftZlibClient() throws TTransportException {
         if (transport == null) {
             LOG.info("Connecting to the Thrift server with zlib compression on port: {}", THRIFT_TEST_PORT);
 
@@ -68,7 +66,7 @@ public class ThriftConsumerZlibCompressionTest extends CamelTestSupport {
     }
 
     @AfterEach
-    public void stopThriftClient() throws Exception {
+    public void stopThriftClient() {
         if (transport != null) {
             transport.close();
             transport = null;
@@ -110,18 +108,18 @@ public class ThriftConsumerZlibCompressionTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {
 
                 from("thrift://localhost:" + THRIFT_TEST_PORT
                      + "/org.apache.camel.component.thrift.generated.Calculator?compressionType=ZLIB&synchronous=true")
-                             .to("mock:thrift-secure-service").choice()
-                             .when(header(ThriftConstants.THRIFT_METHOD_NAME_HEADER).isEqualTo("calculate"))
-                             .setBody(simple(Integer.valueOf(THRIFT_TEST_NUM1 * THRIFT_TEST_NUM2).toString()))
-                             .when(header(ThriftConstants.THRIFT_METHOD_NAME_HEADER).isEqualTo("echo"))
-                             .setBody(simple("${body[0]}")).bean(new CalculatorMessageBuilder(), "echo");
+                        .to("mock:thrift-secure-service").choice()
+                        .when(header(ThriftConstants.THRIFT_METHOD_NAME_HEADER).isEqualTo("calculate"))
+                        .setBody(simple(Integer.valueOf(THRIFT_TEST_NUM1 * THRIFT_TEST_NUM2).toString()))
+                        .when(header(ThriftConstants.THRIFT_METHOD_NAME_HEADER).isEqualTo("echo"))
+                        .setBody(simple("${body[0]}")).bean(new CalculatorMessageBuilder(), "echo");
             }
         };
     }

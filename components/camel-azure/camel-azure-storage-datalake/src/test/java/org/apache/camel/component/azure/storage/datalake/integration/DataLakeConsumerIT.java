@@ -44,8 +44,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.io.TempDir;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,7 +54,6 @@ public class DataLakeConsumerIT extends Base {
 
     @TempDir
     static Path testDir;
-    private static final Logger LOG = LoggerFactory.getLogger(DataLakeConsumerIT.class);
 
     @EndpointInject("direct:createFile")
     private ProducerTemplate templateStart;
@@ -195,7 +192,7 @@ public class DataLakeConsumerIT extends Base {
 
                 from(baseURI + fileSystemName + "?fileName=" + fileName
                      + "&dataLakeServiceClient=#serviceClient&fileDir=" + testDir + "&openOptions=#openOptions")
-                             .to("mock:result");
+                        .to("mock:result");
 
                 from(baseURI + batchFileSystemName + "?dataLakeServiceClient=#serviceClient&openOptions=#openOptions")
                         .to("mock:resultBatch");
@@ -205,8 +202,8 @@ public class DataLakeConsumerIT extends Base {
 
                 from(baseURI + batchFileSystemName2 + "?dataLakeServiceClient=#serviceClient&regex=" + regex
                      + "&openOptions=#openOptions")
-                             .idempotentConsumer(body(), new MemoryIdempotentRepository())
-                             .to("mock:resultRegex");
+                        .idempotentConsumer(body(), new MemoryIdempotentRepository())
+                        .to("mock:resultRegex");
             }
         };
     }

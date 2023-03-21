@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -44,6 +45,7 @@ import org.apache.camel.spi.ClassResolver;
 import org.apache.camel.spi.Language;
 import org.apache.camel.spi.PropertiesComponent;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.spi.UnitOfWork;
 import org.apache.camel.support.ConstantExpressionAdapter;
 import org.apache.camel.support.ExchangeHelper;
 import org.apache.camel.support.ExpressionAdapter;
@@ -346,7 +348,11 @@ public class ExpressionBuilder {
             @Override
             public Object evaluate(Exchange exchange) {
                 String text = ref.evaluate(exchange, String.class);
-                return registry.lookupByName(text);
+                if (text != null) {
+                    return registry.lookupByName(text);
+                } else {
+                    return null;
+                }
             }
 
             @Override
@@ -822,6 +828,40 @@ public class ExpressionBuilder {
     }
 
     /**
+     * Returns the expression for the original incoming message body
+     */
+    public static Expression originalBodyExpression() {
+        return new ExpressionAdapter() {
+
+            private boolean enabled;
+            @Override
+            public Object evaluate(Exchange exchange) {
+                if (enabled) {
+                    UnitOfWork uow = exchange.getUnitOfWork();
+                    if (uow != null) {
+                        Message msg = uow.getOriginalInMessage();
+                        if (msg != null) {
+                            return msg.getBody();
+                        }
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public void init(CamelContext context) {
+                super.init(context);
+                this.enabled = context.isAllowUseOriginalMessage();
+            }
+
+            @Override
+            public String toString() {
+                return "originalBody";
+            }
+        };
+    }
+
+    /**
      * Returns a functional expression for the exchanges inbound message body
      */
     public static Expression bodyExpression(final Function<Object, Object> function) {
@@ -956,6 +996,24 @@ public class ExpressionBuilder {
                 return "bodyAs[" + name + "]";
             }
         };
+    }
+
+    /**
+     * @param headerName the name of the header from which the input data must be extracted if not empty.
+     * @param propertyName the name of the property from which the input data must be extracted if not empty and {@code headerName} is empty.
+     * @return a header expression if {@code headerName} is not empty, otherwise a property expression if {@code propertyName} is not empty
+     * or finally a body expression.
+     */
+    public static Expression singleInputExpression(String headerName, String propertyName) {
+        final Expression exp;
+        if (ObjectHelper.isNotEmpty(headerName)) {
+            exp = headerExpression(headerName);
+        } else if (ObjectHelper.isNotEmpty(propertyName)) {
+            exp = exchangePropertyExpression(propertyName);
+        } else {
+            exp = bodyExpression();
+        }
+        return exp;
     }
 
     /**
@@ -1381,6 +1439,53 @@ public class ExpressionBuilder {
         };
     }
 
+    public static Expression joinExpression(final Expression expression, final String separator, final String prefix) {
+        return new ExpressionAdapter() {
+            private TypeConverter converter;
+
+            @Override
+            public Object evaluate(Exchange exchange) {
+                // evaluate expression as iterator
+                Iterator<?> it = expression.evaluate(exchange, Iterator.class);
+                ObjectHelper.notNull(it, "expression: " + expression + " evaluated on " + exchange + " must return an java.util.Iterator");
+
+                StringBuilder sb = new StringBuilder();
+                while (it.hasNext()) {
+                    Object o = it.next();
+                    if (o != null) {
+                        String s = converter.tryConvertTo(String.class, exchange, o);
+                        if (s != null) {
+                            if (sb.length() > 0) {
+                                sb.append(separator);
+                            }
+                            if (prefix != null) {
+                                sb.append(prefix);
+                            }
+                            sb.append(s);
+                        }
+                    }
+                }
+
+                return sb.toString();
+            }
+
+            @Override
+            public void init(CamelContext context) {
+                expression.init(context);
+                converter = context.getTypeConverter();
+            }
+
+            @Override
+            public String toString() {
+                if (prefix != null) {
+                    return "join(" + expression + "," + separator + "," + prefix + ")";
+                } else {
+                    return "join(" + expression + "," + separator + ")";
+                }
+            }
+        };
+    }
+
     /**
      * Returns a sort expression which will sort the expression with the given comparator.
      * <p/>
@@ -1535,32 +1640,32 @@ public class ExpressionBuilder {
      * @return an expression which when evaluated will return the concatenated values
      */
     public static Expression concatExpression(final Collection<Expression> expressions, final String description) {
-        return new ExpressionAdapter() {
+        for (Expression expression : expressions) {
+            if (expression instanceof ConstantExpressionAdapter) {
+                return concatExpressionOptimized(expressions, description);
+            }
+        }
+        return concatExpressionUnoptimized(expressions, description);
+    }
 
-            private Collection<Object> col;
+    /**
+     * Returns an expression which returns the string concatenation value of the various
+     * expressions
+     *
+     * @param expressions the expression to be concatenated dynamically
+     * @param description the text description of the expression
+     * @return an expression which when evaluated will return the concatenated values
+     */
+    private static Expression concatExpressionUnoptimized(final Collection<Expression> expressions, final String description) {
+        return new ExpressionAdapter() {
 
             @Override
             public Object evaluate(Exchange exchange) {
                 StringBuilder buffer = new StringBuilder();
-                if (col != null) {
-                    // optimize for constant expressions so we can do this a bit faster
-                    for (Object obj : col) {
-                        if (obj instanceof Expression) {
-                            Expression expression = (Expression) obj;
-                            String text = expression.evaluate(exchange, String.class);
-                            if (text != null) {
-                                buffer.append(text);
-                            }
-                        } else {
-                            buffer.append((String) obj);
-                        }
-                    }
-                } else {
-                    for (Expression expression : expressions) {
-                        String text = expression.evaluate(exchange, String.class);
-                        if (text != null) {
-                            buffer.append(text);
-                        }
+                for (Expression expression : expressions) {
+                    String text = expression.evaluate(exchange, String.class);
+                    if (text != null) {
+                        buffer.append(text);
                     }
                 }
                 return buffer.toString();
@@ -1568,24 +1673,83 @@ public class ExpressionBuilder {
 
             @Override
             public void init(CamelContext context) {
-                boolean constant = false;
                 for (Expression expression : expressions) {
                     expression.init(context);
-                    constant |= expression instanceof ConstantExpressionAdapter;
                 }
-                if (constant) {
-                    // okay some of the expressions are constant so we can optimize and avoid
-                    // evaluate them but use their constant value as-is directly
-                    // this can be common with the simple language where you use it for templating
-                    // by mixing string text and simple functions together (or via the log EIP)
-                    col = new ArrayList<>(expressions.size());
+            }
+
+            @Override
+            public String toString() {
+                if (description != null) {
+                    return description;
+                } else {
+                    return "concat(" + expressions + ")";
+                }
+            }
+        };
+    }
+
+    /**
+     * Returns an optimized expression which returns the string concatenation value of the various.
+     * expressions
+     *
+     * @param expressions the expression to be concatenated dynamically
+     * @param description the text description of the expression
+     * @return an expression which when evaluated will return the concatenated values
+     */
+    private static Expression concatExpressionOptimized(final Collection<Expression> expressions, final String description) {
+        return new ExpressionAdapter() {
+            private Collection<Object> optimized;
+            private String optimizedValue;
+
+            @Override
+            public Object evaluate(Exchange exchange) {
+                if (optimizedValue != null) {
+                    return optimizedValue;
+                }
+                StringBuilder buffer = new StringBuilder();
+                Collection<?> col = optimized != null ? optimized : expressions;
+                for (Object obj : col) {
+                    if (obj instanceof Expression) {
+                        Expression expression = (Expression) obj;
+                        String text = expression.evaluate(exchange, String.class);
+                        if (text != null) {
+                            buffer.append(text);
+                        }
+                    } else if (obj != null) {
+                        buffer.append(obj);
+                    }
+                }
+                return buffer.toString();
+            }
+
+            @Override
+            public void init(CamelContext context) {
+                if (optimized == null) {
+                    Collection<Object> preprocessedExpression = new ArrayList<>(expressions.size());
+                    boolean constantsOnly = true;
                     for (Expression expression : expressions) {
+                        expression.init(context);
                         if (expression instanceof ConstantExpressionAdapter) {
                             Object value = ((ConstantExpressionAdapter) expression).getValue();
-                            col.add(value.toString());
+                            preprocessedExpression.add(value.toString());
                         } else {
-                            col.add(expression);
+                            preprocessedExpression.add(expression);
+                            constantsOnly = false;
                         }
+                    }
+                    if (constantsOnly) {
+                        StringBuilder sb = new StringBuilder();
+                        for (Object o : preprocessedExpression) {
+                            sb.append(o);
+                        }
+                        optimizedValue = sb.toString();
+                    } else {
+                        optimized = preprocessedExpression;
+                    }
+                } else {
+                    for (Expression expression : expressions) {
+                        expression.init(context);
                     }
                 }
             }
@@ -1746,6 +1910,29 @@ public class ExpressionBuilder {
         };
     }
 
+    public static Expression beanExpression(final Expression expression, final String method) {
+        return new ExpressionAdapter() {
+            private Language language;
+
+            @Override
+            public Object evaluate(Exchange exchange) {
+                Object bean = expression.evaluate(exchange, Object.class);
+                Expression exp = language.createExpression(null, new Object[]{bean, method});
+                exp.init(exchange.getContext());
+                return exp.evaluate(exchange, Object.class);
+            }
+
+            @Override
+            public void init(CamelContext context) {
+                this.language = context.resolveLanguage("bean");
+            }
+
+            public String toString() {
+                return "bean(" + expression + ", " + method + ")";
+            }
+        };
+    }
+
     public static Expression propertiesComponentExpression(final String key, final String defaultValue) {
         return new ExpressionAdapter() {
             private Expression exp;
@@ -1776,6 +1963,32 @@ public class ExpressionBuilder {
             @Override
             public String toString() {
                 return "properties(" + key + ")";
+            }
+        };
+    }
+
+    public static Expression propertiesComponentExist(final String key, final boolean negate) {
+        return new ExpressionAdapter() {
+            private PropertiesComponent pc;
+
+            @Override
+            public Object evaluate(Exchange exchange) {
+                Optional<String> result = pc.resolveProperty(key);
+                boolean answer = result.isPresent();
+                if (negate) {
+                    answer = !answer;
+                }
+                return answer;
+            }
+
+            @Override
+            public void init(CamelContext context) {
+                pc = context.getPropertiesComponent();
+            }
+
+            @Override
+            public String toString() {
+                return "propertiesExist(" + key + ")";
             }
         };
     }

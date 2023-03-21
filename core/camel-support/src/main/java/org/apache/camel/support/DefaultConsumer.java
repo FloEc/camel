@@ -21,8 +21,6 @@ import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.PooledExchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Route;
@@ -62,7 +60,7 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
         this.asyncProcessor = AsyncProcessorConverterHelper.convert(processor);
         this.exceptionHandler = new LoggingExceptionHandler(endpoint.getCamelContext(), getClass());
         // create a per consumer exchange factory
-        this.exchangeFactory = endpoint.getCamelContext().adapt(ExtendedCamelContext.class)
+        this.exchangeFactory = endpoint.getCamelContext().getCamelContextExtension()
                 .getExchangeFactory().newExchangeFactory(this);
     }
 
@@ -107,12 +105,16 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
         // if the exchange doesn't have from route id set, then set it if it originated
         // from this unit of work
         if (route != null && exchange.getFromRouteId() == null) {
-            exchange.adapt(ExtendedExchange.class).setFromRouteId(route.getId());
+            exchange.getExchangeExtension().setFromRouteId(route.getId());
         }
 
-        UnitOfWork uow = endpoint.getCamelContext().adapt(ExtendedCamelContext.class).getUnitOfWorkFactory()
-                .createUnitOfWork(exchange);
-        exchange.adapt(ExtendedExchange.class).setUnitOfWork(uow);
+        // create uow (however for pooled exchanges then the uow is pre-created)
+        UnitOfWork uow = exchange.getUnitOfWork();
+        if (uow == null) {
+            uow = endpoint.getCamelContext().getCamelContextExtension().getUnitOfWorkFactory()
+                    .createUnitOfWork(exchange);
+            exchange.getExchangeExtension().setUnitOfWork(uow);
+        }
         return uow;
     }
 
@@ -131,7 +133,8 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
     public Exchange createExchange(boolean autoRelease) {
         Exchange answer = exchangeFactory.create(getEndpoint(), autoRelease);
         endpoint.configureExchange(answer);
-        answer.adapt(ExtendedExchange.class).setFromRouteId(routeId);
+
+        answer.getExchangeExtension().setFromRouteId(routeId);
         return answer;
     }
 
@@ -140,7 +143,7 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
         if (exchange != null) {
             if (!autoRelease && exchange instanceof PooledExchange) {
                 // if not auto release we must manually force done
-                ((PooledExchange) exchange).done(true);
+                ((PooledExchange) exchange).done();
             }
             exchangeFactory.release(exchange);
         }
@@ -150,11 +153,10 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
     public AsyncCallback defaultConsumerCallback(Exchange exchange, boolean autoRelease) {
         boolean pooled = exchangeFactory.isPooled();
         if (pooled) {
-            ExtendedExchange ee = exchange.adapt(ExtendedExchange.class);
-            AsyncCallback answer = ee.getDefaultConsumerCallback();
+            AsyncCallback answer = exchange.getExchangeExtension().getDefaultConsumerCallback();
             if (answer == null) {
                 answer = new DefaultConsumerCallback(this, exchange, autoRelease);
-                ee.setDefaultConsumerCallback(answer);
+                exchange.getExchangeExtension().setDefaultConsumerCallback(answer);
             }
             return answer;
         } else {
@@ -259,11 +261,13 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
 
         private final DefaultConsumer consumer;
         private final Exchange exchange;
+        private final boolean pooled;
         private final boolean autoRelease;
 
         public DefaultConsumerCallback(DefaultConsumer consumer, Exchange exchange, boolean autoRelease) {
             this.consumer = consumer;
             this.exchange = exchange;
+            this.pooled = exchange instanceof PooledExchange;
             this.autoRelease = autoRelease;
         }
 
@@ -276,7 +280,10 @@ public class DefaultConsumer extends ServiceSupport implements Consumer, RouteAw
                             exchange.getException());
                 }
             } finally {
-                consumer.releaseExchange(exchange, autoRelease);
+                if (!autoRelease) {
+                    // must release if not auto released
+                    consumer.releaseExchange(exchange, autoRelease);
+                }
             }
         }
 

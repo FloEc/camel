@@ -20,14 +20,13 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Supplier;
 
 import org.apache.camel.StaticService;
 import org.apache.camel.api.management.ManagedAttribute;
 import org.apache.camel.api.management.ManagedResource;
 import org.apache.camel.spi.ReactiveExecutor;
-import org.apache.camel.spi.annotations.EagerClassloaded;
 import org.apache.camel.support.service.ServiceSupport;
+import org.apache.camel.util.concurrent.NamedThreadLocal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,24 +34,20 @@ import org.slf4j.LoggerFactory;
  * Default {@link ReactiveExecutor}.
  */
 @ManagedResource(description = "Managed ReactiveExecutor")
-@EagerClassloaded
 public class DefaultReactiveExecutor extends ServiceSupport implements ReactiveExecutor, StaticService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultReactiveExecutor.class);
-
-    private final ThreadLocal<Worker> workers = ThreadLocal.withInitial(new Supplier<Worker>() {
-        @Override
-        public Worker get() {
-            int number = createdWorkers.incrementAndGet();
-            return new Worker(number, DefaultReactiveExecutor.this);
-        }
-    });
 
     // use for statistics so we have insights at runtime
     private boolean statisticsEnabled;
     private final AtomicInteger createdWorkers = new AtomicInteger();
     private final LongAdder runningWorkers = new LongAdder();
     private final LongAdder pendingTasks = new LongAdder();
+
+    private final NamedThreadLocal<Worker> workers = new NamedThreadLocal<>("CamelReactiveWorker", () -> {
+        int number = createdWorkers.incrementAndGet();
+        return new Worker(number, DefaultReactiveExecutor.this);
+    });
 
     @Override
     public void schedule(Runnable runnable) {
@@ -108,18 +103,17 @@ public class DefaultReactiveExecutor extends ServiceSupport implements ReactiveE
         return pendingTasks.intValue();
     }
 
-    public static void onClassloaded(Logger log) {
-        log.trace("Loaded DefaultReactiveExecutor");
-        Worker dummy = new Worker(-1, null);
-        log.trace("Loaded {}", dummy.getClass().getName());
-    }
-
     @Override
     protected void doStop() throws Exception {
         if (LOG.isDebugEnabled() && statisticsEnabled) {
             LOG.debug("Stopping DefaultReactiveExecutor [createdWorkers: {}, runningWorkers: {}, pendingTasks: {}]",
                     getCreatedWorkers(), getRunningWorkers(), getPendingTasks());
         }
+    }
+
+    @Override
+    protected void doShutdown() throws Exception {
+        workers.remove();
     }
 
     private static class Worker {

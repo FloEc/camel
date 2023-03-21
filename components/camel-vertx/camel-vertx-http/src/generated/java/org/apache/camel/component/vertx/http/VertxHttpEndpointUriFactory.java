@@ -19,34 +19,36 @@ public class VertxHttpEndpointUriFactory extends org.apache.camel.support.compon
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
         Set<String> props = new HashSet<>(24);
-        props.add("throwExceptionOnFailure");
-        props.add("proxyUsername");
-        props.add("sessionManagement");
-        props.add("webClientOptions");
-        props.add("proxyPassword");
-        props.add("proxyType");
         props.add("basicAuthPassword");
-        props.add("sslContextParameters");
-        props.add("httpMethod");
-        props.add("useCompression");
-        props.add("vertxHttpBinding");
-        props.add("okStatusCodeRange");
-        props.add("responsePayloadAsByteArray");
-        props.add("proxyHost");
-        props.add("timeout");
-        props.add("proxyPort");
-        props.add("lazyStartProducer");
-        props.add("bearerToken");
         props.add("basicAuthUsername");
-        props.add("httpUri");
-        props.add("headerFilterStrategy");
-        props.add("transferException");
+        props.add("bearerToken");
         props.add("connectTimeout");
         props.add("cookieStore");
+        props.add("headerFilterStrategy");
+        props.add("httpMethod");
+        props.add("httpUri");
+        props.add("lazyStartProducer");
+        props.add("okStatusCodeRange");
+        props.add("proxyHost");
+        props.add("proxyPassword");
+        props.add("proxyPort");
+        props.add("proxyType");
+        props.add("proxyUsername");
+        props.add("responsePayloadAsByteArray");
+        props.add("sessionManagement");
+        props.add("sslContextParameters");
+        props.add("throwExceptionOnFailure");
+        props.add("timeout");
+        props.add("transferException");
+        props.add("useCompression");
+        props.add("vertxHttpBinding");
+        props.add("webClientOptions");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         SECRET_PROPERTY_NAMES = Collections.emptySet();
+        MULTI_VALUE_PREFIXES = Collections.emptySet();
     }
 
     @Override
@@ -74,6 +76,11 @@ public class VertxHttpEndpointUriFactory extends org.apache.camel.support.compon
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

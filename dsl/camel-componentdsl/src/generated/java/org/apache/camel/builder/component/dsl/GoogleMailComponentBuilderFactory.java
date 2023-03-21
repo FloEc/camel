@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -93,6 +93,36 @@ public interface GoogleMailComponentBuilderFactory {
         default GoogleMailComponentBuilder configuration(
                 org.apache.camel.component.google.mail.GoogleMailConfiguration configuration) {
             doSetProperty("configuration", configuration);
+            return this;
+        }
+        /**
+         * Delegate for wide-domain service account.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param delegate the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailComponentBuilder delegate(java.lang.String delegate) {
+            doSetProperty("delegate", delegate);
+            return this;
+        }
+        /**
+         * GMail scopes.
+         * 
+         * The option is a:
+         * &lt;code&gt;java.util.Collection&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param scopes the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailComponentBuilder scopes(
+                java.util.Collection<java.lang.String> scopes) {
+            doSetProperty("scopes", scopes);
             return this;
         }
         /**
@@ -227,6 +257,22 @@ public interface GoogleMailComponentBuilderFactory {
             doSetProperty("refreshToken", refreshToken);
             return this;
         }
+        /**
+         * Service account key in json format to authenticate an application as
+         * a service account. Accept base64 adding the prefix base64:.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param serviceAccountKey the value to set
+         * @return the dsl builder
+         */
+        default GoogleMailComponentBuilder serviceAccountKey(
+                java.lang.String serviceAccountKey) {
+            doSetProperty("serviceAccountKey", serviceAccountKey);
+            return this;
+        }
     }
 
     class GoogleMailComponentBuilderImpl
@@ -254,6 +300,8 @@ public interface GoogleMailComponentBuilderFactory {
             case "applicationName": getOrCreateConfiguration((GoogleMailComponent) component).setApplicationName((java.lang.String) value); return true;
             case "clientId": getOrCreateConfiguration((GoogleMailComponent) component).setClientId((java.lang.String) value); return true;
             case "configuration": ((GoogleMailComponent) component).setConfiguration((org.apache.camel.component.google.mail.GoogleMailConfiguration) value); return true;
+            case "delegate": getOrCreateConfiguration((GoogleMailComponent) component).setDelegate((java.lang.String) value); return true;
+            case "scopes": getOrCreateConfiguration((GoogleMailComponent) component).setScopes((java.util.Collection) value); return true;
             case "bridgeErrorHandler": ((GoogleMailComponent) component).setBridgeErrorHandler((boolean) value); return true;
             case "lazyStartProducer": ((GoogleMailComponent) component).setLazyStartProducer((boolean) value); return true;
             case "autowiredEnabled": ((GoogleMailComponent) component).setAutowiredEnabled((boolean) value); return true;
@@ -261,6 +309,7 @@ public interface GoogleMailComponentBuilderFactory {
             case "accessToken": getOrCreateConfiguration((GoogleMailComponent) component).setAccessToken((java.lang.String) value); return true;
             case "clientSecret": getOrCreateConfiguration((GoogleMailComponent) component).setClientSecret((java.lang.String) value); return true;
             case "refreshToken": getOrCreateConfiguration((GoogleMailComponent) component).setRefreshToken((java.lang.String) value); return true;
+            case "serviceAccountKey": getOrCreateConfiguration((GoogleMailComponent) component).setServiceAccountKey((java.lang.String) value); return true;
             default: return false;
             }
         }

@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -48,22 +48,6 @@ public interface BeanComponentBuilderFactory {
      * Builder for the Bean component.
      */
     interface BeanComponentBuilder extends ComponentBuilder<BeanComponent> {
-        /**
-         * Use singleton option instead.
-         * 
-         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: producer
-         * 
-         * @param cache the value to set
-         * @return the dsl builder
-         */
-        @Deprecated
-        default BeanComponentBuilder cache(java.lang.Boolean cache) {
-            doSetProperty("cache", cache);
-            return this;
-        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -153,7 +137,6 @@ public interface BeanComponentBuilderFactory {
                 String name,
                 Object value) {
             switch (name) {
-            case "cache": ((BeanComponent) component).setCache((java.lang.Boolean) value); return true;
             case "lazyStartProducer": ((BeanComponent) component).setLazyStartProducer((boolean) value); return true;
             case "scope": ((BeanComponent) component).setScope((org.apache.camel.BeanScope) value); return true;
             case "autowiredEnabled": ((BeanComponent) component).setAutowiredEnabled((boolean) value); return true;

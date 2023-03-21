@@ -15,9 +15,8 @@ For validating the source code for mis configured Camel:
 - seda/direct endpoint pairs
 - configuration in properties files
 
-Then you can run validate goal from the command line or from within your Java editor such as IDEA or Eclipse.
+Then you can run the validate goal from the command line or from within your Java editor such as IDEA or Eclipse.
 
-[source,bash]
 ----
 mvn camel-report:validate
 ----
@@ -65,72 +64,6 @@ changed accordingly to `process-test-classes` as shown below:
 </plugin>
 ----
 
-=== Running the goal on any Maven project
-
-You can also run validate goal on any Maven project without having to add the plugin to the `pom.xml` file.
-Doing so requires to specify the plugin using its fully qualified name. For example to run the goal on
-the `cdi` from Apache Camel you can run
-
-[source,bash]
-----
-$cd examples/cdi
-$mvn org.apache.camel:camel-report-maven-plugin:3.13.0:validate
-----
-
-which then runs and outputs the following:
-
-----
-[INFO] ------------------------------------------------------------------------
-[INFO] Building Camel :: Example :: CDI 3.13.0
-[INFO] ------------------------------------------------------------------------
-[INFO]
-[INFO] --- camel-report-maven-plugin:3.13.0:validate (default-cli) @ camel-example-cdi ---
-[INFO] Endpoint validation success: (5 = passed, 0 = invalid, 0 = incapable, 0 = unknown components, 0 = deprecated options)
-[INFO] Simple validation success: (0 = passed, 0 = invalid)
-[INFO] Endpoint pair (seda/direct) validation success: (0 = pairs)
-[INFO] Duplicate route id validation success: (0 = ids)
-[INFO] Configuration validation success: (0 = passed, 0 = invalid, 0 = incapable, 0 = unknown components, 0 = deprecated options)
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-----
-
-The validation passed, and 5 endpoints was validated. Now suppose we made a typo in one of the Camel endpoint uris in the source code, such as:
-
-[source,java]
-----
-@Uri("timer:foo?period=5000")
-----
-
-is changed to include a typo error in the `period` option
-
-[source,java]
-----
-@Uri("timer:foo?perid=5000")
-----
-
-And when running validate goal again reports the following:
-
-----
-[INFO] ------------------------------------------------------------------------
-[INFO] Building Camel :: Example :: CDI 3.13.0
-[INFO] ------------------------------------------------------------------------
-[INFO]
-[INFO] --- camel-report-maven-plugin:3.13.0:validate (default-cli) @ camel-example-cdi ---
-[WARNING] Endpoint validation error at: org.apache.camel.example.cdi.MyRoutes(MyRoutes.java:31)
-
-	timer:foo?perid=5000
-
-	                   perid    Unknown option. Did you mean: [period]
-
-
-[WARNING] Endpoint validation error: (3 = passed, 1 = invalid, 0 = incapable, 0 = unknown components)
-[INFO] Simple validation success: (0 = passed, 0 = invalid)
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-----
-
 === Options
 
 The maven plugin *validate* goal supports the following options which can be configured from the command line (use `-D` syntax), or defined in the `pom.xml` file in the `<configuration>` tag.
@@ -159,7 +92,6 @@ The maven plugin *validate* goal supports the following options which can be con
 
 For example to turn off ignoring usage of deprecated options from the command line, you can run:
 
-[source,bash]
 ----
 $mvn camel-report:validate -Dcamel.ignoreDeprecated=true
 ----
@@ -171,10 +103,9 @@ Notice that you must prefix the `-D` command argument with `camel.`, eg `camel.i
 If you have a Maven project then you can run the plugin to validate the endpoints in the unit test source code as well.
 You can pass in the options using `-D` style as shown:
 
-[source,bash]
 ----
 $cd myproject
-$mvn org.apache.camel:camel-report-maven-plugin:3.0.0:validate -DincludeTest=true
+$mvn org.apache.camel:camel-report-maven-plugin:3.0.0:validate -Dcamel.includeTest=true
 ----
 
 
@@ -203,7 +134,7 @@ such as by declaring the following Maven dependency in your pom.xml file:
 You can enable route coverage while running unit tests either by:
 
 - setting global JVM system property enabling for all test classes
-- using `@EnableRouteCoverage` annotation per test class if using `camel-test-spring` module
+- using `@EnableRouteCoverage` annotation per test class if using `camel-test-spring-junit5` module
 - overriding `isDumpRouteCoverage` method per test class if using `camel-test` module
 
 ==== Enabling via JVM system property
@@ -226,7 +157,6 @@ This can be done either in the configuration of the `maven-surefire-plugin`:
 
 Or from the command line when running tests:
 
-[source,bash]
 ----
 mvn clean test -DCamelTestRouteCoverage=true
 ----
@@ -234,7 +164,7 @@ mvn clean test -DCamelTestRouteCoverage=true
 ==== Enabling via @EnableRouteCoverage annotation
 
 You need to enable route coverage in the unit tests classes. You can do this by adding the `@EnableRouteCoverage`
-annotation to the test class if you are testing using `camel-test-spring`:
+annotation to the test class if you are testing using `camel-test-spring-junit5`:
 
 [source,java]
 ----
@@ -246,7 +176,7 @@ public class FooApplicationTest {
 
 ==== Enabling via isDumpRouteCoverage method
 
-However, if you are using `camel-test-junit5` and your unit tests are extending `CamelTestSupport` then you can
+However if you are using `camel-test` and your unit tests are extending `CamelTestSupport` then you can
 turn on route coverage as shown:
 
 [source,java]
@@ -257,7 +187,7 @@ public boolean isDumpRouteCoverage() {
 }
 ----
 
-Routes that can be route covered must have a unique id assigned, in other words you cannot use anonymous routes.
+Routes that can be route coveraged must have an unique id assigned, in other words you cannot use anonymous routes.
 
 You do this using `routeId` in Java DSL:
 
@@ -283,22 +213,20 @@ And in XML DSL you just assign the route id via the id attribute
 
 After unit testing with:
 
-[source,bash]
 ----
 mvn test
 ----
 
 You can then run the goal to report the route coverage
 
-[source,bash]
 ----
 mvn camel-report:route-coverage
 ----
 
-Which then reports which routes have missing route coverage with precise source code line reporting:
+Which then reports which routes has missing route coverage with precise source code line reporting:
 
 ----
-[INFO] --- camel-camel-report-plugin:3.13.0:route-coverage (default-cli) @ camel-example-spring-boot-xml ---
+[INFO] --- camel-camel-report-plugin:3.0.0:route-coverage (default-cli) @ camel-example-spring-boot-xml ---
 [INFO] Discovered 1 routes
 [INFO] Route coverage summary:
 

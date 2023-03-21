@@ -41,7 +41,7 @@ public class FromFtpRemoteFileSortByNestedExpressionIT extends FtpServerTestSupp
     public void testSortFiles() throws Exception {
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl() + "&sortBy=file:ext;file:name").to("mock:result");
             }
         });
@@ -50,14 +50,14 @@ public class FromFtpRemoteFileSortByNestedExpressionIT extends FtpServerTestSupp
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedBodiesReceived("Hello Dublin", "Hello London", "Hello Paris", "Hello Copenhagen");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
     public void testSortFilesReverse() throws Exception {
         context.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl() + "&sortBy=file:ext;reverse:file:name").to("mock:reverse");
             }
         });
@@ -66,10 +66,10 @@ public class FromFtpRemoteFileSortByNestedExpressionIT extends FtpServerTestSupp
         MockEndpoint reverse = getMockEndpoint("mock:reverse");
         reverse.expectedBodiesReceived("Hello Paris", "Hello London", "Hello Dublin", "Hello Copenhagen");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
-    private void prepareFtpServer() throws Exception {
+    private void prepareFtpServer() {
         // prepares the FTP Server by creating files on the server that we want
         // to unit
         // test that we can pool

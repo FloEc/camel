@@ -45,10 +45,10 @@ public class RestJettyInvalidJSonClientRequestValidationTest extends BaseJettyTe
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // configure to use jetty on localhost with the given port
                 restConfiguration().component("jetty").host("localhost").port(getPort())
                         .bindingMode(RestBindingMode.json)
@@ -58,7 +58,8 @@ public class RestJettyInvalidJSonClientRequestValidationTest extends BaseJettyTe
                 // use the rest DSL to define the rest services
                 rest("/users/").post("{id}/update")
                         .consumes("application/json").produces("application/json")
-                        .route().setBody(constant("{ \"status\": \"ok\" }"));
+                        .to("direct:update");
+                from("direct:update").setBody(constant("{ \"status\": \"ok\" }"));
             }
         };
     }

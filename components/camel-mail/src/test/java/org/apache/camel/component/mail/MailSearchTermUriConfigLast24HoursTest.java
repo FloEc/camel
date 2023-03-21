@@ -18,11 +18,11 @@ package org.apache.camel.component.mail;
 
 import java.util.Date;
 
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Store;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.Store;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -52,7 +52,7 @@ public class MailSearchTermUriConfigLast24HoursTest extends CamelTestSupport {
         mock.expectedBodiesReceivedInAnyOrder("Ordering ActiveMQ in Action", "This is spam",
                 "We meet at 7pm the usual place", "I am attaching you");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     private void prepareMailbox() throws Exception {
@@ -119,9 +119,9 @@ public class MailSearchTermUriConfigLast24HoursTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://bill@localhost?password=secret&searchTerm.fromSentDate=now-24h&initialDelay=100&delay=100")
                         .to("mock:result");
             }

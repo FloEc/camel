@@ -44,14 +44,14 @@ public class StsAssumeRoleIT extends Aws2StsBase {
         template.send("direct:assumeRole", new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(STS2Constants.OPERATION, "assumeRole");
                 exchange.getIn().setHeader(STS2Constants.ROLE_SESSION_NAME, "user_test");
                 exchange.getIn().setHeader(STS2Constants.ROLE_ARN, "user_test");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         assertEquals(1, result.getExchanges().size());
         assertNotNull(
                 result.getExchanges().get(0).getIn().getBody(AssumeRoleResponse.class).credentials().accessKeyId());
@@ -60,10 +60,10 @@ public class StsAssumeRoleIT extends Aws2StsBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 String awsEndpoint
                         = "aws2-sts://default?operation=assumeRole";
                 from("direct:assumeRole").to(awsEndpoint).to("mock:result");

@@ -43,7 +43,7 @@ public class PredictionTest extends AbstractWekaTest {
             camelctx.addRoutes(new RouteBuilder() {
 
                 @Override
-                public void configure() throws Exception {
+                public void configure() {
 
                     // Use the file component to read the CSV file
                     from("file:src/test/resources/data?fileName=sfny-test.arff&noop=true")
@@ -51,13 +51,13 @@ public class PredictionTest extends AbstractWekaTest {
                             // Push these instances for later use
                             .to("weka:push?dsname=sfny-test")
 
-                            // Remove the class attribute 
+                            // Remove the class attribute
                             .to("weka:filter?apply=Remove -R last")
 
-                            // Add the 'prediction' placeholder attribute 
+                            // Add the 'prediction' placeholder attribute
                             .to("weka:filter?apply=Add -N predicted -T NOM -L 0,1")
 
-                            // Rename the relation 
+                            // Rename the relation
                             .to("weka:filter?apply=RenameRelation -modify sfny-predicted")
 
                             // Load an already existing model
@@ -65,7 +65,7 @@ public class PredictionTest extends AbstractWekaTest {
 
                             // Use a processor to do the prediction
                             .process(new Processor() {
-                                public void process(Exchange exchange) throws Exception {
+                                public void process(Exchange exchange) {
                                     Dataset dataset = exchange.getMessage().getBody(Dataset.class);
                                     dataset.applyToInstances(new NominalPredictor());
                                 }

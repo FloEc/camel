@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
 public class CommitConsumerSkipExistingOnStartupTest extends GitHubComponentTestBase {
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
 
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("github://commit/master?repoOwner=anotherguy&repoName=somerepo")
                         .routeId("foo").noAutoStartup()
                         .process(new GitHubCommitProcessor())
@@ -46,7 +46,7 @@ public class CommitConsumerSkipExistingOnStartupTest extends GitHubComponentTest
         commitService.addRepositoryCommit("test-2");
 
         mockResultEndpoint.expectedMessageCount(3);
-        mockResultEndpoint.expectedBodiesReceivedInAnyOrder("test-3", "test-4", "test-5");
+        mockResultEndpoint.expectedBodiesReceived("test-3", "test-4", "test-5");
 
         context.getRouteController().startAllRoutes();
 
@@ -59,7 +59,7 @@ public class CommitConsumerSkipExistingOnStartupTest extends GitHubComponentTest
 
     public class GitHubCommitProcessor implements Processor {
         @Override
-        public void process(Exchange exchange) throws Exception {
+        public void process(Exchange exchange) {
             String author = exchange.getMessage().getHeader(GitHubConstants.GITHUB_COMMIT_AUTHOR, String.class);
             String sha = exchange.getMessage().getHeader(GitHubConstants.GITHUB_COMMIT_SHA, String.class);
             if (log.isDebugEnabled()) {

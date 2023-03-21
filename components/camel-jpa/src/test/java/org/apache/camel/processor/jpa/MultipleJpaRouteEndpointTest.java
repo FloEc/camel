@@ -18,9 +18,9 @@ package org.apache.camel.processor.jpa;
 
 import java.util.HashMap;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -63,7 +63,7 @@ public class MultipleJpaRouteEndpointTest extends CamelTestSupport {
 
         template.sendBody("direct:start", "start");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         verify(em1).merge(value1);
         verify(em2).merge(value2);
     }
@@ -76,7 +76,7 @@ public class MultipleJpaRouteEndpointTest extends CamelTestSupport {
         when(emf2.createEntityManager()).thenReturn(em2);
 
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 JpaEndpoint jpa1 = new JpaEndpoint();
                 jpa1.setComponent(new JpaComponent());
                 jpa1.setCamelContext(context);

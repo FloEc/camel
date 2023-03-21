@@ -17,7 +17,6 @@
 package org.apache.camel.dsl.groovy.common.model
 
 import org.apache.camel.CamelContext
-import org.apache.camel.ExtendedCamelContext
 import org.apache.camel.support.PropertyBindingSupport
 
 class BeanConfiguration {
@@ -30,7 +29,7 @@ class BeanConfiguration {
     }
 
     def methodMissing(String name, arguments) {
-        Object value = null
+        Object value
         final Object[] args = arguments as Object[]
 
         if (args == null) {
@@ -45,7 +44,6 @@ class BeanConfiguration {
             def m = this.target.metaClass.getMetaMethod(name, Closure.class)
             if (m) {
                 m.invoke(target, args)
-
                 // done
                 return
             }
@@ -77,7 +75,7 @@ class BeanConfiguration {
     def propertyMissing(String name) {
         def props = new HashMap<String, Object>()
 
-        context.adapt(ExtendedCamelContext.class)
+        context.getExtendedCamelContextToBeReplaced()
             .getBeanIntrospection()
             .getProperties(target, props, null, false)
 

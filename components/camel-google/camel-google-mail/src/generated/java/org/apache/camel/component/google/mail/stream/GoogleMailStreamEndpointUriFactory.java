@@ -19,43 +19,50 @@ public class GoogleMailStreamEndpointUriFactory extends org.apache.camel.support
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(29);
-        props.add("backoffMultiplier");
-        props.add("initialDelay");
-        props.add("markAsRead");
-        props.add("scheduler");
-        props.add("bridgeErrorHandler");
-        props.add("useFixedDelay");
-        props.add("runLoggingLevel");
-        props.add("maxResults");
-        props.add("backoffErrorThreshold");
-        props.add("greedy");
-        props.add("clientSecret");
-        props.add("scheduledExecutorService");
-        props.add("applicationName");
-        props.add("repeatCount");
-        props.add("timeUnit");
-        props.add("clientId");
-        props.add("query");
-        props.add("sendEmptyMessageWhenIdle");
-        props.add("schedulerProperties");
-        props.add("exchangePattern");
-        props.add("index");
+        Set<String> props = new HashSet<>(32);
         props.add("accessToken");
+        props.add("applicationName");
+        props.add("backoffErrorThreshold");
         props.add("backoffIdleThreshold");
-        props.add("labels");
+        props.add("backoffMultiplier");
+        props.add("bridgeErrorHandler");
+        props.add("clientId");
+        props.add("clientSecret");
         props.add("delay");
-        props.add("pollStrategy");
-        props.add("startScheduler");
+        props.add("delegate");
         props.add("exceptionHandler");
+        props.add("exchangePattern");
+        props.add("greedy");
+        props.add("index");
+        props.add("initialDelay");
+        props.add("labels");
+        props.add("markAsRead");
+        props.add("maxResults");
+        props.add("pollStrategy");
+        props.add("query");
         props.add("refreshToken");
+        props.add("repeatCount");
+        props.add("runLoggingLevel");
+        props.add("scheduledExecutorService");
+        props.add("scheduler");
+        props.add("schedulerProperties");
+        props.add("scopes");
+        props.add("sendEmptyMessageWhenIdle");
+        props.add("serviceAccountKey");
+        props.add("startScheduler");
+        props.add("timeUnit");
+        props.add("useFixedDelay");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         Set<String> secretProps = new HashSet<>(3);
-        secretProps.add("clientSecret");
         secretProps.add("accessToken");
+        secretProps.add("clientSecret");
         secretProps.add("refreshToken");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        Set<String> prefixes = new HashSet<>(1);
+        prefixes.add("scheduler.");
+        MULTI_VALUE_PREFIXES = Collections.unmodifiableSet(prefixes);
     }
 
     @Override
@@ -83,6 +90,11 @@ public class GoogleMailStreamEndpointUriFactory extends org.apache.camel.support
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

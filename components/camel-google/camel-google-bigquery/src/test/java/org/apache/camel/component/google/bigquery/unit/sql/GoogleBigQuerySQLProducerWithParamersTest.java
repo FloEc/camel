@@ -16,12 +16,15 @@
  */
 package org.apache.camel.component.google.bigquery.unit.sql;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.cloud.bigquery.JobId;
+import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.RuntimeExchangeException;
@@ -34,8 +37,6 @@ import static org.apache.camel.component.google.bigquery.integration.BigQueryITS
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 public class GoogleBigQuerySQLProducerWithParamersTest extends GoogleBigQuerySQLProducerBaseTest {
@@ -54,10 +55,10 @@ public class GoogleBigQuerySQLProducerWithParamersTest extends GoogleBigQuerySQL
         body.put("data", "some data");
         producer.process(createExchangeWithBody(body));
 
-        ArgumentCaptor<QueryJobConfiguration> dataCaptor = ArgumentCaptor.forClass(QueryJobConfiguration.class);
-        verify(bigquery).query(dataCaptor.capture(), any(JobId.class));
+        ArgumentCaptor<JobInfo> dataCaptor = ArgumentCaptor.forClass(JobInfo.class);
+        verify(bigquery).create(dataCaptor.capture());
 
-        QueryJobConfiguration request = dataCaptor.getValue();
+        QueryJobConfiguration request = dataCaptor.getValue().getConfiguration();
         assertEquals(sql, request.getQuery());
 
         Map<String, QueryParameterValue> namedParameters = request.getNamedParameters();
@@ -82,10 +83,10 @@ public class GoogleBigQuerySQLProducerWithParamersTest extends GoogleBigQuerySQL
 
         producer.process(exchange);
 
-        ArgumentCaptor<QueryJobConfiguration> dataCaptor = ArgumentCaptor.forClass(QueryJobConfiguration.class);
-        verify(bigquery).query(dataCaptor.capture(), any(JobId.class));
+        ArgumentCaptor<JobInfo> dataCaptor = ArgumentCaptor.forClass(JobInfo.class);
+        verify(bigquery).create(dataCaptor.capture());
 
-        QueryJobConfiguration request = dataCaptor.getValue();
+        QueryJobConfiguration request = dataCaptor.getValue().getConfiguration();
         assertEquals(sql, request.getQuery());
 
         Map<String, QueryParameterValue> namedParameters = request.getNamedParameters();
@@ -96,6 +97,66 @@ public class GoogleBigQuerySQLProducerWithParamersTest extends GoogleBigQuerySQL
 
         assertTrue(namedParameters.containsKey("data"));
         assertEquals("some data", namedParameters.get("data").getValue());
+    }
+
+    @Test
+    public void parametersAutomaticTypeConversion() throws Exception {
+        Map<String, String> body = new HashMap<>();
+
+        Exchange exchange = createExchangeWithBody(body);
+        Message message = exchange.getMessage();
+        message.setHeader("id", 200);
+        message.setHeader("data", new BigDecimal(1));
+
+        producer.process(exchange);
+
+        ArgumentCaptor<JobInfo> dataCaptor = ArgumentCaptor.forClass(JobInfo.class);
+        verify(bigquery).create(dataCaptor.capture());
+
+        QueryJobConfiguration request = dataCaptor.getValue().getConfiguration();
+        assertEquals(sql, request.getQuery());
+
+        Map<String, QueryParameterValue> namedParameters = request.getNamedParameters();
+        assertEquals(2, namedParameters.size());
+
+        assertTrue(namedParameters.containsKey("id"));
+        assertEquals("200", namedParameters.get("id").getValue());
+        assertEquals(StandardSQLTypeName.INT64, namedParameters.get("id").getType(), "Integer parameter is detected as INT64");
+
+        assertTrue(namedParameters.containsKey("data"));
+        assertEquals("1", namedParameters.get("data").getValue());
+        assertEquals(StandardSQLTypeName.NUMERIC, namedParameters.get("data").getType(),
+                "BigDecimal parameter is detected as NUMERIC");
+    }
+
+    @Test
+    public void parametersAutomaticTypeConversionFallback() throws Exception {
+        Map<String, String> body = new HashMap<>();
+
+        Exchange exchange = createExchangeWithBody(body);
+        Message message = exchange.getMessage();
+        message.setHeader("id", "1");
+        message.setHeader("data", new CustomField("Hello"));
+
+        producer.process(exchange);
+
+        ArgumentCaptor<JobInfo> dataCaptor = ArgumentCaptor.forClass(JobInfo.class);
+        verify(bigquery).create(dataCaptor.capture());
+
+        QueryJobConfiguration request = dataCaptor.getValue().getConfiguration();
+        assertEquals(sql, request.getQuery());
+
+        Map<String, QueryParameterValue> namedParameters = request.getNamedParameters();
+        assertEquals(2, namedParameters.size());
+
+        assertTrue(namedParameters.containsKey("id"));
+        assertEquals("1", namedParameters.get("id").getValue());
+        assertEquals(StandardSQLTypeName.STRING, namedParameters.get("id").getType(), "String parameter is detected as STRING");
+
+        assertTrue(namedParameters.containsKey("data"));
+        assertEquals("CustomField{value='Hello'}", namedParameters.get("data").getValue());
+        assertEquals(StandardSQLTypeName.STRING, namedParameters.get("data").getType(),
+                "Unknown parameter fallbacks to STRING");
     }
 
     @Test
@@ -113,10 +174,10 @@ public class GoogleBigQuerySQLProducerWithParamersTest extends GoogleBigQuerySQL
 
         producer.process(exchange);
 
-        ArgumentCaptor<QueryJobConfiguration> dataCaptor = ArgumentCaptor.forClass(QueryJobConfiguration.class);
-        verify(bigquery).query(dataCaptor.capture(), eq(jobId));
+        ArgumentCaptor<JobInfo> dataCaptor = ArgumentCaptor.forClass(JobInfo.class);
+        verify(bigquery).create(dataCaptor.capture());
 
-        QueryJobConfiguration request = dataCaptor.getValue();
+        QueryJobConfiguration request = dataCaptor.getValue().getConfiguration();
         assertEquals(sql, request.getQuery());
 
         Map<String, QueryParameterValue> namedParameters = request.getNamedParameters();
@@ -130,9 +191,24 @@ public class GoogleBigQuerySQLProducerWithParamersTest extends GoogleBigQuerySQL
     }
 
     @Test
-    public void sendMessageWithoutParameters() throws Exception {
+    public void sendMessageWithoutParameters() {
         final Exchange exchangeWithBody = createExchangeWithBody(new HashMap<>());
 
         assertThrows(RuntimeExchangeException.class, () -> producer.process(exchangeWithBody));
+    }
+
+    private class CustomField {
+        private final String value;
+
+        public CustomField(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return "CustomField{" +
+                   "value='" + value + '\'' +
+                   '}';
+        }
     }
 }

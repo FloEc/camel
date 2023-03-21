@@ -30,12 +30,12 @@ public final class EventbridgeClientFactory {
 
     /**
      * Return the correct AWS Eventbridge client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               EventBridgeClient
      */
     public static EventbridgeInternalClient getEventbridgeClient(EventbridgeConfiguration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new EventbridgeClientIAMOptimizedImpl(configuration) : new EventbridgeClientStandardImpl(configuration);
     }
 }

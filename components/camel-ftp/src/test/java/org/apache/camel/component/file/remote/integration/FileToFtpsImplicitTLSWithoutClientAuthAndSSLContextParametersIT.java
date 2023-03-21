@@ -24,7 +24,7 @@ import org.apache.camel.support.jsse.TrustManagersParameters;
 public class FileToFtpsImplicitTLSWithoutClientAuthAndSSLContextParametersIT
         extends FileToFtpsImplicitTLSWithoutClientAuthIT {
     @BindToRegistry("sslContextParameters")
-    public SSLContextParameters createSslContextParams() throws Exception {
+    public SSLContextParameters createSslContextParams() {
         KeyStoreParameters ksp = new KeyStoreParameters();
         ksp.setResource("server.jks");
         ksp.setPassword("password");
@@ -33,7 +33,7 @@ public class FileToFtpsImplicitTLSWithoutClientAuthAndSSLContextParametersIT
         tmp.setKeyStore(ksp);
 
         SSLContextParameters sslContextParameters = new SSLContextParameters();
-        sslContextParameters.setSecureSocketProtocol("TLSv1.2");
+        sslContextParameters.setSecureSocketProtocol("TLSv1.3");
         sslContextParameters.setTrustManagers(tmp);
 
         return sslContextParameters;

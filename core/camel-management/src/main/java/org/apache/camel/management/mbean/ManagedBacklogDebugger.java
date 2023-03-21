@@ -18,23 +18,30 @@ package org.apache.camel.management.mbean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePropertyKey;
 import org.apache.camel.Expression;
+import org.apache.camel.MessageHistory;
 import org.apache.camel.NoTypeConversionAvailableException;
 import org.apache.camel.Predicate;
+import org.apache.camel.Route;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.api.management.ManagedResource;
-import org.apache.camel.api.management.mbean.BacklogTracerEventMessage;
 import org.apache.camel.api.management.mbean.ManagedBacklogDebuggerMBean;
 import org.apache.camel.impl.debugger.BacklogDebugger;
+import org.apache.camel.spi.BacklogTracerEventMessage;
 import org.apache.camel.spi.Language;
 import org.apache.camel.spi.ManagementStrategy;
+import org.apache.camel.support.LoggerHelper;
 import org.apache.camel.util.ObjectHelper;
 import org.apache.camel.util.StringHelper;
+import org.apache.camel.util.TimeUtils;
+import org.apache.camel.util.URISupport;
 
 @ManagedResource(description = "Managed BacklogDebugger")
 public class ManagedBacklogDebugger implements ManagedBacklogDebuggerMBean {
@@ -115,11 +122,6 @@ public class ManagedBacklogDebugger implements ManagedBacklogDebuggerMBean {
     }
 
     @Override
-    public Set<String> getBreakpoints() {
-        return breakpoints();
-    }
-
-    @Override
     public Set<String> breakpoints() {
         return backlogDebugger.getBreakpoints();
     }
@@ -194,11 +196,6 @@ public class ManagedBacklogDebugger implements ManagedBacklogDebuggerMBean {
     }
 
     @Override
-    public Set<String> getSuspendedBreakpointNodeIds() {
-        return suspendedBreakpointNodeIds();
-    }
-
-    @Override
     public Set<String> suspendedBreakpointNodeIds() {
         return backlogDebugger.getSuspendedBreakpointNodeIds();
     }
@@ -241,11 +238,6 @@ public class ManagedBacklogDebugger implements ManagedBacklogDebuggerMBean {
     @Override
     public void setBodyIncludeFiles(boolean bodyIncludeFiles) {
         backlogDebugger.setBodyIncludeFiles(bodyIncludeFiles);
-    }
-
-    @Override
-    public String dumpTracedMessagesAsXml(String nodeId) {
-        return dumpTracedMessagesAsXml(nodeId, false);
     }
 
     @Override
@@ -366,6 +358,83 @@ public class ManagedBacklogDebugger implements ManagedBacklogDebuggerMBean {
             return e.getMessage();
         }
         return null;
+    }
+
+    @Override
+    public String messageHistoryOnBreakpointAsXml(String nodeId) {
+        StringBuffer messageHistoryBuffer = new StringBuffer();
+        messageHistoryBuffer.append("<messageHistory>\n");
+
+        Exchange suspendedExchange = backlogDebugger.getSuspendedExchange(nodeId);
+        if (suspendedExchange != null) {
+            List<MessageHistory> list = suspendedExchange.getProperty(ExchangePropertyKey.MESSAGE_HISTORY, List.class);
+            if (list != null) {
+                // add incoming origin of message on the top
+                String routeId = suspendedExchange.getFromRouteId();
+                Route route = suspendedExchange.getContext().getRoute(routeId);
+                String loc = route != null ? route.getSourceLocationShort() : "";
+                String id = routeId;
+                String label = "";
+                if (suspendedExchange.getFromEndpoint() != null) {
+                    label = "from["
+                            + URISupport
+                                    .sanitizeUri(
+                                            StringHelper.limitLength(suspendedExchange.getFromEndpoint().getEndpointUri(), 100))
+                            + "]";
+                }
+
+                long elapsed = TimeUtils.elapsedMillisSince(suspendedExchange.getCreated());
+
+                messageHistoryBuffer
+                        .append("    <messageHistoryEntry")
+                        .append(" location=\"").append(StringHelper.xmlEncode(loc)).append("\"")
+                        .append(" routeId=\"").append(StringHelper.xmlEncode(routeId)).append("\"")
+                        .append(" processorId=\"").append(StringHelper.xmlEncode(id)).append("\"")
+                        .append(" processor=\"").append(StringHelper.xmlEncode(label)).append("\"")
+                        .append(" elapsed=\"").append(elapsed).append("\"")
+                        .append("/>\n");
+
+                for (MessageHistory history : list) {
+                    // and then each history
+                    loc = LoggerHelper.getLineNumberLoggerName(history.getNode());
+                    if (loc == null) {
+                        loc = "";
+                    }
+                    routeId = history.getRouteId() != null ? history.getRouteId() : "";
+                    id = history.getNode().getId();
+                    // we need to avoid leak the sensible information here
+                    // the sanitizeUri takes a very long time for very long string
+                    // and the format cuts this to
+                    // 78 characters, anyway. Cut this to 100 characters. This will
+                    // give enough space for removing
+                    // characters in the sanitizeUri method and will be reasonably
+                    // fast
+                    label = URISupport.sanitizeUri(StringHelper.limitLength(history.getNode().getLabel(), 100));
+                    elapsed = history.getElapsed();
+
+                    messageHistoryBuffer
+                            .append("    <messageHistoryEntry")
+                            .append(" location=\"").append(StringHelper.xmlEncode(loc)).append("\"")
+                            .append(" routeId=\"").append(StringHelper.xmlEncode(routeId)).append("\"")
+                            .append(" processorId=\"").append(StringHelper.xmlEncode(id)).append("\"")
+                            .append(" processor=\"").append(StringHelper.xmlEncode(label)).append("\"")
+                            .append(" elapsed=\"").append(elapsed).append("\"")
+                            .append("/>\n");
+                }
+            }
+        }
+        messageHistoryBuffer.append("</messageHistory>\n");
+        return messageHistoryBuffer.toString();
+    }
+
+    @Override
+    public void attach() {
+        backlogDebugger.attach();
+    }
+
+    @Override
+    public void detach() {
+        backlogDebugger.detach();
     }
 
     private String dumpExchangePropertiesAsXml(String id) {

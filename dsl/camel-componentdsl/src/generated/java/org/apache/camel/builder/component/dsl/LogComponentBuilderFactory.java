@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -69,6 +69,25 @@ public interface LogComponentBuilderFactory {
          */
         default LogComponentBuilder lazyStartProducer(boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * If enabled then the source location of where the log endpoint is used
+         * in Camel routes, would be used as logger name, instead of the given
+         * name. However, if the source location is disabled or not possible to
+         * resolve then the existing logger name will be used.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer
+         * 
+         * @param sourceLocationLoggerName the value to set
+         * @return the dsl builder
+         */
+        default LogComponentBuilder sourceLocationLoggerName(
+                boolean sourceLocationLoggerName) {
+            doSetProperty("sourceLocationLoggerName", sourceLocationLoggerName);
             return this;
         }
         /**
@@ -127,6 +146,7 @@ public interface LogComponentBuilderFactory {
                 Object value) {
             switch (name) {
             case "lazyStartProducer": ((LogComponent) component).setLazyStartProducer((boolean) value); return true;
+            case "sourceLocationLoggerName": ((LogComponent) component).setSourceLocationLoggerName((boolean) value); return true;
             case "autowiredEnabled": ((LogComponent) component).setAutowiredEnabled((boolean) value); return true;
             case "exchangeFormatter": ((LogComponent) component).setExchangeFormatter((org.apache.camel.spi.ExchangeFormatter) value); return true;
             default: return false;

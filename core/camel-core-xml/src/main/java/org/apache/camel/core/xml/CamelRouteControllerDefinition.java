@@ -16,10 +16,10 @@
  */
 package org.apache.camel.core.xml;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.apache.camel.model.IdentifiedType;
 import org.apache.camel.spi.Metadata;
@@ -33,7 +33,7 @@ import org.apache.camel.spi.Metadata;
 public class CamelRouteControllerDefinition extends IdentifiedType {
 
     @XmlAttribute
-    @Metadata(defaultValue = "false")
+    @Metadata(defaultValue = "false", javaType = "java.lang.Boolean")
     private String supervising;
     @XmlAttribute
     private String includeRoutes;
@@ -57,7 +57,7 @@ public class CamelRouteControllerDefinition extends IdentifiedType {
     @Metadata(defaultValue = "1.0")
     private String backOffMultiplier;
     @XmlAttribute
-    @Metadata(defaultValue = "false")
+    @Metadata(defaultValue = "false", javaType = "java.lang.Boolean")
     private String unhealthyOnExhausted;
     @XmlAttribute
     @Metadata(javaType = "org.apache.camel.LoggingLevel", defaultValue = "DEBUG", enums = "TRACE,DEBUG,INFO,WARN,ERROR,OFF")

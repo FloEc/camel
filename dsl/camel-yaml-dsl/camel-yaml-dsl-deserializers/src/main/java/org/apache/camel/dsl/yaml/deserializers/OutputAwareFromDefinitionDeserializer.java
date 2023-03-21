@@ -22,6 +22,7 @@ import org.apache.camel.dsl.yaml.common.YamlDeserializationContext;
 import org.apache.camel.dsl.yaml.common.YamlDeserializerBase;
 import org.apache.camel.dsl.yaml.common.YamlDeserializerResolver;
 import org.apache.camel.dsl.yaml.common.YamlSupport;
+import org.apache.camel.dsl.yaml.common.exception.UnsupportedFieldException;
 import org.apache.camel.model.FromDefinition;
 import org.apache.camel.spi.annotations.YamlProperty;
 import org.apache.camel.spi.annotations.YamlType;
@@ -35,6 +36,8 @@ import org.snakeyaml.engine.v2.nodes.NodeTuple;
           order = YamlDeserializerResolver.ORDER_DEFAULT,
           properties = {
                   @YamlProperty(name = "uri", type = "string", required = true),
+                  @YamlProperty(name = "id", type = "string"),
+                  @YamlProperty(name = "description", type = "string"),
                   @YamlProperty(name = "parameters", type = "object"),
                   @YamlProperty(name = "steps", type = "array:org.apache.camel.model.ProcessorDefinition", required = true)
           })
@@ -63,7 +66,9 @@ public class OutputAwareFromDefinitionDeserializer extends YamlDeserializerBase<
         }
 
         String uri = null;
-        Map<String, Object> properties = null;
+        String id = null;
+        org.apache.camel.model.DescriptionDefinition desc = null;
+        Map<String, Object> parameters = null;
 
         for (NodeTuple tuple : node.getValue()) {
             final String key = asText(tuple.getKeyNode());
@@ -72,41 +77,40 @@ public class OutputAwareFromDefinitionDeserializer extends YamlDeserializerBase<
             setDeserializationContext(val, dc);
 
             switch (key) {
-                case "steps":
-                    setSteps(target, val);
+                case "id":
+                    id = asText(val);
+                    break;
+                case "description":
+                    desc = asType(val, org.apache.camel.model.DescriptionDefinition.class);
                     break;
                 case "uri":
                     uri = asText(val);
                     break;
                 case "parameters":
-                    properties = asScalarMap(tuple.getValueNode());
+                    parameters = parseParameters(tuple);
+                    break;
+                case "steps":
+                    setSteps(target, val);
                     break;
                 default:
-                    String endpointUri = EndpointConsumerDeserializersResolver.resolveEndpointUri(key, val);
-                    if (endpointUri != null) {
-                        if (uri != null || properties != null) {
-                            throw new IllegalArgumentException("uri and properties are not supported when using Endpoint DSL ");
-                        }
-                        FromDefinition from = new FromDefinition(endpointUri);
-                        // enrich model with line number
-                        if (line != -1) {
-                            from.setLineNumber(line);
-                            from.setLocation(dc.getResource().getLocation());
-                        }
-                        target.setDelegate(from);
-                    } else {
-                        throw new IllegalArgumentException("Unsupported field: " + key);
-                    }
+                    throw new UnsupportedFieldException(node, key);
             }
         }
 
         if (target.getDelegate() == null) {
             ObjectHelper.notNull("uri", "The uri must set");
-            FromDefinition from = new FromDefinition(YamlSupport.createEndpointUri(dc.getCamelContext(), uri, properties));
+            FromDefinition from
+                    = new FromDefinition(YamlSupport.createEndpointUri(dc.getCamelContext(), node, uri, parameters));
             // enrich model with line number
             if (line != -1) {
                 from.setLineNumber(line);
                 from.setLocation(dc.getResource().getLocation());
+            }
+            if (id != null) {
+                from.setId(id);
+            }
+            if (desc != null) {
+                from.setDescription(desc);
             }
             target.setDelegate(from);
         }

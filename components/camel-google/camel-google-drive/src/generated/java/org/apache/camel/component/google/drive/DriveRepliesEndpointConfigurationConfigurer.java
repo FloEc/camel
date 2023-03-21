@@ -27,11 +27,13 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         map.put("ClientSecret", java.lang.String.class);
         map.put("CommentId", java.lang.String.class);
         map.put("Content", com.google.api.services.drive.model.CommentReply.class);
+        map.put("Delegate", java.lang.String.class);
         map.put("FileId", java.lang.String.class);
         map.put("MethodName", java.lang.String.class);
         map.put("RefreshToken", java.lang.String.class);
         map.put("ReplyId", java.lang.String.class);
         map.put("Scopes", java.util.List.class);
+        map.put("ServiceAccountKey", java.lang.String.class);
         ALL_OPTIONS = map;
     }
 
@@ -53,6 +55,8 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         case "CommentId": target.setCommentId(property(camelContext, java.lang.String.class, value)); return true;
         case "content":
         case "Content": target.setContent(property(camelContext, com.google.api.services.drive.model.CommentReply.class, value)); return true;
+        case "delegate":
+        case "Delegate": target.setDelegate(property(camelContext, java.lang.String.class, value)); return true;
         case "fileid":
         case "FileId": target.setFileId(property(camelContext, java.lang.String.class, value)); return true;
         case "methodname":
@@ -63,6 +67,8 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         case "ReplyId": target.setReplyId(property(camelContext, java.lang.String.class, value)); return true;
         case "scopes":
         case "Scopes": target.setScopes(property(camelContext, java.util.List.class, value)); return true;
+        case "serviceaccountkey":
+        case "ServiceAccountKey": target.setServiceAccountKey(property(camelContext, java.lang.String.class, value)); return true;
         default: return false;
         }
     }
@@ -89,6 +95,8 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         case "CommentId": return java.lang.String.class;
         case "content":
         case "Content": return com.google.api.services.drive.model.CommentReply.class;
+        case "delegate":
+        case "Delegate": return java.lang.String.class;
         case "fileid":
         case "FileId": return java.lang.String.class;
         case "methodname":
@@ -99,6 +107,8 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         case "ReplyId": return java.lang.String.class;
         case "scopes":
         case "Scopes": return java.util.List.class;
+        case "serviceaccountkey":
+        case "ServiceAccountKey": return java.lang.String.class;
         default: return null;
         }
     }
@@ -121,6 +131,8 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         case "CommentId": return target.getCommentId();
         case "content":
         case "Content": return target.getContent();
+        case "delegate":
+        case "Delegate": return target.getDelegate();
         case "fileid":
         case "FileId": return target.getFileId();
         case "methodname":
@@ -131,6 +143,8 @@ public class DriveRepliesEndpointConfigurationConfigurer extends org.apache.came
         case "ReplyId": return target.getReplyId();
         case "scopes":
         case "Scopes": return target.getScopes();
+        case "serviceaccountkey":
+        case "ServiceAccountKey": return target.getServiceAccountKey();
         default: return null;
         }
     }

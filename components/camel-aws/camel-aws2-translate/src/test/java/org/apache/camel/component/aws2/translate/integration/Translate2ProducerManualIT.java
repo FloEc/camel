@@ -48,7 +48,7 @@ public class Translate2ProducerManualIT extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:translateText", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Translate2Constants.OPERATION, Translate2Operations.translateText);
                 exchange.getIn().setHeader(Translate2Constants.SOURCE_LANGUAGE, Translate2LanguageEnum.ITALIAN);
                 exchange.getIn().setHeader(Translate2Constants.TARGET_LANGUAGE, Translate2LanguageEnum.GERMAN);
@@ -56,7 +56,7 @@ public class Translate2ProducerManualIT extends CamelTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         String resultGet = (String) exchange.getIn().getBody();
         assertEquals("Hallo, Miss.", resultGet);
@@ -68,7 +68,7 @@ public class Translate2ProducerManualIT extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:translateTextPojo", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
 
                 exchange.getIn()
                         .setBody(TranslateTextRequest.builder().sourceLanguageCode(Translate2LanguageEnum.ITALIAN.toString())
@@ -76,7 +76,7 @@ public class Translate2ProducerManualIT extends CamelTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         String resultGet = (String) exchange.getIn().getBody();
         assertEquals("Hallo, Miss.", resultGet);
@@ -88,24 +88,24 @@ public class Translate2ProducerManualIT extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:translateTextAuto", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Translate2Constants.OPERATION, Translate2Operations.translateText);
                 exchange.getIn().setHeader(Translate2Constants.TARGET_LANGUAGE, Translate2LanguageEnum.GERMAN);
                 exchange.getIn().setBody("Ciao Signorina");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         String resultGet = (String) exchange.getIn().getBody();
         assertEquals("Hallo, Miss.", resultGet);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:translateText").to(
                         "aws2-translate://test?accessKey=RAW({{aws.access.key}})&secretKey=RAW({{aws.secret.key}})&region=eu-west-1&operation=translateText")
                         .to("mock:result");

@@ -91,7 +91,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
     private XQueryExpression expression;
     private StaticQueryContext staticQueryContext;
     private Map<String, Object> parameters = new HashMap<>();
-    private Map<String, String> namespacePrefixes = new HashMap<>();
+    private final Map<String, String> namespacePrefixes = new HashMap<>();
     private ResultFormat resultsFormat = ResultFormat.DOM;
     private Properties properties = new Properties();
     private Class<?> resultType;
@@ -99,6 +99,12 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
     private ModuleURIResolver moduleURIResolver;
     private boolean allowStAX;
     private String headerName;
+    /**
+     * Name of property to use as input, instead of the message body.
+     * <p>
+     * It has a lower precedent than the name of header if both are set.
+     */
+    private String propertyName;
 
     @Override
     public String toString() {
@@ -108,10 +114,10 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
     @Override
     public void process(Exchange exchange) throws Exception {
         Object body = evaluate(exchange);
-        exchange.getOut().setBody(body);
+        exchange.getMessage().setBody(body);
 
         // propagate headers
-        exchange.getOut().getHeaders().putAll(exchange.getIn().getHeaders());
+        exchange.getMessage().getHeaders().putAll(exchange.getIn().getHeaders());
     }
 
     @Override
@@ -223,7 +229,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
         DOMResult result = new DOMResult();
         DynamicQueryContext context = createDynamicContext(exchange);
         XQueryExpression expression = getExpression();
-        expression.pull(context, result, properties);
+        expression.run(context, result, properties);
         return result.getNode();
     }
 
@@ -232,7 +238,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         Result result = new StreamResult(buffer);
-        getExpression().pull(createDynamicContext(exchange), result, properties);
+        getExpression().run(createDynamicContext(exchange), result, properties);
 
         byte[] answer = buffer.toByteArray();
         buffer.close();
@@ -245,7 +251,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
         StringWriter buffer = new StringWriter();
         SequenceIterator iter = getExpression().iterator(createDynamicContext(exchange));
         for (Item item = iter.next(); item != null; item = iter.next()) {
-            buffer.append(item.getStringValueCS());
+            buffer.append(item.getStringValue());
         }
 
         String answer = buffer.toString();
@@ -258,7 +264,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
         LOG.debug("Matches: {} for exchange: {}", expression, exchange);
         try {
             List<?> list = evaluateAsList(exchange);
-            return matches(exchange, list);
+            return matches(list);
         } catch (Exception e) {
             throw new RuntimeExpressionException(e);
         }
@@ -274,7 +280,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
             throw new AssertionError(e);
         }
 
-        if (!matches(exchange, list)) {
+        if (!matches(list)) {
             throw new AssertionError(this + " failed on " + exchange + " as evaluated: " + list);
         }
     }
@@ -518,8 +524,24 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
         return headerName;
     }
 
+    /**
+     * Name of header to use as input, instead of the message body
+     */
     public void setHeaderName(String headerName) {
         this.headerName = headerName;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    /**
+     * Name of property to use as input, instead of the message body.
+     * <p>
+     * It has a lower precedent than the name of header if both are set.
+     */
+    public void setPropertyName(String propertyName) {
+        this.propertyName = propertyName;
     }
 
     public boolean isAllowStAX() {
@@ -547,9 +569,11 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
         DynamicQueryContext dynamicQueryContext = new DynamicQueryContext(config);
 
         Message in = exchange.getIn();
-        Item item = null;
+        Item item;
         if (ObjectHelper.isNotEmpty(getHeaderName())) {
             item = in.getHeader(getHeaderName(), Item.class);
+        } else if (ObjectHelper.isNotEmpty(getPropertyName())) {
+            item = exchange.getProperty(getPropertyName(), Item.class);
         } else {
             item = in.getBody(Item.class);
         }
@@ -559,6 +583,8 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
             Object body;
             if (ObjectHelper.isNotEmpty(getHeaderName())) {
                 body = in.getHeader(getHeaderName());
+            } else if (ObjectHelper.isNotEmpty(getPropertyName())) {
+                body = exchange.getProperty(getPropertyName());
             } else {
                 body = in.getBody();
             }
@@ -571,6 +597,8 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
                 if (isInputStreamNeeded(exchange)) {
                     if (ObjectHelper.isNotEmpty(getHeaderName())) {
                         is = exchange.getIn().getHeader(getHeaderName(), InputStream.class);
+                    } else if (ObjectHelper.isNotEmpty(getPropertyName())) {
+                        is = exchange.getProperty(getPropertyName(), InputStream.class);
                     } else {
                         is = exchange.getIn().getBody(InputStream.class);
                     }
@@ -706,7 +734,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
     @SuppressWarnings("unchecked")
     protected Item getAsParameter(Object value) {
         if (value instanceof String) {
-            return new StringValue((CharSequence) value);
+            return new StringValue((String) value);
         } else if (value instanceof Boolean) {
             return BooleanValue.get((Boolean) value);
         } else if (value instanceof Long) {
@@ -722,7 +750,7 @@ public abstract class XQueryBuilder implements Expression, Predicate, NamespaceA
         }
     }
 
-    protected boolean matches(Exchange exchange, List<?> results) {
+    protected boolean matches(List<?> results) {
         return ObjectHelper.matches(results);
     }
 

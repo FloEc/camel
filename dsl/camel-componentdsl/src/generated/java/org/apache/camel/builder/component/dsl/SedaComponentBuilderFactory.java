@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -211,7 +211,7 @@ public interface SedaComponentBuilderFactory {
          * Sets the default queue factory.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.component.seda.BlockingQueueFactory&lt;org.apache.camel.Exchange&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.seda.BlockingQueueFactory&amp;lt;org.apache.camel.Exchange&amp;gt;&lt;/code&gt; type.
          * 
          * Group: advanced
          * 

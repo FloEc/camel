@@ -16,13 +16,12 @@
  */
 package org.apache.camel.attachment;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.InvalidPayloadException;
@@ -37,9 +36,11 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     private static final String ATTACHMENT_OBJECTS = "CamelAttachmentObjects";
 
     private final Message delegate;
+    private final Exchange exchange;
 
     public DefaultAttachmentMessage(Message delegate) {
         this.delegate = delegate;
+        this.exchange = delegate.getExchange();
     }
 
     @Override
@@ -185,7 +186,7 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public DataHandler getAttachment(String id) {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         if (map != null) {
             Attachment att = map.get(id);
             if (att != null) {
@@ -198,7 +199,7 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public Attachment getAttachmentObject(String id) {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         if (map != null) {
             return map.get(id);
         }
@@ -208,7 +209,7 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public Set<String> getAttachmentNames() {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         if (map != null) {
             return map.keySet();
         }
@@ -218,7 +219,7 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public void removeAttachment(String id) {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         if (map != null) {
             map.remove(id);
         }
@@ -227,10 +228,10 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public void addAttachment(String id, DataHandler content) {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         if (map == null) {
-            map = new LinkedHashMap<>();
-            getExchange().setProperty(ATTACHMENT_OBJECTS, map);
+            map = new AttachmentMap();
+            exchange.getExchangeExtension().setSafeCopyProperty(ATTACHMENT_OBJECTS, map);
         }
         map.put(id, new DefaultAttachment(content));
     }
@@ -238,10 +239,10 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public void addAttachmentObject(String id, Attachment content) {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         if (map == null) {
-            map = new LinkedHashMap<>();
-            getExchange().setProperty(ATTACHMENT_OBJECTS, map);
+            map = new AttachmentMap();
+            exchange.getExchangeExtension().setSafeCopyProperty(ATTACHMENT_OBJECTS, map);
         }
         map.put(id, content);
     }
@@ -249,9 +250,9 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, DataHandler> getAttachments() {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        Map<String, Attachment> map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, Map.class);
         if (map != null) {
-            Map<String, DataHandler> answer = new HashMap<>();
+            Map<String, DataHandler> answer = new LinkedHashMap<>();
             map.forEach((id, att) -> answer.put(id, att.getDataHandler()));
             return answer;
         }
@@ -261,25 +262,27 @@ public final class DefaultAttachmentMessage implements AttachmentMessage {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Attachment> getAttachmentObjects() {
-        return getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        return exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, Map.class);
     }
 
     @Override
     public void setAttachments(Map<String, DataHandler> attachments) {
-        Map<String, Attachment> map = new HashMap<>();
+        AttachmentMap map = new AttachmentMap();
         attachments.forEach((id, dh) -> map.put(id, new DefaultAttachment(dh)));
-        getExchange().setProperty(ATTACHMENT_OBJECTS, map);
+        exchange.getExchangeExtension().setSafeCopyProperty(ATTACHMENT_OBJECTS, map);
     }
 
     @Override
     public void setAttachmentObjects(Map<String, Attachment> attachments) {
-        getExchange().setProperty(ATTACHMENT_OBJECTS, attachments);
+        AttachmentMap map = new AttachmentMap();
+        map.putAll(attachments);
+        exchange.getExchangeExtension().setSafeCopyProperty(ATTACHMENT_OBJECTS, map);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean hasAttachments() {
-        Map<String, Attachment> map = getExchange().getProperty(ATTACHMENT_OBJECTS, Map.class);
+        AttachmentMap map = exchange.getExchangeExtension().getSafeCopyProperty(ATTACHMENT_OBJECTS, AttachmentMap.class);
         return map != null && !map.isEmpty();
     }
 

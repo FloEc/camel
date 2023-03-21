@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -49,26 +50,26 @@ public class FtpProducerConcurrentIT extends FtpServerTestSupport {
 
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
         for (int i = 0; i < files; i++) {
-            getMockEndpoint("mock:result").expectedFileExists(ftpFile("concurrent/" + i + ".txt"));
+            getMockEndpoint("mock:result").expectedFileExists(service.ftpFile("concurrent/" + i + ".txt"));
 
             final int index = i;
-            executor.submit(new Callable<Object>() {
-                public Object call() throws Exception {
+            executor.submit(new Callable<>() {
+                public Object call() {
                     sendFile("direct:start", "Hello World", index + ".txt");
                     return null;
                 }
             });
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         executor.shutdownNow();
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to(getFtpUrl(), "mock:result");
             }
         };

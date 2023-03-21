@@ -26,8 +26,6 @@ import org.apache.camel.FluentProducerTemplate
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.mock.MockEndpoint
 import org.apache.camel.dsl.yaml.KameletRoutesBuilderLoader
-import org.apache.camel.dsl.yaml.YamlRoutesBuilderLoader
-import org.apache.camel.dsl.yaml.common.YamlDeserializationMode
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.model.RouteTemplateDefinition
 import org.apache.camel.spi.HasCamelContext
@@ -41,19 +39,21 @@ import java.nio.charset.StandardCharsets
 @Slf4j
 class YamlTestSupport extends Specification implements HasCamelContext {
     static def MAPPER = new ObjectMapper(new YAMLFactory())
-    static def SCHEMA_RES = JsonLoader.fromResource('/camel-yaml-dsl.json')
+    static def SCHEMA_RES = JsonLoader.fromResource('/schema/camel-yaml-dsl.json')
     static def SCHEMA = JsonSchemaFactory.byDefault().getJsonSchema(SCHEMA_RES)
 
     @AutoCleanup
     def context = new DefaultCamelContext()
 
-    def loadRoutes(Collection<Resource> resources) {
-        for (def resource: resources) {
-            def target = MAPPER.readTree(resource.inputStream)
-            def report = SCHEMA.validate(target)
+    def loadRoutes(Collection<Resource> resources, boolean validate = true) {
+        if (validate) {
+            for (def resource : resources) {
+                def target = MAPPER.readTree(resource.inputStream)
+                def report = SCHEMA.validate(target)
 
-            if (!report.isSuccess()) {
-                throw new IllegalArgumentException("${report}")
+                if (!report.isSuccess()) {
+                    throw new IllegalArgumentException("${report}")
+                }
             }
         }
 
@@ -76,12 +76,26 @@ class YamlTestSupport extends Specification implements HasCamelContext {
     }
 
     def loadRoutes(String... resources) {
+        loadRoutesExt("yaml", resources)
+    }
+
+    def loadRoutesExt(String ext, String... resources) {
+        int index = 0
+
+        loadRoutes(
+                resources.collect {
+                    it -> ResourceHelper.fromString("route-${index++}." + ext, it.stripIndent())
+                }
+        )
+    }
+
+    def loadRoutesNoValidate(String... resources) {
         int index = 0
 
         loadRoutes(
             resources.collect {
                 it -> ResourceHelper.fromString("route-${index++}.yaml", it.stripIndent())
-            }
+            }, false
         )
     }
 
@@ -175,10 +189,6 @@ class YamlTestSupport extends Specification implements HasCamelContext {
                 return location
             }
         }
-    }
-
-    def setFlowMode(YamlDeserializationMode mode) {
-        context.globalOptions[YamlRoutesBuilderLoader.DESERIALIZATION_MODE] = mode.name()
     }
 
     // ***********************************

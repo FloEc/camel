@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class PlatformHttpTest extends AbstractPlatformHttpTest {
 
     @Test
-    public void testGet() throws Exception {
+    public void testGet() {
         given()
                 .header("Accept", "application/json")
                 .port(port)
@@ -52,16 +52,16 @@ public class PlatformHttpTest extends AbstractPlatformHttpTest {
 
         PlatformHttpComponent phc = getContext().getComponent("platform-http", PlatformHttpComponent.class);
         assertEquals(2, phc.getHttpEndpoints().size());
-        Iterator<String> it = phc.getHttpEndpoints().iterator();
-        assertEquals("/get", it.next());
-        assertEquals("/post", it.next());
+        Iterator<HttpEndpointModel> it = phc.getHttpEndpoints().iterator();
+        assertEquals("/get", it.next().getUri());
+        assertEquals("/post", it.next().getUri());
     }
 
     @Override
     protected RouteBuilder routes() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("platform-http:/get")
                         .setBody().constant("get");
                 from("platform-http:/post")

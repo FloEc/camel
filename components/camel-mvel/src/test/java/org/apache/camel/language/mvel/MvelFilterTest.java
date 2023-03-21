@@ -18,6 +18,7 @@ package org.apache.camel.language.mvel;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -30,14 +31,14 @@ public class MvelFilterTest extends CamelTestSupport {
         template.sendBodyAndHeader("direct:foo", "Bye World", "foo", "dude");
         template.sendBodyAndHeader("direct:foo", "Hello World", "foo", "bar");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:foo")
                         .filter().mvel("headers.foo == 'bar'")
                         .to("mock:bar");

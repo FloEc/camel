@@ -16,10 +16,7 @@
  */
 package org.apache.camel.reifier;
 
-import java.util.function.BiFunction;
-
 import org.apache.camel.AggregationStrategy;
-import org.apache.camel.CamelContextAware;
 import org.apache.camel.Exchange;
 import org.apache.camel.Expression;
 import org.apache.camel.Processor;
@@ -28,8 +25,6 @@ import org.apache.camel.model.PollEnrichDefinition;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.language.ConstantExpression;
 import org.apache.camel.processor.PollEnricher;
-import org.apache.camel.processor.aggregate.AggregationStrategyBeanAdapter;
-import org.apache.camel.processor.aggregate.AggregationStrategyBiFunctionAdapter;
 import org.apache.camel.support.DefaultExchange;
 
 public class PollEnrichReifier extends ProcessorReifier<PollEnrichDefinition> {
@@ -40,10 +35,10 @@ public class PollEnrichReifier extends ProcessorReifier<PollEnrichDefinition> {
 
     @Override
     public Processor createProcessor() throws Exception {
-
         // if no timeout then we should block, and there use a negative timeout
         long time = parseDuration(definition.getTimeout(), -1);
         boolean isIgnoreInvalidEndpoint = parseBoolean(definition.getIgnoreInvalidEndpoint(), false);
+        boolean isAggregateOnException = parseBoolean(definition.getAggregateOnException(), false);
 
         PollEnricher enricher;
         if (definition.getExpression() instanceof ConstantExpression) {
@@ -56,55 +51,18 @@ public class PollEnrichReifier extends ProcessorReifier<PollEnrichDefinition> {
             enricher = new PollEnricher(exp, time);
         }
 
-        AggregationStrategy strategy = createAggregationStrategy();
-        if (strategy == null) {
-            enricher.setDefaultAggregationStrategy();
-        } else {
+        AggregationStrategy strategy = getConfiguredAggregationStrategy(definition);
+        if (strategy != null) {
             enricher.setAggregationStrategy(strategy);
-        }
-        if (definition.getAggregateOnException() != null) {
-            enricher.setAggregateOnException(parseBoolean(definition.getAggregateOnException(), false));
         }
         Integer num = parseInt(definition.getCacheSize());
         if (num != null) {
             enricher.setCacheSize(num);
         }
         enricher.setIgnoreInvalidEndpoint(isIgnoreInvalidEndpoint);
+        enricher.setAggregateOnException(isAggregateOnException);
 
         return enricher;
-    }
-
-    private AggregationStrategy createAggregationStrategy() {
-        AggregationStrategy strategy = definition.getAggregationStrategy();
-        String ref = parseString(definition.getAggregationStrategyRef());
-        if (strategy == null && ref != null) {
-            Object aggStrategy = lookup(ref, Object.class);
-            if (aggStrategy instanceof AggregationStrategy) {
-                strategy = (AggregationStrategy) aggStrategy;
-            } else if (aggStrategy instanceof BiFunction) {
-                AggregationStrategyBiFunctionAdapter adapter
-                        = new AggregationStrategyBiFunctionAdapter((BiFunction) aggStrategy);
-                if (definition.getAggregationStrategyMethodName() != null) {
-                    adapter.setAllowNullNewExchange(parseBoolean(definition.getAggregationStrategyMethodAllowNull(), false));
-                    adapter.setAllowNullOldExchange(parseBoolean(definition.getAggregationStrategyMethodAllowNull(), false));
-                }
-                strategy = adapter;
-            } else if (aggStrategy != null) {
-                AggregationStrategyBeanAdapter adapter = new AggregationStrategyBeanAdapter(
-                        aggStrategy, parseString(definition.getAggregationStrategyMethodName()));
-                if (definition.getAggregationStrategyMethodAllowNull() != null) {
-                    adapter.setAllowNullNewExchange(parseBoolean(definition.getAggregationStrategyMethodAllowNull(), false));
-                    adapter.setAllowNullOldExchange(parseBoolean(definition.getAggregationStrategyMethodAllowNull(), false));
-                }
-                strategy = adapter;
-            } else {
-                throw new IllegalArgumentException(
-                        "Cannot find AggregationStrategy in Registry with name: " + definition.getAggregationStrategyRef());
-            }
-        }
-
-        CamelContextAware.trySetCamelContext(strategy, camelContext);
-        return strategy;
     }
 
 }

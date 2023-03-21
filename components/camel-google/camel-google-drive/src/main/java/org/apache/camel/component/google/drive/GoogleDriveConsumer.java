@@ -20,22 +20,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Processor;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.google.drive.internal.GoogleDriveApiName;
 import org.apache.camel.spi.BeanIntrospection;
 import org.apache.camel.support.component.AbstractApiConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The GoogleDrive consumer.
  */
 public class GoogleDriveConsumer extends AbstractApiConsumer<GoogleDriveApiName, GoogleDriveConfiguration> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(BatchGoogleDriveClientFactory.class);
-
     public GoogleDriveConsumer(GoogleDriveEndpoint endpoint, Processor processor) {
         super(endpoint, processor);
     }
@@ -45,7 +39,7 @@ public class GoogleDriveConsumer extends AbstractApiConsumer<GoogleDriveApiName,
         AbstractGoogleClientRequest request = (AbstractGoogleClientRequest) super.doInvokeMethod(properties);
         try {
             BeanIntrospection beanIntrospection
-                    = getEndpoint().getCamelContext().adapt(ExtendedCamelContext.class).getBeanIntrospection();
+                    = getEndpoint().getCamelContext().getCamelContextExtension().getBeanIntrospection();
             for (Entry<String, Object> p : properties.entrySet()) {
                 beanIntrospection.setProperty(getEndpoint().getCamelContext(), request, p.getKey(), p.getValue());
             }

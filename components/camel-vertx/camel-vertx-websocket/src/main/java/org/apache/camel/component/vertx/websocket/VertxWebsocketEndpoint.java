@@ -16,10 +16,12 @@
  */
 package org.apache.camel.component.vertx.websocket;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -38,11 +40,13 @@ import org.apache.camel.spi.UriParam;
 import org.apache.camel.support.DefaultEndpoint;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.util.URISupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @UriEndpoint(firstVersion = "3.5.0", scheme = "vertx-websocket", title = "Vert.x WebSocket",
-             syntax = "vertx-websocket:host:port/path", category = { Category.WEBSOCKET })
+             syntax = "vertx-websocket:host:port/path", category = { Category.WEBSOCKET },
+             headersClass = VertxWebsocketConstants.class, lenientProperties = true)
 public class VertxWebsocketEndpoint extends DefaultEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(VertxWebsocketEndpoint.class);
@@ -50,11 +54,18 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
     @UriParam
     private VertxWebsocketConfiguration configuration;
 
+    private HttpClient client;
     private WebSocket webSocket;
 
     public VertxWebsocketEndpoint(String uri, VertxWebsocketComponent component, VertxWebsocketConfiguration configuration) {
         super(uri, component);
         this.configuration = configuration;
+    }
+
+    @Override
+    public boolean isLenientProperties() {
+        // Enable custom query parameters to be passed on the producer WebSocket URI
+        return true;
     }
 
     @Override
@@ -69,7 +80,12 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
 
     @Override
     public Consumer createConsumer(Processor processor) throws Exception {
-        VertxWebsocketConsumer consumer = new VertxWebsocketConsumer(this, processor);
+        Consumer consumer;
+        if (getConfiguration().isConsumeAsClient()) {
+            consumer = new VertxWebsocketClientConsumer(this, processor);
+        } else {
+            consumer = new VertxWebsocketConsumer(this, processor);
+        }
         configureConsumer(consumer);
         return consumer;
     }
@@ -80,6 +96,12 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
             webSocket.close();
             webSocket = null;
         }
+
+        if (client != null) {
+            client.close();
+            client = null;
+        }
+
         super.doStop();
     }
 
@@ -91,11 +113,9 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
         return getComponent().getVertx();
     }
 
-    protected WebSocket getWebSocket(Exchange exchange) throws Exception {
-        if (webSocket == null || webSocket.isClosed()) {
+    protected WebSocket getWebSocket() throws Exception {
+        if (client == null) {
             HttpClientOptions options = configuration.getClientOptions();
-            HttpClient client;
-
             if (options == null) {
                 options = new HttpClientOptions();
             }
@@ -106,12 +126,28 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
             }
 
             client = getVertx().createHttpClient(options);
+        }
 
+        if (webSocket == null || webSocket.isClosed()) {
+            HttpClientOptions options = configuration.getClientOptions();
+
+            if (options == null) {
+                options = new HttpClientOptions();
+            }
+
+            SSLContextParameters sslContextParameters = configuration.getSslContextParameters();
+            if (sslContextParameters != null) {
+                VertxHelper.setupSSLOptions(getCamelContext(), sslContextParameters, options);
+            }
+
+            URI websocketURI = configuration.getWebsocketURI();
             WebSocketConnectOptions connectOptions = new WebSocketConnectOptions();
-            connectOptions.setHost(configuration.getHost());
-            connectOptions.setPort(configuration.getPort());
-            connectOptions.setURI(configuration.getPath());
-            connectOptions.setSsl(options.isSsl());
+            connectOptions.setHost(websocketURI.getHost());
+            connectOptions.setURI(URISupport.pathAndQueryOf(websocketURI));
+            connectOptions.setSsl(options.isSsl() || websocketURI.getScheme().length() == 3);
+            if (websocketURI.getPort() > 0) {
+                connectOptions.setPort(websocketURI.getPort());
+            }
 
             String subProtocols = configuration.getClientSubProtocols();
             if (ObjectHelper.isNotEmpty(subProtocols)) {
@@ -121,7 +157,7 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
             CompletableFuture<WebSocket> future = new CompletableFuture<>();
             client.webSocket(connectOptions, result -> {
                 if (!result.failed()) {
-                    LOG.info("Connected to WebSocket on {}:{}", configuration.getHost(), configuration.getPort());
+                    LOG.info("Connected to WebSocket on {}", result.result().remoteAddress());
                     future.complete(result.result());
                 } else {
                     webSocket = null;
@@ -129,9 +165,12 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
                 }
             });
             webSocket = future.get(options.getConnectTimeout(), TimeUnit.MILLISECONDS);
-            webSocket.exceptionHandler(event -> exchange.setException(event.getCause()));
         }
         return webSocket;
+    }
+
+    protected WebSocket getWebSocket(Exchange exchange) throws Exception {
+        return getWebSocket().exceptionHandler(event -> exchange.setException(event.getCause()));
     }
 
     protected Map<VertxWebsocketHostKey, VertxWebsocketHost> getVertxHostRegistry() {
@@ -145,7 +184,7 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
         Map<VertxWebsocketHostKey, VertxWebsocketHost> registry = getVertxHostRegistry();
         for (VertxWebsocketHost host : registry.values()) {
             Map<String, ServerWebSocket> hostPeers = host.getConnectedPeers();
-            if (hostPeers.containsKey(connectionKey) && host.getPort() == getConfiguration().getPort()) {
+            if (hostPeers.containsKey(connectionKey) && host.getPort() == getConfiguration().getWebsocketURI().getPort()) {
                 return hostPeers.get(connectionKey);
             }
         }
@@ -153,23 +192,21 @@ public class VertxWebsocketEndpoint extends DefaultEndpoint {
     }
 
     /**
-     * Finds all WebSockets associated with a host matching this endpoint configured port
+     * Finds all WebSockets associated with a host matching this endpoint configured port and resource path
      */
     protected Map<String, ServerWebSocket> findPeersForHostPort() {
-        Map<VertxWebsocketHostKey, VertxWebsocketHost> registry = getVertxHostRegistry();
-        for (VertxWebsocketHost host : registry.values()) {
-            if (host.getPort() == getConfiguration().getPort()) {
-                return host.getConnectedPeers();
-            }
-        }
-        return null;
+        return getVertxHostRegistry()
+                .values()
+                .stream()
+                .filter(host -> host.getPort() == getConfiguration().getWebsocketURI().getPort())
+                .flatMap(host -> host.getConnectedPeers().entrySet().stream())
+                .filter(entry -> entry.getValue().path().equals(getConfiguration().getWebsocketURI().getPath()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     protected boolean isManagedPort() {
         return getVertxHostRegistry().values()
                 .stream()
-                .filter(host -> host.getPort() == getConfiguration().getPort())
-                .findFirst()
-                .isPresent();
+                .anyMatch(host -> host.getPort() == getConfiguration().getWebsocketURI().getPort());
     }
 }

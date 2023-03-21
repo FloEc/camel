@@ -24,7 +24,6 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
@@ -32,14 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 public class FtpEndpointURISanitizedIT extends FtpServerTestSupport {
 
-    private String password = "secret";
+    private final String password = "secret";
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}/////foo?password=" + password + "&delay=5000";
     }
 
     @Test
-    public void testFtpDirectoryRelative() throws Exception {
+    public void testFtpDirectoryRelative() {
         Endpoint endpoint = context.getEndpoint(getFtpUrl());
         MatcherAssert.assertThat(((FtpEndpoint<?>) endpoint).getConfiguration().getDirectoryName(), equalTo("foo"));
     }

@@ -28,12 +28,10 @@ import org.apache.camel.component.extension.verifier.ResultErrorBuilder;
 import org.apache.camel.http.base.HttpHelper;
 import org.apache.camel.util.FileUtil;
 import org.apache.camel.util.ObjectHelper;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 final class HttpComponentVerifierExtension extends DefaultComponentVerifierExtension {
 
@@ -99,47 +97,48 @@ final class HttpComponentVerifierExtension extends DefaultComponentVerifierExten
                             .build());
         }
 
-        try {
-            CloseableHttpClient httpclient = createHttpClient(verifyParams);
-            HttpUriRequest request = new HttpGet(httpUri);
+        try (CloseableHttpClient httpclient = createHttpClient(verifyParams)) {
+            httpclient.execute(
+                    new HttpGet(httpUri),
+                    response -> {
+                        int code = response.getCode();
+                        String okCodes = getOption(verifyParams, "okStatusCodeRange", String.class).orElse("200-299");
 
-            try (CloseableHttpResponse response = httpclient.execute(request)) {
-                int code = response.getStatusLine().getStatusCode();
-                String okCodes = getOption(verifyParams, "okStatusCodeRange", String.class).orElse("200-299");
+                        if (!HttpHelper.isStatusCodeOk(code, okCodes)) {
+                            if (code == 401) {
+                                // Unauthorized, add authUsername and authPassword to the list
+                                // of parameters in error
+                                builder.error(
+                                        ResultErrorBuilder.withHttpCode(code)
+                                                .description(response.getReasonPhrase())
+                                                .parameterKey("authUsername")
+                                                .parameterKey("authPassword")
+                                                .build());
+                            } else if (code >= 300 && code < 400) {
+                                // redirect
+                                builder.error(
+                                        ResultErrorBuilder.withHttpCode(code)
+                                                .description(response.getReasonPhrase())
+                                                .parameterKey("httpUri")
+                                                .detail(VerificationError.HttpAttribute.HTTP_REDIRECT,
+                                                        () -> HttpUtil.responseHeaderValue(response, "location"))
+                                                .build());
+                            } else if (code >= 400) {
+                                // generic http error
+                                builder.error(
+                                        ResultErrorBuilder.withHttpCode(code)
+                                                .description(response.getReasonPhrase())
+                                                .build());
+                            }
+                        }
+                        return null;
+                    });
 
-                if (!HttpHelper.isStatusCodeOk(code, okCodes)) {
-                    if (code == 401) {
-                        // Unauthorized, add authUsername and authPassword to the list
-                        // of parameters in error
-                        builder.error(
-                                ResultErrorBuilder.withHttpCode(code)
-                                        .description(response.getStatusLine().getReasonPhrase())
-                                        .parameterKey("authUsername")
-                                        .parameterKey("authPassword")
-                                        .build());
-                    } else if (code >= 300 && code < 400) {
-                        // redirect
-                        builder.error(
-                                ResultErrorBuilder.withHttpCode(code)
-                                        .description(response.getStatusLine().getReasonPhrase())
-                                        .parameterKey("httpUri")
-                                        .detail(VerificationError.HttpAttribute.HTTP_REDIRECT,
-                                                () -> HttpUtil.responseHeaderValue(response, "location"))
-                                        .build());
-                    } else if (code >= 400) {
-                        // generic http error
-                        builder.error(
-                                ResultErrorBuilder.withHttpCode(code)
-                                        .description(response.getStatusLine().getReasonPhrase())
-                                        .build());
-                    }
-                }
-            } catch (UnknownHostException e) {
-                builder.error(
-                        ResultErrorBuilder.withException(e)
-                                .parameterKey("httpUri")
-                                .build());
-            }
+        } catch (UnknownHostException e) {
+            builder.error(
+                    ResultErrorBuilder.withException(e)
+                            .parameterKey("httpUri")
+                            .build());
         } catch (Exception e) {
             builder.error(ResultErrorBuilder.withException(e).build());
         }
@@ -165,7 +164,9 @@ final class HttpComponentVerifierExtension extends DefaultComponentVerifierExten
         return httpUri;
     }
 
-    private Optional<HttpClientConfigurer> configureAuthentication(Map<String, Object> parameters) {
+    private Optional<HttpClientConfigurer> configureAuthentication(
+            Map<String, Object> parameters,
+            HttpCredentialsHelper credentialsHelper) {
         Optional<String> authUsername = getOption(parameters, "authUsername", String.class);
         Optional<String> authPassword = getOption(parameters, "authPassword", String.class);
 
@@ -178,13 +179,16 @@ final class HttpComponentVerifierExtension extends DefaultComponentVerifierExten
                             authUsername.get(),
                             authPassword.get(),
                             authDomain.orElse(null),
-                            authHost.orElse(null)));
+                            authHost.orElse(null),
+                            credentialsHelper));
         }
 
         return Optional.empty();
     }
 
-    private Optional<HttpClientConfigurer> configureProxy(Map<String, Object> parameters) {
+    private Optional<HttpClientConfigurer> configureProxy(
+            Map<String, Object> parameters,
+            HttpCredentialsHelper credentialsHelper) {
         Optional<String> uri = getOption(parameters, "httpUri", String.class);
         Optional<String> proxyAuthHost = getOption(parameters, "proxyAuthHost", String.class);
         Optional<Integer> proxyAuthPort = getOption(parameters, "proxyAuthPort", Integer.class);
@@ -196,7 +200,7 @@ final class HttpComponentVerifierExtension extends DefaultComponentVerifierExten
             Optional<String> proxyAuthDomain = getOption(parameters, "proxyAuthDomain", String.class);
             Optional<String> proxyAuthNtHost = getOption(parameters, "proxyAuthNtHost", String.class);
 
-            if (!proxyAuthScheme.isPresent()) {
+            if (proxyAuthScheme.isEmpty()) {
                 proxyAuthScheme = Optional.of(HttpHelper.isSecureConnection(uri.get()) ? "https" : "http");
             }
 
@@ -209,7 +213,8 @@ final class HttpComponentVerifierExtension extends DefaultComponentVerifierExten
                                 proxyAuthUsername.orElse(null),
                                 proxyAuthPassword.orElse(null),
                                 proxyAuthDomain.orElse(null),
-                                proxyAuthNtHost.orElse(null)));
+                                proxyAuthNtHost.orElse(null),
+                                credentialsHelper));
             } else {
                 return Optional.of(
                         new ProxyHttpClientConfigurer(
@@ -224,8 +229,9 @@ final class HttpComponentVerifierExtension extends DefaultComponentVerifierExten
 
     private CloseableHttpClient createHttpClient(Map<String, Object> parameters) throws Exception {
         CompositeHttpConfigurer configurer = new CompositeHttpConfigurer();
-        configureAuthentication(parameters).ifPresent(configurer::addConfigurer);
-        configureProxy(parameters).ifPresent(configurer::addConfigurer);
+        HttpCredentialsHelper credentialsHelper = new HttpCredentialsHelper();
+        configureAuthentication(parameters, credentialsHelper).ifPresent(configurer::addConfigurer);
+        configureProxy(parameters, credentialsHelper).ifPresent(configurer::addConfigurer);
 
         HttpClientBuilder builder = HttpClientBuilder.create();
         configurer.configureHttpClient(builder);

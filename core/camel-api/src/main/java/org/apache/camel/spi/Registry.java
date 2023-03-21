@@ -28,7 +28,7 @@ public interface Registry extends BeanRepository {
 
     /**
      * Binds the bean to the repository (if possible).
-     * 
+     *
      * If the bean is {@link CamelContextAware} then the registry will automatic inject the context if possible.
      *
      * @param  id                    the id of the bean
@@ -83,6 +83,15 @@ public interface Registry extends BeanRepository {
      * @throws RuntimeCamelException is thrown if binding is not possible
      */
     void bindAsPrototype(String id, Class<?> type, Supplier<Object> bean) throws RuntimeCamelException;
+
+    /**
+     * Removes the bean from the repository (if possible).
+     *
+     * @param id the id of the bean
+     */
+    default void unbind(String id) {
+        // noop
+    }
 
     /**
      * Strategy to wrap the value to be stored in the registry.

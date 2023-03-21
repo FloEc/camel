@@ -40,6 +40,11 @@ import org.apache.camel.ShutdownRoute;
 import org.apache.camel.ShutdownRunningTask;
 import org.apache.camel.Suspendable;
 import org.apache.camel.SuspendableService;
+import org.apache.camel.resume.ConsumerListener;
+import org.apache.camel.resume.ConsumerListenerAware;
+import org.apache.camel.resume.ResumeAdapter;
+import org.apache.camel.resume.ResumeAware;
+import org.apache.camel.resume.ResumeStrategy;
 import org.apache.camel.spi.IdAware;
 import org.apache.camel.spi.InterceptStrategy;
 import org.apache.camel.spi.ManagementInterceptStrategy;
@@ -50,6 +55,7 @@ import org.apache.camel.spi.RouteIdAware;
 import org.apache.camel.spi.RoutePolicy;
 import org.apache.camel.support.LoggerHelper;
 import org.apache.camel.support.PatternHelper;
+import org.apache.camel.support.resume.AdapterHelper;
 import org.apache.camel.support.service.ServiceHelper;
 import org.apache.camel.support.service.ServiceSupport;
 import org.apache.camel.util.ObjectHelper;
@@ -70,6 +76,7 @@ public class DefaultRoute extends ServiceSupport implements Route {
     private final String routeDescription;
     private final Resource sourceResource;
     private final String sourceLocation;
+    private final String sourceLocationShort;
     private final List<Processor> eventDrivenProcessors = new ArrayList<>();
     private final List<InterceptStrategy> interceptStrategies = new ArrayList<>(0);
     private ManagementInterceptStrategy managementInterceptStrategy;
@@ -87,8 +94,11 @@ public class DefaultRoute extends ServiceSupport implements Route {
     private ShutdownRunningTask shutdownRunningTask;
     private final Map<String, Processor> onCompletions = new HashMap<>();
     private final Map<String, Processor> onExceptions = new HashMap<>();
+    private ResumeStrategy resumeStrategy;
+    private ConsumerListener<?, ?> consumerListener;
 
     // camel-core-model
+    @Deprecated
     private ErrorHandlerFactory errorHandlerFactory;
     // camel-core-model: must be concurrent as error handlers can be mutated concurrently via multicast/recipientlist EIPs
     private final ConcurrentMap<ErrorHandlerFactory, Set<NamedNode>> errorHandlers = new ConcurrentHashMap<>();
@@ -111,7 +121,8 @@ public class DefaultRoute extends ServiceSupport implements Route {
         this.routeDescription = routeDescription;
         this.endpoint = endpoint;
         this.sourceResource = resource;
-        this.sourceLocation = LoggerHelper.getLineNumberLoggerName(route);
+        this.sourceLocation = LoggerHelper.getSourceLocation(route);
+        this.sourceLocationShort = LoggerHelper.getLineNumberLoggerName(route);
     }
 
     @Override
@@ -181,6 +192,11 @@ public class DefaultRoute extends ServiceSupport implements Route {
     @Override
     public String getSourceLocation() {
         return sourceLocation;
+    }
+
+    @Override
+    public String getSourceLocationShort() {
+        return sourceLocationShort;
     }
 
     @Override
@@ -626,6 +642,16 @@ public class DefaultRoute extends ServiceSupport implements Route {
             if (consumer instanceof RouteIdAware) {
                 ((RouteIdAware) consumer).setRouteId(this.getId());
             }
+
+            if (consumer instanceof ResumeAware && resumeStrategy != null) {
+                ResumeAdapter resumeAdapter = AdapterHelper.eval(getCamelContext(), (ResumeAware) consumer, resumeStrategy);
+                resumeStrategy.setAdapter(resumeAdapter);
+                ((ResumeAware) consumer).setResumeStrategy(resumeStrategy);
+            }
+
+            if (consumer instanceof ConsumerListenerAware) {
+                ((ConsumerListenerAware) consumer).setConsumerListener(consumerListener);
+            }
         }
         if (processor instanceof Service) {
             services.add((Service) processor);
@@ -699,4 +725,13 @@ public class DefaultRoute extends ServiceSupport implements Route {
         return consumer instanceof Suspendable && consumer instanceof SuspendableService;
     }
 
+    @Override
+    public void setResumeStrategy(ResumeStrategy resumeStrategy) {
+        this.resumeStrategy = resumeStrategy;
+    }
+
+    @Override
+    public void setConsumerListener(ConsumerListener<?, ?> consumerListener) {
+        this.consumerListener = consumerListener;
+    }
 }

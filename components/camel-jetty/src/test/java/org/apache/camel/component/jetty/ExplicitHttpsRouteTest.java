@@ -16,7 +16,6 @@
  */
 package org.apache.camel.component.jetty;
 
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ import org.junit.jupiter.api.Disabled;
 @Disabled
 public class ExplicitHttpsRouteTest extends HttpsRouteTest {
 
-    private Connector createSslSocketConnector(int port) throws URISyntaxException {
+    private Connector createSslSocketConnector(int port) {
         /*
          * SslSelectChannelConnector sslSocketConnector = new
          * SslSelectChannelConnector();
@@ -40,9 +39,9 @@ public class ExplicitHttpsRouteTest extends HttpsRouteTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws URISyntaxException {
+            public void configure() {
                 // START SNIPPET: e1
                 // create SSL select channel connectors for port 9080 and 9090
                 Map<Integer, Connector> connectors = new HashMap<>();
@@ -56,7 +55,7 @@ public class ExplicitHttpsRouteTest extends HttpsRouteTest {
                 from("jetty:https://localhost:" + port1 + "/test").to("mock:a");
 
                 Processor proc = new Processor() {
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         exchange.getMessage().setBody("<b>Hello World</b>");
                     }
                 };

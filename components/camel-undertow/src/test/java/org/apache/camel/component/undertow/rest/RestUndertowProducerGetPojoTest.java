@@ -16,7 +16,6 @@
  */
 package org.apache.camel.component.undertow.rest;
 
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.undertow.BaseUndertowTest;
@@ -31,9 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class RestUndertowProducerGetPojoTest extends BaseUndertowTest {
 
     @Test
-    public void testUndertowGetPojoRequest() throws Exception {
+    public void testUndertowGetPojoRequest() {
         // should not use reflection when using rest binding in the rest producer
-        BeanIntrospection bi = context.adapt(ExtendedCamelContext.class).getBeanIntrospection();
+        BeanIntrospection bi = context.getCamelContextExtension().getBeanIntrospection();
         bi.setLoggingLevel(LoggingLevel.INFO);
         bi.resetCounters();
 
@@ -51,10 +50,10 @@ public class RestUndertowProducerGetPojoTest extends BaseUndertowTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 // configure to use undertow on localhost with the given port
                 // and enable auto binding mode
                 restConfiguration()

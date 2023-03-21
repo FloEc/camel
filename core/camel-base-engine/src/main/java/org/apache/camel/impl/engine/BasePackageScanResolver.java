@@ -39,6 +39,13 @@ public abstract class BasePackageScanResolver extends ServiceSupport implements 
     private CamelContext camelContext;
 
     public BasePackageScanResolver() {
+        initialize();
+    }
+
+    /**
+     * Performs overridable initialization logic for the package scan resolver
+     */
+    public void initialize() {
         try {
             ClassLoader ccl = Thread.currentThread().getContextClassLoader();
             if (ccl != null) {
@@ -52,6 +59,16 @@ public abstract class BasePackageScanResolver extends ServiceSupport implements 
         }
 
         classLoaders.add(BasePackageScanResolver.class.getClassLoader());
+    }
+
+    @Override
+    protected void doInit() throws Exception {
+        super.doInit();
+
+        // ensure we also use app context class-loader
+        if (camelContext != null && camelContext.getApplicationContextClassLoader() != null) {
+            addClassLoader(camelContext.getApplicationContextClassLoader());
+        }
     }
 
     @Override

@@ -96,4 +96,7 @@ public interface EventNotifier {
 
     void setIgnoreStepEvents(boolean ignoreStepEvents);
 
+    void setIgnoreExchangeAsyncProcessingStartedEvents(boolean ignoreExchangeAsyncProcessingStartedEvents);
+
+    boolean isIgnoreExchangeAsyncProcessingStartedEvents();
 }

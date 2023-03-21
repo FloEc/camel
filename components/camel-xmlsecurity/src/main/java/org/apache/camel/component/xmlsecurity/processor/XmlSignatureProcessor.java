@@ -102,7 +102,11 @@ public abstract class XmlSignatureProcessor implements Processor {
         if (getConfiguration().getClearHeaders() != null && getConfiguration().getClearHeaders()) {
             Map<String, Object> headers = message.getHeaders();
             for (Field f : XmlSignatureConstants.class.getFields()) {
-                headers.remove(ObjectHelper.lookupConstantFieldValue(XmlSignatureConstants.class, f.getName()));
+                String key = ObjectHelper.lookupConstantFieldValue(XmlSignatureConstants.class, f.getName());
+                if (!XmlSignatureConstants.CHARSET_NAME.equals(key)) {
+                    // keep charset header
+                    headers.remove(key);
+                }
             }
         }
     }
@@ -129,6 +133,10 @@ public abstract class XmlSignatureProcessor implements Processor {
         }
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         schemaFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        schemaFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        LOG.debug("Configuring SchemaFactory to not allow access to external DTD/Schema");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         schemaFactory.setResourceResolver(new DefaultLSResourceResolver(
                 getCamelContext(), getConfiguration()
                         .getSchemaResourceUri()));

@@ -41,15 +41,14 @@ public final class CamelOpenMBeanTypes {
                 "rests", "Rest Services",
                 new String[] {
                         "url", "baseUrl", "basePath", "uriTemplate", "method", "consumes", "produces", "inType", "outType",
-                        "state", "routeId", "description" },
+                        "state", "description" },
                 new String[] {
                         "Url", "Base Url", "Base Path", "Uri Template", "Method", "Consumes", "Produces", "Input Type",
-                        "Output Type", "State", "Route Id", "Description" },
+                        "Output Type", "State", "Description" },
                 new OpenType[] {
                         SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING,
                         SimpleType.STRING,
-                        SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING,
-                        SimpleType.STRING });
+                        SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
     }
 
     public static TabularType listEndpointsTabularType() throws OpenDataException {
@@ -236,16 +235,13 @@ public final class CamelOpenMBeanTypes {
                 "healthDetails", "Health Details",
                 new String[] {
                         "id", "group", "state", "enabled", "message", "failureUri", "failureCount", "failureStackTrace",
-                        "readiness", "liveness",
-                        "interval", "successThreshold", "failureThreshold" },
+                        "readiness", "liveness" },
                 new String[] {
                         "ID", "Group", "State", "Enabled", "Message", "Failure Uri", "Failure Count", "Failure StackTrace",
-                        "Readiness", "Liveness",
-                        "Interval", "Success Threshold", "Failure Threshold" },
+                        "Readiness", "Liveness" },
                 new OpenType[] {
                         SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.STRING,
-                        SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.BOOLEAN,
-                        SimpleType.LONG, SimpleType.INTEGER, SimpleType.INTEGER });
+                        SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.BOOLEAN });
     }
 
     public static TabularType camelHealthDetailsTabularType() throws OpenDataException {

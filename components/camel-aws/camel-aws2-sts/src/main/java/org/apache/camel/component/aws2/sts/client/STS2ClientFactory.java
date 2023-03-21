@@ -30,12 +30,12 @@ public final class STS2ClientFactory {
 
     /**
      * Return the correct aws STS client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               StsClient
      */
     public static STS2InternalClient getStsClient(STS2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new STS2ClientIAMOptimized(configuration) : new STS2ClientStandardImpl(configuration);
     }
 }

@@ -56,7 +56,7 @@ public class ExecEndpointTest {
     private Component component;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         component = camelContext.getComponent("exec");
     }
 
@@ -138,6 +138,20 @@ public class ExecEndpointTest {
         long timeout = 1999999L;
         ExecEndpoint e = createExecEndpoint("exec:test?timeout=" + timeout);
         assertEquals(timeout, e.getTimeout());
+    }
+
+    @Test
+    @DirtiesContext
+    public void testCreateEndpointWithExitValues() throws Exception {
+        ExecEndpoint e = createExecEndpoint("exec:test?exitValues=1,2,3");
+        assertEquals("1,2,3", e.getExitValues());
+    }
+
+    @Test
+    @DirtiesContext
+    public void testCreateEndpointWithEmptyExitValues() throws Exception {
+        ExecEndpoint e = createExecEndpoint("exec:test?exitValues=");
+        assertEquals("", e.getExitValues());
     }
 
     @Test

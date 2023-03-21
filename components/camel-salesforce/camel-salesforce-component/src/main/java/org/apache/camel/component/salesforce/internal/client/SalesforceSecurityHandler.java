@@ -36,7 +36,6 @@ import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.api.Result;
 import org.eclipse.jetty.client.util.BufferingResponseListener;
 import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -71,6 +70,11 @@ public class SalesforceSecurityHandler implements ProtocolHandler {
 
     @Override
     public boolean accept(Request request, Response response) {
+
+        // if using an HTTP proxy, this will be a TunnelRequest, which we're not interested in.
+        if (!(request instanceof SalesforceHttpRequest)) {
+            return false;
+        }
 
         HttpConversation conversation = ((SalesforceHttpRequest) request).getConversation();
         Integer retries = (Integer) conversation.getAttribute(AUTHENTICATION_RETRIES_ATTRIBUTE);
@@ -176,8 +180,7 @@ public class SalesforceSecurityHandler implements ProtocolHandler {
                     LOG.warn("Unable to deserialize errors from response body.");
                 }
                 if (errors.stream().anyMatch(error -> EXPIRED_PASSWORD_CODE.equals(error.getErrorCode()))) {
-                    SalesforceException salesforceException = createSalesforceException(client, status,
-                            reason);
+                    SalesforceException salesforceException = createSalesforceException(client, status);
                     forwardFailureComplete(request, null, response, salesforceException);
                     return;
                 }
@@ -211,7 +214,7 @@ public class SalesforceSecurityHandler implements ProtocolHandler {
             }
         }
 
-        private SalesforceException createSalesforceException(AbstractClientBase client, int statusCode, String reason) {
+        private SalesforceException createSalesforceException(AbstractClientBase client, int statusCode) {
             List<RestError> restErrors = Collections.emptyList();
             try {
                 restErrors = client.readErrorsFrom(getContentAsInputStream(), new ObjectMapper());
@@ -254,15 +257,16 @@ public class SalesforceSecurityHandler implements ProtocolHandler {
             if (copy) {
                 newRequest = httpClient.copyRequest(request, request.getURI());
                 newRequest.method(request.getMethod());
-                HttpFields headers = newRequest.getHeaders();
-                // copy cookies and host for subscriptions to avoid
-                // '403::Unknown Client' errors
-                for (HttpField field : request.getHeaders()) {
-                    HttpHeader header = field.getHeader();
-                    if (HttpHeader.COOKIE.equals(header) || HttpHeader.HOST.equals(header)) {
-                        headers.add(header, field.getValue());
+                newRequest.headers(headers -> {
+                    // copy cookies and host for subscriptions to avoid
+                    // '403::Unknown Client' errors
+                    for (HttpField field : request.getHeaders()) {
+                        HttpHeader header = field.getHeader();
+                        if (HttpHeader.COOKIE.equals(header) || HttpHeader.HOST.equals(header)) {
+                            headers.add(header, field.getValue());
+                        }
                     }
-                }
+                });
             } else {
                 newRequest = request;
             }

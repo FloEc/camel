@@ -101,13 +101,13 @@ public class Web3jConsumerCatchUpToLatestAndSubscribeToNewTransactionsObservable
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 errorHandler(deadLetterChannel("mock:error"));
                 from(getUrl() + OPERATION.toLowerCase() + "=" + CATCH_UP_TO_LATEST_AND_SUBSCRIBE_TO_NEW_TRANSACTIONS_OBSERVABLE
                      + "&fromBlock=5499965")
-                             .to("mock:result");
+                        .to("mock:result");
             }
         };
     }

@@ -24,7 +24,6 @@ import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.model.language.XQueryExpression;
 import org.apache.camel.spi.Language;
 import org.apache.camel.spi.NamespaceAware;
-import org.apache.camel.support.CamelContextHelper;
 
 public class XQueryExpressionReifier extends ExpressionReifier<XQueryExpression> {
 
@@ -60,14 +59,23 @@ public class XQueryExpressionReifier extends ExpressionReifier<XQueryExpression>
     }
 
     protected Object[] createProperties() {
-        Object[] properties = new Object[2];
+        Object[] properties = new Object[3];
         properties[0] = definition.getResultType();
         properties[1] = parseString(definition.getHeaderName());
+        properties[2] = parseString(definition.getPropertyName());
         return properties;
     }
 
     @Override
     protected void configureLanguage(Language language) {
+        if (definition.getResultType() == null && definition.getResultTypeName() != null) {
+            try {
+                Class<?> clazz = camelContext.getClassResolver().resolveMandatoryClass(definition.getResultTypeName());
+                definition.setResultType(clazz);
+            } catch (ClassNotFoundException e) {
+                throw RuntimeCamelException.wrapRuntimeException(e);
+            }
+        }
         if (definition.getResultType() == null && definition.getType() != null) {
             try {
                 Class<?> clazz = camelContext.getClassResolver().resolveMandatoryClass(definition.getType());
@@ -77,8 +85,7 @@ public class XQueryExpressionReifier extends ExpressionReifier<XQueryExpression>
             }
         }
         if (definition.getConfiguration() == null && definition.getConfigurationRef() != null) {
-            definition.setConfiguration(
-                    CamelContextHelper.mandatoryLookupAndConvert(camelContext, definition.getConfigurationRef(), Object.class));
+            definition.setConfiguration(mandatoryLookup(definition.getConfigurationRef(), Object.class));
         }
     }
 

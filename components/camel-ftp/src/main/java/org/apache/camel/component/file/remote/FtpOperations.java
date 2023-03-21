@@ -249,7 +249,9 @@ public class FtpOperations implements RemoteFileOperations<FTPFile> {
         final int port = configuration.getPort();
 
         try {
-            log.trace("Reconnect attempt to {}", configuration.remoteServerInformation());
+            if (log.isTraceEnabled()) {
+                log.trace("Reconnect attempt to {}", configuration.remoteServerInformation());
+            }
 
             clientActivityListener.onConnecting(host);
             client.connect(host, port);
@@ -300,17 +302,21 @@ public class FtpOperations implements RemoteFileOperations<FTPFile> {
         try {
             log.trace("Client logout");
             client.logout();
+            client.disconnect();
         } catch (IOException e) {
-            throw new GenericFileOperationFailedException(client.getReplyCode(), client.getReplyString(), e.getMessage(), e);
-        } finally {
+            GenericFileOperationFailedException gfo = new GenericFileOperationFailedException(
+                    client.getReplyCode(), client.getReplyString(), e.getMessage(), e);
             try {
                 log.trace("Client disconnect");
                 client.disconnect();
-            } catch (IOException e) {
-                throw new GenericFileOperationFailedException(
-                        client.getReplyCode(), client.getReplyString(), e.getMessage(), e);
+            } catch (IOException ed) {
+                log.warn("Failed to disconnect: {}", e.getMessage(), e);
+                gfo.addSuppressed(ed);
             }
+
+            throw gfo;
         }
+
         clientActivityListener.onDisconnected(endpoint.getConfiguration().remoteServerInformation());
     }
 
@@ -432,7 +438,7 @@ public class FtpOperations implements RemoteFileOperations<FTPFile> {
 
     @Override
     public void releaseRetrievedFileResources(Exchange exchange) throws GenericFileOperationFailedException {
-        InputStream is = exchange.getIn().getHeader(RemoteFileComponent.REMOTE_FILE_INPUT_STREAM, InputStream.class);
+        InputStream is = exchange.getIn().getHeader(FtpConstants.REMOTE_FILE_INPUT_STREAM, InputStream.class);
 
         if (is != null) {
             try {
@@ -478,7 +484,7 @@ public class FtpOperations implements RemoteFileOperations<FTPFile> {
             if (endpoint.getConfiguration().isStreamDownload()) {
                 InputStream is = client.retrieveFileStream(remoteName);
                 target.setBody(is);
-                exchange.getIn().setHeader(RemoteFileComponent.REMOTE_FILE_INPUT_STREAM, is);
+                exchange.getIn().setHeader(FtpConstants.REMOTE_FILE_INPUT_STREAM, is);
                 result = true;
             } else {
                 // read the entire file into memory in the byte array
@@ -566,10 +572,10 @@ public class FtpOperations implements RemoteFileOperations<FTPFile> {
             os = new FileOutputStream(temp, append);
 
             // set header with the path to the local work file
-            exchange.getIn().setHeader(Exchange.FILE_LOCAL_WORK_PATH, local.getPath());
+            exchange.getIn().setHeader(FtpConstants.FILE_LOCAL_WORK_PATH, local.getPath());
 
         } catch (Exception e) {
-            throw new GenericFileOperationFailedException("Cannot create new local work file: " + local);
+            throw new GenericFileOperationFailedException("Cannot create new local work file: " + local, e);
         }
 
         boolean result;
@@ -766,7 +772,7 @@ public class FtpOperations implements RemoteFileOperations<FTPFile> {
             if (log.isDebugEnabled()) {
                 long time = watch.taken();
                 log.debug("Took {} ({} millis) to store file: {} and FTP client returned: {}",
-                        TimeUtils.printDuration(time), time, targetName, answer);
+                        TimeUtils.printDuration(time, true), time, targetName, answer);
             }
 
             // store client reply information after the operation

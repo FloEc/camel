@@ -23,8 +23,11 @@ import java.util.Queue;
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.component.aws2.kinesis.consumer.KinesisResumeStrategy;
-import org.apache.camel.component.aws2.kinesis.consumer.KinesisUserConfigurationResumeStrategy;
+import org.apache.camel.component.aws2.kinesis.consumer.KinesisResumeAdapter;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.health.WritableHealthCheckRepository;
+import org.apache.camel.resume.ResumeAware;
+import org.apache.camel.resume.ResumeStrategy;
 import org.apache.camel.support.ScheduledBatchPollingConsumer;
 import org.apache.camel.util.CastUtils;
 import org.apache.camel.util.ObjectHelper;
@@ -39,13 +42,18 @@ import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.Shard;
+import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
-public class Kinesis2Consumer extends ScheduledBatchPollingConsumer {
+public class Kinesis2Consumer extends ScheduledBatchPollingConsumer implements ResumeAware<ResumeStrategy> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Kinesis2Consumer.class);
 
     private String currentShardIterator;
     private boolean isShardClosed;
+    private ResumeStrategy resumeStrategy;
+
+    private WritableHealthCheckRepository healthCheckRepository;
+    private Kinesis2ConsumerHealthCheck consumerHealthCheck;
 
     public Kinesis2Consumer(Kinesis2Endpoint endpoint, Processor processor) {
         super(endpoint, processor);
@@ -161,45 +169,94 @@ public class Kinesis2Consumer extends ScheduledBatchPollingConsumer {
                     .streamName(getEndpoint().getConfiguration().getStreamName()).shardId(shardId)
                     .shardIteratorType(getEndpoint().getConfiguration().getIteratorType());
 
+            if (hasSequenceNumber()) {
+                req.startingSequenceNumber(getEndpoint().getConfiguration().getSequenceNumber());
+            }
+
             resume(req);
 
             GetShardIteratorResponse result = getClient().getShardIterator(req.build());
             currentShardIterator = result.shardIterator();
         }
+
         LOG.debug("Shard Iterator is: {}", currentShardIterator);
         return currentShardIterator;
     }
 
     private void resume(GetShardIteratorRequest.Builder req) {
-        KinesisResumeStrategy resumeStrategy;
-        if (getEndpoint().getConfiguration().getResumeStrategy() == null) {
-            resumeStrategy = new KinesisUserConfigurationResumeStrategy(getEndpoint().getConfiguration());
-        } else {
-            resumeStrategy = getEndpoint().getConfiguration().getResumeStrategy();
+        if (resumeStrategy == null) {
+            return;
         }
 
-        resumeStrategy.resume(req);
+        KinesisResumeAdapter adapter = resumeStrategy.getAdapter(KinesisResumeAdapter.class);
+        if (adapter == null) {
+            LOG.warn("There is a resume strategy setup, but no adapter configured or the type is incorrect");
+
+            return;
+        }
+
+        adapter.setRequestBuilder(req);
+        adapter.setStreamName(getEndpoint().getConfiguration().getStreamName());
+        adapter.resume();
     }
 
     private Queue<Exchange> createExchanges(List<Record> records) {
         Queue<Exchange> exchanges = new ArrayDeque<>();
-        for (Record record : records) {
-            exchanges.add(createExchange(record));
+        for (Record dataRecord : records) {
+            exchanges.add(createExchange(dataRecord));
         }
         return exchanges;
     }
 
-    protected Exchange createExchange(Record record) {
+    protected Exchange createExchange(Record dataRecord) {
         Exchange exchange = createExchange(true);
-        exchange.getIn().setBody(record);
-        exchange.getIn().setHeader(Kinesis2Constants.APPROX_ARRIVAL_TIME, record.approximateArrivalTimestamp());
-        exchange.getIn().setHeader(Kinesis2Constants.PARTITION_KEY, record.partitionKey());
-        exchange.getIn().setHeader(Kinesis2Constants.SEQUENCE_NUMBER, record.sequenceNumber());
-        if (record.approximateArrivalTimestamp() != null) {
-            long ts = record.approximateArrivalTimestamp().getEpochSecond() * 1000;
-            exchange.getIn().setHeader(Exchange.MESSAGE_TIMESTAMP, ts);
+        exchange.getIn().setBody(dataRecord.data().asInputStream());
+        exchange.getIn().setHeader(Kinesis2Constants.APPROX_ARRIVAL_TIME, dataRecord.approximateArrivalTimestamp());
+        exchange.getIn().setHeader(Kinesis2Constants.PARTITION_KEY, dataRecord.partitionKey());
+        exchange.getIn().setHeader(Kinesis2Constants.SEQUENCE_NUMBER, dataRecord.sequenceNumber());
+        if (dataRecord.approximateArrivalTimestamp() != null) {
+            long ts = dataRecord.approximateArrivalTimestamp().getEpochSecond() * 1000;
+            exchange.getIn().setHeader(Kinesis2Constants.MESSAGE_TIMESTAMP, ts);
         }
         return exchange;
     }
 
+    @Override
+    public void setResumeStrategy(ResumeStrategy resumeStrategy) {
+        this.resumeStrategy = resumeStrategy;
+    }
+
+    @Override
+    public ResumeStrategy getResumeStrategy() {
+        return resumeStrategy;
+    }
+
+    private boolean hasSequenceNumber() {
+        return !getEndpoint().getConfiguration().getSequenceNumber().isEmpty()
+                && (getEndpoint().getConfiguration().getIteratorType().equals(ShardIteratorType.AFTER_SEQUENCE_NUMBER)
+                        || getEndpoint().getConfiguration().getIteratorType().equals(ShardIteratorType.AT_SEQUENCE_NUMBER));
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        super.doStart();
+
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(
+                getEndpoint().getCamelContext(),
+                "components",
+                WritableHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            consumerHealthCheck = new Kinesis2ConsumerHealthCheck(this, getRouteId());
+            healthCheckRepository.addHealthCheck(consumerHealthCheck);
+        }
+
+        if (resumeStrategy != null) {
+            resumeStrategy.loadCache();
+        }
+    }
+
+    protected Kinesis2Configuration getConfiguration() {
+        return getEndpoint().getConfiguration();
+    }
 }

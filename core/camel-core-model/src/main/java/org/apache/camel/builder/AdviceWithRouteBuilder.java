@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.spi.EndpointStrategy;
@@ -29,7 +28,6 @@ import org.apache.camel.spi.MockSendToEndpointStrategyFactory;
 import org.apache.camel.support.EndpointHelper;
 import org.apache.camel.support.PatternHelper;
 import org.apache.camel.util.ObjectHelper;
-import org.apache.camel.util.function.ThrowingConsumer;
 
 import static org.apache.camel.spi.FactoryFinder.DEFAULT_PATH;
 
@@ -51,79 +49,6 @@ public abstract class AdviceWithRouteBuilder extends RouteBuilder {
 
     public AdviceWithRouteBuilder(CamelContext context) {
         super(context);
-    }
-
-    /**
-     * Advices this route with the route builder using a lambda expression. It can be used as following:
-     * 
-     * <pre>
-     * AdviceWithRouteBuilder.adviceWith(context, "myRoute", a ->
-     *     a.weaveAddLast().to("mock:result");
-     * </pre>
-     * <p/>
-     * <b>Important:</b> It is recommended to only advice a given route once (you can of course advice multiple routes).
-     * If you do it multiple times, then it may not work as expected, especially when any kind of error handling is
-     * involved.
-     * <p/>
-     * The advice process will add the interceptors, on exceptions, on completions etc. configured from the route
-     * builder to this route.
-     * <p/>
-     * This is mostly used for testing purpose to add interceptors and the likes to an existing route.
-     * <p/>
-     * Will stop and remove the old route from camel context and add and start this new advised route.
-     *
-     * @param      camelContext the camel context
-     * @param      routeId      either the route id as a string value, or <tt>null</tt> to chose the 1st route, or you
-     *                          can specify a number for the n'th route, or provide the route definition instance
-     *                          directly as well.
-     * @param      builder      the advice with route builder
-     * @return                  a new route which is this route merged with the route builder
-     * @throws     Exception    can be thrown from the route builder
-     * @deprecated              use {@link AdviceWith#adviceWith(CamelContext, Object, ThrowingConsumer)}
-     */
-    @Deprecated
-    public static RouteDefinition adviceWith(
-            CamelContext camelContext, Object routeId, ThrowingConsumer<AdviceWithRouteBuilder, Exception> builder)
-            throws Exception {
-        return AdviceWith.adviceWith(camelContext, routeId, builder);
-    }
-
-    /**
-     * Advices this route with the route builder using a lambda expression. It can be used as following:
-     *
-     * <pre>
-     * AdviceWithRouteBuilder.adviceWith(context, "myRoute", false, a ->
-     *     a.weaveAddLast().to("mock:result");
-     * </pre>
-     * <p/>
-     * <b>Important:</b> It is recommended to only advice a given route once (you can of course advice multiple routes).
-     * If you do it multiple times, then it may not work as expected, especially when any kind of error handling is
-     * involved.
-     * <p/>
-     * The advice process will add the interceptors, on exceptions, on completions etc. configured from the route
-     * builder to this route.
-     * <p/>
-     * This is mostly used for testing purpose to add interceptors and the likes to an existing route.
-     * <p/>
-     * Will stop and remove the old route from camel context and add and start this new advised route.
-     *
-     * @param      camelContext the camel context
-     * @param      routeId      either the route id as a string value, or <tt>null</tt> to chose the 1st route, or you
-     *                          can specify a number for the n'th route, or provide the route definition instance
-     *                          directly as well.
-     * @param      logXml       whether to log the before and after advices routes as XML to the log (this can be turned
-     *                          off to perform faster)
-     * @param      builder      the advice with route builder
-     * @return                  a new route which is this route merged with the route builder
-     * @throws     Exception    can be thrown from the route builder
-     * @deprecated              use {@link AdviceWith#adviceWith(CamelContext, Object, boolean, ThrowingConsumer)}
-     */
-    @Deprecated
-    public static RouteDefinition adviceWith(
-            CamelContext camelContext, Object routeId, boolean logXml,
-            ThrowingConsumer<AdviceWithRouteBuilder, Exception> builder)
-            throws Exception {
-        return AdviceWith.adviceWith(camelContext, routeId, logXml, builder);
     }
 
     /**
@@ -178,7 +103,7 @@ public abstract class AdviceWithRouteBuilder extends RouteBuilder {
      * @throws Exception can be thrown if error occurred
      */
     public void mockEndpoints() throws Exception {
-        getContext().adapt(ExtendedCamelContext.class).registerEndpointCallback(createMockEndpointStrategy(null, false));
+        getContext().getCamelContextExtension().registerEndpointCallback(createMockEndpointStrategy(null, false));
     }
 
     /**
@@ -192,7 +117,7 @@ public abstract class AdviceWithRouteBuilder extends RouteBuilder {
         for (String s : pattern) {
             // the text based input may be property placeholders
             s = getContext().resolvePropertyPlaceholders(s);
-            getContext().adapt(ExtendedCamelContext.class).registerEndpointCallback(createMockEndpointStrategy(s, false));
+            getContext().getCamelContextExtension().registerEndpointCallback(createMockEndpointStrategy(s, false));
         }
     }
 
@@ -208,7 +133,7 @@ public abstract class AdviceWithRouteBuilder extends RouteBuilder {
         for (String s : pattern) {
             // the text based input may be property placeholders
             s = getContext().resolvePropertyPlaceholders(s);
-            getContext().adapt(ExtendedCamelContext.class)
+            getContext().getCamelContextExtension()
                     .registerEndpointCallback(createMockEndpointStrategy(s, true));
         }
     }
@@ -317,7 +242,7 @@ public abstract class AdviceWithRouteBuilder extends RouteBuilder {
     private EndpointStrategy createMockEndpointStrategy(String pattern, boolean skip) {
         // the text based input may be property placeholders
         pattern = getContext().resolvePropertyPlaceholders(pattern);
-        MockSendToEndpointStrategyFactory factory = getContext().adapt(ExtendedCamelContext.class)
+        MockSendToEndpointStrategyFactory factory = getContext().getCamelContextExtension()
                 .getFactoryFinder(DEFAULT_PATH)
                 .newInstance(MockSendToEndpointStrategyFactory.FACTORY, MockSendToEndpointStrategyFactory.class)
                 .orElseThrow(() -> new IllegalArgumentException(

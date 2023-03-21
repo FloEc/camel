@@ -19,54 +19,61 @@ public class GoogleSheetsEndpointUriFactory extends org.apache.camel.support.com
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(40);
-        props.add("backoffMultiplier");
-        props.add("apiName");
-        props.add("batchClearValuesRequest");
-        props.add("values");
-        props.add("batchUpdateValuesRequest");
-        props.add("range");
-        props.add("splitResult");
-        props.add("initialDelay");
-        props.add("content");
-        props.add("scheduler");
-        props.add("bridgeErrorHandler");
-        props.add("useFixedDelay");
-        props.add("runLoggingLevel");
-        props.add("backoffErrorThreshold");
-        props.add("clearValuesRequest");
-        props.add("greedy");
-        props.add("clientSecret");
-        props.add("scheduledExecutorService");
-        props.add("batchGetValuesByDataFilterRequest");
-        props.add("applicationName");
-        props.add("repeatCount");
-        props.add("timeUnit");
-        props.add("clientId");
-        props.add("batchUpdateSpreadsheetRequest");
-        props.add("sendEmptyMessageWhenIdle");
-        props.add("schedulerProperties");
-        props.add("exchangePattern");
-        props.add("methodName");
-        props.add("spreadsheetId");
+        Set<String> props = new HashSet<>(43);
         props.add("accessToken");
-        props.add("getSpreadsheetByDataFilterRequest");
-        props.add("batchUpdateValuesByDataFilterRequest");
+        props.add("apiName");
+        props.add("applicationName");
+        props.add("backoffErrorThreshold");
         props.add("backoffIdleThreshold");
-        props.add("lazyStartProducer");
+        props.add("backoffMultiplier");
+        props.add("batchClearValuesRequest");
+        props.add("batchGetValuesByDataFilterRequest");
+        props.add("batchUpdateSpreadsheetRequest");
+        props.add("batchUpdateValuesByDataFilterRequest");
+        props.add("batchUpdateValuesRequest");
+        props.add("bridgeErrorHandler");
+        props.add("clearValuesRequest");
+        props.add("clientId");
+        props.add("clientSecret");
+        props.add("content");
         props.add("delay");
-        props.add("pollStrategy");
-        props.add("startScheduler");
-        props.add("inBody");
+        props.add("delegate");
         props.add("exceptionHandler");
+        props.add("exchangePattern");
+        props.add("getSpreadsheetByDataFilterRequest");
+        props.add("greedy");
+        props.add("inBody");
+        props.add("initialDelay");
+        props.add("lazyStartProducer");
+        props.add("methodName");
+        props.add("pollStrategy");
+        props.add("range");
         props.add("refreshToken");
+        props.add("repeatCount");
+        props.add("runLoggingLevel");
+        props.add("scheduledExecutorService");
+        props.add("scheduler");
+        props.add("schedulerProperties");
+        props.add("scopes");
+        props.add("sendEmptyMessageWhenIdle");
+        props.add("serviceAccountKey");
+        props.add("splitResult");
+        props.add("spreadsheetId");
+        props.add("startScheduler");
+        props.add("timeUnit");
+        props.add("useFixedDelay");
+        props.add("values");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         Set<String> secretProps = new HashSet<>(3);
-        secretProps.add("clientSecret");
         secretProps.add("accessToken");
+        secretProps.add("clientSecret");
         secretProps.add("refreshToken");
         SECRET_PROPERTY_NAMES = Collections.unmodifiableSet(secretProps);
+        Set<String> prefixes = new HashSet<>(1);
+        prefixes.add("scheduler.");
+        MULTI_VALUE_PREFIXES = Collections.unmodifiableSet(prefixes);
     }
 
     @Override
@@ -95,6 +102,11 @@ public class GoogleSheetsEndpointUriFactory extends org.apache.camel.support.com
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

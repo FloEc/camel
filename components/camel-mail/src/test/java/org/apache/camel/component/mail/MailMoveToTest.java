@@ -16,16 +16,19 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Store;
-import javax.mail.internet.MimeMessage;
+import java.util.concurrent.TimeUnit;
+
+import jakarta.mail.Flags;
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.Store;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.jvnet.mock_javamail.Mailbox;
@@ -50,11 +53,10 @@ public class MailMoveToTest extends CamelTestSupport {
     public void testMoveToWithMarkAsSeen() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(5);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        Thread.sleep(500);
-
-        assertEquals(0, Mailbox.get("jones@localhost").size());
+        Awaitility.await().atMost(500, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> assertEquals(0, Mailbox.get("jones@localhost").size()));
         assertEquals(0, Mailbox.get("jones@localhost").getNewMessageCount());
         assertEquals(5, Mailbox.get("moveToFolder-jones@localhost").getNewMessageCount());
 
@@ -69,11 +71,10 @@ public class MailMoveToTest extends CamelTestSupport {
     public void testMoveToWithDelete() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result2");
         mock.expectedMessageCount(5);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        Thread.sleep(500);
-
-        assertEquals(0, Mailbox.get("jones2@localhost").size());
+        Awaitility.await().atMost(500, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> assertEquals(0, Mailbox.get("jones2@localhost").size()));
         assertEquals(0, Mailbox.get("jones2@localhost").getNewMessageCount());
         assertEquals(5, Mailbox.get("moveToFolder-jones2@localhost").getNewMessageCount());
 
@@ -110,12 +111,12 @@ public class MailMoveToTest extends CamelTestSupport {
     @Override
     protected RoutesBuilder[] createRouteBuilders() {
         return new RoutesBuilder[] { new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("imap://jones@localhost?password=secret&delete=false&moveTo=moveToFolder&initialDelay=100&delay=100")
                         .to("mock:result");
             }
         }, new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("imap://jones2@localhost?password=secret&delete=true&moveTo=moveToFolder&initialDelay=100&delay=100")
                         .to("mock:result2");
             }

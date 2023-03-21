@@ -17,7 +17,6 @@
 package org.apache.camel.component.kubernetes.consumer.integration;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -56,7 +55,7 @@ public class KubernetesNamespacesConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(1)
-    public void createPod() throws Exception {
+    void createPod() {
         mockResultEndpoint.expectedMessageCount(5);
         mockResultEndpoint.expectedHeaderValuesReceivedInAnyOrder(KubernetesConstants.KUBERNETES_EVENT_ACTION, "ADDED",
                 "MODIFIED", "MODIFIED", "MODIFIED", "DELETED");
@@ -76,20 +75,17 @@ public class KubernetesNamespacesConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(2)
-    public void listByLabels() throws Exception {
+    void listByLabels() {
         Exchange ex = template.request("direct:listByLabels", exchange -> {
             Map<String, String> labels = new HashMap<>();
             labels.put("this", "rocks");
             exchange.getIn().setHeader(KubernetesConstants.KUBERNETES_NAMESPACE_LABELS, labels);
         });
 
-        List<Namespace> result = ex.getMessage().getBody(List.class);
-
         boolean testNamespaceExists = false;
 
-        Iterator<Namespace> it = result.iterator();
-        while (it.hasNext()) {
-            Namespace namespace = it.next();
+        for (Object o : ex.getMessage().getBody(List.class)) {
+            Namespace namespace = (Namespace) o;
             if (TEST_NAME_SPACE.equalsIgnoreCase(namespace.getMetadata().getName())) {
                 testNamespaceExists = true;
             }
@@ -100,7 +96,7 @@ public class KubernetesNamespacesConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(3)
-    public void deletePod() throws Exception {
+    void deletePod() throws Exception {
         Exchange ex = template.request("direct:deleteNamespace",
                 exchange -> exchange.getIn()
                         .setHeader(KubernetesConstants.KUBERNETES_NAMESPACE_NAME, TEST_NAME_SPACE));
@@ -116,14 +112,12 @@ public class KubernetesNamespacesConsumerIT extends KubernetesTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from("direct:list").toF("kubernetes-namespaces://%s?oauthToken=%s&operation=listNamespaces", host, authToken);
+            public void configure() {
                 from("direct:listByLabels").toF("kubernetes-namespaces://%s?oauthToken=%s&operation=listNamespacesByLabels",
                         host, authToken);
-                from("direct:getNs").toF("kubernetes-namespaces://%s?oauthToken=%s&operation=getNamespace", host, authToken);
                 from("direct:createNamespace").toF("kubernetes-namespaces://%s?oauthToken=%s&operation=createNamespace", host,
                         authToken);
                 from("direct:deleteNamespace").toF("kubernetes-namespaces://%s?oauthToken=%s&operation=deleteNamespace", host,
@@ -136,7 +130,7 @@ public class KubernetesNamespacesConsumerIT extends KubernetesTestSupport {
 
     public class KubernetesProcessor implements Processor {
         @Override
-        public void process(Exchange exchange) throws Exception {
+        public void process(Exchange exchange) {
             Message in = exchange.getIn();
             log.info("Got event with body: " + in.getBody() + " and action "
                      + in.getHeader(KubernetesConstants.KUBERNETES_EVENT_ACTION));

@@ -59,7 +59,9 @@ include::partial$component-endpoint-options.adoc[]
 // endpoint options: START
 
 // endpoint options: END
-
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 [[MicrometerComponent-registry]]
 == Meter Registry
@@ -108,7 +110,7 @@ class MyBean extends RouteBuilder {
     public void configure() {
       from("...")
           // Register the 'my-meter' meter in the MetricRegistry below
-          .to("metrics:meter:my-meter");
+          .to("micrometer:meter:my-meter");
     }
 
     @Produces
@@ -150,7 +152,7 @@ For example
 from("direct:in")
     .setHeader(MicrometerConstants.HEADER_METRIC_NAME, constant("new.name"))
     .setHeader(MicrometerConstants.HEADER_METRIC_TAGS, constant(Tags.of("dynamic-key", "dynamic-value")))
-    .to("metrics:counter:name.not.used?tags=key=value")
+    .to("micrometer:counter:name.not.used?tags=key=value")
     .to("direct:out");
 ----
 
@@ -401,6 +403,24 @@ following options:
 |prettyPrint |false |Whether to use pretty print when outputting statistics in json format
 |meterRegistry |  |Allow to use a shared `MeterRegistry`. If none is provided then Camel will create a shared instance used by the this CamelContext.
 |durationUnit |TimeUnit.MILLISECONDS |The unit to use for duration in when dumping the statistics as json.
+|configuration | see below |MicrometerRoutePolicyConfiguration.class
+|=======================================================================
+
+The `MicrometerRoutePolicyConfiguration` supports the
+following options:
+
+[width="100%",options="header"]
+|=======================================================================
+|Name |Default |Description
+|additionalCounters | true | activates all additional counters
+|exchangesSucceeded | true | activates counter for succeeded exchanges
+|exchangesFailed | true | activates counter for failed exchanges
+|exchangesTotal | true | activates counter for total count of exchanges
+|externalRedeliveries | true | activates counter for redeliveries of exchanges
+|failuresHandled | true | activates counter for handled failures
+|longTask | false | activates long task timer (current processing time for micrometer)
+|timerInitiator |  null | Consumer<Timer.Builder> for custom initialize Timer
+|longTaskInitiator |  null | Consumer<LongTaskTimer.Builder> for custom initialize LongTaskTimer
 |=======================================================================
 
 If JMX is enabled in the CamelContext, the MBean is registered in the `type=services` tree
@@ -528,10 +548,22 @@ and add a `JmxMeterRegistry` instance:
 The `HierarchicalNameMapper` strategy determines how meter name and tags are assembled into
 an MBean name.
 
-== Example
 
-`camel-example-micrometer` provides an example how to set up Micrometer monitoring with
-Camel using Java configuration and a Prometheus backend.
+== Using Camel Micrometer with Spring Boot
 
+When you use `camel-micrometer-starter` with Spring Boot, then Spring Boot auto configuration
+will automatically enable metrics capture if a `io.micrometer.core.instrument.MeterRegistry` is available.
+
+For example to capture data with Prometheus, you can add the following dependency:
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+----
+
+See the following table for options to specify what metrics to capture, or to turn it off.
 
 include::spring-boot:partial$starter.adoc[]

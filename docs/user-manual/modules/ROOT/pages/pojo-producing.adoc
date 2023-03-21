@@ -6,10 +6,17 @@ xref:endpoint.adoc[Endpoint] from a POJO:
 - Using `@Produce` or `@EndpointInject`
 - Or to hide using an interface
 
+[NOTE]
+====
+The following steps use the ActiveMQ component which is not yet supported on Camel 4.
+====
+
 == Using @Produce
 
 To allow sending of messages from POJOs you can use the `@Produce` annotation.
 This will inject a `org.apache.camel.ProducerTemplate` so that the bean can send messages.
+
+IMPORTANT: The `@Produce` POJO annotations are not part of any Camel routes, and you cannot use errorHandler or onException with that.
 
 For example to send a message to the foo queue on ActiveMQ:
 
@@ -67,7 +74,7 @@ interface.
 
 When we invoke methods on this interface the method call is
 turned into an object and is sent to the
-endpoint; in this case the xref:components::activemq-component.adoc[ActiveMQ] endpoint to
+endpoint; in this case the ActiveMQ endpoint to
 queue *`foo`*. Because the `sayHello` method has a return type (`String`) then Camel
 will use xref:components:eips:requestReply-eip.adoc[Request Reply] (InOut) messaging.
 

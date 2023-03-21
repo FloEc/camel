@@ -35,21 +35,21 @@ public class CwComponentIT extends Aws2CwBase {
         mock.expectedMessageCount(1);
 
         template.send("direct:start", ExchangePattern.InOnly, new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Cw2Constants.METRIC_NAME, "ExchangesCompleted");
                 exchange.getIn().setHeader(Cw2Constants.METRIC_VALUE, "2.0");
                 exchange.getIn().setHeader(Cw2Constants.METRIC_UNIT, "Count");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").to("aws2-cw://http://camel.apache.org/aws-cw")
                         .to("mock:result");
             }

@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -171,8 +171,8 @@ public interface MllpComponentBuilderFactory {
             return this;
         }
         /**
-         * Timeout (in milliseconds) while waiting for a TCP connection
-         * &lt;p/&gt; TCP Server Only.
+         * Timeout (in milliseconds) while waiting for a TCP connection TCP
+         * Server Only.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -325,8 +325,8 @@ public interface MllpComponentBuilderFactory {
             return this;
         }
         /**
-         * Timeout (in milliseconds) for establishing for a TCP connection
-         * &lt;p/&gt; TCP Client only.
+         * Timeout (in milliseconds) for establishing for a TCP connection TCP
+         * Client only.
          * 
          * The option is a: &lt;code&gt;int&lt;/code&gt; type.
          * 
@@ -482,6 +482,38 @@ public interface MllpComponentBuilderFactory {
             return this;
         }
         /**
+         * Maximum buffer size used when receiving or sending data over the
+         * wire.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 1073741824
+         * Group: advanced
+         * 
+         * @param maxBufferSize the value to set
+         * @return the dsl builder
+         */
+        default MllpComponentBuilder maxBufferSize(int maxBufferSize) {
+            doSetProperty("maxBufferSize", maxBufferSize);
+            return this;
+        }
+        /**
+         * Minimum buffer size used when receiving or sending data over the
+         * wire.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 2048
+         * Group: advanced
+         * 
+         * @param minBufferSize the value to set
+         * @return the dsl builder
+         */
+        default MllpComponentBuilder minBufferSize(int minBufferSize) {
+            doSetProperty("minBufferSize", minBufferSize);
+            return this;
+        }
+        /**
          * The SO_TIMEOUT value (in milliseconds) used after the start of an
          * MLLP frame has been received.
          * 
@@ -610,6 +642,8 @@ public interface MllpComponentBuilderFactory {
             case "defaultCharset": ((MllpComponent) component).setDefaultCharset((java.lang.String) value); return true;
             case "logPhi": ((MllpComponent) component).setLogPhi((java.lang.Boolean) value); return true;
             case "logPhiMaxBytes": ((MllpComponent) component).setLogPhiMaxBytes((java.lang.Integer) value); return true;
+            case "maxBufferSize": getOrCreateConfiguration((MllpComponent) component).setMaxBufferSize((int) value); return true;
+            case "minBufferSize": getOrCreateConfiguration((MllpComponent) component).setMinBufferSize((int) value); return true;
             case "readTimeout": getOrCreateConfiguration((MllpComponent) component).setReadTimeout((int) value); return true;
             case "receiveBufferSize": getOrCreateConfiguration((MllpComponent) component).setReceiveBufferSize((java.lang.Integer) value); return true;
             case "receiveTimeout": getOrCreateConfiguration((MllpComponent) component).setReceiveTimeout((int) value); return true;

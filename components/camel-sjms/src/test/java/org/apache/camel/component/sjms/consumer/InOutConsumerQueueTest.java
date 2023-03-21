@@ -19,6 +19,7 @@ package org.apache.camel.component.sjms.consumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.sjms.support.JmsTestSupport;
 import org.junit.jupiter.api.Test;
 
@@ -31,13 +32,13 @@ public class InOutConsumerQueueTest extends JmsTestSupport {
         template.sendBody("sjms:start", "Hello Camel");
         template.sendBody("sjms:start", "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("sjms:queue:start").to("log:request")
                         .to("sjms:queue:in.out.queue?exchangePattern=InOut&replyTo=in.out.queue.response")
                         .to("log:response").to("mock:result");

@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -119,6 +119,28 @@ public interface CassandraEndpointBuilderFactory {
          */
         default CassandraEndpointConsumerBuilder datacenter(String datacenter) {
             doSetProperty("datacenter", datacenter);
+            return this;
+        }
+        /**
+         * To use a specific comma separated list of Extra Type codecs. Possible
+         * values are: BLOB_TO_ARRAY, BOOLEAN_LIST_TO_ARRAY, BYTE_LIST_TO_ARRAY,
+         * SHORT_LIST_TO_ARRAY, INT_LIST_TO_ARRAY, LONG_LIST_TO_ARRAY,
+         * FLOAT_LIST_TO_ARRAY, DOUBLE_LIST_TO_ARRAY, TIMESTAMP_UTC,
+         * TIMESTAMP_MILLIS_SYSTEM, TIMESTAMP_MILLIS_UTC,
+         * ZONED_TIMESTAMP_SYSTEM, ZONED_TIMESTAMP_UTC,
+         * ZONED_TIMESTAMP_PERSISTED, LOCAL_TIMESTAMP_SYSTEM and
+         * LOCAL_TIMESTAMP_UTC.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param extraTypeCodecs the value to set
+         * @return the dsl builder
+         */
+        default CassandraEndpointConsumerBuilder extraTypeCodecs(
+                String extraTypeCodecs) {
+            doSetProperty("extraTypeCodecs", extraTypeCodecs);
             return this;
         }
         /**
@@ -262,51 +284,6 @@ public interface CassandraEndpointBuilderFactory {
          */
         default CassandraEndpointConsumerBuilder username(String username) {
             doSetProperty("username", username);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default CassandraEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default CassandraEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -685,8 +662,8 @@ public interface CassandraEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -707,8 +684,8 @@ public interface CassandraEndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -832,6 +809,51 @@ public interface CassandraEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default CassandraEndpointConsumerBuilder basic() {
             return (CassandraEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedCassandraEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedCassandraEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1029,6 +1051,28 @@ public interface CassandraEndpointBuilderFactory {
             return this;
         }
         /**
+         * To use a specific comma separated list of Extra Type codecs. Possible
+         * values are: BLOB_TO_ARRAY, BOOLEAN_LIST_TO_ARRAY, BYTE_LIST_TO_ARRAY,
+         * SHORT_LIST_TO_ARRAY, INT_LIST_TO_ARRAY, LONG_LIST_TO_ARRAY,
+         * FLOAT_LIST_TO_ARRAY, DOUBLE_LIST_TO_ARRAY, TIMESTAMP_UTC,
+         * TIMESTAMP_MILLIS_SYSTEM, TIMESTAMP_MILLIS_UTC,
+         * ZONED_TIMESTAMP_SYSTEM, ZONED_TIMESTAMP_UTC,
+         * ZONED_TIMESTAMP_PERSISTED, LOCAL_TIMESTAMP_SYSTEM and
+         * LOCAL_TIMESTAMP_UTC.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param extraTypeCodecs the value to set
+         * @return the dsl builder
+         */
+        default CassandraEndpointProducerBuilder extraTypeCodecs(
+                String extraTypeCodecs) {
+            doSetProperty("extraTypeCodecs", extraTypeCodecs);
+            return this;
+        }
+        /**
          * To use a specific LoadBalancingPolicyClass.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1171,6 +1215,17 @@ public interface CassandraEndpointBuilderFactory {
             doSetProperty("username", username);
             return this;
         }
+    }
+
+    /**
+     * Advanced builder for endpoint producers for the Cassandra CQL component.
+     */
+    public interface AdvancedCassandraEndpointProducerBuilder
+            extends
+                EndpointProducerBuilder {
+        default CassandraEndpointProducerBuilder basic() {
+            return (CassandraEndpointProducerBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -1185,12 +1240,12 @@ public interface CassandraEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default CassandraEndpointProducerBuilder lazyStartProducer(
+        default AdvancedCassandraEndpointProducerBuilder lazyStartProducer(
                 boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
@@ -1210,26 +1265,15 @@ public interface CassandraEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default CassandraEndpointProducerBuilder lazyStartProducer(
+        default AdvancedCassandraEndpointProducerBuilder lazyStartProducer(
                 String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
-        }
-    }
-
-    /**
-     * Advanced builder for endpoint producers for the Cassandra CQL component.
-     */
-    public interface AdvancedCassandraEndpointProducerBuilder
-            extends
-                EndpointProducerBuilder {
-        default CassandraEndpointProducerBuilder basic() {
-            return (CassandraEndpointProducerBuilder) this;
         }
     }
 
@@ -1317,6 +1361,27 @@ public interface CassandraEndpointBuilderFactory {
          */
         default CassandraEndpointBuilder datacenter(String datacenter) {
             doSetProperty("datacenter", datacenter);
+            return this;
+        }
+        /**
+         * To use a specific comma separated list of Extra Type codecs. Possible
+         * values are: BLOB_TO_ARRAY, BOOLEAN_LIST_TO_ARRAY, BYTE_LIST_TO_ARRAY,
+         * SHORT_LIST_TO_ARRAY, INT_LIST_TO_ARRAY, LONG_LIST_TO_ARRAY,
+         * FLOAT_LIST_TO_ARRAY, DOUBLE_LIST_TO_ARRAY, TIMESTAMP_UTC,
+         * TIMESTAMP_MILLIS_SYSTEM, TIMESTAMP_MILLIS_UTC,
+         * ZONED_TIMESTAMP_SYSTEM, ZONED_TIMESTAMP_UTC,
+         * ZONED_TIMESTAMP_PERSISTED, LOCAL_TIMESTAMP_SYSTEM and
+         * LOCAL_TIMESTAMP_UTC.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: common
+         * 
+         * @param extraTypeCodecs the value to set
+         * @return the dsl builder
+         */
+        default CassandraEndpointBuilder extraTypeCodecs(String extraTypeCodecs) {
+            doSetProperty("extraTypeCodecs", extraTypeCodecs);
             return this;
         }
         /**
@@ -1486,6 +1551,20 @@ public interface CassandraEndpointBuilderFactory {
          * Since: 2.15
          * Maven coordinates: org.apache.camel:camel-cassandraql
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default CassandraHeaderNameBuilder cql() {
+            return CassandraHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Cassandra CQL (camel-cassandraql)
+         * Integrate with Cassandra 2.0 using the CQL3 API (not the Thrift API).
+         * Based on Cassandra Java Driver provided by DataStax.
+         * 
+         * Category: database,nosql
+         * Since: 2.15
+         * Maven coordinates: org.apache.camel:camel-cassandraql
+         * 
          * Syntax: <code>cql:beanRef:hosts:port/keyspace</code>
          * 
          * Path parameter: beanRef
@@ -1538,6 +1617,43 @@ public interface CassandraEndpointBuilderFactory {
          */
         default CassandraEndpointBuilder cql(String componentName, String path) {
             return CassandraEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Cassandra CQL component.
+     */
+    public static class CassandraHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final CassandraHeaderNameBuilder INSTANCE = new CassandraHeaderNameBuilder();
+
+        /**
+         * The CQL query to execute.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code CqlQuery}.
+         */
+        public String cqlQuery() {
+            return "CqlQuery";
+        }
+
+        /**
+         * The resume action to execute when resuming.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code CqlResumeAction}.
+         */
+        public String cqlResumeAction() {
+            return "CqlResumeAction";
         }
     }
     static CassandraEndpointBuilder endpointBuilder(

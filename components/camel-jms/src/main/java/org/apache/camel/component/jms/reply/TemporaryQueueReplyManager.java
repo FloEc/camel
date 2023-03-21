@@ -18,18 +18,21 @@ package org.apache.camel.component.jms.reply;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TemporaryQueue;
+import jakarta.jms.Destination;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
+import jakarta.jms.TemporaryQueue;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
+import org.apache.camel.component.jms.ConsumerType;
 import org.apache.camel.component.jms.DefaultJmsMessageListenerContainer;
 import org.apache.camel.component.jms.DefaultSpringErrorHandler;
+import org.apache.camel.component.jms.MessageListenerContainerFactory;
+import org.apache.camel.component.jms.SimpleJmsMessageListenerContainer;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -50,7 +53,8 @@ public class TemporaryQueueReplyManager extends ReplyManagerSupport {
         try {
             destResolver.destinationReady();
         } catch (InterruptedException e) {
-            log.warn("Interrupted while waiting for JMSReplyTo destination refresh", e);
+            log.warn("Interrupted while waiting for JMSReplyTo destination refresh due to: " + e.getMessage()
+                     + ". This exception is ignored.");
         }
         return super.getReplyTo();
     }
@@ -85,7 +89,7 @@ public class TemporaryQueueReplyManager extends ReplyManagerSupport {
         } else {
             // we could not correlate the received reply message to a matching request and therefore
             // we cannot continue routing the unknown message
-            // log a warn and then ignore the message
+            // log warn and then ignore the message
             log.warn("Reply received for unknown correlationID [{}]. The message will be ignored: {}", correlationID, message);
         }
     }
@@ -97,6 +101,21 @@ public class TemporaryQueueReplyManager extends ReplyManagerSupport {
 
     @Override
     protected AbstractMessageListenerContainer createListenerContainer() throws Exception {
+        if (endpoint.getConfiguration().getReplyToConsumerType() == ConsumerType.Default) {
+            return createDefaultListenerContainer();
+        } else if (endpoint.getConfiguration().getReplyToConsumerType() == ConsumerType.Simple) {
+            return createSimpleListenerContainer();
+        } else {
+            MessageListenerContainerFactory factory = endpoint.getConfiguration().getMessageListenerContainerFactory();
+            if (factory != null) {
+                return factory.createMessageListenerContainer(endpoint);
+            }
+            throw new IllegalArgumentException(
+                    "ReplyToConsumerType.Custom requires that a MessageListenerContainerFactory has been configured");
+        }
+    }
+
+    protected AbstractMessageListenerContainer createDefaultListenerContainer() throws Exception {
         // Use DefaultMessageListenerContainer as it supports reconnects (see CAMEL-3193)
         DefaultMessageListenerContainer answer
                 = new DefaultJmsMessageListenerContainer(endpoint, endpoint.isAllowReplyManagerQuickStop());
@@ -128,11 +147,7 @@ public class TemporaryQueueReplyManager extends ReplyManagerSupport {
         } else {
             answer.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONSUMER);
         }
-        String clientId = endpoint.getClientId();
-        if (clientId != null) {
-            clientId += ".CamelReplyManager";
-            answer.setClientId(clientId);
-        }
+        setupClientId(endpoint, answer);
 
         // we cannot do request-reply over JMS with transaction
         answer.setSessionTransacted(false);
@@ -173,6 +188,55 @@ public class TemporaryQueueReplyManager extends ReplyManagerSupport {
         return answer;
     }
 
+    private AbstractMessageListenerContainer createSimpleListenerContainer() {
+        SimpleJmsMessageListenerContainer answer = new SimpleJmsMessageListenerContainer(endpoint);
+        answer.setDestinationName("temporary");
+        answer.setDestinationResolver(destResolver);
+        answer.setAutoStartup(true);
+        answer.setMessageListener(this);
+        answer.setPubSubDomain(false);
+        answer.setSubscriptionDurable(false);
+        answer.setConcurrentConsumers(endpoint.getReplyToConcurrentConsumers());
+        answer.setConnectionFactory(endpoint.getConfiguration().getOrCreateConnectionFactory());
+        String clientId = endpoint.getClientId();
+        if (clientId != null) {
+            clientId += ".CamelReplyManager";
+            answer.setClientId(clientId);
+        }
+
+        // we cannot do request-reply over JMS with transaction
+        answer.setSessionTransacted(false);
+
+        // other optional properties
+        answer.setExceptionListener(new TemporaryReplyQueueExceptionListener(destResolver, endpoint.getExceptionListener()));
+
+        if (endpoint.getErrorHandler() != null) {
+            answer.setErrorHandler(endpoint.getErrorHandler());
+        } else {
+            answer.setErrorHandler(new DefaultSpringErrorHandler(
+                    endpoint.getCamelContext(), TemporaryQueueReplyManager.class,
+                    endpoint.getErrorHandlerLoggingLevel(), endpoint.isErrorHandlerLogStackTrace()));
+        }
+        if (endpoint.getTaskExecutor() != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Using custom TaskExecutor: {} on listener container: {}", endpoint.getTaskExecutor(), answer);
+            }
+            answer.setTaskExecutor(endpoint.getTaskExecutor());
+        }
+
+        // setup a bean name which is used by Spring JMS as the thread name
+        // use the name of the request destination
+        String name = "TemporaryQueueReplyManager[" + endpoint.getDestinationName() + "]";
+        answer.setBeanName(name);
+
+        if (endpoint.getReplyToConcurrentConsumers() > 1) {
+            // log that we are using concurrent consumers
+            log.info("Using {} concurrent consumers on {}",
+                    endpoint.getReplyToConcurrentConsumers(), name);
+        }
+        return answer;
+    }
+
     private final class TemporaryReplyQueueExceptionListener implements ExceptionListener {
         private final TemporaryReplyQueueDestinationResolver destResolver;
         private final ExceptionListener delegate;
@@ -186,8 +250,13 @@ public class TemporaryQueueReplyManager extends ReplyManagerSupport {
         @Override
         public void onException(JMSException exception) {
             // capture exceptions, and schedule a refresh of the ReplyTo destination
-            log.warn("Exception inside the DMLC for Temporary ReplyTo Queue for destination {}, refreshing ReplyTo destination",
-                    endpoint.getDestinationName(), exception);
+            String msg
+                    = "Exception inside the DMLC for Temporary ReplyTo Queue for destination " + endpoint.getDestinationName()
+                      + ", refreshing ReplyTo destination (stacktrace in DEBUG logging level).";
+            log.warn(msg);
+            if (log.isDebugEnabled()) {
+                log.debug(msg, exception);
+            }
             destResolver.scheduleRefresh();
             // serve as a proxy for any exception listener the user may have set explicitly
             if (delegate != null) {

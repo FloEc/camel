@@ -101,13 +101,13 @@ public class Web3jConsumerCatchUpToLatestBlocksObservableMockTest extends Web3jM
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 errorHandler(deadLetterChannel("mock:error"));
                 from(getUrl() + OPERATION.toLowerCase() + "=" + CATCH_UP_TO_LATEST_BLOCK_OBSERVABLE
                      + "&fromBlock=5499965&toBlock=5499967")
-                             .to("mock:result");
+                        .to("mock:result");
             }
         };
     }

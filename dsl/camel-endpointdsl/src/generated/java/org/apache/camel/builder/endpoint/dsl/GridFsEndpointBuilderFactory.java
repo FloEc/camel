@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -77,10 +77,10 @@ public interface GridFsEndpointBuilderFactory {
         /**
          * Sets a MongoDB ReadPreference on the Mongo connection. Read
          * preferences set directly on the connection will be overridden by this
-         * setting. &lt;p/&gt; The com.mongodb.ReadPreference#valueOf(String)
-         * utility method is used to resolve the passed readPreference value.
-         * Some examples for the possible values are nearest, primary or
-         * secondary etc.
+         * setting. The com.mongodb.ReadPreference#valueOf(String) utility
+         * method is used to resolve the passed readPreference value. Some
+         * examples for the possible values are nearest, primary or secondary
+         * etc.
          * 
          * The option is a: &lt;code&gt;com.mongodb.ReadPreference&lt;/code&gt;
          * type.
@@ -98,10 +98,10 @@ public interface GridFsEndpointBuilderFactory {
         /**
          * Sets a MongoDB ReadPreference on the Mongo connection. Read
          * preferences set directly on the connection will be overridden by this
-         * setting. &lt;p/&gt; The com.mongodb.ReadPreference#valueOf(String)
-         * utility method is used to resolve the passed readPreference value.
-         * Some examples for the possible values are nearest, primary or
-         * secondary etc.
+         * setting. The com.mongodb.ReadPreference#valueOf(String) utility
+         * method is used to resolve the passed readPreference value. Some
+         * examples for the possible values are nearest, primary or secondary
+         * etc.
          * 
          * The option will be converted to a
          * &lt;code&gt;com.mongodb.ReadPreference&lt;/code&gt; type.
@@ -149,51 +149,6 @@ public interface GridFsEndpointBuilderFactory {
          */
         default GridFsEndpointConsumerBuilder writeConcern(String writeConcern) {
             doSetProperty("writeConcern", writeConcern);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default GridFsEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default GridFsEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -371,6 +326,51 @@ public interface GridFsEndpointBuilderFactory {
             return (GridFsEndpointConsumerBuilder) this;
         }
         /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGridFsEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGridFsEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
          * option bridgeErrorHandler is enabled then this option is not in use.
          * By default the consumer will deal with exceptions, that will be
@@ -485,10 +485,10 @@ public interface GridFsEndpointBuilderFactory {
         /**
          * Sets a MongoDB ReadPreference on the Mongo connection. Read
          * preferences set directly on the connection will be overridden by this
-         * setting. &lt;p/&gt; The com.mongodb.ReadPreference#valueOf(String)
-         * utility method is used to resolve the passed readPreference value.
-         * Some examples for the possible values are nearest, primary or
-         * secondary etc.
+         * setting. The com.mongodb.ReadPreference#valueOf(String) utility
+         * method is used to resolve the passed readPreference value. Some
+         * examples for the possible values are nearest, primary or secondary
+         * etc.
          * 
          * The option is a: &lt;code&gt;com.mongodb.ReadPreference&lt;/code&gt;
          * type.
@@ -506,10 +506,10 @@ public interface GridFsEndpointBuilderFactory {
         /**
          * Sets a MongoDB ReadPreference on the Mongo connection. Read
          * preferences set directly on the connection will be overridden by this
-         * setting. &lt;p/&gt; The com.mongodb.ReadPreference#valueOf(String)
-         * utility method is used to resolve the passed readPreference value.
-         * Some examples for the possible values are nearest, primary or
-         * secondary etc.
+         * setting. The com.mongodb.ReadPreference#valueOf(String) utility
+         * method is used to resolve the passed readPreference value. Some
+         * examples for the possible values are nearest, primary or secondary
+         * etc.
          * 
          * The option will be converted to a
          * &lt;code&gt;com.mongodb.ReadPreference&lt;/code&gt; type.
@@ -560,55 +560,6 @@ public interface GridFsEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default GridFsEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default GridFsEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * Sets the operation this endpoint will execute against GridFs.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -632,6 +583,55 @@ public interface GridFsEndpointBuilderFactory {
                 EndpointProducerBuilder {
         default GridFsEndpointProducerBuilder basic() {
             return (GridFsEndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGridFsEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedGridFsEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
     }
 
@@ -679,10 +679,10 @@ public interface GridFsEndpointBuilderFactory {
         /**
          * Sets a MongoDB ReadPreference on the Mongo connection. Read
          * preferences set directly on the connection will be overridden by this
-         * setting. &lt;p/&gt; The com.mongodb.ReadPreference#valueOf(String)
-         * utility method is used to resolve the passed readPreference value.
-         * Some examples for the possible values are nearest, primary or
-         * secondary etc.
+         * setting. The com.mongodb.ReadPreference#valueOf(String) utility
+         * method is used to resolve the passed readPreference value. Some
+         * examples for the possible values are nearest, primary or secondary
+         * etc.
          * 
          * The option is a: &lt;code&gt;com.mongodb.ReadPreference&lt;/code&gt;
          * type.
@@ -700,10 +700,10 @@ public interface GridFsEndpointBuilderFactory {
         /**
          * Sets a MongoDB ReadPreference on the Mongo connection. Read
          * preferences set directly on the connection will be overridden by this
-         * setting. &lt;p/&gt; The com.mongodb.ReadPreference#valueOf(String)
-         * utility method is used to resolve the passed readPreference value.
-         * Some examples for the possible values are nearest, primary or
-         * secondary etc.
+         * setting. The com.mongodb.ReadPreference#valueOf(String) utility
+         * method is used to resolve the passed readPreference value. Some
+         * examples for the possible values are nearest, primary or secondary
+         * etc.
          * 
          * The option will be converted to a
          * &lt;code&gt;com.mongodb.ReadPreference&lt;/code&gt; type.
@@ -775,6 +775,19 @@ public interface GridFsEndpointBuilderFactory {
          * Since: 2.18
          * Maven coordinates: org.apache.camel:camel-mongodb-gridfs
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default GridFsHeaderNameBuilder mongodbGridfs() {
+            return GridFsHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * MongoDB GridFS (camel-mongodb-gridfs)
+         * Interact with MongoDB GridFS.
+         * 
+         * Category: database,nosql
+         * Since: 2.18
+         * Maven coordinates: org.apache.camel:camel-mongodb-gridfs
+         * 
          * Syntax: <code>mongodb-gridfs:connectionBean</code>
          * 
          * Path parameter: connectionBean (required)
@@ -808,6 +821,160 @@ public interface GridFsEndpointBuilderFactory {
                 String componentName,
                 String path) {
             return GridFsEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the MongoDB GridFS component.
+     */
+    public static class GridFsHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final GridFsHeaderNameBuilder INSTANCE = new GridFsHeaderNameBuilder();
+
+        /**
+         * The content type of the file.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileContentType}.
+         */
+        public String fileContentType() {
+            return "FileContentType";
+        }
+
+        /**
+         * The size of the file.
+         * 
+         * The option is a: {@code long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileLength}.
+         */
+        public String fileLength() {
+            return "FileLength";
+        }
+
+        /**
+         * The size of the file.
+         * 
+         * The option is a: {@code Date} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code FileLastModified}.
+         */
+        public String fileLastModified() {
+            return "FileLastModified";
+        }
+
+        /**
+         * The name of the file.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code FileName}.
+         */
+        public String fileName() {
+            return "FileName";
+        }
+
+        /**
+         * The content type of the file.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code Content-Type}.
+         */
+        public String contentType() {
+            return "Content-Type";
+        }
+
+        /**
+         * The file name produced.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code FileNameProduced}.
+         */
+        public String fileNameProduced() {
+            return "FileNameProduced";
+        }
+
+        /**
+         * Any additional metadata stored along with the file in JSON format.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code gridfs.metadata}.
+         */
+        public String gridfsMetadata() {
+            return "gridfs.metadata";
+        }
+
+        /**
+         * The operation to perform.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code gridfs.operation}.
+         */
+        public String gridfsOperation() {
+            return "gridfs.operation";
+        }
+
+        /**
+         * The number of bytes per chunk for the uploaded file.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code gridfs.chunksize}.
+         */
+        public String gridfsChunksize() {
+            return "gridfs.chunksize";
+        }
+
+        /**
+         * The ObjectId of the file produced.
+         * 
+         * The option is a: {@code org.bson.types.ObjectId} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code gridfs.fileid}.
+         */
+        public String gridfsFileid() {
+            return "gridfs.fileid";
+        }
+
+        /**
+         * The ObjectId of the file.
+         * 
+         * The option is a: {@code org.bson.types.ObjectId} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code gridfs.objectid}.
+         */
+        public String gridfsObjectid() {
+            return "gridfs.objectid";
         }
     }
     static GridFsEndpointBuilder endpointBuilder(

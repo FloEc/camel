@@ -58,7 +58,7 @@ public class BeanExpression implements Expression, Predicate {
     private ParameterMappingStrategy parameterMappingStrategy;
     private BeanComponent beanComponent;
     private Language simple;
-
+    private Class<?> resultType;
     private Object bean;
     private String beanName;
     private Class<?> type;
@@ -136,6 +136,14 @@ public class BeanExpression implements Expression, Predicate {
         this.simple = simple;
     }
 
+    public Class<?> getResultType() {
+        return resultType;
+    }
+
+    public void setResultType(Class<?> resultType) {
+        this.resultType = resultType;
+    }
+
     @Override
     public void init(CamelContext context) {
         if (parameterMappingStrategy == null) {
@@ -201,10 +209,9 @@ public class BeanExpression implements Expression, Predicate {
                 // regular non ognl invocation
                 return invokeBean(beanHolder, beanName, method, exchange);
             }
+        } catch (RuntimeBeanExpressionException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof RuntimeBeanExpressionException) {
-                throw (RuntimeBeanExpressionException) e;
-            }
             throw new RuntimeBeanExpressionException(exchange, getBeanName(exchange, beanName, beanHolder), method, e);
         }
     }
@@ -214,7 +221,8 @@ public class BeanExpression implements Expression, Predicate {
         Object result = evaluate(exchange);
         if (Object.class == type) {
             // do not use type converter if type is Object (optimize)
-            return (T) result;
+            return (T) (resultType == null
+                    ? result : exchange.getContext().getTypeConverter().convertTo(resultType, exchange, result));
         } else {
             return exchange.getContext().getTypeConverter().convertTo(type, exchange, result);
         }

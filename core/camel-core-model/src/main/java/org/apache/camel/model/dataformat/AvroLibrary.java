@@ -16,17 +16,18 @@
  */
 package org.apache.camel.model.dataformat;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * Supported Avro marshalers.
+ * Supported Avro marshallers.
  */
 @XmlType
 @XmlEnum
 public enum AvroLibrary {
+
     ApacheAvro("avro"),
-    Jackson("avro-jackson");
+    Jackson("avroJackson");
 
     private final String dataFormatName;
 

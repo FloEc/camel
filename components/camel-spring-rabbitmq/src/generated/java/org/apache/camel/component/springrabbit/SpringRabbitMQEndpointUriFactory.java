@@ -19,45 +19,51 @@ public class SpringRabbitMQEndpointUriFactory extends org.apache.camel.support.c
 
     private static final Set<String> PROPERTY_NAMES;
     private static final Set<String> SECRET_PROPERTY_NAMES;
+    private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(35);
+        Set<String> props = new HashSet<>(37);
+        props.add("acknowledgeMode");
+        props.add("args");
         props.add("asyncConsumer");
-        props.add("prefetchCount");
-        props.add("synchronous");
+        props.add("autoDeclare");
+        props.add("autoStartup");
+        props.add("bridgeErrorHandler");
+        props.add("concurrentConsumers");
+        props.add("confirm");
+        props.add("confirmTimeout");
+        props.add("connectionFactory");
+        props.add("deadLetterExchange");
+        props.add("deadLetterExchangeType");
+        props.add("deadLetterQueue");
+        props.add("deadLetterRoutingKey");
+        props.add("disableReplyTo");
+        props.add("exceptionHandler");
+        props.add("exchangeName");
+        props.add("exchangePattern");
+        props.add("exchangeType");
+        props.add("exclusive");
+        props.add("lazyStartProducer");
+        props.add("maxConcurrentConsumers");
         props.add("maximumRetryAttempts");
         props.add("messageConverter");
-        props.add("exchangeType");
-        props.add("rejectAndDontRequeue");
-        props.add("autoStartup");
-        props.add("noLocal");
-        props.add("retryDelay");
-        props.add("bridgeErrorHandler");
-        props.add("deadLetterRoutingKey");
-        props.add("messagePropertiesConverter");
-        props.add("exclusive");
-        props.add("retry");
-        props.add("disableReplyTo");
-        props.add("maxConcurrentConsumers");
-        props.add("deadLetterExchange");
-        props.add("exchangePattern");
-        props.add("deadLetterExchangeType");
-        props.add("concurrentConsumers");
         props.add("messageListenerContainerType");
-        props.add("args");
-        props.add("lazyStartProducer");
-        props.add("deadLetterQueue");
-        props.add("connectionFactory");
-        props.add("testConnectionOnStartup");
-        props.add("acknowledgeMode");
+        props.add("messagePropertiesConverter");
+        props.add("noLocal");
+        props.add("prefetchCount");
         props.add("queues");
-        props.add("exchangeName");
+        props.add("rejectAndDontRequeue");
         props.add("replyTimeout");
-        props.add("usePublisherConnection");
-        props.add("exceptionHandler");
+        props.add("retry");
+        props.add("retryDelay");
         props.add("routingKey");
-        props.add("autoDeclare");
+        props.add("synchronous");
+        props.add("testConnectionOnStartup");
+        props.add("usePublisherConnection");
         PROPERTY_NAMES = Collections.unmodifiableSet(props);
         SECRET_PROPERTY_NAMES = Collections.emptySet();
+        Set<String> prefixes = new HashSet<>(1);
+        prefixes.add("arg.");
+        MULTI_VALUE_PREFIXES = Collections.unmodifiableSet(prefixes);
     }
 
     @Override
@@ -85,6 +91,11 @@ public class SpringRabbitMQEndpointUriFactory extends org.apache.camel.support.c
     @Override
     public Set<String> secretPropertyNames() {
         return SECRET_PROPERTY_NAMES;
+    }
+
+    @Override
+    public Set<String> multiValuePrefixes() {
+        return MULTI_VALUE_PREFIXES;
     }
 
     @Override

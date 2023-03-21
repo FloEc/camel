@@ -23,13 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.model.IdentifiedType;
 import org.apache.camel.model.PropertyDefinition;
 import org.apache.camel.spi.Configurer;
@@ -57,8 +56,8 @@ public abstract class ServiceCallConfiguration extends IdentifiedType {
     /**
      * Set client properties to use.
      * <p/>
-     * These properties are specific to what service call implementation are in use. For example if using ribbon, then
-     * the client properties are define in com.netflix.client.config.CommonClientConfigKey.
+     * These properties are specific to what service call implementation are in use. For example if using a different
+     * one, then the client properties are defined according to the specific service in use.
      */
     public void setProperties(List<PropertyDefinition> properties) {
         this.properties = properties;
@@ -67,8 +66,8 @@ public abstract class ServiceCallConfiguration extends IdentifiedType {
     /**
      * Adds a custom property to use.
      * <p/>
-     * These properties are specific to what service call implementation are in use. For example if using ribbon, then
-     * the client properties are define in com.netflix.client.config.CommonClientConfigKey.
+     * These properties are specific to what service call implementation are in use. For example if using a different
+     * one, then the client properties are defined according to the specific service in use.
      */
     public ServiceCallConfiguration property(String key, String value) {
         if (properties == null) {
@@ -102,7 +101,7 @@ public abstract class ServiceCallConfiguration extends IdentifiedType {
     protected Map<String, Object> getConfiguredOptions(CamelContext context, Object target) {
         Map<String, Object> answer = new HashMap<>();
 
-        PropertyConfigurer configurer = context.adapt(ExtendedCamelContext.class).getConfigurerResolver()
+        PropertyConfigurer configurer = context.getCamelContextExtension().getConfigurerResolver()
                 .resolvePropertyConfigurer(target.getClass().getName(), context);
         // use reflection free configurer (if possible)
         if (configurer instanceof ExtendedPropertyConfigurerGetter) {
@@ -117,7 +116,7 @@ public abstract class ServiceCallConfiguration extends IdentifiedType {
                 }
             }
         } else {
-            context.adapt(ExtendedCamelContext.class).getBeanIntrospection().getProperties(target, answer,
+            context.getCamelContextExtension().getBeanIntrospection().getProperties(target, answer,
                     null, false);
         }
 

@@ -31,6 +31,9 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Supported producer operation
 
@@ -39,6 +42,7 @@ include::partial$component-endpoint-options.adoc[]
 - getCustomResource
 - deleteCustomResource
 - createCustomResource
+- replaceCustomResource
 
 
 include::spring-boot:partial$starter.adoc[]

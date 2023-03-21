@@ -16,10 +16,8 @@
  */
 package org.apache.camel.component.google.drive;
 
-import java.util.Arrays;
 import java.util.List;
 
-import com.google.api.services.drive.DriveScopes;
 import org.apache.camel.component.google.drive.internal.GoogleDriveApiName;
 import org.apache.camel.spi.Configurer;
 import org.apache.camel.spi.Metadata;
@@ -33,10 +31,6 @@ import org.apache.camel.spi.UriPath;
 @UriParams
 @Configurer(extended = true)
 public class GoogleDriveConfiguration {
-    private static final List<String> DEFAULT_SCOPES
-            = Arrays.asList(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_APPS_READONLY, DriveScopes.DRIVE_METADATA_READONLY,
-                    DriveScopes.DRIVE);
-
     @UriPath
     @Metadata(required = true)
     private GoogleDriveApiName apiName;
@@ -44,7 +38,7 @@ public class GoogleDriveConfiguration {
     @Metadata(required = true)
     private String methodName;
     @UriParam
-    private List<String> scopes = DEFAULT_SCOPES;
+    private List<String> scopes;
     @UriParam
     private String clientId;
     @UriParam(label = "security", secret = true)
@@ -55,6 +49,11 @@ public class GoogleDriveConfiguration {
     private String refreshToken;
     @UriParam
     private String applicationName;
+    /* Service account */
+    @UriParam(label = "security")
+    private String serviceAccountKey;
+    @UriParam
+    private String delegate;
 
     public GoogleDriveApiName getApiName() {
         return apiName;
@@ -144,5 +143,30 @@ public class GoogleDriveConfiguration {
      */
     public void setScopes(List<String> scopes) {
         this.scopes = scopes;
+    }
+
+    public String getServiceAccountKey() {
+        return serviceAccountKey;
+    }
+
+    /**
+     * Service account key in json format to authenticate an application as a service account. Accept base64 adding the
+     * prefix "base64:"
+     *
+     * @param serviceAccountKey String file, classpath, base64, or http url
+     */
+    public void setServiceAccountKey(String serviceAccountKey) {
+        this.serviceAccountKey = serviceAccountKey;
+    }
+
+    public String getDelegate() {
+        return delegate;
+    }
+
+    /**
+     * Delegate for wide-domain service account
+     */
+    public void setDelegate(String delegate) {
+        this.delegate = delegate;
     }
 }

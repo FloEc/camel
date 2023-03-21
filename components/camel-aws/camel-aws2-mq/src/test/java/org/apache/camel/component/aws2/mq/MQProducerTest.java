@@ -55,12 +55,12 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listBrokers", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.listBrokers);
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListBrokersResponse resultGet = (ListBrokersResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.brokerSummaries().size());
@@ -74,13 +74,13 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:listBrokersPojo", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.listBrokers);
                 exchange.getIn().setBody(ListBrokersRequest.builder().maxResults(10).build());
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         ListBrokersResponse resultGet = (ListBrokersResponse) exchange.getIn().getBody();
         assertEquals(1, resultGet.brokerSummaries().size());
@@ -94,7 +94,7 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createBroker", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.createBroker);
                 exchange.getIn().setHeader(MQ2Constants.BROKER_NAME, "test");
                 exchange.getIn().setHeader(MQ2Constants.BROKER_DEPLOYMENT_MODE, DeploymentMode.SINGLE_INSTANCE);
@@ -111,7 +111,7 @@ public class MQProducerTest extends CamelTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         CreateBrokerResponse resultGet = (CreateBrokerResponse) exchange.getIn().getBody();
         assertEquals("1", resultGet.brokerId());
@@ -124,13 +124,13 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:createBroker", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.deleteBroker);
                 exchange.getIn().setHeader(MQ2Constants.BROKER_ID, "1");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         DeleteBrokerResponse resultGet = (DeleteBrokerResponse) exchange.getIn().getBody();
         assertEquals("1", resultGet.brokerId());
@@ -142,13 +142,13 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         template.request("direct:rebootBroker", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.rebootBroker);
                 exchange.getIn().setHeader(MQ2Constants.BROKER_ID, "1");
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:updateBroker", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.updateBroker);
                 exchange.getIn().setHeader(MQ2Constants.BROKER_ID, "1");
                 ConfigurationId.Builder cId = ConfigurationId.builder();
@@ -167,7 +167,7 @@ public class MQProducerTest extends CamelTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         UpdateBrokerResponse resultGet = (UpdateBrokerResponse) exchange.getIn().getBody();
         assertEquals("1", resultGet.brokerId());
     }
@@ -178,7 +178,7 @@ public class MQProducerTest extends CamelTestSupport {
         mock.expectedMessageCount(1);
         Exchange exchange = template.request("direct:describeBroker", new Processor() {
             @Override
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(MQ2Constants.OPERATION, MQ2Operations.describeBroker);
                 exchange.getIn().setHeader(MQ2Constants.BROKER_ID, "1");
                 ConfigurationId.Builder cId = ConfigurationId.builder();
@@ -188,16 +188,16 @@ public class MQProducerTest extends CamelTestSupport {
             }
         });
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         DescribeBrokerResponse resultGet = (DescribeBrokerResponse) exchange.getIn().getBody();
         assertEquals("1", resultGet.brokerId());
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:listBrokers").to("aws2-mq://test?amazonMqClient=#amazonMqClient&operation=listBrokers")
                         .to("mock:result");
                 from("direct:listBrokersPojo")

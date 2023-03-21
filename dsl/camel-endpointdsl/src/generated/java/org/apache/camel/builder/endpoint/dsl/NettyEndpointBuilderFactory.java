@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -145,10 +145,10 @@ public interface NettyEndpointBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -168,10 +168,10 @@ public interface NettyEndpointBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -246,51 +246,6 @@ public interface NettyEndpointBuilderFactory {
          */
         default NettyEndpointConsumerBuilder tcpNoDelay(String tcpNoDelay) {
             doSetProperty("tcpNoDelay", tcpNoDelay);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -569,27 +524,7 @@ public interface NettyEndpointBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
-         * 
-         * Group: codec
-         * 
-         * @param decoders the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointConsumerBuilder decoders(
-                List<io.netty.channel.ChannelHandler> decoders) {
-            doSetProperty("decoders", decoders);
-            return this;
-        }
-        /**
-         * A list of decoders to be used. You can use a String which have values
-         * separated by comma, and have the values be looked up in the Registry.
-         * Just remember to prefix the value with # so Camel knows it should
-         * lookup.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -641,27 +576,7 @@ public interface NettyEndpointBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
-         * 
-         * Group: codec
-         * 
-         * @param encoders the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointConsumerBuilder encoders(
-                List<io.netty.channel.ChannelHandler> encoders) {
-            doSetProperty("encoders", encoders);
-            return this;
-        }
-        /**
-         * A list of encoders to be used. You can use a String which have values
-         * separated by comma, and have the values be looked up in the Registry.
-         * Just remember to prefix the value with # so Camel knows it should
-         * lookup.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -729,7 +644,7 @@ public interface NettyEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: TLSv1,TLSv1.1,TLSv1.2
+         * Default: TLSv1.2,TLSv1.3
          * Group: security
          * 
          * @param enabledProtocols the value to set
@@ -1164,6 +1079,51 @@ public interface NettyEndpointBuilderFactory {
          */
         default AdvancedNettyEndpointConsumerBuilder bossGroup(String bossGroup) {
             doSetProperty("bossGroup", bossGroup);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -1618,8 +1578,8 @@ public interface NettyEndpointBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the options(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -1642,8 +1602,8 @@ public interface NettyEndpointBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the options(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -2051,10 +2011,10 @@ public interface NettyEndpointBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -2074,10 +2034,10 @@ public interface NettyEndpointBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -2185,55 +2145,6 @@ public interface NettyEndpointBuilderFactory {
         default NettyEndpointProducerBuilder connectTimeout(
                 String connectTimeout) {
             doSetProperty("connectTimeout", connectTimeout);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -2416,27 +2327,7 @@ public interface NettyEndpointBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
-         * 
-         * Group: codec
-         * 
-         * @param decoders the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointProducerBuilder decoders(
-                List<io.netty.channel.ChannelHandler> decoders) {
-            doSetProperty("decoders", decoders);
-            return this;
-        }
-        /**
-         * A list of decoders to be used. You can use a String which have values
-         * separated by comma, and have the values be looked up in the Registry.
-         * Just remember to prefix the value with # so Camel knows it should
-         * lookup.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -2488,27 +2379,7 @@ public interface NettyEndpointBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
-         * 
-         * Group: codec
-         * 
-         * @param encoders the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointProducerBuilder encoders(
-                List<io.netty.channel.ChannelHandler> encoders) {
-            doSetProperty("encoders", encoders);
-            return this;
-        }
-        /**
-         * A list of encoders to be used. You can use a String which have values
-         * separated by comma, and have the values be looked up in the Registry.
-         * Just remember to prefix the value with # so Camel knows it should
-         * lookup.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -2576,7 +2447,7 @@ public interface NettyEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: TLSv1,TLSv1.1,TLSv1.2
+         * Default: TLSv1.2,TLSv1.3
          * Group: security
          * 
          * @param enabledProtocols the value to set
@@ -2916,12 +2787,11 @@ public interface NettyEndpointBuilderFactory {
          * concurrent messages on the same channel (aka connection) in netty.
          * When doing this you must have a way to correlate the request and
          * reply messages so you can store the right reply on the inflight Camel
-         * Exchange before its continued routed. &lt;p/&gt; We recommend
-         * extending the TimeoutCorrelationManagerSupport when you build custom
-         * correlation managers. This provides support for timeout and other
-         * complexities you otherwise would need to implement as well.
-         * &lt;p/&gt; See also the &lt;tt&gt;producerPoolEnabled option for more
-         * details.
+         * Exchange before its continued routed. We recommend extending the
+         * TimeoutCorrelationManagerSupport when you build custom correlation
+         * managers. This provides support for timeout and other complexities
+         * you otherwise would need to implement as well. See also the
+         * producerPoolEnabled option for more details.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.netty.NettyCamelStateCorrelationManager&lt;/code&gt; type.
@@ -2945,12 +2815,11 @@ public interface NettyEndpointBuilderFactory {
          * concurrent messages on the same channel (aka connection) in netty.
          * When doing this you must have a way to correlate the request and
          * reply messages so you can store the right reply on the inflight Camel
-         * Exchange before its continued routed. &lt;p/&gt; We recommend
-         * extending the TimeoutCorrelationManagerSupport when you build custom
-         * correlation managers. This provides support for timeout and other
-         * complexities you otherwise would need to implement as well.
-         * &lt;p/&gt; See also the &lt;tt&gt;producerPoolEnabled option for more
-         * details.
+         * Exchange before its continued routed. We recommend extending the
+         * TimeoutCorrelationManagerSupport when you build custom correlation
+         * managers. This provides support for timeout and other complexities
+         * you otherwise would need to implement as well. See also the
+         * producerPoolEnabled option for more details.
          * 
          * The option will be converted to a
          * &lt;code&gt;org.apache.camel.component.netty.NettyCamelStateCorrelationManager&lt;/code&gt; type.
@@ -3001,17 +2870,105 @@ public interface NettyEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether producer pool is enabled or not. &lt;p&gt; Important: If you
-         * turn this off then a single shared connection is used for the
-         * producer, also if you are doing request/reply. That means there is a
-         * potential issue with interleaved responses if replies comes back
-         * out-of-order. Therefore you need to have a correlation id in both the
-         * request and reply messages so you can properly correlate the replies
-         * to the Camel callback that is responsible for continue processing the
-         * message in Camel. To do this you need to implement
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Sets the value for the blockWhenExhausted configuration attribute. It
+         * determines whether to block when the borrowObject() method is invoked
+         * when the pool is exhausted (the maximum number of active objects has
+         * been reached).
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolBlockWhenExhausted the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder producerPoolBlockWhenExhausted(
+                boolean producerPoolBlockWhenExhausted) {
+            doSetProperty("producerPoolBlockWhenExhausted", producerPoolBlockWhenExhausted);
+            return this;
+        }
+        /**
+         * Sets the value for the blockWhenExhausted configuration attribute. It
+         * determines whether to block when the borrowObject() method is invoked
+         * when the pool is exhausted (the maximum number of active objects has
+         * been reached).
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: true
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolBlockWhenExhausted the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder producerPoolBlockWhenExhausted(
+                String producerPoolBlockWhenExhausted) {
+            doSetProperty("producerPoolBlockWhenExhausted", producerPoolBlockWhenExhausted);
+            return this;
+        }
+        /**
+         * Whether producer pool is enabled or not. Important: If you turn this
+         * off then a single shared connection is used for the producer, also if
+         * you are doing request/reply. That means there is a potential issue
+         * with interleaved responses if replies comes back out-of-order.
+         * Therefore you need to have a correlation id in both the request and
+         * reply messages so you can properly correlate the replies to the Camel
+         * callback that is responsible for continue processing the message in
+         * Camel. To do this you need to implement
          * NettyCamelStateCorrelationManager as correlation manager and
-         * configure it via the &lt;tt&gt;correlationManager option. &lt;p/&gt;
-         * See also the &lt;tt&gt;correlationManager option for more details.
+         * configure it via the correlationManager option. See also the
+         * correlationManager option for more details.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -3027,17 +2984,17 @@ public interface NettyEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether producer pool is enabled or not. &lt;p&gt; Important: If you
-         * turn this off then a single shared connection is used for the
-         * producer, also if you are doing request/reply. That means there is a
-         * potential issue with interleaved responses if replies comes back
-         * out-of-order. Therefore you need to have a correlation id in both the
-         * request and reply messages so you can properly correlate the replies
-         * to the Camel callback that is responsible for continue processing the
-         * message in Camel. To do this you need to implement
+         * Whether producer pool is enabled or not. Important: If you turn this
+         * off then a single shared connection is used for the producer, also if
+         * you are doing request/reply. That means there is a potential issue
+         * with interleaved responses if replies comes back out-of-order.
+         * Therefore you need to have a correlation id in both the request and
+         * reply messages so you can properly correlate the replies to the Camel
+         * callback that is responsible for continue processing the message in
+         * Camel. To do this you need to implement
          * NettyCamelStateCorrelationManager as correlation manager and
-         * configure it via the &lt;tt&gt;correlationManager option. &lt;p/&gt;
-         * See also the &lt;tt&gt;correlationManager option for more details.
+         * configure it via the correlationManager option. See also the
+         * correlationManager option for more details.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -3051,42 +3008,6 @@ public interface NettyEndpointBuilderFactory {
         default AdvancedNettyEndpointProducerBuilder producerPoolEnabled(
                 String producerPoolEnabled) {
             doSetProperty("producerPoolEnabled", producerPoolEnabled);
-            return this;
-        }
-        /**
-         * Sets the cap on the number of objects that can be allocated by the
-         * pool (checked out to clients, or idle awaiting checkout) at a given
-         * time. Use a negative value for no limit.
-         * 
-         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: -1
-         * Group: producer (advanced)
-         * 
-         * @param producerPoolMaxActive the value to set
-         * @return the dsl builder
-         */
-        default AdvancedNettyEndpointProducerBuilder producerPoolMaxActive(
-                int producerPoolMaxActive) {
-            doSetProperty("producerPoolMaxActive", producerPoolMaxActive);
-            return this;
-        }
-        /**
-         * Sets the cap on the number of objects that can be allocated by the
-         * pool (checked out to clients, or idle awaiting checkout) at a given
-         * time. Use a negative value for no limit.
-         * 
-         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
-         * 
-         * Default: -1
-         * Group: producer (advanced)
-         * 
-         * @param producerPoolMaxActive the value to set
-         * @return the dsl builder
-         */
-        default AdvancedNettyEndpointProducerBuilder producerPoolMaxActive(
-                String producerPoolMaxActive) {
-            doSetProperty("producerPoolMaxActive", producerPoolMaxActive);
             return this;
         }
         /**
@@ -3119,6 +3040,80 @@ public interface NettyEndpointBuilderFactory {
         default AdvancedNettyEndpointProducerBuilder producerPoolMaxIdle(
                 String producerPoolMaxIdle) {
             doSetProperty("producerPoolMaxIdle", producerPoolMaxIdle);
+            return this;
+        }
+        /**
+         * Sets the cap on the number of objects that can be allocated by the
+         * pool (checked out to clients, or idle awaiting checkout) at a given
+         * time. Use a negative value for no limit.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolMaxTotal the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder producerPoolMaxTotal(
+                int producerPoolMaxTotal) {
+            doSetProperty("producerPoolMaxTotal", producerPoolMaxTotal);
+            return this;
+        }
+        /**
+         * Sets the cap on the number of objects that can be allocated by the
+         * pool (checked out to clients, or idle awaiting checkout) at a given
+         * time. Use a negative value for no limit.
+         * 
+         * The option will be converted to a &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolMaxTotal the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder producerPoolMaxTotal(
+                String producerPoolMaxTotal) {
+            doSetProperty("producerPoolMaxTotal", producerPoolMaxTotal);
+            return this;
+        }
+        /**
+         * Sets the maximum duration (value in millis) the borrowObject() method
+         * should block before throwing an exception when the pool is exhausted
+         * and producerPoolBlockWhenExhausted is true. When less than 0, the
+         * borrowObject() method may block indefinitely.
+         * 
+         * The option is a: &lt;code&gt;long&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolMaxWait the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder producerPoolMaxWait(
+                long producerPoolMaxWait) {
+            doSetProperty("producerPoolMaxWait", producerPoolMaxWait);
+            return this;
+        }
+        /**
+         * Sets the maximum duration (value in millis) the borrowObject() method
+         * should block before throwing an exception when the pool is exhausted
+         * and producerPoolBlockWhenExhausted is true. When less than 0, the
+         * borrowObject() method may block indefinitely.
+         * 
+         * The option will be converted to a &lt;code&gt;long&lt;/code&gt; type.
+         * 
+         * Default: -1
+         * Group: producer (advanced)
+         * 
+         * @param producerPoolMaxWait the value to set
+         * @return the dsl builder
+         */
+        default AdvancedNettyEndpointProducerBuilder producerPoolMaxWait(
+                String producerPoolMaxWait) {
+            doSetProperty("producerPoolMaxWait", producerPoolMaxWait);
             return this;
         }
         /**
@@ -3379,8 +3374,8 @@ public interface NettyEndpointBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the options(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -3403,8 +3398,8 @@ public interface NettyEndpointBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the options(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -3813,10 +3808,10 @@ public interface NettyEndpointBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -3836,10 +3831,10 @@ public interface NettyEndpointBuilderFactory {
          * This is useful if you need to call a server multiple times in a Camel
          * route and want to use the same network connection. When using this,
          * the channel is not returned to the connection pool until the Exchange
-         * is done; or disconnected if the disconnect option is set to true.
-         * &lt;p/&gt; The reused Channel is stored on the Exchange as an
-         * exchange property with the key NettyConstants#NETTY_CHANNEL which
-         * allows you to obtain the channel during routing and use it as well.
+         * is done; or disconnected if the disconnect option is set to true. The
+         * reused Channel is stored on the Exchange as an exchange property with
+         * the key NettyConstants#NETTY_CHANNEL which allows you to obtain the
+         * channel during routing and use it as well.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -4059,27 +4054,7 @@ public interface NettyEndpointBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
-         * 
-         * Group: codec
-         * 
-         * @param decoders the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointBuilder decoders(
-                List<io.netty.channel.ChannelHandler> decoders) {
-            doSetProperty("decoders", decoders);
-            return this;
-        }
-        /**
-         * A list of decoders to be used. You can use a String which have values
-         * separated by comma, and have the values be looked up in the Registry.
-         * Just remember to prefix the value with # so Camel knows it should
-         * lookup.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -4131,27 +4106,7 @@ public interface NettyEndpointBuilderFactory {
          * Just remember to prefix the value with # so Camel knows it should
          * lookup.
          * 
-         * The option is a:
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
-         * 
-         * Group: codec
-         * 
-         * @param encoders the value to set
-         * @return the dsl builder
-         */
-        default NettyEndpointBuilder encoders(
-                List<io.netty.channel.ChannelHandler> encoders) {
-            doSetProperty("encoders", encoders);
-            return this;
-        }
-        /**
-         * A list of encoders to be used. You can use a String which have values
-         * separated by comma, and have the values be looked up in the Registry.
-         * Just remember to prefix the value with # so Camel knows it should
-         * lookup.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;io.netty.channel.ChannelHandler&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -4219,7 +4174,7 @@ public interface NettyEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: TLSv1,TLSv1.1,TLSv1.2
+         * Default: TLSv1.2,TLSv1.3
          * Group: security
          * 
          * @param enabledProtocols the value to set
@@ -4629,8 +4584,8 @@ public interface NettyEndpointBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the options(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -4651,8 +4606,8 @@ public interface NettyEndpointBuilderFactory {
          * child.keepAlive=false. See the Netty documentation for possible
          * options that can be used.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the options(String,
          * Object) method to add a value (call the method multiple times to set
          * more values).
@@ -4954,6 +4909,19 @@ public interface NettyEndpointBuilderFactory {
          * Since: 2.14
          * Maven coordinates: org.apache.camel:camel-netty
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default NettyHeaderNameBuilder netty() {
+            return NettyHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Netty (camel-netty)
+         * Socket level networking using TCP or UDP with Netty 4.x.
+         * 
+         * Category: networking,tcp,udp
+         * Since: 2.14
+         * Maven coordinates: org.apache.camel:camel-netty
+         * 
          * Syntax: <code>netty:protocol://host:port</code>
          * 
          * Path parameter: protocol (required)
@@ -4961,9 +4929,8 @@ public interface NettyEndpointBuilderFactory {
          * There are 2 enums and the value can be one of: tcp, udp
          * 
          * Path parameter: host (required)
-         * The hostname. <p/> For the consumer the hostname is localhost or
-         * 0.0.0.0. For the producer the hostname is the remote host to connect
-         * to
+         * The hostname. For the consumer the hostname is localhost or 0.0.0.0.
+         * For the producer the hostname is the remote host to connect to
          * 
          * Path parameter: port (required)
          * The host port number
@@ -4989,9 +4956,8 @@ public interface NettyEndpointBuilderFactory {
          * There are 2 enums and the value can be one of: tcp, udp
          * 
          * Path parameter: host (required)
-         * The hostname. <p/> For the consumer the hostname is localhost or
-         * 0.0.0.0. For the producer the hostname is the remote host to connect
-         * to
+         * The hostname. For the consumer the hostname is localhost or 0.0.0.0.
+         * For the producer the hostname is the remote host to connect to
          * 
          * Path parameter: port (required)
          * The host port number
@@ -5003,6 +4969,161 @@ public interface NettyEndpointBuilderFactory {
          */
         default NettyEndpointBuilder netty(String componentName, String path) {
             return NettyEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Netty component.
+     */
+    public static class NettyHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final NettyHeaderNameBuilder INSTANCE = new NettyHeaderNameBuilder();
+
+        /**
+         * Indicates whether the channel should be closed after complete.
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettyCloseChannelWhenComplete}.
+         */
+        public String nettyCloseChannelWhenComplete() {
+            return "NettyCloseChannelWhenComplete";
+        }
+
+        /**
+         * The channel handler context.
+         * 
+         * The option is a: {@code io.netty.channel.ChannelHandlerContext} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettyChannelHandlerContext}.
+         */
+        public String nettyChannelHandlerContext() {
+            return "NettyChannelHandlerContext";
+        }
+
+        /**
+         * The remote address.
+         * 
+         * The option is a: {@code java.net.SocketAddress} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettyRemoteAddress}.
+         */
+        public String nettyRemoteAddress() {
+            return "NettyRemoteAddress";
+        }
+
+        /**
+         * The local address.
+         * 
+         * The option is a: {@code java.net.SocketAddress} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettyLocalAddress}.
+         */
+        public String nettyLocalAddress() {
+            return "NettyLocalAddress";
+        }
+
+        /**
+         * The SSL session.
+         * 
+         * The option is a: {@code javax.net.ssl.SSLSession} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettySSLSession}.
+         */
+        public String nettySSLSession() {
+            return "NettySSLSession";
+        }
+
+        /**
+         * The SSL client certificate subject name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettySSLClientCertSubjectName}.
+         */
+        public String nettySSLClientCertSubjectName() {
+            return "NettySSLClientCertSubjectName";
+        }
+
+        /**
+         * The SSL client certificate issuer name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettySSLClientCertIssuerName}.
+         */
+        public String nettySSLClientCertIssuerName() {
+            return "NettySSLClientCertIssuerName";
+        }
+
+        /**
+         * The SSL client certificate serial number.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code
+         * NettySSLClientCertSerialNumber}.
+         */
+        public String nettySSLClientCertSerialNumber() {
+            return "NettySSLClientCertSerialNumber";
+        }
+
+        /**
+         * The SSL client certificate not before.
+         * 
+         * The option is a: {@code java.util.Date} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettySSLClientCertNotBefore}.
+         */
+        public String nettySSLClientCertNotBefore() {
+            return "NettySSLClientCertNotBefore";
+        }
+
+        /**
+         * The SSL client certificate not after.
+         * 
+         * The option is a: {@code java.util.Date} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettySSLClientCertNotAfter}.
+         */
+        public String nettySSLClientCertNotAfter() {
+            return "NettySSLClientCertNotAfter";
+        }
+
+        /**
+         * The read timeout.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code NettyRequestTimeout}.
+         */
+        public String nettyRequestTimeout() {
+            return "NettyRequestTimeout";
         }
     }
     static NettyEndpointBuilder endpointBuilder(

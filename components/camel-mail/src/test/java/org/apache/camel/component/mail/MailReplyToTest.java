@@ -16,7 +16,7 @@
  */
 package org.apache.camel.component.mail;
 
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -39,10 +39,10 @@ public class MailReplyToTest extends CamelTestSupport {
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedHeaderReceived("Reply-To", "noReply1@localhost,noReply2@localhost");
+        mock.expectedHeaderReceived(MailConstants.MAIL_REPLY_TO, "noReply1@localhost,noReply2@localhost");
         mock.expectedBodiesReceived(body);
 
-        template.sendBodyAndHeader("direct:a", body, "Reply-To", "noReply1@localhost,noReply2@localhost");
+        template.sendBodyAndHeader("direct:a", body, MailConstants.MAIL_REPLY_TO, "noReply1@localhost,noReply2@localhost");
 
         mock.assertIsSatisfied();
 
@@ -61,7 +61,7 @@ public class MailReplyToTest extends CamelTestSupport {
 
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
-        mock.expectedHeaderReceived("Reply-To", "noReply1@localhost, noReply2@localhost");
+        mock.expectedHeaderReceived(MailConstants.MAIL_REPLY_TO, "noReply1@localhost, noReply2@localhost");
         mock.expectedBodiesReceived(body);
 
         template.sendBody("direct:b", body);
@@ -76,9 +76,9 @@ public class MailReplyToTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:a")
                         .to("smtp://christian@localhost?subject=Camel");
 

@@ -16,9 +16,12 @@
  */
 package org.apache.camel.component.jms.issues;
 
+import java.util.concurrent.atomic.LongAdder;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.test.spring.junit5.CamelSpringTestSupport;
+import org.apache.camel.component.jms.AbstractSpringJMSTestSupport;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -28,9 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Unit test for issue CAMEL-706
  */
-public class TransactionErrorHandlerRedeliveryDelayTest extends CamelSpringTestSupport {
+public class TransactionErrorHandlerRedeliveryDelayTest extends AbstractSpringJMSTestSupport {
 
-    private static volatile int counter;
+    private static final LongAdder COUNTER = new LongAdder();
 
     @Override
     protected AbstractApplicationContext createApplicationContext() {
@@ -42,9 +45,9 @@ public class TransactionErrorHandlerRedeliveryDelayTest extends CamelSpringTestS
     public void testTransactedRedeliveryDelay() throws Exception {
         getMockEndpoint("mock:result").expectedBodiesReceived("Bye World");
 
-        template.sendBody("activemq:queue:in", "Hello World");
+        template.sendBody("activemq:queue:TransactionErrorHandlerRedeliveryDelayTest.in", "Hello World");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     public static class MyFailureProcessor implements Processor {
@@ -53,9 +56,11 @@ public class TransactionErrorHandlerRedeliveryDelayTest extends CamelSpringTestS
         }
 
         @Override
-        public void process(Exchange exchange) throws Exception {
-            if (counter++ < 3) {
-                throw new IllegalArgumentException("Forced exception as counter is " + counter);
+        public void process(Exchange exchange) {
+            int counterValue = COUNTER.intValue();
+            COUNTER.increment();
+            if (counterValue < 3) {
+                throw new IllegalArgumentException("Forced exception as counter is " + counterValue);
             }
             assertTrue(exchange.isTransacted(), "Should be transacted");
             exchange.getIn().setBody("Bye World");

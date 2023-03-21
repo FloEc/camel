@@ -46,25 +46,25 @@ public class FtpConsumerNotEagerMaxMessagesPerPollIT extends FtpServerTestSuppor
         mock.setResultWaitTime(4000);
         mock.expectedPropertyReceived(Exchange.BATCH_SIZE, 2);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         mock.reset();
         mock.expectedBodiesReceived("CCC");
         mock.expectedPropertyReceived(Exchange.BATCH_SIZE, 1);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
-    private void prepareFtpServer() throws Exception {
+    private void prepareFtpServer() {
         sendFile(getFtpUrl(), "CCC", "ccc.txt");
         sendFile(getFtpUrl(), "AAA", "aaa.txt");
         sendFile(getFtpUrl(), "BBB", "bbb.txt");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).noAutoStartup().routeId("foo").to("mock:result");
             }
         };

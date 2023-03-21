@@ -20,9 +20,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.cloud.ServiceDefinition;
+import org.apache.camel.component.zookeeper.cloud.MetaData;
 import org.apache.camel.component.zookeeper.cloud.ZooKeeperServiceRegistry;
 import org.apache.camel.test.AvailablePortFinder;
 import org.apache.camel.test.infra.zookeeper.services.ZooKeeperContainer;
@@ -38,6 +40,7 @@ import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,7 +53,7 @@ public abstract class ZooKeeperServiceRegistrationITBase extends CamelTestSuppor
 
     protected ZooKeeperContainer container;
     protected CuratorFramework curator;
-    protected ServiceDiscovery<ZooKeeperServiceRegistry.MetaData> discovery;
+    protected ServiceDiscovery<MetaData> discovery;
 
     // ***********************
     // Lifecycle
@@ -68,10 +71,10 @@ public abstract class ZooKeeperServiceRegistrationITBase extends CamelTestSuppor
                 .retryPolicy(new ExponentialBackoffRetry(1000, 3))
                 .build();
 
-        discovery = ServiceDiscoveryBuilder.builder(ZooKeeperServiceRegistry.MetaData.class)
+        discovery = ServiceDiscoveryBuilder.builder(MetaData.class)
                 .client(curator)
                 .basePath(SERVICE_PATH)
-                .serializer(new JsonInstanceSerializer<>(ZooKeeperServiceRegistry.MetaData.class))
+                .serializer(new JsonInstanceSerializer<>(MetaData.class))
                 .build();
 
         curator.start();
@@ -122,10 +125,11 @@ public abstract class ZooKeeperServiceRegistrationITBase extends CamelTestSuppor
         context().getRouteController().startRoute(SERVICE_ID);
 
         // check that service has been registered
-        Collection<ServiceInstance<ZooKeeperServiceRegistry.MetaData>> services = discovery.queryForInstances(SERVICE_NAME);
-        assertEquals(1, services.size());
+        await().atMost(2, TimeUnit.MINUTES)
+                .untilAsserted(() -> assertEquals(1, discovery.queryForInstances(SERVICE_NAME).size()));
+        Collection<ServiceInstance<MetaData>> services = discovery.queryForInstances(SERVICE_NAME);
 
-        ServiceInstance<ZooKeeperServiceRegistry.MetaData> instance = services.iterator().next();
+        ServiceInstance<MetaData> instance = services.iterator().next();
         assertEquals(SERVICE_PORT, (int) instance.getPort());
         assertEquals("localhost", instance.getAddress());
         assertEquals("http", instance.getPayload().get(ServiceDefinition.SERVICE_META_PROTOCOL));
@@ -140,6 +144,7 @@ public abstract class ZooKeeperServiceRegistrationITBase extends CamelTestSuppor
         context().getRouteController().stopRoute(SERVICE_ID);
 
         // the service should be removed once the route is stopped
-        assertTrue(discovery.queryForInstances(SERVICE_NAME).isEmpty());
+        await().atMost(2, TimeUnit.MINUTES)
+                .untilAsserted(() -> assertTrue(discovery.queryForInstances(SERVICE_NAME).isEmpty()));
     }
 }

@@ -39,7 +39,7 @@ public class FtpConsumerIdempotentIT extends FtpServerTestSupport {
 
         sendFile(getFtpUrl(), "Hello World", "report.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Thread.sleep(100);
 
@@ -53,13 +53,13 @@ public class FtpConsumerIdempotentIT extends FtpServerTestSupport {
         // should NOT consume the file again, let 2 secs pass to let the
         // consumer try to consume it but it should not
         Thread.sleep(2000);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };

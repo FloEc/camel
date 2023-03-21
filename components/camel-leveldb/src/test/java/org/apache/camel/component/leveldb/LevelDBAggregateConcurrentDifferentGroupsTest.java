@@ -73,14 +73,14 @@ public class LevelDBAggregateConcurrentDifferentGroupsTest extends LevelDBTestSu
             });
         }
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         executor.shutdownNow();
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
 
                 from("direct:start")
                         .aggregate(header("id"), new StringAggregationStrategy())

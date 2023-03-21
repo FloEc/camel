@@ -16,10 +16,15 @@
  */
 package org.apache.camel.component.xquery;
 
+import java.nio.file.Path;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.apache.camel.test.junit5.TestSupport.assertFileExists;
 import static org.apache.camel.test.junit5.TestSupport.assertFileNotExists;
@@ -28,6 +33,8 @@ import static org.apache.camel.test.junit5.TestSupport.assertFileNotExists;
  *
  */
 public class XQueryFromFileExceptionTest extends CamelTestSupport {
+    @TempDir
+    static Path testDirectory;
 
     @Test
     public void testXQueryFromFileExceptionOk() throws Exception {
@@ -36,14 +43,14 @@ public class XQueryFromFileExceptionTest extends CamelTestSupport {
 
         String body = "<person user='James'><firstName>James</firstName>"
                       + "<lastName>Strachan</lastName><city>London</city></person>";
-        template.sendBodyAndHeader(fileUri(), body, Exchange.FILE_NAME, "hello.xml");
+        template.sendBodyAndHeader(TestSupport.fileUri(testDirectory), body, Exchange.FILE_NAME, "hello.xml");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Thread.sleep(500);
 
-        assertFileNotExists(testFile("hello.xml"));
-        assertFileExists(testFile("ok/hello.xml"));
+        assertFileNotExists(testDirectory.resolve("hello.xml"));
+        assertFileExists(testDirectory.resolve("ok/hello.xml"));
     }
 
     @Test
@@ -54,22 +61,22 @@ public class XQueryFromFileExceptionTest extends CamelTestSupport {
         // the last tag is not ended properly
         String body = "<person user='James'><firstName>James</firstName>"
                       + "<lastName>Strachan</lastName><city>London</city></person";
-        template.sendBodyAndHeader(fileUri(), body, Exchange.FILE_NAME, "hello2.xml");
+        template.sendBodyAndHeader(TestSupport.fileUri(testDirectory), body, Exchange.FILE_NAME, "hello2.xml");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Thread.sleep(500);
 
-        assertFileNotExists(testFile("hello2.xml"));
-        assertFileExists(testFile("error/hello2.xml"));
+        assertFileNotExists(testDirectory.resolve("hello2.xml"));
+        assertFileExists(testDirectory.resolve("error/hello2.xml"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from(fileUri("?moveFailed=error&move=ok"))
+            public void configure() {
+                fromF("file:%s?moveFailed=error&move=ok", testDirectory.toString())
                         .onException(Exception.class)
                         .to("mock:error")
                         .end()

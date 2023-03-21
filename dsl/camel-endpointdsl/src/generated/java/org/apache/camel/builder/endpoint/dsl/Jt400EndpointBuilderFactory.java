@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -182,51 +182,6 @@ public interface Jt400EndpointBuilderFactory {
          */
         default Jt400EndpointConsumerBuilder searchKey(String searchKey) {
             doSetProperty("searchKey", searchKey);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default Jt400EndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default Jt400EndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -747,8 +702,8 @@ public interface Jt400EndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -769,8 +724,8 @@ public interface Jt400EndpointBuilderFactory {
          * To configure additional properties when using a custom scheduler or
          * any of the Quartz, Spring based scheduler.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * schedulerProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -923,6 +878,51 @@ public interface Jt400EndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default Jt400EndpointConsumerBuilder basic() {
             return (Jt400EndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedJt400EndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedJt400EndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1183,55 +1183,6 @@ public interface Jt400EndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default Jt400EndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default Jt400EndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * Specifies which fields (program parameters) are output parameters.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer[]&lt;/code&gt; type.
@@ -1350,6 +1301,55 @@ public interface Jt400EndpointBuilderFactory {
                 EndpointProducerBuilder {
         default Jt400EndpointProducerBuilder basic() {
             return (Jt400EndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedJt400EndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedJt400EndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
     }
 
@@ -1558,7 +1558,23 @@ public interface Jt400EndpointBuilderFactory {
          * Since: 1.5
          * Maven coordinates: org.apache.camel:camel-jt400
          * 
-         * Syntax: <code>jt400:userID:password/systemName/objectPath.type</code>
+         * @return the dsl builder for the headers' name.
+         */
+        default Jt400HeaderNameBuilder jt400() {
+            return Jt400HeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * JT400 (camel-jt400)
+         * Exchanges messages with an IBM i system using data queues, message
+         * queues, or program call. IBM i is the replacement for AS/400 and
+         * iSeries servers.
+         * 
+         * Category: messaging
+         * Since: 1.5
+         * Maven coordinates: org.apache.camel:camel-jt400
+         * 
+         * Syntax:
+         * <code>jt400:userID:password@systemName/QSYS.LIB/objectPath.type</code>
          * 
          * Path parameter: userID (required)
          * Returns the ID of the IBM i user.
@@ -1578,7 +1594,7 @@ public interface Jt400EndpointBuilderFactory {
          * There are 4 enums and the value can be one of: DTAQ, PGM, SRVPGM,
          * MSGQ
          * 
-         * @param path userID:password/systemName/objectPath.type
+         * @param path userID:password@systemName/QSYS.LIB/objectPath.type
          * @return the dsl builder
          */
         default Jt400EndpointBuilder jt400(String path) {
@@ -1594,7 +1610,8 @@ public interface Jt400EndpointBuilderFactory {
          * Since: 1.5
          * Maven coordinates: org.apache.camel:camel-jt400
          * 
-         * Syntax: <code>jt400:userID:password/systemName/objectPath.type</code>
+         * Syntax:
+         * <code>jt400:userID:password@systemName/QSYS.LIB/objectPath.type</code>
          * 
          * Path parameter: userID (required)
          * Returns the ID of the IBM i user.
@@ -1616,11 +1633,149 @@ public interface Jt400EndpointBuilderFactory {
          * 
          * @param componentName to use a custom component name for the endpoint
          * instead of the default name
-         * @param path userID:password/systemName/objectPath.type
+         * @param path userID:password@systemName/QSYS.LIB/objectPath.type
          * @return the dsl builder
          */
         default Jt400EndpointBuilder jt400(String componentName, String path) {
             return Jt400EndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the JT400 component.
+     */
+    public static class Jt400HeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final Jt400HeaderNameBuilder INSTANCE = new Jt400HeaderNameBuilder();
+
+        /**
+         * Data queues: Returns the sender information for this data queue
+         * entry, or an empty string if not available.Message queues: The job
+         * identifier of the sending job.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code SENDER_INFORMATION}.
+         */
+        public String senderInformation() {
+            return "SENDER_INFORMATION";
+        }
+
+        /**
+         * The data queue key.
+         * 
+         * The option is a: {@code String or byte[]} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code KEY}.
+         */
+        public String kEY() {
+            return "KEY";
+        }
+
+        /**
+         * The message received.
+         * 
+         * The option is a: {@code com.ibm.as400.access.QueuedMessage} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code Jt400Message}.
+         */
+        public String jt400Message() {
+            return "Jt400Message";
+        }
+
+        /**
+         * The message identifier.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code Jt400MessageID}.
+         */
+        public String jt400MessageID() {
+            return "Jt400MessageID";
+        }
+
+        /**
+         * The message file name.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code Jt400MessageFile}.
+         */
+        public String jt400MessageFile() {
+            return "Jt400MessageFile";
+        }
+
+        /**
+         * The message type (corresponds to constants defined in the
+         * AS400Message class).
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code Jt400MessageType}.
+         */
+        public String jt400MessageType() {
+            return "Jt400MessageType";
+        }
+
+        /**
+         * The message severity (Valid values are between 0 and 99, or -1 if it
+         * is not set).
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code Jt400MessageSeverity}.
+         */
+        public String jt400MessageSeverity() {
+            return "Jt400MessageSeverity";
+        }
+
+        /**
+         * The default message reply, when the message is an inquiry message.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code Jt400MessageDefaultReply}.
+         */
+        public String jt400MessageDefaultReply() {
+            return "Jt400MessageDefaultReply";
+        }
+
+        /**
+         * Consumer: The key of the message that will be replied to (if the
+         * sendingReply parameter is set to true). Producer: If set, and if the
+         * message body is not empty, a new message will not be sent to the
+         * provided message queue. Instead, a response will be sent to the
+         * message identified by the given key. This is set automatically when
+         * reading from the message queue if the sendingReply parameter is set
+         * to true.
+         * 
+         * The option is a: {@code byte[]} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code Jt400MessageReplyToKey}.
+         */
+        public String jt400MessageReplyToKey() {
+            return "Jt400MessageReplyToKey";
         }
     }
     static Jt400EndpointBuilder endpointBuilder(

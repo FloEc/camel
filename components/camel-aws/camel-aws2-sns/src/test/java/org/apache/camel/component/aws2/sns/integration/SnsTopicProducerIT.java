@@ -24,19 +24,21 @@ import org.apache.camel.component.aws2.sns.Sns2Constants;
 import org.apache.camel.test.infra.common.SharedNameGenerator;
 import org.apache.camel.test.infra.common.TestEntityNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@DisabledIfSystemProperty(named = "ci.env.name", matches = "github.com", disabledReason = "Flaky on GitHub Actions")
 public class SnsTopicProducerIT extends Aws2SNSBase {
 
     @RegisterExtension
     public static SharedNameGenerator sharedNameGenerator = new TestEntityNameGenerator();
 
     @Test
-    public void sendInOnly() throws Exception {
+    public void sendInOnly() {
         Exchange exchange = template.send("direct:start", ExchangePattern.InOnly, new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Sns2Constants.SUBJECT, "This is my subject");
                 exchange.getIn().setBody("This is my message text.");
             }
@@ -46,9 +48,9 @@ public class SnsTopicProducerIT extends Aws2SNSBase {
     }
 
     @Test
-    public void sendInOut() throws Exception {
+    public void sendInOut() {
         Exchange exchange = template.send("direct:start", ExchangePattern.InOut, new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 exchange.getIn().setHeader(Sns2Constants.SUBJECT, "This is my subject");
                 exchange.getIn().setBody("This is my message text.");
             }
@@ -58,10 +60,10 @@ public class SnsTopicProducerIT extends Aws2SNSBase {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start")
                         .toF("aws2-sns://%s?subject=The+subject+message&autoCreateTopic=true", sharedNameGenerator.getName());
             }

@@ -25,13 +25,13 @@ import org.junit.jupiter.api.condition.EnabledIf;
 /**
  * Test the ftps component over TLS (explicit) without client authentication
  */
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.FtpsEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.FtpsUtil#hasRequiredAlgorithms")
 public class FileToFtpsExplicitTLSWithoutClientAuthIT extends FtpsServerExplicitTLSWithoutClientAuthTestSupport {
 
     protected String getFtpUrl() {
         return "ftps://admin@localhost:{{ftp.server.port}}"
                + "/tmp2/camel?password=admin&initialDelay=2000&disableSecureDataChannelDefaults=true"
-               + "&securityProtocol=TLSv1.2&implicit=false&delete=true";
+               + "&securityProtocol=TLSv1.3&implicit=false&delete=true";
     }
 
     @Disabled("CAMEL-16784:Disable testFromFileToFtp tests")
@@ -41,13 +41,13 @@ public class FileToFtpsExplicitTLSWithoutClientAuthIT extends FtpsServerExplicit
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(2);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("file:src/test/data?noop=true").log("Got ${file:name}").to(getFtpUrl());
 
                 from(getFtpUrl()).to("mock:result");

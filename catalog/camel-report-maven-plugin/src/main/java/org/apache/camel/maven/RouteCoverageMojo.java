@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,16 +48,13 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.camel.maven.model.RouteCoverageNode;
 import org.apache.camel.parser.RouteBuilderParser;
 import org.apache.camel.parser.XmlRouteParser;
 import org.apache.camel.parser.helper.RouteCoverageHelper;
 import org.apache.camel.parser.model.CamelNodeDetails;
 import org.apache.camel.parser.model.CoverageData;
-import org.apache.camel.support.PatternHelper;
 import org.apache.camel.util.FileUtil;
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -65,6 +63,12 @@ import org.codehaus.mojo.exec.AbstractExecMojo;
 import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.JavaType;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
+
+import static org.apache.camel.maven.ReportPluginCommon.asRelativeFile;
+import static org.apache.camel.maven.ReportPluginCommon.findJavaRouteBuilderClasses;
+import static org.apache.camel.maven.ReportPluginCommon.findXmlRouters;
+import static org.apache.camel.maven.ReportPluginCommon.matchRouteFile;
+import static org.apache.camel.maven.ReportPluginCommon.stripRootPath;
 
 /**
  * Performs route coverage reports after running Camel unit tests with camel-test modules
@@ -147,30 +151,9 @@ public class RouteCoverageMojo extends AbstractExecMojo {
         Set<File> xmlFiles = new LinkedHashSet<>();
 
         // find all java route builder classes
-        List list = project.getCompileSourceRoots();
-        for (Object obj : list) {
-            String dir = (String) obj;
-            findJavaFiles(new File(dir), javaFiles);
-        }
+        findJavaRouteBuilderClasses(javaFiles, true, includeTest, project);
         // find all xml routes
-        list = project.getResources();
-        for (Object obj : list) {
-            Resource dir = (Resource) obj;
-            findXmlFiles(new File(dir.getDirectory()), xmlFiles);
-        }
-
-        if (includeTest) {
-            list = project.getTestCompileSourceRoots();
-            for (Object obj : list) {
-                String dir = (String) obj;
-                findJavaFiles(new File(dir), javaFiles);
-            }
-            list = project.getTestResources();
-            for (Object obj : list) {
-                Resource dir = (Resource) obj;
-                findXmlFiles(new File(dir.getDirectory()), xmlFiles);
-            }
-        }
+        findXmlRouters(xmlFiles, true, includeTest, project);
 
         List<CamelNodeDetails> routeTrees = new ArrayList<>();
 
@@ -179,12 +162,11 @@ public class RouteCoverageMojo extends AbstractExecMojo {
                 try {
                     // parse the java source code and find Camel RouteBuilder classes
                     String fqn = file.getPath();
-                    String baseDir = ".";
                     JavaType out = Roaster.parse(file);
                     // we should only parse java classes (not interfaces and enums etc)
                     if (out instanceof JavaClassSource) {
                         JavaClassSource clazz = (JavaClassSource) out;
-                        List<CamelNodeDetails> result = RouteBuilderParser.parseRouteBuilderTree(clazz, baseDir, fqn, true);
+                        List<CamelNodeDetails> result = RouteBuilderParser.parseRouteBuilderTree(clazz, fqn, true);
                         routeTrees.addAll(result);
                     }
                 } catch (Exception e) {
@@ -248,7 +230,7 @@ public class RouteCoverageMojo extends AbstractExecMojo {
         // favor strict matching on route ids
         for (CamelNodeDetails t : routeIdTrees) {
             String routeId = t.getRouteId();
-            String fileName = stripRootPath(asRelativeFile(t.getFileName()));
+            String fileName = stripRootPath(asRelativeFile(t.getFileName(), project), project);
             String sourceFileName = new File(fileName).getName();
             String packageName = new File(fileName).getParent();
             Element pack = null;
@@ -267,7 +249,7 @@ public class RouteCoverageMojo extends AbstractExecMojo {
                     getLog().warn("No route coverage data found for route: " + routeId
                         + ". Make sure to enable route coverage in your unit tests and assign unique route ids to your routes. Also remember to run unit tests first.");
                 } else {
-                    List<RouteCoverageNode> coverage = gatherRouteCoverageSummary(Collections.singletonList(t), coverageData);
+                    List<RouteCoverageNode> coverage = gatherRouteCoverageSummary(List.of(t), coverageData);
                     totalNumberOfNodes += coverage.size();
                     String out = templateCoverageData(fileName, routeId, coverage, notCovered, coveredNodes);
                     getLog().info("Route coverage summary:\n\n" + out);
@@ -320,7 +302,7 @@ public class RouteCoverageMojo extends AbstractExecMojo {
 
                         if (!coverage.isEmpty()) {
                             totalNumberOfNodes += coverage.size();
-                            String fileName = stripRootPath(asRelativeFile(t.getValue().get(0).getFileName()));
+                            String fileName = stripRootPath(asRelativeFile(t.getValue().get(0).getFileName(), project), project);
                             String out = templateCoverageData(fileName, null, coverage, notCovered, coveredNodes);
                             getLog().info("Route coverage summary:\n\n" + out);
                             getLog().info("");
@@ -349,7 +331,7 @@ public class RouteCoverageMojo extends AbstractExecMojo {
         Map<String, List<CamelNodeDetails>> answer = new LinkedHashMap<>();
 
         for (CamelNodeDetails t : anonymousRouteTrees) {
-            String fileName = asRelativeFile(t.getFileName());
+            String fileName = asRelativeFile(t.getFileName(), project);
             String className = FileUtil.stripExt(FileUtil.stripPath(fileName));
             List<CamelNodeDetails> list = answer.computeIfAbsent(className, k -> new ArrayList<>());
             list.add(t);
@@ -527,120 +509,8 @@ public class RouteCoverageMojo extends AbstractExecMojo {
         return sb.toString();
     }
 
-    private void findJavaFiles(File dir, Set<File> javaFiles) {
-        File[] files = dir.isDirectory() ? dir.listFiles() : null;
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".java")) {
-                    javaFiles.add(file);
-                } else if (file.isDirectory()) {
-                    findJavaFiles(file, javaFiles);
-                }
-            }
-        }
-    }
-
-    private void findXmlFiles(File dir, Set<File> xmlFiles) {
-        File[] files = dir.isDirectory() ? dir.listFiles() : null;
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".xml")) {
-                    xmlFiles.add(file);
-                } else if (file.isDirectory()) {
-                    findXmlFiles(file, xmlFiles);
-                }
-            }
-        }
-    }
-
     private boolean matchFile(File file) {
-        if (excludes == null && includes == null) {
-            return true;
-        }
-
-        // exclude take precedence
-        if (excludes != null) {
-            for (String exclude : excludes.split(",")) {
-                exclude = exclude.trim();
-                // try both with and without directory in the name
-                String fqn = stripRootPath(asRelativeFile(file.getAbsolutePath()));
-                boolean match = PatternHelper.matchPattern(fqn, exclude) || PatternHelper.matchPattern(file.getName(), exclude);
-                if (match) {
-                    return false;
-                }
-            }
-        }
-
-        // include
-        if (includes != null) {
-            for (String include : includes.split(",")) {
-                include = include.trim();
-                // try both with and without directory in the name
-                String fqn = stripRootPath(asRelativeFile(file.getAbsolutePath()));
-                boolean match = PatternHelper.matchPattern(fqn, include) || PatternHelper.matchPattern(file.getName(), include);
-                if (match) {
-                    return true;
-                }
-            }
-            // did not match any includes
-            return false;
-        }
-
-        // was not excluded nor failed include so its accepted
-        return true;
-    }
-
-    private String asRelativeFile(String name) {
-        String answer = name;
-
-        String base = project.getBasedir().getAbsolutePath();
-        if (name.startsWith(base)) {
-            answer = name.substring(base.length());
-            // skip leading slash for relative path
-            if (answer.startsWith(File.separator)) {
-                answer = answer.substring(1);
-            }
-        }
-        return answer;
-    }
-
-    private String stripRootPath(String name) {
-        // strip out any leading source / resource directory
-
-        List list = project.getCompileSourceRoots();
-        for (Object obj : list) {
-            String dir = (String) obj;
-            dir = asRelativeFile(dir);
-            if (name.startsWith(dir)) {
-                return name.substring(dir.length() + 1);
-            }
-        }
-        list = project.getTestCompileSourceRoots();
-        for (Object obj : list) {
-            String dir = (String) obj;
-            dir = asRelativeFile(dir);
-            if (name.startsWith(dir)) {
-                return name.substring(dir.length() + 1);
-            }
-        }
-        List resources = project.getResources();
-        for (Object obj : resources) {
-            Resource resource = (Resource) obj;
-            String dir = asRelativeFile(resource.getDirectory());
-            if (name.startsWith(dir)) {
-                return name.substring(dir.length() + 1);
-            }
-        }
-        resources = project.getTestResources();
-        for (Object obj : resources) {
-            Resource resource = (Resource) obj;
-            String dir = asRelativeFile(resource.getDirectory());
-            if (name.startsWith(dir)) {
-                return name.substring(dir.length() + 1);
-            }
-        }
-
-        return name;
+        return matchRouteFile(file, excludes, includes, project);
     }
 
     private void appendSourcefileNode(
@@ -695,19 +565,32 @@ public class RouteCoverageMojo extends AbstractExecMojo {
     }
 
     private static Document createDocument() throws ParserConfigurationException {
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-        documentFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        documentFactory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        // turn off validator and loading external dtd
+        dbf.setValidating(false);
+        dbf.setNamespaceAware(true);
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://xml.org/sax/features/namespaces", false);
+        dbf.setFeature("http://xml.org/sax/features/validation", false);
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
 
-        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+        DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
         return documentBuilder.newDocument();
     }
 
     private static void createJacocoXmlFile(Document document, File file) throws TransformerException {
         String xmlFilePath = file.toString() + "/xmlJacoco.xml";
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        Transformer transformer = transformerFactory.newTransformer();
+        TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        Transformer transformer = factory.newTransformer();
         DOMSource domSource = new DOMSource(document);
         StreamResult streamResult = new StreamResult(new File(xmlFilePath));
 

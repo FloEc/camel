@@ -18,6 +18,7 @@ package org.apache.camel.component.vertx.http;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.support.NormalizedUri;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,27 +27,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class VertxHttpSendDynamicAwareTest extends VertxHttpTestSupport {
 
     @Test
-    public void testDynamicAware() throws Exception {
+    public void testDynamicAware() {
         String out = fluentTemplate.to("direct:moes").withHeader("drink", "beer").request(String.class);
         assertEquals("Drinking beer", out);
 
         out = fluentTemplate.to("direct:joes").withHeader("drink", "wine").request(String.class);
         assertEquals("Drinking wine", out);
 
+        NormalizedUri uri = NormalizedUri
+                .newNormalizedUri("vertx-http://http://localhost:" + getPort() + "?throwExceptionOnFailure=false", false);
+
         // and there should only be one http endpoint as they are both on same host
-        boolean found = context.getEndpointMap()
-                .containsKey("vertx-http://http://localhost:" + getPort() + "?throwExceptionOnFailure=false");
-        assertTrue(found, "Should find static uri");
+        assertTrue(context.getEndpointRegistry().containsKey(uri), "Should find static uri");
 
         // we only have 2xdirect and 2xVERTX-http
-        assertEquals(4, context.getEndpointMap().size());
+        assertEquals(4, context.getEndpointRegistry().size());
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:moes")
                         .toD("vertx-http:http://localhost:" + getPort()
                              + "/moes?throwExceptionOnFailure=false&drink=${header.drink}");

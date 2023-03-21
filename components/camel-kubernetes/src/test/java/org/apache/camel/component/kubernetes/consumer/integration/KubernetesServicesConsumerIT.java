@@ -60,8 +60,7 @@ public class KubernetesServicesConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(1)
-    public void createService() throws Exception {
-        //        mockResultEndpoint.expectedMessageCount(1);
+    void createService() {
         mockResultEndpoint.expectedHeaderValuesReceivedInAnyOrder(KubernetesConstants.KUBERNETES_EVENT_ACTION, "ADDED");
 
         Exchange ex = template.request("direct:createService", exchange -> {
@@ -94,7 +93,7 @@ public class KubernetesServicesConsumerIT extends KubernetesTestSupport {
 
     @Test
     @Order(2)
-    public void deleteService() throws Exception {
+    void deleteService() {
         Exchange ex = template.request("direct:deleteService", exchange -> {
             exchange.getIn().setHeader(KubernetesConstants.KUBERNETES_NAMESPACE_NAME, "default");
             exchange.getIn().setHeader(KubernetesConstants.KUBERNETES_SERVICE_NAME, TEST_SERVICE_NAME);
@@ -109,14 +108,10 @@ public class KubernetesServicesConsumerIT extends KubernetesTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
-                from("direct:list").toF("kubernetes-services://%s?oauthToken=%s&operation=listServices", host, authToken);
-                from("direct:listByLabels").toF("kubernetes-services://%s?oauthToken=%s&operation=listServicesByLabels", host,
-                        authToken);
-                from("direct:getServices").toF("kubernetes-services://%s?oauthToken=%s&operation=getService", host, authToken);
+            public void configure() {
                 from("direct:createService").toF("kubernetes-services://%s?oauthToken=%s&operation=createService", host,
                         authToken);
                 from("direct:deleteService").toF("kubernetes-services://%s?oauthToken=%s&operation=deleteService", host,
@@ -129,7 +124,7 @@ public class KubernetesServicesConsumerIT extends KubernetesTestSupport {
 
     public class KubernetesProcessor implements Processor {
         @Override
-        public void process(Exchange exchange) throws Exception {
+        public void process(Exchange exchange) {
             Message in = exchange.getIn();
             log.info("Got event with body: " + in.getBody() + " and action "
                      + in.getHeader(KubernetesConstants.KUBERNETES_EVENT_ACTION));

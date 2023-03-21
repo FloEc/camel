@@ -29,16 +29,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jms.BytesMessage;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageFormatException;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
+import jakarta.jms.BytesMessage;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.MapMessage;
+import jakarta.jms.Message;
+import jakarta.jms.MessageFormatException;
+import jakarta.jms.ObjectMessage;
+import jakarta.jms.Session;
+import jakarta.jms.StreamMessage;
+import jakarta.jms.TextMessage;
 
 import org.w3c.dom.Node;
 
@@ -60,7 +60,7 @@ import static org.apache.camel.component.sjms.jms.JmsMessageHelper.normalizeDest
 
 /**
  * A Strategy used to convert between a Camel {@link org.apache.camel.Exchange} and {@link org.apache.camel.Message} to
- * and from a JMS {@link javax.jms.Message}
+ * and from a JMS {@link jakarta.jms.Message}
  */
 public class JmsBinding {
 
@@ -133,7 +133,7 @@ public class JmsBinding {
         if (jmsMessage != null) {
             // lets populate the standard JMS message headers
             try {
-                map.put("JMSCorrelationID", jmsMessage.getJMSCorrelationID());
+                map.put(JmsConstants.JMS_CORRELATION_ID, jmsMessage.getJMSCorrelationID());
                 map.put("JMSCorrelationIDAsBytes", JmsMessageHelper.getJMSCorrelationIDAsBytes(jmsMessage));
                 map.put("JMSDeliveryMode", jmsMessage.getJMSDeliveryMode());
                 map.put("JMSDestination", jmsMessage.getJMSDestination());
@@ -143,7 +143,7 @@ public class JmsBinding {
                 map.put("JMSRedelivered", jmsMessage.getJMSRedelivered());
                 map.put("JMSTimestamp", jmsMessage.getJMSTimestamp());
 
-                map.put("JMSReplyTo", JmsMessageHelper.getJMSReplyTo(jmsMessage));
+                map.put(JmsConstants.JMS_REPLY_TO, JmsMessageHelper.getJMSReplyTo(jmsMessage));
                 map.put("JMSType", JmsMessageHelper.getJMSType(jmsMessage));
 
                 // this works around a bug in the ActiveMQ property handling
@@ -206,7 +206,7 @@ public class JmsBinding {
      * Creates a JMS message from the Camel exchange and message
      *
      * @param  exchange     the current exchange
-     * @param  camelMessage the body to make a javax.jms.Message as
+     * @param  camelMessage the body to make a jakarta.jms.Message as
      * @param  session      the JMS session used to create the message
      * @param  cause        optional exception occurred that should be sent as reply instead of a regular body
      * @return              a newly created JMS Message instance containing the
@@ -251,12 +251,12 @@ public class JmsBinding {
     public void appendJmsProperty(Message jmsMessage, Exchange exchange, String headerName, Object headerValue)
             throws JMSException {
         if (isStandardJMSHeader(headerName)) {
-            if (headerName.equals("JMSCorrelationID")) {
+            if (headerName.equals(JmsConstants.JMS_CORRELATION_ID)) {
                 jmsMessage.setJMSCorrelationID(ExchangeHelper.convertToType(exchange, String.class, headerValue));
-            } else if (headerName.equals("JMSReplyTo") && headerValue != null) {
+            } else if (headerName.equals(JmsConstants.JMS_REPLY_TO) && headerValue != null) {
                 if (headerValue instanceof String) {
                     // if the value is a String we must normalize it first, and must include the prefix
-                    // as ActiveMQ requires that when converting the String to a javax.jms.Destination type
+                    // as ActiveMQ requires that when converting the String to a jakarta.jms.Destination type
                     headerValue = normalizeDestinationName((String) headerValue, true);
                 }
                 Destination replyTo = ExchangeHelper.convertToType(exchange, Destination.class, headerValue);
@@ -296,7 +296,7 @@ public class JmsBinding {
 
     /**
      * Is the given header a standard JMS header
-     * 
+     *
      * @param  headerName the header name
      * @return            <tt>true</tt> if its a standard JMS header
      */
@@ -381,7 +381,7 @@ public class JmsBinding {
                 throw new JMSException("Cannot send message as message body is null, and option allowNullBody is false.");
             }
             LOG.trace("Using JmsMessageType: {}", type);
-            Message answer = createJmsMessageForType(exchange, body, headers, session, context, type);
+            Message answer = createJmsMessageForType(exchange, body, session, context, type);
             // ensure default delivery mode is used by default
             answer.setJMSDeliveryMode(Message.DEFAULT_DELIVERY_MODE);
             return answer;
@@ -441,7 +441,7 @@ public class JmsBinding {
      * @return jmsMessage or null if the mapping was not successfully
      */
     protected Message createJmsMessageForType(
-            Exchange exchange, Object body, Map<String, Object> headers, Session session, CamelContext context,
+            Exchange exchange, Object body, Session session, CamelContext context,
             JmsMessageType type)
             throws JMSException {
         switch (type) {

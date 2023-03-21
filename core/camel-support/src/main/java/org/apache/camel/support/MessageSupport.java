@@ -19,7 +19,6 @@ package org.apache.camel.support;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.InvalidPayloadException;
 import org.apache.camel.Message;
 import org.apache.camel.TypeConverter;
@@ -34,7 +33,7 @@ import org.apache.camel.spi.DataTypeAware;
  * from {@link DefaultMessage}
  */
 public abstract class MessageSupport implements Message, CamelContextAware, DataTypeAware {
-    ExtendedCamelContext camelContext;
+    CamelContext camelContext;
     TypeConverter typeConverter;
     private Exchange exchange;
     private Object body;
@@ -174,8 +173,7 @@ public abstract class MessageSupport implements Message, CamelContextAware, Data
     @Override
     public Message copy() {
         Message answer = newInstance();
-        // must copy over CamelContext
-        CamelContextAware.trySetCamelContext(answer, camelContext);
+
         answer.copyFrom(this);
         return answer;
     }
@@ -183,27 +181,24 @@ public abstract class MessageSupport implements Message, CamelContextAware, Data
     @Override
     public void copyFrom(Message that) {
         if (that == this) {
-            // the same instance so do not need to copy
+            // it's the same instance, so do not need to copy
             return;
         }
 
-        // must copy over CamelContext
-        CamelContextAware.trySetCamelContext(that, camelContext);
-        if (that instanceof DataTypeAware && ((DataTypeAware) that).hasDataType()) {
-            setDataType(((DataTypeAware) that).getDataType());
-        }
-        // cover over exchange if none has been assigned
-        if (getExchange() == null) {
-            setExchange(that.getExchange());
-        }
-
         copyFromWithNewBody(that, that.getBody());
+        // Preserve the DataType
+        if (that instanceof DataTypeAware) {
+            final DataTypeAware dataTypeAware = (DataTypeAware) that;
+            if (dataTypeAware.hasDataType()) {
+                setDataType(dataTypeAware.getDataType());
+            }
+        }
     }
 
     @Override
     public void copyFromWithNewBody(Message that, Object newBody) {
         if (that == this) {
-            // the same instance so do not need to copy
+            // it's the same instance, so do not need to copy
             return;
         }
 
@@ -254,7 +249,7 @@ public abstract class MessageSupport implements Message, CamelContextAware, Data
 
     @Override
     public void setCamelContext(CamelContext camelContext) {
-        this.camelContext = (ExtendedCamelContext) camelContext;
+        this.camelContext = camelContext;
         this.typeConverter = camelContext.getTypeConverter();
     }
 

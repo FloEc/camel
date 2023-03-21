@@ -33,7 +33,7 @@ public class FtpConsumerIdempotentRefIT extends FtpServerTestSupport {
     private static boolean invoked;
 
     @BindToRegistry("myIdempotentRepo")
-    private MyIdempotentRepository myIdempotentRepo = new MyIdempotentRepository();
+    private final MyIdempotentRepository myIdempotentRepo = new MyIdempotentRepository();
 
     private String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}"
@@ -49,7 +49,7 @@ public class FtpConsumerIdempotentRefIT extends FtpServerTestSupport {
 
         sendFile(getFtpUrl(), "Hello World", "report.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         Thread.sleep(100);
 
@@ -63,21 +63,21 @@ public class FtpConsumerIdempotentRefIT extends FtpServerTestSupport {
         // should NOT consume the file again, let 2 secs pass to let the
         // consumer try to consume it but it should not
         Thread.sleep(2000);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         assertTrue(invoked, "MyIdempotentRepository should have been invoked");
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from(getFtpUrl()).to("mock:result");
             }
         };
     }
 
-    public class MyIdempotentRepository implements IdempotentRepository {
+    public static class MyIdempotentRepository implements IdempotentRepository {
 
         @Override
         public boolean add(String messageId) {
@@ -105,7 +105,6 @@ public class FtpConsumerIdempotentRefIT extends FtpServerTestSupport {
 
         @Override
         public void clear() {
-            return;
         }
 
         @Override

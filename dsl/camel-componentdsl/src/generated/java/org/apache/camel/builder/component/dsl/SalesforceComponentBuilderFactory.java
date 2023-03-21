@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -68,8 +68,8 @@ public interface SalesforceComponentBuilderFactory {
         /**
          * Query params for APEX method.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -86,7 +86,7 @@ public interface SalesforceComponentBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: 53.0
+         * Default: 56.0
          * Group: common
          * 
          * @param apiVersion the value to set
@@ -277,6 +277,22 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
+         * Timeout value for HTTP requests.
+         * 
+         * The option is a: &lt;code&gt;long&lt;/code&gt; type.
+         * 
+         * Default: 60000
+         * Group: common
+         * 
+         * @param httpRequestTimeout the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder httpRequestTimeout(
+                long httpRequestTimeout) {
+            doSetProperty("httpRequestTimeout", httpRequestTimeout);
+            return this;
+        }
+        /**
          * Include details in Salesforce1 Analytics report, defaults to false.
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
@@ -294,8 +310,8 @@ public interface SalesforceComponentBuilderFactory {
         /**
          * Replay IDs to start from per channel name.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Long&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Long&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common
          * 
@@ -441,8 +457,8 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
-         * Notify for create operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for create operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -457,8 +473,8 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
-         * Notify for delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -474,7 +490,7 @@ public interface SalesforceComponentBuilderFactory {
         }
         /**
          * Notify for operations, options are ALL, CREATE, EXTENDED, UPDATE (API
-         * version &lt; 29.0).
+         * version &amp;amp;lt; 29.0).
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.salesforce.internal.dto.NotifyForOperationsEnum&lt;/code&gt; type.
@@ -490,8 +506,8 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
-         * Notify for un-delete operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for un-delete operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -506,8 +522,8 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
-         * Notify for update operation, defaults to false (API version &gt;=
-         * 29.0).
+         * Notify for update operation, defaults to false (API version
+         * &amp;amp;gt;= 29.0).
          * 
          * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
          * 
@@ -839,6 +855,24 @@ public interface SalesforceComponentBuilderFactory {
             return this;
         }
         /**
+         * If true, streams SOQL query result and transparently handles
+         * subsequent requests if there are multiple pages. Otherwise, results
+         * are returned one page at a time.
+         * 
+         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: common
+         * 
+         * @param streamQueryResult the value to set
+         * @return the dsl builder
+         */
+        default SalesforceComponentBuilder streamQueryResult(
+                java.lang.Boolean streamQueryResult) {
+            doSetProperty("streamQueryResult", streamQueryResult);
+            return this;
+        }
+        /**
          * Whether to update an existing Push Topic when using the Streaming
          * API, defaults to false.
          * 
@@ -876,8 +910,8 @@ public interface SalesforceComponentBuilderFactory {
          * HTTP client. Have a look at properties of SalesforceHttpClient and
          * the Jetty HttpClient for all available options.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common (advanced)
          * 
@@ -894,8 +928,8 @@ public interface SalesforceComponentBuilderFactory {
          * LongPollingTransport used by the BayeuxClient (CometD) used by the
          * streaming api.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * 
          * Group: common (advanced)
          * 
@@ -1116,7 +1150,7 @@ public interface SalesforceComponentBuilderFactory {
          * A list of addresses for which HTTP proxy server should not be used.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.Set&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Set&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -1147,7 +1181,7 @@ public interface SalesforceComponentBuilderFactory {
          * A list of addresses for which HTTP proxy server should be used.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.Set&lt;java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.Set&amp;lt;java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: proxy
          * 
@@ -1569,6 +1603,7 @@ public interface SalesforceComponentBuilderFactory {
             case "httpClientIdleTimeout": ((SalesforceComponent) component).setHttpClientIdleTimeout((long) value); return true;
             case "httpMaxContentLength": ((SalesforceComponent) component).setHttpMaxContentLength((java.lang.Integer) value); return true;
             case "httpRequestBufferSize": ((SalesforceComponent) component).setHttpRequestBufferSize((java.lang.Integer) value); return true;
+            case "httpRequestTimeout": ((SalesforceComponent) component).setHttpRequestTimeout((long) value); return true;
             case "includeDetails": getOrCreateConfiguration((SalesforceComponent) component).setIncludeDetails((java.lang.Boolean) value); return true;
             case "initialReplayIdMap": getOrCreateConfiguration((SalesforceComponent) component).setInitialReplayIdMap((java.util.Map) value); return true;
             case "instanceId": getOrCreateConfiguration((SalesforceComponent) component).setInstanceId((java.lang.String) value); return true;
@@ -1604,6 +1639,7 @@ public interface SalesforceComponentBuilderFactory {
             case "sObjectName": getOrCreateConfiguration((SalesforceComponent) component).setSObjectName((java.lang.String) value); return true;
             case "sObjectQuery": getOrCreateConfiguration((SalesforceComponent) component).setSObjectQuery((java.lang.String) value); return true;
             case "sObjectSearch": getOrCreateConfiguration((SalesforceComponent) component).setSObjectSearch((java.lang.String) value); return true;
+            case "streamQueryResult": getOrCreateConfiguration((SalesforceComponent) component).setStreamQueryResult((java.lang.Boolean) value); return true;
             case "updateTopic": getOrCreateConfiguration((SalesforceComponent) component).setUpdateTopic((boolean) value); return true;
             case "config": ((SalesforceComponent) component).setConfig((org.apache.camel.component.salesforce.SalesforceEndpointConfig) value); return true;
             case "httpClientProperties": ((SalesforceComponent) component).setHttpClientProperties((java.util.Map) value); return true;

@@ -18,6 +18,7 @@ package org.apache.camel.component.azure.storage.blob.client;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.azure.core.http.HttpHeaders;
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.Response;
 import com.azure.core.http.rest.ResponseBase;
 import com.azure.core.util.Context;
@@ -48,9 +50,11 @@ import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.DownloadRetryOptions;
 import com.azure.storage.blob.models.PageBlobItem;
 import com.azure.storage.blob.models.PageBlobRequestConditions;
-import com.azure.storage.blob.models.PageList;
 import com.azure.storage.blob.models.PageRange;
+import com.azure.storage.blob.models.PageRangeItem;
 import com.azure.storage.blob.models.ParallelTransferOptions;
+import com.azure.storage.blob.options.BlockBlobSimpleUploadOptions;
+import com.azure.storage.blob.options.ListPageRangesOptions;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.AppendBlobClient;
@@ -58,7 +62,9 @@ import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.azure.storage.blob.specialized.PageBlobClient;
 import com.azure.storage.common.StorageSharedKeyCredential;
+import com.azure.storage.common.Utility;
 import org.apache.camel.util.ObjectHelper;
+import reactor.core.publisher.Flux;
 
 public class BlobClientWrapper {
     private static final String SERVICE_URI_SEGMENT = ".blob.core.windows.net";
@@ -100,7 +106,7 @@ public class BlobClientWrapper {
             final OutputStream stream, final BlobRange range,
             final DownloadRetryOptions options, final BlobRequestConditions requestConditions, final boolean getRangeContentMd5,
             final Duration timeout) {
-        return client.downloadWithResponse(stream, range, options, requestConditions, getRangeContentMd5, timeout,
+        return client.downloadStreamWithResponse(stream, range, options, requestConditions, getRangeContentMd5, timeout,
                 Context.NONE);
     }
 
@@ -118,8 +124,10 @@ public class BlobClientWrapper {
             final Map<String, String> metadata, AccessTier tier, final byte[] contentMd5,
             final BlobRequestConditions requestConditions,
             final Duration timeout) {
-        return getBlockBlobClient().uploadWithResponse(data, length, headers, metadata, tier, contentMd5, requestConditions,
-                timeout, Context.NONE);
+        Flux<ByteBuffer> dataBuffer = Utility.convertStreamToByteBuffer(data, length, 4194304, false);
+        BlockBlobSimpleUploadOptions uploadOptions = new BlockBlobSimpleUploadOptions(dataBuffer, length).setHeaders(headers)
+                .setMetadata(metadata).setTier(tier).setContentMd5(contentMd5).setRequestConditions(requestConditions);
+        return getBlockBlobClient().uploadWithResponse(uploadOptions, timeout, Context.NONE);
     }
 
     public HttpHeaders stageBlockBlob(
@@ -169,10 +177,7 @@ public class BlobClientWrapper {
                 .setStartTime(OffsetDateTime.now());
         String sasToken = sourceBlob.generateSas(values);
 
-        String res = client.copyFromUrl(sourceBlob.getBlobUrl() + "?" + sasToken);
-
-        return res;
-
+        return client.copyFromUrl(sourceBlob.getBlobUrl() + "?" + sasToken);
     }
 
     public boolean appendBlobExists() {
@@ -203,10 +208,12 @@ public class BlobClientWrapper {
         return getPageBlobClient().clearPagesWithResponse(pageRange, pageBlobRequestConditions, timeout, Context.NONE);
     }
 
-    public Response<PageList> getPageBlobRanges(
+    public PagedIterable<PageRangeItem> getPageBlobRanges(
             final BlobRange blobRange, final BlobRequestConditions requestConditions,
             final Duration timeout) {
-        return getPageBlobClient().getPageRangesWithResponse(blobRange, requestConditions, timeout, Context.NONE);
+        final ListPageRangesOptions listPageRangesOptions = new ListPageRangesOptions(blobRange);
+        listPageRangesOptions.setRequestConditions(requestConditions);
+        return getPageBlobClient().listPageRanges(listPageRangesOptions, timeout, Context.NONE);
     }
 
     public boolean pageBlobExists() {

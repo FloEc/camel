@@ -30,12 +30,12 @@ public final class Lambda2ClientFactory {
 
     /**
      * Return the correct AWS Lambda client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               LambdaClient
      */
     public static Lambda2InternalClient getLambdaClient(Lambda2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new Lambda2ClientOptimizedImpl(configuration) : new Lambda2ClientStandardImpl(configuration);
     }
 }

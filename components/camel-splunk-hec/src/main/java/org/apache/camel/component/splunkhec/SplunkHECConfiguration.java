@@ -36,6 +36,8 @@ public class SplunkHECConfiguration {
     private String source = "camel";
     @UriParam
     private String host;
+    @UriParam(defaultValue = "/services/collector/event")
+    private String splunkEndpoint = "/services/collector/event";
     @UriParam(label = "security")
     private boolean skipTlsVerify;
     @UriParam(label = "security", defaultValue = "true")
@@ -93,10 +95,26 @@ public class SplunkHECConfiguration {
     }
 
     /**
-     * Splunk host.
+     * Splunk host field of the event message. This is not the Splunk host to connect to.
      */
     public void setHost(String host) {
         this.host = host;
+    }
+
+    /**
+     * Splunk endpoint Defaults to /services/collector/event To write RAW data like JSON use /services/collector/raw For
+     * a list of all endpoints refer to splunk documentation (HTTP Event Collector REST API endpoints) Example for Spunk
+     * 8.2.x: https://docs.splunk.com/Documentation/SplunkCloud/8.2.2203/Data/HECRESTendpoints
+     *
+     * To extract timestamps in Splunk>8.0 /services/collector/event?auto_extract_timestamp=true Remember to utilize
+     * RAW{} for questionmarks or slashes in parameters.
+     */
+    public void setSplunkEndpoint(String splunkEndpoint) {
+        this.splunkEndpoint = splunkEndpoint;
+    }
+
+    public String getSplunkEndpoint() {
+        return this.splunkEndpoint;
     }
 
     public boolean isSkipTlsVerify() {
@@ -153,4 +171,5 @@ public class SplunkHECConfiguration {
     public void setTime(Long time) {
         this.time = time;
     }
+
 }

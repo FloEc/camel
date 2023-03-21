@@ -24,12 +24,14 @@ import javax.management.ObjectName;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
-import static org.apache.camel.test.junit5.TestSupport.isPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisabledOnOs(OS.AIX)
 public class ManagedNettyEndpointTest extends BaseNettyTest {
 
     @Override
@@ -49,9 +51,6 @@ public class ManagedNettyEndpointTest extends BaseNettyTest {
 
     @Test
     public void testManagement() throws Exception {
-        // JMX tests dont work well on AIX CI servers (hangs them)
-        assumeFalse(isPlatform("aix"));
-
         // should not add 10 endpoints
         getMockEndpoint("mock:foo").expectedMessageCount(10);
         for (int i = 0; i < 10; i++) {
@@ -59,7 +58,7 @@ public class ManagedNettyEndpointTest extends BaseNettyTest {
                     "Hello World", String.class);
             assertEquals("param" + i + "=value" + i, out);
         }
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
         MBeanServer mbeanServer = getMBeanServer();
 
@@ -75,10 +74,10 @@ public class ManagedNettyEndpointTest extends BaseNettyTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("netty-http:http://0.0.0.0:{{port}}/foo")
                         .to("mock:foo")
                         .transform().header(Exchange.HTTP_QUERY);

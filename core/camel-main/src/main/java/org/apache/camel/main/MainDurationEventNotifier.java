@@ -23,10 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.spi.CamelEvent;
-import org.apache.camel.spi.CamelEvent.ExchangeCompletedEvent;
-import org.apache.camel.spi.CamelEvent.ExchangeCreatedEvent;
-import org.apache.camel.spi.CamelEvent.ExchangeFailedEvent;
-import org.apache.camel.spi.CamelEvent.RouteReloadedEvent;
 import org.apache.camel.support.EventNotifierSupport;
 import org.apache.camel.util.StopWatch;
 import org.slf4j.Logger;
@@ -62,6 +58,11 @@ public class MainDurationEventNotifier extends EventNotifierSupport {
         this.restartDuration = restartDuration;
         this.action = action.toLowerCase();
         this.doneMessages = new AtomicInteger();
+
+        if (maxMessages == 0 && maxIdleSeconds == 0) {
+            // we do not need exchange events
+            setIgnoreExchangeEvents(true);
+        }
     }
 
     @Override
@@ -69,19 +70,17 @@ public class MainDurationEventNotifier extends EventNotifierSupport {
         try {
             doNotify(event);
         } catch (Exception e) {
-            LOG.warn("Error during processing CamelEvent: " + event + ". This exception is ignored.", e);
+            LOG.warn("Error during processing CamelEvent: {}. This exception is ignored.", event, e);
         }
     }
 
-    protected void doNotify(CamelEvent event) throws Exception {
+    protected void doNotify(CamelEvent event) {
         // ignore any event that is received if shutdown is in process
         if (!shutdownStrategy.isRunAllowed()) {
             return;
         }
 
-        boolean begin = event instanceof ExchangeCreatedEvent;
-        boolean complete = event instanceof ExchangeCompletedEvent || event instanceof ExchangeFailedEvent;
-        boolean reloaded = event instanceof RouteReloadedEvent;
+        final boolean reloaded = event.getType() == CamelEvent.Type.RouteReloaded;
 
         if (reloaded) {
             if (restartDuration) {
@@ -95,14 +94,20 @@ public class MainDurationEventNotifier extends EventNotifierSupport {
             return;
         }
 
-        if (maxMessages > 0 && complete) {
+        boolean complete = false;
+        if (maxMessages > 0) {
+            complete = event.getType() == CamelEvent.Type.ExchangeCompleted
+                    || event.getType() == CamelEvent.Type.ExchangeFailed;
+
             boolean result = doneMessages.incrementAndGet() >= maxMessages;
-            LOG.trace("Duration max messages check {} >= {} -> {}", doneMessages.get(), maxMessages, result);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Duration max messages check {} >= {} -> {}", doneMessages.get(), maxMessages, result);
+            }
 
             if (result && shutdownStrategy.isRunAllowed()) {
                 if ("shutdown".equalsIgnoreCase(action)) {
                     LOG.info("Duration max messages triggering shutdown of the JVM");
-                    // use thread to shutdown Camel as otherwise we would block current thread
+                    // use thread to shut down Camel as otherwise we would block current thread
                     camelContext.getExecutorServiceManager().newThread("CamelMainShutdownCamelContext", this::shutdownTask)
                             .start();
                 } else if ("stop".equalsIgnoreCase(action)) {
@@ -114,18 +119,22 @@ public class MainDurationEventNotifier extends EventNotifierSupport {
         }
 
         // idle reacts on both incoming and complete messages
-        if (maxIdleSeconds > 0 && (begin || complete)) {
-            if (watch != null) {
-                LOG.trace("Message activity so restarting stop watch");
-                watch.restart();
+        if (maxIdleSeconds > 0) {
+            final boolean begin = event.getType() == CamelEvent.Type.ExchangeCreated;
+
+            if (begin || complete) {
+                if (watch != null) {
+                    LOG.trace("Message activity so restarting stop watch");
+                    watch.restart();
+                }
             }
         }
     }
 
     @Override
     public boolean isEnabled(CamelEvent event) {
-        return event instanceof ExchangeCreatedEvent || event instanceof ExchangeCompletedEvent
-                || event instanceof ExchangeFailedEvent || event instanceof RouteReloadedEvent;
+        return event.getType() == CamelEvent.Type.ExchangeCreated || event.getType() == CamelEvent.Type.ExchangeCreated
+                || event.getType() == CamelEvent.Type.ExchangeFailed || event.getType() == CamelEvent.Type.RouteReloaded;
     }
 
     @Override

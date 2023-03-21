@@ -79,7 +79,7 @@ public class RawProducerTest extends SplunkMockTestSupport {
         mock.setExpectedMessageCount(1);
         mock.expectedBodiesReceived(PAYLOAD);
         template.sendBody("direct:stream", PAYLOAD);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class RawProducerTest extends SplunkMockTestSupport {
         mock.setExpectedMessageCount(1);
         mock.expectedBodiesReceived(PAYLOAD);
         template.sendBody("direct:submit", PAYLOAD);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -97,11 +97,11 @@ public class RawProducerTest extends SplunkMockTestSupport {
         mock.setExpectedMessageCount(1);
         mock.expectedBodiesReceived(PAYLOAD);
         template.sendBody("direct:tcp", PAYLOAD);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:stream").to(

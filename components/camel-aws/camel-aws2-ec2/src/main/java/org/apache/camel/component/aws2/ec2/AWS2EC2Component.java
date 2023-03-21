@@ -23,17 +23,12 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.Metadata;
 import org.apache.camel.spi.annotations.Component;
 import org.apache.camel.support.DefaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * For working with Amazon's Elastic Compute Cloud (EC2) SDK v2.
  */
 @Component("aws2-ec2")
 public class AWS2EC2Component extends DefaultComponent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AWS2EC2Component.class);
-
     @Metadata
     private AWS2EC2Configuration configuration = new AWS2EC2Configuration();
 
@@ -44,7 +39,6 @@ public class AWS2EC2Component extends DefaultComponent {
     public AWS2EC2Component(CamelContext context) {
         super(context);
 
-        registerExtension(new AWS2EC2ComponentVerifierExtension());
     }
 
     @Override
@@ -54,7 +48,7 @@ public class AWS2EC2Component extends DefaultComponent {
                 = this.configuration != null ? this.configuration.copy() : new AWS2EC2Configuration();
         AWS2EC2Endpoint endpoint = new AWS2EC2Endpoint(uri, this, configuration);
         setProperties(endpoint, parameters);
-        if (!configuration.isUseDefaultCredentialsProvider() && configuration.getAmazonEc2Client() == null
+        if (Boolean.FALSE.equals(configuration.isUseDefaultCredentialsProvider()) && configuration.getAmazonEc2Client() == null
                 && (configuration.getAccessKey() == null || configuration.getSecretKey() == null)) {
             throw new IllegalArgumentException(
                     "useDefaultCredentialsProvider is set to false, amazonEC2Client or accessKey and secretKey must be specified");

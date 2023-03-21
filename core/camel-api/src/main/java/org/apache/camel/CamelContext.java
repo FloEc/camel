@@ -53,6 +53,7 @@ import org.apache.camel.spi.UuidGenerator;
 import org.apache.camel.spi.Validator;
 import org.apache.camel.spi.ValidatorRegistry;
 import org.apache.camel.support.jsse.SSLContextParameters;
+import org.apache.camel.vault.VaultConfiguration;
 
 /**
  * Interface used to represent the CamelContext used to configure routes and the policies to use during message
@@ -60,8 +61,7 @@ import org.apache.camel.support.jsse.SSLContextParameters;
  * <p/>
  * The CamelContext offers the following methods {@link CamelContextLifecycle} to control the lifecycle:
  * <ul>
- * <li>{@link #start()} - to start (<b>important:</b> the start method is not blocked, see more details
- * <a href="http://camel.apache.org/running-camel-standalone-and-have-it-keep-running.html">here</a>)</li>
+ * <li>{@link #start()} - to start</li>
  * <li>{@link #stop()} - to shutdown (will stop all routes/components/endpoints etc and clear internal state/cache)</li>
  * <li>{@link #suspend()} - to pause routing messages</li>
  * <li>{@link #resume()} - to resume after a suspend</li>
@@ -77,21 +77,18 @@ import org.apache.camel.support.jsse.SSLContextParameters;
  * End users are advised to use suspend/resume. Using stop is for shutting down Camel and it's not guaranteed that when
  * it's being started again using the start method that Camel will operate consistently.
  * <p/>
- * For more advanced APIs with {@link CamelContext} see {@link ExtendedCamelContext}, which you can obtain via the adapt
- * method.
+ * You can use the {@link CamelContext#getCamelContextExtension()} to obtain the extension point for the
+ * {@link CamelContext}. This extension point exposes internal APIs via {@link ExtendedCamelContext}.
  */
 public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguration {
 
     /**
-     * Adapts this {@link org.apache.camel.CamelContext} to the specialized type.
-     * <p/>
-     * For example to adapt to <tt>ExtendedCamelContext</tt>, <tt>ModelCamelContext</tt>, or
-     * <tt>SpringCamelContext</tt>, or <tt>CdiCamelContext</tt>, etc.
+     * Gets the {@link ExtendedCamelContext} that contains the extension points for internal context APIs. These APIs
+     * are intended for internal usage within Camel and end-users should avoid using them.
      *
-     * @param  type the type to adapt to
-     * @return      this {@link org.apache.camel.CamelContext} adapted to the given type
+     * @return this {@link ExtendedCamelContext} extension point for this context.
      */
-    <T extends CamelContext> T adapt(Class<T> type);
+    ExtendedCamelContext getCamelContextExtension();
 
     /**
      * Gets the extension of the given type.
@@ -115,11 +112,18 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
     boolean isVetoStarted();
 
     /**
-     * Gets the name (id) of the this CamelContext.
+     * Gets the name (id) of this CamelContext.
      *
      * @return the name
      */
     String getName();
+
+    /**
+     * Gets the description of this CamelContext.
+     *
+     * @return the description, or null if no description has been set.
+     */
+    String getDescription();
 
     /**
      * Gets the current name strategy
@@ -446,15 +450,6 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
     Collection<Endpoint> getEndpoints();
 
     /**
-     * Returns a new {@link Map} containing all of the endpoints from the {@link org.apache.camel.spi.EndpointRegistry}
-     *
-     * @return     map of endpoints
-     * @deprecated use {@link #getEndpointRegistry()}
-     */
-    @Deprecated
-    Map<String, Endpoint> getEndpointMap();
-
-    /**
      * Is the given endpoint already registered in the {@link org.apache.camel.spi.EndpointRegistry}
      *
      * @param  uri the URI of the endpoint
@@ -573,6 +568,15 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
     void addRoutes(RoutesBuilder builder) throws Exception;
 
     /**
+     * Adds the templated routes from the routes builder. For example in Java DSL you can use
+     * {@link org.apache.camel.builder.TemplatedRouteBuilder}.
+     *
+     * @param  builder   the builder which has templated routes
+     * @throws Exception if the routes could not be created for whatever reason
+     */
+    void addTemplatedRoutes(RoutesBuilder builder) throws Exception;
+
+    /**
      * Adds the routes configurations (global configuration for all routes) from the routes builder.
      *
      * @param  builder   the builder which has routes configurations
@@ -611,13 +615,50 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * Camel end users should favour using {@link org.apache.camel.builder.TemplatedRouteBuilder} which is a fluent
      * builder with more functionality than this API.
      *
+     * @param      routeId         the id of the new route to add (optional)
+     * @param      routeTemplateId the id of the route template (mandatory)
+     * @param      parameters      parameters to use for the route template when creating the new route
+     * @return                     the id of the route added (for example when an id was auto assigned)
+     * @throws     Exception       is thrown if error creating and adding the new route
+     * @deprecated                 use {@link #addRouteFromTemplate(String, String, String, Map)}
+     */
+    @Deprecated
+    String addRouteFromTemplate(String routeId, String routeTemplateId, Map<String, Object> parameters) throws Exception;
+
+    /**
+     * Adds a new route from a given route template.
+     *
+     * Camel end users should favour using {@link org.apache.camel.builder.TemplatedRouteBuilder} which is a fluent
+     * builder with more functionality than this API.
+     *
      * @param  routeId         the id of the new route to add (optional)
      * @param  routeTemplateId the id of the route template (mandatory)
+     * @param  prefixId        prefix to use for all node ids (not route id). Use null for no prefix. (optional)
      * @param  parameters      parameters to use for the route template when creating the new route
      * @return                 the id of the route added (for example when an id was auto assigned)
      * @throws Exception       is thrown if error creating and adding the new route
      */
-    String addRouteFromTemplate(String routeId, String routeTemplateId, Map<String, Object> parameters) throws Exception;
+    String addRouteFromTemplate(
+            String routeId, String routeTemplateId, String prefixId,
+            Map<String, Object> parameters)
+            throws Exception;
+
+    /**
+     * Adds a new route from a given route template.
+     *
+     * Camel end users should favour using {@link org.apache.camel.builder.TemplatedRouteBuilder} which is a fluent
+     * builder with more functionality than this API.
+     *
+     * @param      routeId              the id of the new route to add (optional)
+     * @param      routeTemplateId      the id of the route template (mandatory)
+     * @param      routeTemplateContext the route template context (mandatory)
+     * @return                          the id of the route added (for example when an id was auto assigned)
+     * @throws     Exception            is thrown if error creating and adding the new route
+     * @deprecated                      use {@link #addRouteFromTemplate(String, String, String, RouteTemplateContext)}
+     */
+    @Deprecated
+    String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
+            throws Exception;
 
     /**
      * Adds a new route from a given route template.
@@ -627,11 +668,13 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      *
      * @param  routeId              the id of the new route to add (optional)
      * @param  routeTemplateId      the id of the route template (mandatory)
+     * @param  prefixId             prefix to use for all node ids (not route id). Use null for no prefix. (optional)
      * @param  routeTemplateContext the route template context (mandatory)
      * @return                      the id of the route added (for example when an id was auto assigned)
      * @throws Exception            is thrown if error creating and adding the new route
      */
-    String addRouteFromTemplate(String routeId, String routeTemplateId, RouteTemplateContext routeTemplateContext)
+    String addRouteFromTemplate(
+            String routeId, String routeTemplateId, String prefixId, RouteTemplateContext routeTemplateContext)
             throws Exception;
 
     /**
@@ -672,6 +715,20 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * @return the configuration, or <tt>null</tt> if none has been configured.
      */
     RestConfiguration getRestConfiguration();
+
+    /**
+     * Sets a custom {@link VaultConfiguration}
+     *
+     * @param vaultConfiguration the vault configuration
+     */
+    void setVaultConfiguration(VaultConfiguration vaultConfiguration);
+
+    /**
+     * Gets the vault configuration
+     *
+     * @return the configuration, or <tt>null</tt> if none has been configured.
+     */
+    VaultConfiguration getVaultConfiguration();
 
     /**
      * Gets the {@link org.apache.camel.spi.RestRegistry} to use
@@ -942,7 +999,7 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
 
     /**
      * Gets the {@link org.apache.camel.spi.TransformerRegistry}
-     * 
+     *
      * @return the TransformerRegistry
      */
     TransformerRegistry getTransformerRegistry();
@@ -957,7 +1014,7 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
 
     /**
      * Gets the {@link org.apache.camel.spi.ValidatorRegistry}
-     * 
+     *
      * @return the ValidatorRegistry
      */
     ValidatorRegistry getValidatorRegistry();
@@ -1147,6 +1204,18 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
     boolean isTracingStandby();
 
     /**
+     * Whether to set backlog tracing on standby. If on standby then the backlog tracer is installed and made available.
+     * Then the backlog tracer can be enabled later at runtime via JMX or via Java API.
+     */
+    void setBacklogTracingStandby(boolean backlogTracingStandby);
+
+    /**
+     * Whether to set backlog tracing on standby. If on standby then the backlog tracer is installed and made available.
+     * Then the backlog tracer can be enabled later at runtime via JMX or via Java API.
+     */
+    boolean isBacklogTracingStandby();
+
+    /**
      * Gets the current {@link UuidGenerator}
      *
      * @return the uuidGenerator
@@ -1203,6 +1272,32 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * This only impact startup, not the performance of the routes at runtime.
      */
     void setSourceLocationEnabled(Boolean sourceLocationEnabled);
+
+    /**
+     * Whether camel-k style modeline is also enabled when not using camel-k. Enabling this allows to use a camel-k like
+     * experience by being able to configure various settings using modeline directly in your route source code.
+     */
+    Boolean isModeline();
+
+    /**
+     * Whether camel-k style modeline is also enabled when not using camel-k. Enabling this allows to use a camel-k like
+     * experience by being able to configure various settings using modeline directly in your route source code.
+     */
+    void setModeline(Boolean modeline);
+
+    /**
+     * Whether to enable developer console (requires camel-console on classpath).
+     *
+     * The developer console is only for assisting during development. This is NOT for production usage.
+     */
+    Boolean isDevConsole();
+
+    /**
+     * Whether to enable developer console (requires camel-console on classpath)
+     *
+     * The developer console is only for assisting during development. This is NOT for production usage.
+     */
+    void setDevConsole(Boolean loadDevConsoles);
 
     /**
      * Whether or not type converter statistics is enabled.
@@ -1277,6 +1372,22 @@ public interface CamelContext extends CamelContextLifecycle, RuntimeConfiguratio
      * @param pattern the pattern
      */
     void setMDCLoggingKeysPattern(String pattern);
+
+    /**
+     * To use a custom tracing logging format.
+     *
+     * The default format (arrow, routeId, label) is: %-4.4s [%-12.12s] [%-33.33s]
+     */
+    String getTracingLoggingFormat();
+
+    /**
+     * To use a custom tracing logging format.
+     *
+     * The default format (arrow, routeId, label) is: %-4.4s [%-12.12s] [%-33.33s]
+     *
+     * @param format the logging format
+     */
+    void setTracingLoggingFormat(String format);
 
     /**
      * If dumping is enabled then Camel will during startup dump all loaded routes (incl rests and route templates)

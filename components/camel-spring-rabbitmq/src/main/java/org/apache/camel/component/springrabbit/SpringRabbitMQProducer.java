@@ -18,6 +18,7 @@ package org.apache.camel.component.springrabbit;
 
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Endpoint;
@@ -29,10 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
+import org.springframework.amqp.rabbit.RabbitMessageFuture;
 import org.springframework.amqp.rabbit.connection.Connection;
 import org.springframework.amqp.rabbit.connection.RabbitUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 public class SpringRabbitMQProducer extends DefaultAsyncProducer {
 
@@ -147,30 +148,25 @@ public class SpringRabbitMQProducer extends DefaultAsyncProducer {
 
         try {
             // will use RabbitMQ direct reply-to
-            AsyncRabbitTemplate.RabbitMessageFuture future = getInOutTemplate().sendAndReceive(exchangeName, routingKey, msg);
-            future.addCallback(new ListenableFutureCallback<Message>() {
-                @Override
-                public void onFailure(Throwable throwable) {
-                    exchange.setException(throwable);
-                    callback.done(false);
-                }
-
-                @Override
-                public void onSuccess(Message message) {
-                    try {
-                        Object body = getEndpoint().getMessageConverter().fromMessage(message);
-                        exchange.getMessage().setBody(body);
+            RabbitMessageFuture future = getInOutTemplate().sendAndReceive(exchangeName, routingKey, msg);
+            future.whenCompleteAsync((message, throwable) -> {
+                try {
+                    if (throwable != null) {
+                        exchange.setException(throwable);
+                    } else {
+                        Object body1 = getEndpoint().getMessageConverter().fromMessage(message);
+                        exchange.getMessage().setBody(body1);
                         Map<String, Object> headers
                                 = getEndpoint().getMessagePropertiesConverter()
                                         .fromMessageProperties(message.getMessageProperties(), exchange);
                         if (!headers.isEmpty()) {
                             exchange.getMessage().getHeaders().putAll(headers);
                         }
-                    } catch (Exception e) {
-                        exchange.setException(e);
-                    } finally {
-                        callback.done(false);
                     }
+                } catch (Exception e) {
+                    exchange.setException(e);
+                } finally {
+                    callback.done(false);
                 }
             });
 
@@ -206,8 +202,29 @@ public class SpringRabbitMQProducer extends DefaultAsyncProducer {
             msg = getEndpoint().getMessageConverter().toMessage(body, mp);
         }
 
+        final String ex = exchangeName;
+        final String rk = routingKey;
+        boolean confirm;
+        if ("auto".equalsIgnoreCase(getEndpoint().getConfirm())) {
+            confirm = getEndpoint().getConnectionFactory().isPublisherConfirms();
+        } else if ("enabled".equalsIgnoreCase(getEndpoint().getConfirm())) {
+            confirm = true;
+        } else {
+            confirm = false;
+        }
+        final long timeout = getEndpoint().getConfirmTimeout() <= 0 ? Long.MAX_VALUE : getEndpoint().getConfirmTimeout();
         try {
-            getInOnlyTemplate().send(exchangeName, routingKey, msg);
+            Boolean sent = getInOnlyTemplate().invoke(t -> {
+                t.send(ex, rk, msg);
+                if (confirm) {
+                    return t.waitForConfirms(timeout);
+                } else {
+                    return true;
+                }
+            });
+            if (Boolean.FALSE == sent) {
+                exchange.setException(new TimeoutException("Message not sent within " + timeout + " millis"));
+            }
         } catch (Exception e) {
             exchange.setException(e);
         }

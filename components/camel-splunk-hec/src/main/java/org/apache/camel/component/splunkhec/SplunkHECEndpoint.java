@@ -35,7 +35,8 @@ import org.apache.commons.validator.routines.InetAddressValidator;
  * The splunk component allows to publish events in Splunk using the HTTP Event Collector.
  */
 @UriEndpoint(firstVersion = "3.3.0", scheme = "splunk-hec", title = "Splunk HEC", producerOnly = true,
-             syntax = "splunk-hec:splunkURL/token", category = { Category.LOG, Category.MONITORING })
+             syntax = "splunk-hec:splunkURL/token", category = { Category.LOG, Category.MONITORING },
+             headersClass = SplunkHECConstants.class)
 public class SplunkHECEndpoint extends DefaultEndpoint {
 
     private static final Pattern URI_PARSER
@@ -93,7 +94,7 @@ public class SplunkHECEndpoint extends DefaultEndpoint {
     }
 
     /**
-     * Splunk Host URL
+     * Splunk Host and Port (example: my_splunk_server:8089)
      */
     public void setSplunkURL(String splunkURL) {
         this.splunkURL = splunkURL;
@@ -104,7 +105,7 @@ public class SplunkHECEndpoint extends DefaultEndpoint {
     }
 
     /**
-     * Splunk authorization token
+     * Splunk HEC token (this is the token created for HEC and not the user's token)
      */
     public void setToken(String token) {
         this.token = token;

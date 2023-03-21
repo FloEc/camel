@@ -36,7 +36,6 @@ import org.apache.camel.Channel;
 import org.apache.camel.Component;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.ManagementStatisticsLevel;
 import org.apache.camel.NamedNode;
 import org.apache.camel.NonManagedService;
@@ -829,6 +828,11 @@ public class JmxManagementLifecycleStrategy extends ServiceSupport implements Li
      * Should the given processor be registered.
      */
     protected boolean registerProcessor(ProcessorDefinition<?> processor) {
+
+        //skip processors according the ManagementMBeansLevel
+        if (!getManagementStrategy().getManagementAgent().getMBeansLevel().isProcessors()) {
+            return false;
+        }
         // skip on exception
         if (processor instanceof OnExceptionDefinition) {
             return false;
@@ -914,6 +918,11 @@ public class JmxManagementLifecycleStrategy extends ServiceSupport implements Li
 
         LOG.trace("Checking whether to register {} from route: {}", service, route);
 
+        //skip route according the ManagementMBeansLevel
+        if (!getManagementStrategy().getManagementAgent().getMBeansLevel().isRoutes()) {
+            return false;
+        }
+
         ManagementAgent agent = getManagementStrategy().getManagementAgent();
         if (agent == null) {
             // do not register if no agent
@@ -927,7 +936,7 @@ public class JmxManagementLifecycleStrategy extends ServiceSupport implements Li
         }
 
         // always register if we are setting up routes
-        if (getCamelContext().adapt(ExtendedCamelContext.class).isSetupRoutes()) {
+        if (getCamelContext().getCamelContextExtension().isSetupRoutes()) {
             return true;
         }
 

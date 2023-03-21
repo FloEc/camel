@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -550,8 +551,10 @@ public final class ObjectHelper {
                     int count = StringHelper.countChar(value, DEFAULT_DELIMITER_CHAR) + 1;
                     return () -> StringHelper.splitOnCharacterAsIterator(value, DEFAULT_DELIMITER_CHAR, count);
                 }
+            } else if (pattern) {
+                return () -> new StringIteratorForPattern(value, delimiter);
             }
-            return () -> new Scanner(value, delimiter);
+            return () -> new StringIterator(value, delimiter);
         } else if (allowEmptyValues || org.apache.camel.util.ObjectHelper.isNotEmpty(value)) {
             return Collections.singletonList(value);
         } else {
@@ -770,9 +773,10 @@ public final class ObjectHelper {
                         return (Iterable<String>) () -> StringHelper.splitOnCharacterAsIterator(s, DEFAULT_DELIMITER_CHAR,
                                 count);
                     }
-                } else {
-                    return (Iterable<String>) () -> new Scanner(s, delimiter);
+                } else if (pattern) {
+                    return (Iterable<String>) () -> new StringIteratorForPattern(s, delimiter);
                 }
+                return (Iterable<String>) () -> new StringIterator(s, delimiter);
             } else {
                 return (Iterable<Object>) () -> {
                     // use a plain iterator that returns the value as is as there are only a single value
@@ -807,46 +811,11 @@ public final class ObjectHelper {
 
     /**
      * Returns true if the collection contains the specified value
-     * 
-     * @deprecated use {@link #typeCoerceContains(TypeConverter, Object, Object, boolean)}
-     */
-    @Deprecated
-    public static boolean contains(Object collectionOrArray, Object value) {
-        // favor String types
-        if (collectionOrArray != null
-                && (collectionOrArray instanceof StringBuffer || collectionOrArray instanceof StringBuilder)) {
-            collectionOrArray = collectionOrArray.toString();
-        }
-        if (value != null && (value instanceof StringBuffer || value instanceof StringBuilder)) {
-            value = value.toString();
-        }
-
-        if (collectionOrArray instanceof Collection) {
-            Collection<?> collection = (Collection<?>) collectionOrArray;
-            return collection.contains(value);
-        } else if (collectionOrArray instanceof String && value instanceof String) {
-            String str = (String) collectionOrArray;
-            String subStr = (String) value;
-            return str.contains(subStr);
-        } else {
-            Iterator<?> iter = createIterator(collectionOrArray);
-            while (iter.hasNext()) {
-                if (org.apache.camel.util.ObjectHelper.equal(value, iter.next())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns true if the collection contains the specified value
      */
     public static boolean typeCoerceContains(
             TypeConverter typeConverter, Object collectionOrArray, Object value, boolean ignoreCase) {
         // favor String types
-        if (collectionOrArray != null
-                && (collectionOrArray instanceof StringBuffer || collectionOrArray instanceof StringBuilder)) {
+        if (collectionOrArray instanceof StringBuffer || collectionOrArray instanceof StringBuilder) {
             collectionOrArray = collectionOrArray.toString();
         }
         if (value instanceof StringBuffer || value instanceof StringBuilder) {
@@ -888,4 +857,184 @@ public final class ObjectHelper {
         return false;
     }
 
+    /**
+     * An {@link Iterator} to split an input {@code String} content according to a specific {@code String} literal as
+     * separator.
+     */
+    private static class StringIterator implements Iterator<String> {
+
+        /**
+         * Flag indicating that the indexes have already been computed.
+         */
+        private boolean computed;
+        /**
+         * The current {@code from} index.
+         */
+        private int from;
+        /**
+         * The current {@code to} index.
+         */
+        private int to;
+        /**
+         * The content to split.
+         */
+        private final String content;
+        /**
+         * The separator to use when splitting the content.
+         */
+        private final String separator;
+        /**
+         * The length of the separator.
+         */
+        private final int separatorLength;
+        /**
+         * The length of the part of the content to split.
+         */
+        private final int contentLength;
+
+        /**
+         * Construct a {@code StringIterator} with the specified content and separator.
+         *
+         * @param content   the content to split.
+         * @param separator the separator to use when splitting the content.
+         */
+        StringIterator(String content, String separator) {
+            this.content = content;
+            this.separator = separator;
+            this.separatorLength = separator.length();
+            boolean skipStart = content.startsWith(separator);
+            boolean skipEnd = content.endsWith(separator);
+            if (skipStart && skipEnd) {
+                this.from = separatorLength;
+                this.contentLength = content.length() - separatorLength;
+            } else if (skipStart) {
+                this.from = separatorLength;
+                this.contentLength = content.length();
+            } else if (skipEnd) {
+                this.contentLength = content.length() - separatorLength;
+            } else {
+                this.contentLength = content.length();
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (computed) {
+                return to != -1;
+            } else if (to == -1) {
+                return false;
+            }
+            int index = content.indexOf(separator, from);
+            if (index == -1 || index == contentLength) {
+                to = contentLength;
+            } else {
+                to = index;
+            }
+            computed = true;
+            return true;
+        }
+
+        @Override
+        public String next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            String answer;
+            if (to == contentLength) {
+                answer = content.substring(from, contentLength);
+                to = -1;
+            } else {
+                answer = content.substring(from, to);
+                from = to + separatorLength;
+            }
+            computed = false;
+            return answer;
+        }
+    }
+
+    /**
+     * An {@link Iterator} to split an input {@code String} content according to a specific pattern as separator.
+     */
+    private static class StringIteratorForPattern implements Iterator<String> {
+
+        /**
+         * Flag indicating that the indexes have already been computed.
+         */
+        private boolean computed;
+        /**
+         * The current {@code from} index.
+         */
+        private int from;
+        /**
+         * The current {@code to} index.
+         */
+        private int to;
+        /**
+         * The content to split.
+         */
+        private final String content;
+        /**
+         * The matcher that will match the content to split against the pattern used as separator.
+         */
+        private final Matcher matcher;
+        /**
+         * The length of the part of the content to split.
+         */
+        private int contentLength;
+
+        /**
+         * Construct a {@code StringIterator} with the specified content and separator.
+         *
+         * @param content the content to split.
+         * @param pattern the pattern to use when splitting the content.
+         */
+        StringIteratorForPattern(String content, String pattern) {
+            this.content = content;
+            this.matcher = Pattern.compile(pattern).matcher(content);
+            matcher.useTransparentBounds(true);
+            matcher.useAnchoringBounds(false);
+            this.contentLength = content.length();
+        }
+
+        @Override
+        public boolean hasNext() {
+            for (;;) {
+                if (computed) {
+                    return to != -1;
+                } else if (to == -1) {
+                    return false;
+                }
+                if (matcher.find(from)) {
+                    to = matcher.start();
+                    if (from == to) {
+                        from = matcher.end();
+                        continue;
+                    } else if (matcher.end() == contentLength) {
+                        contentLength = to;
+                    }
+                } else {
+                    to = contentLength;
+                }
+                computed = true;
+                return true;
+            }
+        }
+
+        @Override
+        public String next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            String answer;
+            if (to == contentLength) {
+                answer = content.substring(from, contentLength);
+                to = -1;
+            } else {
+                answer = content.substring(from, to);
+                from = matcher.end();
+            }
+            computed = false;
+            return answer;
+        }
+    }
 }

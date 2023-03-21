@@ -27,27 +27,18 @@ import org.apache.camel.Predicate;
 import org.apache.camel.jsonpath.easypredicate.EasyPredicateParser;
 import org.apache.camel.spi.PropertyConfigurer;
 import org.apache.camel.spi.annotations.Language;
-import org.apache.camel.support.LanguageSupport;
+import org.apache.camel.support.SingleInputTypedLanguageSupport;
 import org.apache.camel.support.component.PropertyConfigurerSupport;
 
 @Language("jsonpath")
-public class JsonPathLanguage extends LanguageSupport implements PropertyConfigurer {
+public class JsonPathLanguage extends SingleInputTypedLanguageSupport implements PropertyConfigurer {
 
-    private Class<?> resultType;
     private boolean suppressExceptions;
     private boolean allowSimple = true;
     private boolean allowEasyPredicate = true;
     private boolean writeAsString;
-    private String headerName;
+    private boolean unpackArray;
     private Option[] options;
-
-    public Class<?> getResultType() {
-        return resultType;
-    }
-
-    public void setResultType(Class<?> resultType) {
-        this.resultType = resultType;
-    }
 
     public boolean isSuppressExceptions() {
         return suppressExceptions;
@@ -81,12 +72,12 @@ public class JsonPathLanguage extends LanguageSupport implements PropertyConfigu
         this.writeAsString = writeAsString;
     }
 
-    public String getHeaderName() {
-        return headerName;
+    public boolean isUnpackArray() {
+        return unpackArray;
     }
 
-    public void setHeaderName(String headerName) {
-        this.headerName = headerName;
+    public void setUnpackArray(boolean unpackArray) {
+        this.unpackArray = unpackArray;
     }
 
     public Option[] getOptions() {
@@ -107,13 +98,14 @@ public class JsonPathLanguage extends LanguageSupport implements PropertyConfigu
     @Override
     public Expression createExpression(String expression) {
         JsonPathExpression answer = new JsonPathExpression(expression);
-        answer.setResultType(resultType);
+        answer.setResultType(getResultType());
         answer.setSuppressExceptions(suppressExceptions);
         answer.setAllowSimple(allowSimple);
         answer.setAllowEasyPredicate(allowEasyPredicate);
-        answer.setHeaderName(headerName);
+        answer.setHeaderName(getHeaderName());
         answer.setWriteAsString(writeAsString);
-        answer.setHeaderName(headerName);
+        answer.setUnpackArray(unpackArray);
+        answer.setPropertyName(getPropertyName());
         answer.setOptions(options);
         answer.init(getCamelContext());
         return answer;
@@ -129,20 +121,22 @@ public class JsonPathLanguage extends LanguageSupport implements PropertyConfigu
     @Override
     public Expression createExpression(String expression, Object[] properties) {
         JsonPathExpression answer = new JsonPathExpression(expression);
-        answer.setResultType(property(Class.class, properties, 0, resultType));
+        answer.setResultType(property(Class.class, properties, 0, getResultType()));
         answer.setSuppressExceptions(property(boolean.class, properties, 1, suppressExceptions));
         answer.setAllowSimple(property(boolean.class, properties, 2, allowSimple));
         answer.setAllowEasyPredicate(property(boolean.class, properties, 3, allowEasyPredicate));
         answer.setWriteAsString(property(boolean.class, properties, 4, writeAsString));
-        answer.setHeaderName(property(String.class, properties, 5, headerName));
-        String option = (String) properties[6];
+        answer.setUnpackArray(property(boolean.class, properties, 5, unpackArray));
+        answer.setHeaderName(property(String.class, properties, 6, getHeaderName()));
+        String option = (String) properties[7];
         if (option != null) {
             List<Option> list = new ArrayList<>();
             for (String s : option.split(",")) {
                 list.add(getCamelContext().getTypeConverter().convertTo(Option.class, s));
             }
-            answer.setOptions(list.toArray(new Option[list.size()]));
+            answer.setOptions(list.toArray(new Option[0]));
         }
+        answer.setPropertyName(property(String.class, properties, 8, getPropertyName()));
         answer.init(getCamelContext());
         return answer;
     }
@@ -188,9 +182,17 @@ public class JsonPathLanguage extends LanguageSupport implements PropertyConfigu
             case "headerName":
                 setHeaderName(PropertyConfigurerSupport.property(camelContext, String.class, value));
                 return true;
+            case "propertyname":
+            case "propertyName":
+                setPropertyName(PropertyConfigurerSupport.property(camelContext, String.class, value));
+                return true;
             case "writeasstring":
             case "writeAsString":
                 setWriteAsString(PropertyConfigurerSupport.property(camelContext, boolean.class, value));
+                return true;
+            case "unpackarray":
+            case "unpackArray":
+                setUnpackArray(PropertyConfigurerSupport.property(camelContext, boolean.class, value));
                 return true;
             case "options":
                 setOptions(PropertyConfigurerSupport.property(camelContext, Option[].class, value));

@@ -141,7 +141,7 @@ public class MllpIdleTimeoutStrategyTest extends CamelTestSupport {
 
     @BeforeEach
     public void setupMock() {
-        resetMocks();
+        MockEndpoint.resetMocks(context);
     }
 
     private void sendHl7Message(ProducerTemplate template) throws Exception {
@@ -149,7 +149,7 @@ public class MllpIdleTimeoutStrategyTest extends CamelTestSupport {
         // Need to send one message to get the connection established
         template.sendBody(Hl7TestMessageGenerator.generateMessage());
         Thread.sleep(IDLE_TIMEOUT * 3);
-        assertMockEndpointsSatisfied(5, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 5, TimeUnit.SECONDS);
     }
 
     @Test
@@ -174,11 +174,11 @@ public class MllpIdleTimeoutStrategyTest extends CamelTestSupport {
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
 
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 route("mllp-sender-default", defaultStrategySource.getDefaultEndpoint(), defaultStrategyEndpoint);
                 route("mllp-sender-reset", resetStrategySource.getDefaultEndpoint(), resetStrategyEndpoint);
                 route("mllp-sender-close", closeStrategySource.getDefaultEndpoint(), closeStrategyEndpoint);

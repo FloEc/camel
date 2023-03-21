@@ -20,14 +20,13 @@ import java.io.InputStream;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@EnabledIf(value = "org.apache.camel.component.file.remote.services.SftpEmbeddedService#hasRequiredAlgorithms")
+@EnabledIf(value = "org.apache.camel.test.infra.ftp.services.embedded.SftpUtil#hasRequiredAlgorithms('src/test/resources/hostkey.pem')")
 public class SftpSimpleConsumeStreamingWithMultipleFilesIT extends SftpServerTestSupport {
 
     @Test
@@ -45,22 +44,22 @@ public class SftpSimpleConsumeStreamingWithMultipleFilesIT extends SftpServerTes
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
 
-        GenericFile<?> remoteFile1 = mock.getExchanges().get(0).getIn().getBody(GenericFile.class);
-        GenericFile<?> remoteFile2 = mock.getExchanges().get(1).getIn().getBody(GenericFile.class);
-        assertTrue(remoteFile1.getBody() instanceof InputStream);
-        assertTrue(remoteFile2.getBody() instanceof InputStream);
+        InputStream is = mock.getExchanges().get(0).getIn().getBody(InputStream.class);
+        assertNotNull(is);
+        InputStream is2 = mock.getExchanges().get(1).getIn().getBody(InputStream.class);
+        assertNotNull(is2);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("sftp://localhost:{{ftp.server.port}}/{{ftp.root.dir}}"
                      + "?username=admin&password=admin&delay=10000&disconnect=true&streamDownload=true").routeId("foo")
-                             .noAutoStartup().to("mock:result");
+                        .noAutoStartup().to("mock:result");
             }
         };
     }

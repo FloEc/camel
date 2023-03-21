@@ -146,7 +146,7 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
     @Override
     public void after(Exchange exchange, Map<String, Object> state) throws Exception {
         if (enableCORS) {
-            setCORSHeaders(exchange, state);
+            setCORSHeaders(exchange);
         }
         if (state.get(STATE_KEY_DO_MARSHAL) != null) {
             marshal(exchange, state);
@@ -282,7 +282,7 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
             }
             if (requiredQueryParameters != null
                     && !exchange.getIn().getHeaders().keySet().containsAll(requiredQueryParameters)) {
-                // this is a bad request, the client did not include some of the required query parameters
+                // this is a bad request, the client did not include some required query parameters
                 exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
                 exchange.getMessage().setBody("Some of the required query parameters are missing.");
                 // stop routing and return
@@ -290,7 +290,7 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
                 return;
             }
             if (requiredHeaders != null && !exchange.getIn().getHeaders().keySet().containsAll(requiredHeaders)) {
-                // this is a bad request, the client did not include some of the required http headers
+                // this is a bad request, the client did not include some required http headers
                 exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
                 exchange.getMessage().setBody("Some of the required HTTP headers are missing.");
                 // stop routing and return
@@ -304,8 +304,16 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
             // add reverse operation
             state.put(STATE_KEY_DO_MARSHAL, STATE_JSON);
             if (ObjectHelper.isNotEmpty(body)) {
-                jsonUnmarshal.process(exchange);
-                ExchangeHelper.prepareOutToIn(exchange);
+                try {
+                    jsonUnmarshal.process(exchange);
+                    ExchangeHelper.prepareOutToIn(exchange);
+                } catch (Exception e) {
+                    exchange.setException(e);
+                }
+                if (exchange.isFailed()) {
+                    // we want to indicate that this is a bad request instead of 500 due to parsing error
+                    exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
+                }
             }
             if (clientRequestValidation && exchange.isFailed()) {
                 // this is a bad request, the client included message body that cannot be parsed to json
@@ -322,8 +330,16 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
             // add reverse operation
             state.put(STATE_KEY_DO_MARSHAL, STATE_XML);
             if (ObjectHelper.isNotEmpty(body)) {
-                xmlUnmarshal.process(exchange);
-                ExchangeHelper.prepareOutToIn(exchange);
+                try {
+                    xmlUnmarshal.process(exchange);
+                    ExchangeHelper.prepareOutToIn(exchange);
+                } catch (Exception e) {
+                    exchange.setException(e);
+                }
+                if (exchange.isFailed()) {
+                    // we want to indicate that this is a bad request instead of 500 due to parsing error
+                    exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
+                }
             }
             if (clientRequestValidation && exchange.isFailed()) {
                 // this is a bad request, the client included message body that cannot be parsed to XML
@@ -499,7 +515,7 @@ public class RestBindingAdvice implements CamelInternalProcessorAdvice<Map<Strin
         }
     }
 
-    private void setCORSHeaders(Exchange exchange, Map<String, Object> state) {
+    private void setCORSHeaders(Exchange exchange) {
         // add the CORS headers after routing, but before the consumer writes the response
         Message msg = exchange.getMessage();
 

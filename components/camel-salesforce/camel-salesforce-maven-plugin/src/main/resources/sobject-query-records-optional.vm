@@ -23,22 +23,12 @@ package $packageName;
 import org.apache.camel.component.salesforce.api.dto.AbstractQueryRecordsBase;
 
 import java.util.List;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 /**
  * Salesforce QueryRecords DTO for type $desc.Name
  */
 #set( $descName = "${desc.Name}Optional" )
 @Generated("org.apache.camel.maven.CamelSalesforceMojo")
-public class QueryRecords$descName extends AbstractQueryRecordsBase {
-
-    private List<$descName> records;
-
-    public List<$descName> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<$descName> records) {
-        this.records = records;
-    }
+public class QueryRecords$descName extends AbstractQueryRecordsBase<$descName> {
 }

@@ -20,12 +20,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProducer;
+import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.EndpointAware;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.Traceable;
 import org.apache.camel.spi.IdAware;
 import org.apache.camel.spi.ProducerCache;
@@ -51,7 +51,7 @@ public class SendProcessor extends AsyncProcessorSupport implements Traceable, E
     private static final Logger LOG = LoggerFactory.getLogger(SendProcessor.class);
 
     protected transient String traceLabelToString;
-    protected final ExtendedCamelContext camelContext;
+    protected final CamelContext camelContext;
     protected final ExchangePattern pattern;
     protected ProducerCache producerCache;
     protected AsyncProducer producer;
@@ -69,7 +69,7 @@ public class SendProcessor extends AsyncProcessorSupport implements Traceable, E
     public SendProcessor(Endpoint destination, ExchangePattern pattern) {
         ObjectHelper.notNull(destination, "destination");
         this.destination = destination;
-        this.camelContext = (ExtendedCamelContext) destination.getCamelContext();
+        this.camelContext = destination.getCamelContext();
         ObjectHelper.notNull(this.camelContext, "camelContext");
         this.pattern = pattern;
         this.destinationExchangePattern = null;
@@ -139,7 +139,7 @@ public class SendProcessor extends AsyncProcessorSupport implements Traceable, E
             // set property which endpoint we send to
             exchange.setProperty(ExchangePropertyKey.TO_ENDPOINT, destination.getEndpointUri());
 
-            final boolean sending = camelContext.isEventNotificationApplicable()
+            final boolean sending = camelContext.getCamelContextExtension().isEventNotificationApplicable()
                     && EventHelper.notifyExchangeSending(exchange.getContext(), target, destination);
             // record timing for sending the exchange using the producer
             StopWatch watch;
@@ -169,7 +169,11 @@ public class SendProcessor extends AsyncProcessorSupport implements Traceable, E
             }
             try {
                 LOG.debug(">>>> {} {}", destination, exchange);
-                return producer.process(exchange, ac);
+                boolean sync = producer.process(exchange, ac);
+                if (!sync) {
+                    EventHelper.notifyExchangeAsyncProcessingStartedEvent(camelContext, exchange);
+                }
+                return sync;
             } catch (Throwable throwable) {
                 exchange.setException(throwable);
                 callback.done(true);
@@ -226,9 +230,6 @@ public class SendProcessor extends AsyncProcessorSupport implements Traceable, E
         // if the producer is not singleton we need to use a producer cache
         if (!destination.isSingletonProducer() && producerCache == null) {
             // use a single producer cache as we need to only hold reference for one destination
-            // and use a regular HashMap as we do not want a soft reference store that may get re-claimed when low on memory
-            // as we want to ensure the producer is kept around, to ensure its lifecycle is fully managed,
-            // eg stopping the producer when we stop etc.
             producerCache = new DefaultProducerCache(this, camelContext, 0);
             // do not add as service as we do not want to manage the producer cache
         }

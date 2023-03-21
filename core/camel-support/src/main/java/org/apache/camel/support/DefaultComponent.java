@@ -32,7 +32,6 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.Component;
 import org.apache.camel.Endpoint;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.ResolveEndpointFailedException;
 import org.apache.camel.component.extension.ComponentExtension;
 import org.apache.camel.spi.Metadata;
@@ -366,20 +365,23 @@ public abstract class DefaultComponent extends ServiceSupport implements Compone
             org.apache.camel.spi.annotations.Component ann
                     = ObjectHelper.getAnnotation(this, org.apache.camel.spi.annotations.Component.class);
             if (ann != null) {
-                defaultName = ann.value();
+                String name = ann.value();
                 // just grab first scheme name if the component has scheme alias (eg http,https)
-                if (defaultName.contains(",")) {
-                    defaultName = StringHelper.before(defaultName, ",");
+                if (name.contains(",")) {
+                    name = StringHelper.before(name, ",");
                 }
+                defaultName = name;
             }
         }
         if (defaultName != null) {
-            final String componentConfigurerName = defaultName + "-component-configurer";
-            componentPropertyConfigurer = getCamelContext().adapt(ExtendedCamelContext.class).getConfigurerResolver()
-                    .resolvePropertyConfigurer(componentConfigurerName, getCamelContext());
-            final String endpointConfigurerName = defaultName + "-endpoint-configurer";
-            endpointPropertyConfigurer = getCamelContext().adapt(ExtendedCamelContext.class).getConfigurerResolver()
-                    .resolvePropertyConfigurer(endpointConfigurerName, getCamelContext());
+            if (componentPropertyConfigurer == null) {
+                componentPropertyConfigurer = getCamelContext().getCamelContextExtension().getConfigurerResolver()
+                        .resolvePropertyConfigurer(defaultName + "-component-configurer", getCamelContext());
+            }
+            if (endpointPropertyConfigurer == null) {
+                endpointPropertyConfigurer = getCamelContext().getCamelContextExtension().getConfigurerResolver()
+                        .resolvePropertyConfigurer(defaultName + "-endpoint-configurer", getCamelContext());
+            }
         }
     }
 

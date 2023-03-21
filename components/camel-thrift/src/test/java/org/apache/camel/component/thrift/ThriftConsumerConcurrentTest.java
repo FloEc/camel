@@ -67,7 +67,7 @@ public class ThriftConsumerConcurrentTest extends CamelTestSupport {
     }
 
     @Test
-    public void testSyncWithConcurrentThreads() throws Exception {
+    public void testSyncWithConcurrentThreads() {
         RunnableAssert ra = new RunnableAssert("testSyncWithConcurrentThreads") {
 
             @Override
@@ -98,7 +98,7 @@ public class ThriftConsumerConcurrentTest extends CamelTestSupport {
     }
 
     @Test
-    public void testAsyncWithConcurrentThreads() throws Exception {
+    public void testAsyncWithConcurrentThreads() {
         RunnableAssert ra = new RunnableAssert("testAsyncWithConcurrentThreads") {
 
             @Override
@@ -157,18 +157,18 @@ public class ThriftConsumerConcurrentTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {
 
                 from("thrift://localhost:" + THRIFT_SYNC_REQUEST_TEST_PORT
                      + "/org.apache.camel.component.thrift.generated.Calculator?synchronous=true")
-                             .setBody(simple("${body[1]}")).bean(new CalculatorMessageBuilder(), "multiply");
+                        .setBody(simple("${body[1]}")).bean(new CalculatorMessageBuilder(), "multiply");
 
                 from("thrift://localhost:" + THRIFT_ASYNC_REQUEST_TEST_PORT
                      + "/org.apache.camel.component.thrift.generated.Calculator")
-                             .setBody(simple("${body[1]}")).bean(new CalculatorMessageBuilder(), "multiply");
+                        .setBody(simple("${body[1]}")).bean(new CalculatorMessageBuilder(), "multiply");
             }
         };
     }

@@ -17,15 +17,14 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-jbang-parent</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -36,9 +35,12 @@
     <description>Camel JBang</description>
 
     <properties>
-        <supportLevel>Experimental</supportLevel>
+        <firstVersion>3.12.0</firstVersion>
+        <label>jbang</label>
+        <supportLevel>Preview</supportLevel>
         <checkstyle.skip>true</checkstyle.skip>
         <dist.dir>dist</dist.dir>
+        <camel-prepare-component>false</camel-prepare-component>
     </properties>
 
     <dependencies>
@@ -76,14 +78,14 @@
                     <execution>
                         <phase>prepare-package</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <copy todir="${dist.dir}">
                                     <fileset dir="${project.build.directory}">
-                                        <include name="**/*.java"/>
+                                        <include name="**/*.java" />
                                     </fileset>
                                 </copy>
                                 <chmod file="${dist.dir}/*.java" perm="u+x" />
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>

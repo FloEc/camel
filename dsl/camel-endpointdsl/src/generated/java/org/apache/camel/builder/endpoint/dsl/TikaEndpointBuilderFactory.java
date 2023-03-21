@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -38,6 +38,75 @@ public interface TikaEndpointBuilderFactory {
      * Builder for endpoint for the Tika component.
      */
     public interface TikaEndpointBuilder extends EndpointProducerBuilder {
+        default AdvancedTikaEndpointBuilder advanced() {
+            return (AdvancedTikaEndpointBuilder) this;
+        }
+        /**
+         * Tika Parse Output Encoding.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: producer
+         * 
+         * @param tikaParseOutputEncoding the value to set
+         * @return the dsl builder
+         */
+        default TikaEndpointBuilder tikaParseOutputEncoding(
+                String tikaParseOutputEncoding) {
+            doSetProperty("tikaParseOutputEncoding", tikaParseOutputEncoding);
+            return this;
+        }
+        /**
+         * Tika Output Format. Supported output formats. xml: Returns Parsed
+         * Content as XML. html: Returns Parsed Content as HTML. text: Returns
+         * Parsed Content as Text. textMain: Uses the boilerpipe library to
+         * automatically extract the main content from a web page.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.component.tika.TikaParseOutputFormat&lt;/code&gt; type.
+         * 
+         * Default: xml
+         * Group: producer
+         * 
+         * @param tikaParseOutputFormat the value to set
+         * @return the dsl builder
+         */
+        default TikaEndpointBuilder tikaParseOutputFormat(
+                org.apache.camel.component.tika.TikaParseOutputFormat tikaParseOutputFormat) {
+            doSetProperty("tikaParseOutputFormat", tikaParseOutputFormat);
+            return this;
+        }
+        /**
+         * Tika Output Format. Supported output formats. xml: Returns Parsed
+         * Content as XML. html: Returns Parsed Content as HTML. text: Returns
+         * Parsed Content as Text. textMain: Uses the boilerpipe library to
+         * automatically extract the main content from a web page.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.tika.TikaParseOutputFormat&lt;/code&gt; type.
+         * 
+         * Default: xml
+         * Group: producer
+         * 
+         * @param tikaParseOutputFormat the value to set
+         * @return the dsl builder
+         */
+        default TikaEndpointBuilder tikaParseOutputFormat(
+                String tikaParseOutputFormat) {
+            doSetProperty("tikaParseOutputFormat", tikaParseOutputFormat);
+            return this;
+        }
+    }
+
+    /**
+     * Advanced builder for endpoint for the Tika component.
+     */
+    public interface AdvancedTikaEndpointBuilder
+            extends
+                EndpointProducerBuilder {
+        default TikaEndpointBuilder basic() {
+            return (TikaEndpointBuilder) this;
+        }
         /**
          * Whether the producer should be started lazy (on the first message).
          * By starting lazy you can use this to allow CamelContext and routes to
@@ -52,12 +121,13 @@ public interface TikaEndpointBuilderFactory {
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default TikaEndpointBuilder lazyStartProducer(boolean lazyStartProducer) {
+        default AdvancedTikaEndpointBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
@@ -76,12 +146,13 @@ public interface TikaEndpointBuilderFactory {
          * type.
          * 
          * Default: false
-         * Group: producer
+         * Group: producer (advanced)
          * 
          * @param lazyStartProducer the value to set
          * @return the dsl builder
          */
-        default TikaEndpointBuilder lazyStartProducer(String lazyStartProducer) {
+        default AdvancedTikaEndpointBuilder lazyStartProducer(
+                String lazyStartProducer) {
             doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
@@ -91,12 +162,12 @@ public interface TikaEndpointBuilderFactory {
          * The option is a:
          * &lt;code&gt;org.apache.tika.config.TikaConfig&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: advanced
          * 
          * @param tikaConfig the value to set
          * @return the dsl builder
          */
-        default TikaEndpointBuilder tikaConfig(
+        default AdvancedTikaEndpointBuilder tikaConfig(
                 org.apache.tika.config.TikaConfig tikaConfig) {
             doSetProperty("tikaConfig", tikaConfig);
             return this;
@@ -107,12 +178,12 @@ public interface TikaEndpointBuilderFactory {
          * The option will be converted to a
          * &lt;code&gt;org.apache.tika.config.TikaConfig&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: advanced
          * 
          * @param tikaConfig the value to set
          * @return the dsl builder
          */
-        default TikaEndpointBuilder tikaConfig(String tikaConfig) {
+        default AdvancedTikaEndpointBuilder tikaConfig(String tikaConfig) {
             doSetProperty("tikaConfig", tikaConfig);
             return this;
         }
@@ -121,68 +192,13 @@ public interface TikaEndpointBuilderFactory {
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Group: producer
+         * Group: advanced
          * 
          * @param tikaConfigUri the value to set
          * @return the dsl builder
          */
-        default TikaEndpointBuilder tikaConfigUri(String tikaConfigUri) {
+        default AdvancedTikaEndpointBuilder tikaConfigUri(String tikaConfigUri) {
             doSetProperty("tikaConfigUri", tikaConfigUri);
-            return this;
-        }
-        /**
-         * Tika Parse Output Encoding.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Group: producer
-         * 
-         * @param tikaParseOutputEncoding the value to set
-         * @return the dsl builder
-         */
-        default TikaEndpointBuilder tikaParseOutputEncoding(
-                String tikaParseOutputEncoding) {
-            doSetProperty("tikaParseOutputEncoding", tikaParseOutputEncoding);
-            return this;
-        }
-        /**
-         * Tika Output Format. Supported output formats. &lt;ul&gt;
-         * &lt;li&gt;xml: Returns Parsed Content as XML. &lt;li&gt;html: Returns
-         * Parsed Content as HTML. &lt;li&gt;text: Returns Parsed Content as
-         * Text. &lt;li&gt;textMain: Uses the.
-         * 
-         * The option is a:
-         * &lt;code&gt;org.apache.camel.component.tika.TikaParseOutputFormat&lt;/code&gt; type.
-         * 
-         * Default: xml
-         * Group: producer
-         * 
-         * @param tikaParseOutputFormat the value to set
-         * @return the dsl builder
-         */
-        default TikaEndpointBuilder tikaParseOutputFormat(
-                org.apache.camel.component.tika.TikaParseOutputFormat tikaParseOutputFormat) {
-            doSetProperty("tikaParseOutputFormat", tikaParseOutputFormat);
-            return this;
-        }
-        /**
-         * Tika Output Format. Supported output formats. &lt;ul&gt;
-         * &lt;li&gt;xml: Returns Parsed Content as XML. &lt;li&gt;html: Returns
-         * Parsed Content as HTML. &lt;li&gt;text: Returns Parsed Content as
-         * Text. &lt;li&gt;textMain: Uses the.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.tika.TikaParseOutputFormat&lt;/code&gt; type.
-         * 
-         * Default: xml
-         * Group: producer
-         * 
-         * @param tikaParseOutputFormat the value to set
-         * @return the dsl builder
-         */
-        default TikaEndpointBuilder tikaParseOutputFormat(
-                String tikaParseOutputFormat) {
-            doSetProperty("tikaParseOutputFormat", tikaParseOutputFormat);
             return this;
         }
     }
@@ -232,7 +248,7 @@ public interface TikaEndpointBuilderFactory {
         }
     }
     static TikaEndpointBuilder endpointBuilder(String componentName, String path) {
-        class TikaEndpointBuilderImpl extends AbstractEndpointBuilder implements TikaEndpointBuilder {
+        class TikaEndpointBuilderImpl extends AbstractEndpointBuilder implements TikaEndpointBuilder, AdvancedTikaEndpointBuilder {
             public TikaEndpointBuilderImpl(String path) {
                 super(componentName, path);
             }

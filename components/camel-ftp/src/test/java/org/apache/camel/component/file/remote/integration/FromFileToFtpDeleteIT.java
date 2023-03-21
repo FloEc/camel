@@ -16,17 +16,23 @@
  */
 package org.apache.camel.component.file.remote.integration;
 
+import java.nio.file.Path;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.junit5.TestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.apache.camel.test.junit5.TestSupport.assertFileExists;
 import static org.apache.camel.test.junit5.TestSupport.assertFileNotExists;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FromFileToFtpDeleteIT extends FtpServerTestSupport {
+    @TempDir
+    Path testDirectory;
 
     protected String getFtpUrl() {
         return "ftp://admin@localhost:{{ftp.server.port}}?password=admin";
@@ -39,23 +45,24 @@ public class FromFileToFtpDeleteIT extends FtpServerTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
 
-        template.sendBodyAndHeader(fileUri("delete"), "Hello World", Exchange.FILE_NAME, "hello.txt");
+        template.sendBodyAndHeader(TestSupport.fileUri(testDirectory, "delete"), "Hello World", Exchange.FILE_NAME,
+                "hello.txt");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         assertTrue(notify.matchesWaitTime());
 
         // file should be deleted
-        assertFileNotExists(testFile("delete/hello.txt"));
+        assertFileNotExists(testDirectory.resolve("delete/hello.txt"));
 
         // file should exists on ftp server
-        assertFileExists(ftpFile("hello.txt"));
+        assertFileExists(service.ftpFile("hello.txt"));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
-                from(fileUri("delete?delete=true")).to(getFtpUrl()).to("mock:result");
+            public void configure() {
+                from(TestSupport.fileUri(testDirectory, "delete?delete=true")).to(getFtpUrl()).to("mock:result");
             }
         };
     }

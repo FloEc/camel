@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>core</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-core-engine</artifactId>
@@ -35,18 +35,6 @@
     <properties>
         <firstVersion>3.0.0</firstVersion>
         <label>core</label>
-        <camel.osgi.dynamic>
-            org.apache.camel.spring.util;${camel.osgi.import.strict.version},
-            org.apache.camel.spring.pollingconsumer;${camel.osgi.import.strict.version},
-            org.apache.camel.processor.interceptor.jpa;${camel.osgi.import.strict.version},
-            org.apache.camel.pollconsumer.quartz;${camel.osgi.import.strict.version},
-            org.apache.camel.component.caffeine;${camel.osgi.import.strict.version},
-            net.sf.saxon
-        </camel.osgi.dynamic>
-        <camel.osgi.import>
-            javax.xml.bind*;version="[2.2,3.0)",
-            *
-        </camel.osgi.import>
         <platform.skip.tests>false</platform.skip.tests>
     </properties>
 
@@ -57,15 +45,8 @@
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>${jakarta-jaxb-version}</version>
+            <version>${jakarta-xml-bind-api-version}</version>
             <optional>true</optional>
-        </dependency>
-
-        <!-- xmltokenizer using woodstox -->
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>woodstox-core-asl</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <!-- required dependencies by camel-core -->
@@ -146,24 +127,11 @@
                                 <class>org.apache.camel.ExtendedCamelContext=org.apache.camel.impl.ExtendedCamelContext</class>
                                 <!-- we want to have configurer for RestConfiguration in camel-core-engine -->
                                 <class>org.apache.camel.spi.RestConfiguration=org.apache.camel.impl.RestConfiguration</class>
+                                <class>org.apache.camel.CamelContext=org.apache.camel.impl.CamelContext</class>
                             </classes>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <_plugin>
-                            org.apache.felix.bundleplugin.BlueprintPlugin,
-                            aQute.lib.spring.SpringXMLType,
-                            org.apache.felix.bundleplugin.JpaPlugin,
-                            org.apache.camel.maven.bundle.CamelPlugin
-                        </_plugin>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -322,17 +290,6 @@
         </profile>
 
         <profile>
-            <id>xalan</id>
-            <dependencies>
-                <!-- enable the Xalan processor -->
-                <dependency>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                    <version>${xalan-version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
             <id>xerces</id>
             <dependencies>
                 <!-- enable the xerces processor -->
@@ -353,7 +310,14 @@
                 <dependency>
                     <groupId>org.codehaus.woodstox</groupId>
                     <artifactId>woodstox-core-asl</artifactId>
+                    <version>${woodstox-version}</version>
                     <scope>test</scope>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>javax.xml.stream</groupId>
+                            <artifactId>stax-api</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
             </dependencies>
         </profile>

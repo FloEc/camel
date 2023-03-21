@@ -2,7 +2,7 @@
 :doctitle: Kudu
 :shortname: kudu
 :artifactid: camel-kudu
-:description: Interact with , a free and open source column-oriented data store of the Apache Hadoop ecosystem.
+:description: Interact with Apache Kudu, a free and open source column-oriented data store of the Apache Hadoop ecosystem.
 :since: 3.0
 :supportlevel: Stable
 :component-header: Only producer is supported
@@ -32,11 +32,13 @@ include::partial$component-endpoint-options.adoc[]
 // endpoint options: START
 
 // endpoint options: END
-
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Input Body formats
 
-=== Insert
+=== Insert, delete, update, and upsert
 
 The input body format has to be a java.util.Map<String, Object>. This map will represent a row of the table whose elements are columns, where the key is the column name and the value is the value of the column. 
 

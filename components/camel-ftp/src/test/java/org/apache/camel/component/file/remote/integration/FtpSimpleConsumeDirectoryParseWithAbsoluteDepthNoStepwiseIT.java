@@ -30,7 +30,7 @@ public class FtpSimpleConsumeDirectoryParseWithAbsoluteDepthNoStepwiseIT extends
         // create file using regular file
 
         // FTP Server does not support absolute path, so lets simulate it
-        String path = ftpFile("tmp/mytemp").toString();
+        String path = service.ftpFile("tmp/mytemp").toString();
         template.sendBodyAndHeader("file:" + path, expected, Exchange.FILE_NAME, "hello.txt");
 
         MockEndpoint mock = getMockEndpoint("mock:result");
@@ -39,17 +39,17 @@ public class FtpSimpleConsumeDirectoryParseWithAbsoluteDepthNoStepwiseIT extends
 
         context.getRouteController().startRoute("foo");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("ftp://localhost:{{ftp.server.port}}//tmp/mytemp?username=admin&password=admin&delay=10000"
                      + "&disconnect=true&download=true&stepwise=false&delete=false&handleDirectoryParserAbsoluteResult=true")
-                             .routeId("foo").noAutoStartup().to("mock:result");
+                        .routeId("foo").noAutoStartup().to("mock:result");
             }
         };
     }

@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.camel</groupId>
         <artifactId>components</artifactId>
-        <version>3.15.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>camel-hdfs</artifactId>
@@ -32,20 +32,6 @@
     <description>Camel HDFS support with Hadoop 3.x libraries</description>
 
     <properties>
-        <camel.osgi.import.additional>
-            org.apache.hadoop.hdfs,
-            org.apache.hadoop.hdfs.client,
-            org.apache.hadoop.hdfs.protocolPB,
-            org.apache.hadoop.hdfs.util,
-            org.apache.hadoop.hdfs.net,
-            org.apache.hadoop.hdfs.security.token.block,
-            org.apache.hadoop.hdfs.security.token.delegation,
-            org.apache.hadoop.hdfs.protocol,
-            org.apache.hadoop.hdfs.protocol.proto,
-            org.apache.hadoop.hdfs.protocol.datatransfer,
-            org.apache.hadoop.net,
-            org.apache.hadoop.ipc
-        </camel.osgi.import.additional>
     </properties>
 
     <dependencies>
@@ -71,6 +57,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-reload4j</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -127,29 +117,24 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
+            <version>${hamcrest-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
 
         <!-- test infra -->
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-test-infra-common</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-test-infra-hdfs</artifactId>

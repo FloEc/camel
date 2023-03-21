@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
@@ -164,7 +164,7 @@ public class JpaWithNamedQueryTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         camelContext.start();
         template = camelContext.createProducerTemplate();
 
@@ -182,7 +182,7 @@ public class JpaWithNamedQueryTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ServiceHelper.stopService(consumer, template);
         camelContext.stop();
     }

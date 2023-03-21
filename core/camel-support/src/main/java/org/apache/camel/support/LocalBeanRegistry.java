@@ -17,7 +17,6 @@
 package org.apache.camel.support;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,18 +42,4 @@ public final class LocalBeanRegistry extends SupplierRegistry {
         return Collections.unmodifiableSet(keySet());
     }
 
-    /**
-     * Swaps the key which is used when this local registry have a number of bound beans that would clash with global
-     * registry or endpoint registry in Camel. Then there is a check that validates for clashes and then re-assign key
-     * names.
-     *
-     * @param oldKey the old key name
-     * @param newKey the new key name
-     */
-    public void swapKey(String oldKey, String newKey) {
-        Map<Class<?>, Object> value = remove(oldKey);
-        if (value != null) {
-            put(newKey, value);
-        }
-    }
 }

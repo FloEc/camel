@@ -35,10 +35,10 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPOutputStream;
 
-import javax.activation.DataHandler;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.activation.DataHandler;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -157,20 +157,28 @@ public class DefaultHttpBinding implements HttpBinding {
 
         Map<String, Object> headers = message.getHeaders();
 
-        //apply the headerFilterStrategy
         Enumeration<?> names = request.getHeaderNames();
         while (names.hasMoreElements()) {
             String name = (String) names.nextElement();
-            String value = request.getHeader(name);
-            // use http helper to extract parameter value as it may contain multiple values
-            Object extracted = HttpHelper.extractHttpParameterValue(value);
             // mapping the content-type
             if (name.equalsIgnoreCase("content-type")) {
                 name = Exchange.CONTENT_TYPE;
             }
-            if (headerFilterStrategy != null
-                    && !headerFilterStrategy.applyFilterToExternalHeaders(name, extracted, message.getExchange())) {
-                HttpHelper.appendHeader(headers, name, extracted);
+            // some implementations like Jetty might return unique header names, while some others might not.
+            // Since we are going to call request.getHeaders() to get all values for a header name,
+            // we only need to process a header once.
+            if (!headers.containsKey(name)) {
+                Enumeration<String> values = request.getHeaders(name);
+                while (values.hasMoreElements()) {
+                    String value = values.nextElement();
+                    // use http helper to extract parameter value as it may contain multiple values
+                    Object extracted = HttpHelper.extractHttpParameterValue(value);
+                    //apply the headerFilterStrategy
+                    if (headerFilterStrategy != null
+                            && !headerFilterStrategy.applyFilterToExternalHeaders(name, extracted, message.getExchange())) {
+                        HttpHelper.appendHeader(headers, name, extracted);
+                    }
+                }
             }
         }
 
@@ -295,7 +303,7 @@ public class DefaultHttpBinding implements HttpBinding {
         String uri = request.getRequestURI();
         /**
          * In async case, it seems that request.getContextPath() can return null
-         * 
+         *
          * @see https://dev.eclipse.org/mhonarc/lists/jetty-users/msg04669.html
          */
         String contextPath = request.getContextPath() == null ? "" : request.getContextPath();
@@ -312,6 +320,10 @@ public class DefaultHttpBinding implements HttpBinding {
             LOG.trace("HTTP attachment {} = {}", name, object);
             if (object instanceof File) {
                 String fileName = request.getParameter(name);
+                // fix file name if using malicious parameter name
+                if (fileName != null) {
+                    fileName = fileName.replaceAll("[\n\r\t]", "_");
+                }
                 // is the file name accepted
                 boolean accepted = true;
                 if (fileNameExtWhitelist != null) {
@@ -436,7 +448,7 @@ public class DefaultHttpBinding implements HttpBinding {
     /*
      * set the HTTP status code
      * NOTE: this is similar to the Netty-Http and Undertow approach
-     * TODO: we may want to refactor this class so that 
+     * TODO: we may want to refactor this class so that
      * the status code is determined in one place
      */
     private int determineResponseCode(Exchange camelExchange, Object body) {
@@ -449,7 +461,7 @@ public class DefaultHttpBinding implements HttpBinding {
 
         if (codeToUse != 500) {
             if (body == null || body instanceof String && ((String) body).trim().isEmpty()) {
-                // no content 
+                // no content
                 codeToUse = currentCode == null ? 204 : currentCode;
             }
         }
@@ -762,7 +774,7 @@ public class DefaultHttpBinding implements HttpBinding {
         StringBuilder sb = new StringBuilder();
         sb.append(locale.getLanguage());
         if (locale.getCountry() != null) {
-            // Locale.toString() will use a "_" separator instead, 
+            // Locale.toString() will use a "_" separator instead,
             // while '-' is expected in headers such as Content-Language, etc:
             // http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.10
             sb.append('-').append(locale.getCountry());

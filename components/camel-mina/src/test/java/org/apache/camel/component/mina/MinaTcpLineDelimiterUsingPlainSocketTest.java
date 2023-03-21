@@ -78,7 +78,7 @@ public class MinaTcpLineDelimiterUsingPlainSocketTest extends BaseMinaTest {
     }
 
     private String sendAndReceive(String input) throws IOException {
-        byte buf[] = new byte[128];
+        byte[] buf = new byte[128];
 
         Socket soc = new Socket();
         soc.connect(new InetSocketAddress("localhost", getPort()));
@@ -125,21 +125,21 @@ public class MinaTcpLineDelimiterUsingPlainSocketTest extends BaseMinaTest {
                 // use no delay for fast unit testing
                 errorHandler(defaultErrorHandler().maximumRedeliveries(2));
 
-                from(String.format("mina:tcp://localhost:%1$s?textline=true&minaLogger=true&textlineDelimiter=MAC&sync=true",
-                        getPort()))
-                                .process(e -> {
-                                    String in = e.getIn().getBody(String.class);
-                                    if ("force-null-out-body".equals(in)) {
-                                        // forcing a null out body
-                                        e.getMessage().setBody(null);
-                                    } else if ("force-exception".equals(in)) {
-                                        // clear out before throwing exception
-                                        e.getMessage().setBody(null);
-                                        throw new IllegalArgumentException("Forced exception");
-                                    } else {
-                                        e.getMessage().setBody("Hello " + in);
-                                    }
-                                });
+                fromF("mina:tcp://localhost:%1$s?textline=true&minaLogger=true&textlineDelimiter=MAC&sync=true",
+                        getPort())
+                        .process(e -> {
+                            String in = e.getIn().getBody(String.class);
+                            if ("force-null-out-body".equals(in)) {
+                                // forcing a null out body
+                                e.getMessage().setBody(null);
+                            } else if ("force-exception".equals(in)) {
+                                // clear out before throwing exception
+                                e.getMessage().setBody(null);
+                                throw new IllegalArgumentException("Forced exception");
+                            } else {
+                                e.getMessage().setBody("Hello " + in);
+                            }
+                        });
             }
         };
     }

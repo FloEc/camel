@@ -36,7 +36,7 @@ for this component:
 You can store a Java entity bean in a database by sending it to a JPA
 producer endpoint. The body of the _In_ message is assumed to be an
 entity bean (that is, a POJO with an
-http://java.sun.com/javaee/5/docs/api/javax/persistence/Entity.html[@Entity]
+https://jakarta.ee/specifications/persistence/2.2/apidocs/javax/persistence/entity[@Entity]
 annotation on it) or a collection or array of entity beans.
 
 If the body is a List of entities, make sure to use
@@ -108,20 +108,9 @@ include::partial$component-endpoint-options.adoc[]
 
 // endpoint options: END
 
-
-== Message Headers
-
-Camel adds the following message headers to the exchange:
-
-[width="100%",cols="10%,10%,80%",options="header",]
-|=======================================================================
-|Header |Type |Description
-
-|`CamelEntityManager` |`EntityManager` |The JPA `EntityManager` object being used by `JpaConsumer` or `JpaProducer`.
-
-|`CamelJpaParameters` |`Map<String, Object>` |Alternative way for passing query parameters as an Exchange header.
-
-|=======================================================================
+// component headers: START
+include::partial$component-endpoint-headers.adoc[]
+// component headers: END
 
 == Configuring EntityManagerFactory
 
@@ -300,7 +289,7 @@ Index: 20, Size: 20
 <camelContext xmlns="http://camel.apache.org/schema/spring">
     <route id="JpaMessageIdRepositoryTest">
         <from uri="direct:start" />
-        <idempotentConsumer messageIdRepositoryRef="jpaStore">
+        <idempotentConsumer idempotentRepository="jpaStore">
             <header>messageId</header>
             <to uri="mock:result" />
         </idempotentConsumer>

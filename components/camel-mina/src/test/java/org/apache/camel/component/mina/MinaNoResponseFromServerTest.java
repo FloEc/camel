@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class MinaNoResponseFromServerTest extends BaseMinaTest {
 
     @BindToRegistry("myCodec")
-    private MyCodec codec1 = new MyCodec();
+    private final MyCodec codec1 = new MyCodec();
 
     @Test
     public void testNoResponse() throws Exception {
@@ -56,11 +56,11 @@ public class MinaNoResponseFromServerTest extends BaseMinaTest {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
 
-            public void configure() throws Exception {
-                from(String.format("mina:tcp://localhost:%1$s?sync=true&codec=#myCodec", getPort()))
+            public void configure() {
+                fromF("mina:tcp://localhost:%1$s?sync=true&codec=#myCodec", getPort())
                         .transform(constant("Bye World")).to("mock:result");
             }
         };
@@ -69,15 +69,15 @@ public class MinaNoResponseFromServerTest extends BaseMinaTest {
     private static class MyCodec implements ProtocolCodecFactory {
 
         @Override
-        public ProtocolEncoder getEncoder(IoSession session) throws Exception {
+        public ProtocolEncoder getEncoder(IoSession session) {
             return new ProtocolEncoder() {
 
-                public void encode(IoSession ioSession, Object message, ProtocolEncoderOutput out) throws Exception {
+                public void encode(IoSession ioSession, Object message, ProtocolEncoderOutput out) {
                     // close session instead of returning a reply
                     ioSession.closeNow();
                 }
 
-                public void dispose(IoSession ioSession) throws Exception {
+                public void dispose(IoSession ioSession) {
                     // do nothing
                 }
             };
@@ -85,19 +85,19 @@ public class MinaNoResponseFromServerTest extends BaseMinaTest {
         }
 
         @Override
-        public ProtocolDecoder getDecoder(IoSession session) throws Exception {
+        public ProtocolDecoder getDecoder(IoSession session) {
             return new ProtocolDecoder() {
 
-                public void decode(IoSession ioSession, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+                public void decode(IoSession ioSession, IoBuffer in, ProtocolDecoderOutput out) {
                     // close session instead of returning a reply
                     ioSession.closeNow();
                 }
 
-                public void finishDecode(IoSession ioSession, ProtocolDecoderOutput protocolDecoderOutput) throws Exception {
+                public void finishDecode(IoSession ioSession, ProtocolDecoderOutput protocolDecoderOutput) {
                     // do nothing
                 }
 
-                public void dispose(IoSession ioSession) throws Exception {
+                public void dispose(IoSession ioSession) {
                     // do nothing
                 }
             };

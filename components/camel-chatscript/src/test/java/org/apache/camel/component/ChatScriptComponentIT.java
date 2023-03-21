@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component;
 
+import java.time.Duration;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.builder.RouteBuilder;
@@ -29,25 +31,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 public class ChatScriptComponentIT extends CamelTestSupport {
-    @RegisterExtension
-    static ChatScriptService service = ChatScriptServiceFactory.createService();
-
     private static final Logger LOG = LoggerFactory.getLogger(ChatScriptComponentIT.class);
+
+    @RegisterExtension
+    public ChatScriptService service = ChatScriptServiceFactory.createService();
 
     @Test
     public void testChatScript() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);
-        Thread.sleep(100);
-        assertMockEndpointsSatisfied();
+        Awaitility.await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> MockEndpoint.assertIsSatisfied(context));
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws JsonProcessingException {
+            public void configure() {
                 String g = "CS" + Math.random();
                 ChatScriptMessage rqMsg = new ChatScriptMessage(g, "", "");
                 ChatScriptMessage rq2Msg = new ChatScriptMessage(g, "", "Hello");

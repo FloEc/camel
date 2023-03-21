@@ -23,10 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.Binder;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.Binder;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,7 +35,6 @@ import org.w3c.dom.Node;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Expression;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.NamedNode;
 import org.apache.camel.TypeConversionException;
 import org.apache.camel.converter.jaxp.XmlConverter;
@@ -47,6 +46,8 @@ import org.apache.camel.model.RouteTemplateDefinition;
 import org.apache.camel.model.RouteTemplatesDefinition;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.model.SendDefinition;
+import org.apache.camel.model.TemplatedRouteDefinition;
+import org.apache.camel.model.TemplatedRoutesDefinition;
 import org.apache.camel.model.ToDynamicDefinition;
 import org.apache.camel.model.language.ExpressionDefinition;
 import org.apache.camel.model.rest.RestDefinition;
@@ -63,7 +64,7 @@ public final class JaxbHelper {
     }
 
     public static JAXBContext getJAXBContext(CamelContext context) throws Exception {
-        return (JAXBContext) context.adapt(ExtendedCamelContext.class).getModelJAXBContextFactory().newJAXBContext();
+        return (JAXBContext) context.getCamelContextExtension().getModelJAXBContextFactory().newJAXBContext();
     }
 
     /**
@@ -118,20 +119,20 @@ public final class JaxbHelper {
     public static void resolveEndpointDslUris(RouteDefinition route) {
         FromDefinition from = route.getInput();
         if (from != null && from.getEndpointConsumerBuilder() != null) {
-            String uri = from.getEndpointConsumerBuilder().getUri();
+            String uri = from.getEndpointConsumerBuilder().getRawUri();
             from.setUri(uri);
         }
         Collection<SendDefinition> col = filterTypeInOutputs(route.getOutputs(), SendDefinition.class);
         for (SendDefinition<?> to : col) {
             if (to.getEndpointProducerBuilder() != null) {
-                String uri = to.getEndpointProducerBuilder().getUri();
+                String uri = to.getEndpointProducerBuilder().getRawUri();
                 to.setUri(uri);
             }
         }
         Collection<ToDynamicDefinition> col2 = filterTypeInOutputs(route.getOutputs(), ToDynamicDefinition.class);
         for (ToDynamicDefinition to : col2) {
             if (to.getEndpointProducerBuilder() != null) {
-                String uri = to.getEndpointProducerBuilder().getUri();
+                String uri = to.getEndpointProducerBuilder().getRawUri();
                 to.setUri(uri);
             }
         }
@@ -167,7 +168,7 @@ public final class JaxbHelper {
      * @param document   the DOM document
      * @param namespaces the map of namespaces to add new found XML namespaces
      */
-    public static void extractNamespaces(Document document, Map<String, String> namespaces) throws JAXBException {
+    public static void extractNamespaces(Document document, Map<String, String> namespaces) {
         NamedNodeMap attributes = document.getDocumentElement().getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node item = attributes.item(i);
@@ -314,6 +315,50 @@ public final class JaxbHelper {
             for (RouteTemplateDefinition route : answer.getRouteTemplates()) {
                 applyNamespaces(route.getRoute(), namespaces);
             }
+        } else {
+            // ignore not supported type
+            return null;
+        }
+
+        return answer;
+    }
+
+    /**
+     * Un-marshals the content of the input stream to an instance of {@link TemplatedRoutesDefinition}.
+     *
+     * @param  context     the Camel context from which the JAXBContext is extracted
+     * @param  inputStream the input stream to unmarshal
+     * @return             the content unmarshalled as a {@link TemplatedRoutesDefinition}.
+     * @throws Exception   if an exception occurs while unmarshalling
+     */
+    public static TemplatedRoutesDefinition loadTemplatedRoutesDefinition(CamelContext context, InputStream inputStream)
+            throws Exception {
+        XmlConverter xmlConverter = newXmlConverter(context);
+        Document dom = xmlConverter.toDOMDocument(inputStream, null);
+
+        JAXBContext jaxbContext = getJAXBContext(context);
+
+        Map<String, String> namespaces = new LinkedHashMap<>();
+        extractNamespaces(dom, namespaces);
+        if (!namespaces.containsValue(CAMEL_NS)) {
+            addNamespaceToDom(dom);
+        }
+
+        Binder<Node> binder = jaxbContext.createBinder();
+        Object result = binder.unmarshal(dom);
+
+        if (result == null) {
+            throw new JAXBException("Cannot unmarshal to TemplatedRoutesDefinition using JAXB");
+        }
+
+        // can either be routes or a single route
+        TemplatedRoutesDefinition answer;
+        if (result instanceof TemplatedRouteDefinition) {
+            TemplatedRouteDefinition templatedRoute = (TemplatedRouteDefinition) result;
+            answer = new TemplatedRoutesDefinition();
+            answer.getTemplatedRoutes().add(templatedRoute);
+        } else if (result instanceof TemplatedRoutesDefinition) {
+            answer = (TemplatedRoutesDefinition) result;
         } else {
             // ignore not supported type
             return null;

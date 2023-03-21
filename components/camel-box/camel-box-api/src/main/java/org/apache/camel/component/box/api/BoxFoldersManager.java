@@ -45,7 +45,7 @@ public class BoxFoldersManager {
 
     /**
      * Create folder manager to manage folders of Box connection's authenticated user.
-     * 
+     *
      * @param boxConnection - Box connection to authenticated user account.
      */
     public BoxFoldersManager(BoxAPIConnection boxConnection) {
@@ -54,7 +54,7 @@ public class BoxFoldersManager {
 
     /**
      * Return the root folder of authenticated user.
-     * 
+     *
      * @return The root folder of authenticated user.
      */
     public BoxFolder getRootFolder() {
@@ -69,14 +69,16 @@ public class BoxFoldersManager {
 
     /**
      * Return the Box folder referenced by <code>path</code>.
-     * 
+     *
      * @param  path - Sequence of Box folder names from root folder to returned folder.
-     * 
+     *
      * @return      The Box folder referenced by <code>path</code> or <code>null</code> if folder is not found.
      */
     public BoxFolder getFolder(String... path) {
         try {
-            LOG.debug("Getting folder at path={}", Arrays.toString(path));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Getting folder at path={}", Arrays.toString(path));
+            }
 
             BoxFolder folder = BoxFolder.getRootFolder(boxConnection);
             if (path == null || path.length == 0) {
@@ -103,7 +105,7 @@ public class BoxFoldersManager {
 
     /**
      * Returns a specific range of child items in folder and specifies which fields of each item to retrieve.
-     * 
+     *
      * @param  folderId - the id of folder.
      * @param  offset   - the index of first child item to retrieve; if <code>null</code> all child items are retrieved.
      * @param  limit    - the maximum number of children to retrieve after the offset; if <code>null</code> all child
@@ -114,8 +116,10 @@ public class BoxFoldersManager {
      */
     public Collection<BoxItem.Info> getFolderItems(String folderId, Long offset, Long limit, String... fields) {
         try {
-            LOG.debug("Getting folder items in folder(id={}) at offset={} and limit={} with fields={}",
-                    folderId, offset, limit, Arrays.toString(fields));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Getting folder items in folder(id={}) at offset={} and limit={} with fields={}",
+                        folderId, offset, limit, Arrays.toString(fields));
+            }
             if (folderId == null) {
                 throw new IllegalArgumentException("Parameter 'folderId' can not be null");
             }
@@ -147,7 +151,7 @@ public class BoxFoldersManager {
 
     /**
      * Create a folder in parent folder with given <code>parentFolderId</code>.
-     * 
+     *
      * @param  parentFolderId - the id of parent folder.
      * @param  folderName     the name of created folder.
      * @return                The created folder.
@@ -179,7 +183,11 @@ public class BoxFoldersManager {
      */
     public BoxFolder createFolder(String parentFolderId, String... path) {
         try {
-            LOG.debug("Creating folder with path '{}' in parent_folder(id={})", Arrays.toString(path), parentFolderId);
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Creating folder with path '{}' in parent_folder(id={})", Arrays.toString(path), parentFolderId);
+            }
+
             if (parentFolderId == null) {
                 throw new IllegalArgumentException("Parameter 'parentFolderId' can not be null");
             }
@@ -205,7 +213,7 @@ public class BoxFoldersManager {
 
     /**
      * Copy folder to destination folder while optionally giving it a new name.
-     * 
+     *
      * @param  folderId            - the id of folder to copy.
      * @param  destinationFolderId - the id of the destination folder.
      * @param  newName             - the new name for copied folder; if <code>newName</code> is <code>null</code>, the
@@ -237,7 +245,7 @@ public class BoxFoldersManager {
 
     /**
      * Move folder to destination folder while optionally giving it a new name.
-     * 
+     *
      * @param  folderId            - the id of folder to move.
      * @param  destinationFolderId - the id of the destination folder.
      * @param  newName             - the new name of moved folder; if <code>newName</code> is <code>null</code>, the
@@ -269,7 +277,7 @@ public class BoxFoldersManager {
 
     /**
      * Rename folder giving it the name <code>newName</code>
-     * 
+     *
      * @param  folderId      - the id of folder to rename.
      * @param  newFolderName - the new name of folder.
      * @return               The renamed folder.
@@ -294,7 +302,7 @@ public class BoxFoldersManager {
 
     /**
      * Delete folder.
-     * 
+     *
      * @param folderId - the id of folder to delete.
      */
     public void deleteFolder(String folderId) {
@@ -313,7 +321,7 @@ public class BoxFoldersManager {
 
     /**
      * Get folder information.
-     * 
+     *
      * @param  folderId - the id of folder.
      * @param  fields   - the information fields to retrieve; if <code>null</code> all information fields are retrieved.
      * @return          The folder information.
@@ -340,7 +348,7 @@ public class BoxFoldersManager {
 
     /**
      * Update folder information.
-     * 
+     *
      * @param  folderId - the id of folder to update.
      * @param  info     - the updated information
      * @return          The updated folder.
@@ -365,7 +373,7 @@ public class BoxFoldersManager {
 
     /**
      * Create a shared link to folder.
-     * 
+     *
      * @param  folderId    - the id of folder to create shared link on.
      * @param  access      - the access level of the shared link.
      * @param  unshareDate - the date and time at which time the created shared link will expire; if

@@ -21,11 +21,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.remote.FtpEndpoint;
+import org.apache.camel.model.language.SimpleExpression;
 import org.apache.commons.net.ftp.FTPClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.camel.language.simple.SimpleLanguage.simple;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,7 +48,7 @@ public class FtpProducerDisconnectOnBatchCompleteIT extends FtpServerTestSupport
     }
 
     @Test
-    public void testDisconnectOnBatchComplete() throws Exception {
+    public void testDisconnectOnBatchComplete() {
         sendFile(getFtpUrl(), "Hello World", "claus.txt");
 
         FtpEndpoint<?> endpoint = context.getEndpoint(getFtpUrl(), FtpEndpoint.class);
@@ -63,8 +63,8 @@ public class FtpProducerDisconnectOnBatchCompleteIT extends FtpServerTestSupport
         template.send(url, new Processor() {
 
             @Override
-            public void process(Exchange exchange) throws Exception {
-                exchange.getIn().setHeader(Exchange.FILE_NAME, simple(fileName));
+            public void process(Exchange exchange) {
+                exchange.getIn().setHeader(Exchange.FILE_NAME, new SimpleExpression(fileName));
                 exchange.setProperty(Exchange.BATCH_COMPLETE, true);
             }
         });

@@ -42,8 +42,8 @@ public final class URISupport {
     // Match any key-value pair in the URI query string whose key contains
     // "passphrase" or "password" or secret key (case-insensitive).
     // First capture group is the key, second is the value.
-    private static final Pattern SECRETS = Pattern.compile(
-            "([?&][^=]*(?:passphrase|password|secretKey|accessToken|clientSecret|authorizationToken|saslJaasConfig)[^=]*)=(RAW[({].*[)}]|[^&]*)",
+    private static final Pattern ALL_SECRETS = Pattern.compile(
+            "([?&][^=]*(?:" + SensitiveUtils.getSensitivePattern() + ")[^=]*)=(RAW(([{][^}]*[}])|([(][^)]*[)]))|[^&]*)",
             Pattern.CASE_INSENSITIVE);
 
     // Match the user password in the URI as second capture group
@@ -66,15 +66,15 @@ public final class URISupport {
      * Removes detected sensitive information (such as passwords) from the URI and returns the result.
      *
      * @param  uri The uri to sanitize.
-     * @see        #SECRETS and #USERINFO_PASSWORD for the matched pattern
      * @return     Returns null if the uri is null, otherwise the URI with the passphrase, password or secretKey
      *             sanitized.
+     * @see        #ALL_SECRETS and #USERINFO_PASSWORD for the matched pattern
      */
     public static String sanitizeUri(String uri) {
         // use xxxxx as replacement as that works well with JMX also
         String sanitized = uri;
         if (uri != null) {
-            sanitized = SECRETS.matcher(sanitized).replaceAll("$1=xxxxxx");
+            sanitized = ALL_SECRETS.matcher(sanitized).replaceAll("$1=xxxxxx");
             sanitized = USERINFO_PASSWORD.matcher(sanitized).replaceFirst("$1xxxxxx$3");
         }
         return sanitized;
@@ -331,14 +331,20 @@ public final class URISupport {
                     String raw = URIScanner.resolveRaw(str);
                     if (raw != null) {
                         // update the string in the list
-                        list.set(i, raw);
+                        // do not encode RAW parameters unless it has %
+                        // need to reverse: replace % with %25 to avoid losing "%" when decoding
+                        String s = raw.replace("%25", "%");
+                        list.set(i, s);
                     }
                 }
             } else {
                 String str = entry.getValue().toString();
                 String raw = URIScanner.resolveRaw(str);
                 if (raw != null) {
-                    entry.setValue(raw);
+                    // do not encode RAW parameters unless it has %
+                    // need to reverse: replace % with %25 to avoid losing "%" when decoding
+                    String s = raw.replace("%25", "%");
+                    entry.setValue(s);
                 }
             }
         }
@@ -787,4 +793,19 @@ public final class URISupport {
 
         return joined.toString();
     }
+
+    public static String buildMultiValueQuery(String key, Iterable<Object> values) {
+        StringBuilder sb = new StringBuilder();
+        for (Object v : values) {
+            String s = v.toString();
+            if (sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(key);
+            sb.append("=");
+            sb.append(v);
+        }
+        return sb.toString();
+    }
+
 }

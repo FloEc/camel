@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RouteConcurrentTest extends CamelOpenTelemetryTestSupport {
+class RouteConcurrentTest extends CamelOpenTelemetryTestSupport {
 
     private static SpanTestData[] testdata = {
             new SpanTestData().setLabel("seda:foo server").setUri("seda://foo?concurrentConsumers=5").setOperation("foo"),
@@ -33,12 +33,12 @@ public class RouteConcurrentTest extends CamelOpenTelemetryTestSupport {
                     .setParentId(0)
     };
 
-    public RouteConcurrentTest() {
+    RouteConcurrentTest() {
         super(testdata);
     }
 
     @Test
-    public void testSingleInvocationsOfRoute() throws Exception {
+    void testSingleInvocationsOfRoute() {
         NotifyBuilder notify = new NotifyBuilder(context).whenDone(2).create();
 
         template.sendBody("seda:foo", "Hello World");
@@ -49,7 +49,7 @@ public class RouteConcurrentTest extends CamelOpenTelemetryTestSupport {
     }
 
     @Test
-    public void testConcurrentInvocationsOfRoute() throws Exception {
+    void testConcurrentInvocationsOfRoute() {
         NotifyBuilder notify = new NotifyBuilder(context).whenDone(10).create();
 
         for (int i = 0; i < 5; i++) {
@@ -62,10 +62,10 @@ public class RouteConcurrentTest extends CamelOpenTelemetryTestSupport {
     }
 
     @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
+    protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 from("seda:foo?concurrentConsumers=5").routeId("foo")
                         .log("routing at ${routeId}")
                         .delay(simple("${random(1000,2000)}"))

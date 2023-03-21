@@ -50,10 +50,10 @@ public class GoogleCloudIT extends CamelTestSupport {
     private MockEndpoint mockCreateFunction;
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
 
                 // list functions
                 from("timer:timer1?repeatCount=1")
@@ -118,7 +118,7 @@ public class GoogleCloudIT extends CamelTestSupport {
         int functionListCounter = mockFunctionList1.getReceivedCounter();
         mockGetFunction.expectedMessageCount(functionListCounter);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     private String createRandomFunctionName() {

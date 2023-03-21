@@ -35,7 +35,7 @@ public class JettyContentBasedRouteTest extends BaseJettyTest {
 
         template.requestBody(serverUri + "?one=true", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -46,13 +46,13 @@ public class JettyContentBasedRouteTest extends BaseJettyTest {
 
         template.requestBody(serverUri + "?two=true", null, Object.class);
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 // START SNIPPET: e1
                 from("jetty:" + serverUri).choice().when().simple("${header.one}").to("mock:one").otherwise().to("mock:other");
                 // END SNIPPET: e1

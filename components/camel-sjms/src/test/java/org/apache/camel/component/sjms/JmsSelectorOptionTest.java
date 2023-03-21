@@ -47,7 +47,7 @@ public class JmsSelectorOptionTest extends JmsTestSupport {
         template.sendBodyAndHeader("sjms:queue:hello", "Message1", "SIZE_NUMBER", 1505);
         template.sendBodyAndHeader("sjms:queue:hello", "Message3", "SIZE_NUMBER", 1300);
         template.sendBodyAndHeader("sjms:queue:hello", "Message2", "SIZE_NUMBER", 1600);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Test
@@ -64,9 +64,9 @@ public class JmsSelectorOptionTest extends JmsTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("sjms:queue:hello?messageSelector=color='blue'").to("mock:a");
                 from("sjms:queue:hello?messageSelector=color='red'").to("mock:b");
                 from("sjms:queue:hello?messageSelector=SIZE_NUMBER>1500").to("mock:c");

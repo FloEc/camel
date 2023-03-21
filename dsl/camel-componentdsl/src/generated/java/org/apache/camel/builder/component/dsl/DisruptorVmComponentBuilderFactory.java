@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -120,8 +120,8 @@ public interface DisruptorVmComponentBuilderFactory {
             return this;
         }
         /**
-         * To configure the default value for DisruptorWaitStrategy &lt;p/&gt;
-         * The default value is Blocking.
+         * To configure the default value for DisruptorWaitStrategy The default
+         * value is Blocking.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.disruptor.DisruptorWaitStrategy&lt;/code&gt; type.
@@ -138,8 +138,8 @@ public interface DisruptorVmComponentBuilderFactory {
             return this;
         }
         /**
-         * To configure the default value for block when full &lt;p/&gt; The
-         * default value is true.
+         * To configure the default value for block when full The default value
+         * is true.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -155,8 +155,8 @@ public interface DisruptorVmComponentBuilderFactory {
             return this;
         }
         /**
-         * To configure the default value for DisruptorProducerType &lt;p/&gt;
-         * The default value is Multi.
+         * To configure the default value for DisruptorProducerType The default
+         * value is Multi.
          * 
          * The option is a:
          * &lt;code&gt;org.apache.camel.component.disruptor.DisruptorProducerType&lt;/code&gt; type.

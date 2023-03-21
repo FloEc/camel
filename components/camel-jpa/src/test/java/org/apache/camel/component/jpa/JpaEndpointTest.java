@@ -16,8 +16,10 @@
  */
 package org.apache.camel.component.jpa;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import java.io.IOException;
+
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 import org.apache.camel.examples.SendEmail;
 import org.apache.camel.test.junit5.CamelTestSupport;
@@ -31,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public class JpaEndpointTest extends CamelTestSupport {
 
     @Test
-    public void testJpaEndpointCtr() throws Exception {
+    public void testJpaEndpointCtr() throws IOException {
         JpaEndpoint jpa = new JpaEndpoint();
         jpa.setEntityType(SendEmail.class);
 
@@ -40,15 +42,17 @@ public class JpaEndpointTest extends CamelTestSupport {
 
         assertEquals("jpa://org.apache.camel.examples.SendEmail", jpa.getEndpointUri());
         assertEquals("camel", jpa.getPersistenceUnit());
+        jpa.close();
     }
 
     /**
-     * 
+     *
+     * @throws     IOException
      * @deprecated
      */
     @Deprecated
     @Test
-    public void testJpaEndpointCtrUrl() throws Exception {
+    public void testJpaEndpointCtrUrl() throws IOException {
         JpaEndpoint jpa = new JpaEndpoint("jpa://org.apache.camel.examples.SendEmail", null);
         jpa.setEntityType(SendEmail.class);
 
@@ -57,15 +61,17 @@ public class JpaEndpointTest extends CamelTestSupport {
 
         assertEquals("jpa://org.apache.camel.examples.SendEmail", jpa.getEndpointUri());
         assertEquals("camel", jpa.getPersistenceUnit());
+        jpa.close();
     }
 
     /**
-     * 
+     *
+     * @throws     IOException
      * @deprecated
      */
     @Deprecated
     @Test
-    public void testJpaEndpointCtrUrlEMF() throws Exception {
+    public void testJpaEndpointCtrUrlEMF() throws IOException {
         EntityManagerFactory fac = Persistence.createEntityManagerFactory("camel");
 
         JpaEndpoint jpa = new JpaEndpoint("jpa://org.apache.camel.examples.SendEmail", null);
@@ -77,15 +83,17 @@ public class JpaEndpointTest extends CamelTestSupport {
 
         assertEquals("jpa://org.apache.camel.examples.SendEmail", jpa.getEndpointUri());
         assertEquals("camel", jpa.getPersistenceUnit());
+        jpa.close();
     }
 
     /**
-     * 
+     *
+     * @throws     IOException
      * @deprecated
      */
     @Deprecated
     @Test
-    public void testJpaEndpointCtrUrlEMFandTM() throws Exception {
+    public void testJpaEndpointCtrUrlEMFandTM() throws IOException {
         EntityManagerFactory fac = Persistence.createEntityManagerFactory("camel");
         JpaTransactionManager tm = new JpaTransactionManager(fac);
         tm.afterPropertiesSet();
@@ -100,10 +108,11 @@ public class JpaEndpointTest extends CamelTestSupport {
 
         assertEquals("jpa://org.apache.camel.examples.SendEmail", jpa.getEndpointUri());
         assertEquals("camel", jpa.getPersistenceUnit());
+        jpa.close();
     }
 
     @Test
-    public void testJpaEndpointCustomEMFandTM() throws Exception {
+    public void testJpaEndpointCustomEMFandTM() throws IOException {
         EntityManagerFactory fac = Persistence.createEntityManagerFactory("camel");
         JpaTransactionManager tm = new JpaTransactionManager(fac);
         tm.afterPropertiesSet();
@@ -119,5 +128,6 @@ public class JpaEndpointTest extends CamelTestSupport {
 
         assertEquals("jpa://org.apache.camel.examples.SendEmail", jpa.getEndpointUri());
         assertEquals("camel", jpa.getPersistenceUnit());
+        jpa.close();
     }
 }

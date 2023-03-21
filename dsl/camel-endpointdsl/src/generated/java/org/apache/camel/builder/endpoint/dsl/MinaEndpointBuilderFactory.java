@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -204,51 +204,6 @@ public interface MinaEndpointBuilderFactory {
          */
         default MinaEndpointConsumerBuilder writeTimeout(String writeTimeout) {
             doSetProperty("writeTimeout", writeTimeout);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -446,7 +401,7 @@ public interface MinaEndpointBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -462,7 +417,7 @@ public interface MinaEndpointBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -545,37 +500,6 @@ public interface MinaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointConsumerBuilder autoStartTls(boolean autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
-            return this;
-        }
-        /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointConsumerBuilder autoStartTls(String autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
-            return this;
-        }
-        /**
          * To configure SSL security.
          * 
          * The option is a:
@@ -617,6 +541,51 @@ public interface MinaEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default MinaEndpointConsumerBuilder basic() {
             return (MinaEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMinaEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMinaEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1044,55 +1013,6 @@ public interface MinaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * The mina component installs a default codec if both, codec is null
          * and textline is false. Setting allowDefaultCodec to false prevents
          * the mina component from installing a default codec as the first
@@ -1254,7 +1174,7 @@ public interface MinaEndpointBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -1270,7 +1190,7 @@ public interface MinaEndpointBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -1350,37 +1270,6 @@ public interface MinaEndpointBuilderFactory {
         default MinaEndpointProducerBuilder textlineDelimiter(
                 String textlineDelimiter) {
             doSetProperty("textlineDelimiter", textlineDelimiter);
-            return this;
-        }
-        /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointProducerBuilder autoStartTls(boolean autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
-            return this;
-        }
-        /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointProducerBuilder autoStartTls(String autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
             return this;
         }
         /**
@@ -1494,6 +1383,55 @@ public interface MinaEndpointBuilderFactory {
         default AdvancedMinaEndpointProducerBuilder lazySessionCreation(
                 String lazySessionCreation) {
             doSetProperty("lazySessionCreation", lazySessionCreation);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMinaEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedMinaEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
             return this;
         }
         /**
@@ -1976,7 +1914,7 @@ public interface MinaEndpointBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option is a:
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -1992,7 +1930,7 @@ public interface MinaEndpointBuilderFactory {
          * You can set a list of Mina IoFilters to use.
          * 
          * The option will be converted to a
-         * &lt;code&gt;java.util.List&lt;org.apache.mina.core.filterchain.IoFilter&gt;&lt;/code&gt; type.
+         * &lt;code&gt;java.util.List&amp;lt;org.apache.mina.core.filterchain.IoFilter&amp;gt;&lt;/code&gt; type.
          * 
          * Group: codec
          * 
@@ -2071,37 +2009,6 @@ public interface MinaEndpointBuilderFactory {
          */
         default MinaEndpointBuilder textlineDelimiter(String textlineDelimiter) {
             doSetProperty("textlineDelimiter", textlineDelimiter);
-            return this;
-        }
-        /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointBuilder autoStartTls(boolean autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
-            return this;
-        }
-        /**
-         * Whether to auto start SSL handshake.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: true
-         * Group: security
-         * 
-         * @param autoStartTls the value to set
-         * @return the dsl builder
-         */
-        default MinaEndpointBuilder autoStartTls(String autoStartTls) {
-            doSetProperty("autoStartTls", autoStartTls);
             return this;
         }
         /**
@@ -2303,6 +2210,19 @@ public interface MinaEndpointBuilderFactory {
          * Since: 2.10
          * Maven coordinates: org.apache.camel:camel-mina
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default MinaHeaderNameBuilder mina() {
+            return MinaHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Mina (camel-mina)
+         * Socket level networking using TCP or UDP with Apache Mina 2.x.
+         * 
+         * Category: networking,tcp,udp
+         * Since: 2.10
+         * Maven coordinates: org.apache.camel:camel-mina
+         * 
          * Syntax: <code>mina:protocol:host:port</code>
          * 
          * Path parameter: protocol (required)
@@ -2350,6 +2270,69 @@ public interface MinaEndpointBuilderFactory {
          */
         default MinaEndpointBuilder mina(String componentName, String path) {
             return MinaEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Mina component.
+     */
+    public static class MinaHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final MinaHeaderNameBuilder INSTANCE = new MinaHeaderNameBuilder();
+
+        /**
+         * Indicates whether the session should be closed after complete.
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code MinaCloseSessionWhenComplete}.
+         */
+        public String minaCloseSessionWhenComplete() {
+            return "MinaCloseSessionWhenComplete";
+        }
+
+        /**
+         * The key of the IoSession which is stored in the message header.
+         * 
+         * The option is a: {@code org.apache.mina.core.session.IoSession} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code MinaIoSession}.
+         */
+        public String minaIoSession() {
+            return "MinaIoSession";
+        }
+
+        /**
+         * The socket address of local machine that received the message.
+         * 
+         * The option is a: {@code java.net.SocketAddress} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code MinaLocalAddress}.
+         */
+        public String minaLocalAddress() {
+            return "MinaLocalAddress";
+        }
+
+        /**
+         * The socket address of the remote machine that send the message.
+         * 
+         * The option is a: {@code java.net.SocketAddress} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code MinaRemoteAddress}.
+         */
+        public String minaRemoteAddress() {
+            return "MinaRemoteAddress";
         }
     }
     static MinaEndpointBuilder endpointBuilder(String componentName, String path) {

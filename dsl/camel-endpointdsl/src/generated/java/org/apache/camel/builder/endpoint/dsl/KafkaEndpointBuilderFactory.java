@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -50,10 +50,10 @@ public interface KafkaEndpointBuilderFactory {
          * configurations (e.g: new Kafka properties that are not reflected yet
          * in Camel configurations), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -76,10 +76,10 @@ public interface KafkaEndpointBuilderFactory {
          * configurations (e.g: new Kafka properties that are not reflected yet
          * in Camel configurations), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -96,8 +96,8 @@ public interface KafkaEndpointBuilderFactory {
         /**
          * URL of the Kafka brokers to use. The format is
          * host1:port1,host2:port2, and the list can be a subset of brokers or a
-         * VIP pointing to a subset of brokers. &lt;p/&gt; This option is known
-         * as &lt;tt&gt;bootstrap.servers in the Kafka documentation.
+         * VIP pointing to a subset of brokers. This option is known as
+         * bootstrap.servers in the Kafka documentation.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -237,11 +237,10 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether to allow doing manual commits via KafkaManualCommit.
-         * &lt;p/&gt; If this option is enabled then an instance of
-         * KafkaManualCommit is stored on the Exchange message header, which
-         * allows end users to access this API and perform manual offset commits
-         * via the Kafka consumer.
+         * Whether to allow doing manual commits via KafkaManualCommit. If this
+         * option is enabled then an instance of KafkaManualCommit is stored on
+         * the Exchange message header, which allows end users to access this
+         * API and perform manual offset commits via the Kafka consumer.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -257,11 +256,10 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether to allow doing manual commits via KafkaManualCommit.
-         * &lt;p/&gt; If this option is enabled then an instance of
-         * KafkaManualCommit is stored on the Exchange message header, which
-         * allows end users to access this API and perform manual offset commits
-         * via the Kafka consumer.
+         * Whether to allow doing manual commits via KafkaManualCommit. If this
+         * option is enabled then an instance of KafkaManualCommit is stored on
+         * the Exchange message header, which allows end users to access this
+         * API and perform manual offset commits via the Kafka consumer.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -283,7 +281,7 @@ public interface KafkaEndpointBuilderFactory {
          * when the process fails as the position from which the new consumer
          * will begin.
          * 
-         * The option is a: &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: true
          * Group: consumer
@@ -292,7 +290,7 @@ public interface KafkaEndpointBuilderFactory {
          * @return the dsl builder
          */
         default KafkaEndpointConsumerBuilder autoCommitEnable(
-                Boolean autoCommitEnable) {
+                boolean autoCommitEnable) {
             doSetProperty("autoCommitEnable", autoCommitEnable);
             return this;
         }
@@ -302,8 +300,8 @@ public interface KafkaEndpointBuilderFactory {
          * when the process fails as the position from which the new consumer
          * will begin.
          * 
-         * The option will be converted to a
-         * &lt;code&gt;java.lang.Boolean&lt;/code&gt; type.
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
          * 
          * Default: true
          * Group: consumer
@@ -352,25 +350,6 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether to perform an explicit auto commit when the consumer stops to
-         * ensure the broker has a commit from the last consumed message. This
-         * requires the option autoCommitEnable is turned on. The possible
-         * values are: sync, async, or none. And sync is the default value.
-         * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
-         * 
-         * Default: sync
-         * Group: consumer
-         * 
-         * @param autoCommitOnStop the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointConsumerBuilder autoCommitOnStop(
-                String autoCommitOnStop) {
-            doSetProperty("autoCommitOnStop", autoCommitOnStop);
-            return this;
-        }
-        /**
          * What to do when there is no initial offset in ZooKeeper or if an
          * offset is out of range: earliest : automatically reset the offset to
          * the earliest offset latest : automatically reset the offset to the
@@ -391,14 +370,14 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * This options controls what happens when a consumer is processing an
-         * exchange and it fails. If the option is &lt;tt&gt;false then the
-         * consumer continues to the next message and processes it. If the
-         * option is &lt;tt&gt;true then the consumer breaks out, and will seek
-         * back to offset of the message that caused a failure, and then
-         * re-attempt to process this message. However this can lead to endless
-         * processing of the same message if its bound to fail every time, eg a
-         * poison message. Therefore its recommended to deal with that for
-         * example by using Camel's error handler.
+         * exchange and it fails. If the option is false then the consumer
+         * continues to the next message and processes it. If the option is true
+         * then the consumer breaks out, and will seek back to offset of the
+         * message that caused a failure, and then re-attempt to process this
+         * message. However this can lead to endless processing of the same
+         * message if its bound to fail every time, eg a poison message.
+         * Therefore its recommended to deal with that for example by using
+         * Camel's error handler.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -415,14 +394,14 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * This options controls what happens when a consumer is processing an
-         * exchange and it fails. If the option is &lt;tt&gt;false then the
-         * consumer continues to the next message and processes it. If the
-         * option is &lt;tt&gt;true then the consumer breaks out, and will seek
-         * back to offset of the message that caused a failure, and then
-         * re-attempt to process this message. However this can lead to endless
-         * processing of the same message if its bound to fail every time, eg a
-         * poison message. Therefore its recommended to deal with that for
-         * example by using Camel's error handler.
+         * exchange and it fails. If the option is false then the consumer
+         * continues to the next message and processes it. If the option is true
+         * then the consumer breaks out, and will seek back to offset of the
+         * message that caused a failure, and then re-attempt to process this
+         * message. However this can lead to endless processing of the same
+         * message if its bound to fail every time, eg a poison message.
+         * Therefore its recommended to deal with that for example by using
+         * Camel's error handler.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -436,51 +415,6 @@ public interface KafkaEndpointBuilderFactory {
         default KafkaEndpointConsumerBuilder breakOnFirstError(
                 String breakOnFirstError) {
             doSetProperty("breakOnFirstError", breakOnFirstError);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointConsumerBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
-            return this;
-        }
-        /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param bridgeErrorHandler the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointConsumerBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -1006,8 +940,7 @@ public interface KafkaEndpointBuilderFactory {
          * autocommit.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.spi.StateRepository&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.spi.StateRepository&amp;lt;java.lang.String, java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -1025,8 +958,7 @@ public interface KafkaEndpointBuilderFactory {
          * autocommit.
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.spi.StateRepository&lt;java.lang.String,
-         * java.lang.String&gt;&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.spi.StateRepository&amp;lt;java.lang.String, java.lang.String&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -1141,59 +1073,32 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * This option allows the user to set a custom resume strategy. The
-         * resume strategy is executed when partitions are assigned (i.e.: when
-         * connecting or reconnecting). It allows implementations to customize
-         * how to resume operations and serve as more flexible alternative to
-         * the seekTo and the offsetRepository mechanisms. See the
-         * KafkaConsumerResumeStrategy for implementation details. This option
-         * does not affect the auto commit setting. It is likely that
-         * implementations using this setting will also want to evaluate using
-         * the manual commit option along with this.
+         * Set if KafkaConsumer will read from beginning or end on startup:
+         * SeekPolicy.BEGINNING: read from beginning. SeekPolicy.END: read from
+         * end.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.kafka.SeekPolicy&lt;/code&gt;
+         * type.
          * 
          * Group: consumer
          * 
-         * @param resumeStrategy the value to set
+         * @param seekTo the value to set
          * @return the dsl builder
          */
-        default KafkaEndpointConsumerBuilder resumeStrategy(
-                org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy resumeStrategy) {
-            doSetProperty("resumeStrategy", resumeStrategy);
-            return this;
-        }
-        /**
-         * This option allows the user to set a custom resume strategy. The
-         * resume strategy is executed when partitions are assigned (i.e.: when
-         * connecting or reconnecting). It allows implementations to customize
-         * how to resume operations and serve as more flexible alternative to
-         * the seekTo and the offsetRepository mechanisms. See the
-         * KafkaConsumerResumeStrategy for implementation details. This option
-         * does not affect the auto commit setting. It is likely that
-         * implementations using this setting will also want to evaluate using
-         * the manual commit option along with this.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.kafka.consumer.support.KafkaConsumerResumeStrategy&lt;/code&gt; type.
-         * 
-         * Group: consumer
-         * 
-         * @param resumeStrategy the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointConsumerBuilder resumeStrategy(
-                String resumeStrategy) {
-            doSetProperty("resumeStrategy", resumeStrategy);
+        default KafkaEndpointConsumerBuilder seekTo(
+                org.apache.camel.component.kafka.SeekPolicy seekTo) {
+            doSetProperty("seekTo", seekTo);
             return this;
         }
         /**
          * Set if KafkaConsumer will read from beginning or end on startup:
-         * beginning : read from beginning end : read from end This is replacing
-         * the earlier property seekToBeginning.
+         * SeekPolicy.BEGINNING: read from beginning. SeekPolicy.END: read from
+         * end.
          * 
-         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.component.kafka.SeekPolicy&lt;/code&gt;
+         * type.
          * 
          * Group: consumer
          * 
@@ -1426,8 +1331,8 @@ public interface KafkaEndpointBuilderFactory {
          * it to a short name. Any later rules in the list are ignored. By
          * default, principal names of the form {username}/{hostname}{REALM} are
          * mapped to {username}. For more details on the format please see the
-         * security authorization and acls documentation.. &lt;p/&gt; Multiple
-         * values can be separated by comma.
+         * security authorization and acls documentation (at the Apache Kafka
+         * project). Multiple values can be separated by comma.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1547,7 +1452,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * The Simple Authentication and Security Layer (SASL) Mechanism used.
-         * For the valid values see.
+         * For the valid values see
+         * http://www.iana.org/assignments/sasl-mechanisms/sasl-mechanisms.xhtml.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1562,8 +1468,8 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Protocol used to communicate with brokers. SASL_PLAINTEXT, PLAINTEXT
-         * and SSL are supported.
+         * Protocol used to communicate with brokers. SASL_PLAINTEXT, PLAINTEXT,
+         * SASL_SSL and SSL are supported.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1582,7 +1488,7 @@ public interface KafkaEndpointBuilderFactory {
          * A list of cipher suites. This is a named combination of
          * authentication, encryption, MAC and key exchange algorithm used to
          * negotiate the security settings for a network connection using TLS or
-         * SSL network protocol.By default all the available cipher suites are
+         * SSL network protocol. By default all the available cipher suites are
          * supported.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1638,8 +1544,13 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The list of protocols enabled for SSL connections. TLSv1.2, TLSv1.1
-         * and TLSv1 are enabled by default.
+         * The list of protocols enabled for SSL connections. The default is
+         * TLSv1.2,TLSv1.3 when running with Java 11 or newer, TLSv1.2
+         * otherwise. With the default value for Java 11, clients and servers
+         * will prefer TLSv1.3 if both support it and fallback to TLSv1.2
+         * otherwise (assuming both support at least TLSv1.2). This default
+         * should be fine for most cases. Also see the config documentation for
+         * SslProtocol.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1655,7 +1566,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * The endpoint identification algorithm to validate server hostname
-         * using server certificate.
+         * using server certificate. Use none or false to disable server
+         * hostname verification.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1689,6 +1601,56 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
+         * The password of the private key in the key store file or the PEM key
+         * specified in sslKeystoreKey. This is required for clients only if
+         * two-way authentication is configured.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslKeyPassword the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder sslKeyPassword(
+                String sslKeyPassword) {
+            doSetProperty("sslKeyPassword", sslKeyPassword);
+            return this;
+        }
+        /**
+         * The location of the key store file. This is optional for client and
+         * can be used for two-way authentication for client.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslKeystoreLocation the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder sslKeystoreLocation(
+                String sslKeystoreLocation) {
+            doSetProperty("sslKeystoreLocation", sslKeystoreLocation);
+            return this;
+        }
+        /**
+         * The store password for the key store file. This is optional for
+         * client and only needed if sslKeystoreLocation' is configured. Key
+         * store password is not supported for PEM format.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslKeystorePassword the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder sslKeystorePassword(
+                String sslKeystorePassword) {
+            doSetProperty("sslKeystorePassword", sslKeystorePassword);
+            return this;
+        }
+        /**
          * The file format of the key store file. This is optional for client.
          * Default value is JKS.
          * 
@@ -1706,11 +1668,16 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The SSL protocol used to generate the SSLContext. Default setting is
-         * TLS, which is fine for most cases. Allowed values in recent JVMs are
-         * TLS, TLSv1.1 and TLSv1.2. SSL, SSLv2 and SSLv3 may be supported in
-         * older JVMs, but their usage is discouraged due to known security
-         * vulnerabilities.
+         * The SSL protocol used to generate the SSLContext. The default is
+         * TLSv1.3 when running with Java 11 or newer, TLSv1.2 otherwise. This
+         * value should be fine for most use cases. Allowed values in recent
+         * JVMs are TLSv1.2 and TLSv1.3. TLS, TLSv1.1, SSL, SSLv2 and SSLv3 may
+         * be supported in older JVMs, but their usage is discouraged due to
+         * known security vulnerabilities. With the default value for this
+         * config and sslEnabledProtocols, clients will downgrade to TLSv1.2 if
+         * the server does not support TLSv1.3. If this config is set to
+         * TLSv1.2, clients will not use TLSv1.3 even if it is one of the values
+         * in sslEnabledProtocols and the server only supports TLSv1.3.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -1757,6 +1724,39 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
+         * The location of the trust store file.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslTruststoreLocation the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder sslTruststoreLocation(
+                String sslTruststoreLocation) {
+            doSetProperty("sslTruststoreLocation", sslTruststoreLocation);
+            return this;
+        }
+        /**
+         * The password for the trust store file. If a password is not set,
+         * trust store file configured will still be used, but integrity
+         * checking is disabled. Trust store password is not supported for PEM
+         * format.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslTruststorePassword the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointConsumerBuilder sslTruststorePassword(
+                String sslTruststorePassword) {
+            doSetProperty("sslTruststorePassword", sslTruststorePassword);
+            return this;
+        }
+        /**
          * The file format of the trust store file. Default value is JKS.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -1782,6 +1782,51 @@ public interface KafkaEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default KafkaEndpointConsumerBuilder basic() {
             return (KafkaEndpointConsumerBuilder) this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKafkaEndpointConsumerBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKafkaEndpointConsumerBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
         }
         /**
          * To let the consumer use a custom ExceptionHandler. Notice if the
@@ -1854,6 +1899,36 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
+         * Controls how to read messages written transactionally. If set to
+         * read_committed, consumer.poll() will only return transactional
+         * messages which have been committed. If set to read_uncommitted (the
+         * default), consumer.poll() will return all messages, even
+         * transactional messages which have been aborted. Non-transactional
+         * messages will be returned unconditionally in either mode. Messages
+         * will always be returned in offset order. Hence, in read_committed
+         * mode, consumer.poll() will only return messages up to the last stable
+         * offset (LSO), which is the one less than the offset of the first open
+         * transaction. In particular any messages appearing after messages
+         * belonging to ongoing transactions will be withheld until the relevant
+         * transaction has been completed. As a result, read_committed consumers
+         * will not be able to read up to the high watermark when there are in
+         * flight transactions. Further, when in read_committed the seekToEnd
+         * method will return the LSO.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Default: read_uncommitted
+         * Group: consumer (advanced)
+         * 
+         * @param isolationLevel the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKafkaEndpointConsumerBuilder isolationLevel(
+                String isolationLevel) {
+            doSetProperty("isolationLevel", isolationLevel);
+            return this;
+        }
+        /**
          * Factory to use for creating KafkaManualCommit instances. This allows
          * to plugin a custom factory to create custom KafkaManualCommit
          * instances in case special logic is needed when doing manual commits
@@ -1861,7 +1936,7 @@ public interface KafkaEndpointBuilderFactory {
          * box.
          * 
          * The option is a:
-         * &lt;code&gt;org.apache.camel.component.kafka.KafkaManualCommitFactory&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.kafka.consumer.KafkaManualCommitFactory&lt;/code&gt; type.
          * 
          * Group: consumer (advanced)
          * 
@@ -1869,7 +1944,7 @@ public interface KafkaEndpointBuilderFactory {
          * @return the dsl builder
          */
         default AdvancedKafkaEndpointConsumerBuilder kafkaManualCommitFactory(
-                org.apache.camel.component.kafka.KafkaManualCommitFactory kafkaManualCommitFactory) {
+                org.apache.camel.component.kafka.consumer.KafkaManualCommitFactory kafkaManualCommitFactory) {
             doSetProperty("kafkaManualCommitFactory", kafkaManualCommitFactory);
             return this;
         }
@@ -1881,7 +1956,7 @@ public interface KafkaEndpointBuilderFactory {
          * box.
          * 
          * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.component.kafka.KafkaManualCommitFactory&lt;/code&gt; type.
+         * &lt;code&gt;org.apache.camel.component.kafka.consumer.KafkaManualCommitFactory&lt;/code&gt; type.
          * 
          * Group: consumer (advanced)
          * 
@@ -1983,10 +2058,10 @@ public interface KafkaEndpointBuilderFactory {
          * configurations (e.g: new Kafka properties that are not reflected yet
          * in Camel configurations), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -2009,10 +2084,10 @@ public interface KafkaEndpointBuilderFactory {
          * configurations (e.g: new Kafka properties that are not reflected yet
          * in Camel configurations), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -2029,8 +2104,8 @@ public interface KafkaEndpointBuilderFactory {
         /**
          * URL of the Kafka brokers to use. The format is
          * host1:port1,host2:port2, and the list can be a subset of brokers or a
-         * VIP pointing to a subset of brokers. &lt;p/&gt; This option is known
-         * as &lt;tt&gt;bootstrap.servers in the Kafka documentation.
+         * VIP pointing to a subset of brokers. This option is known as
+         * bootstrap.servers in the Kafka documentation.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2170,6 +2245,49 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
+         * If this feature is enabled and a single element of a batch is an
+         * Exchange or Message, the producer will generate individual kafka
+         * header values for it by using the batch Message to determine the
+         * values. Normal behaviour consists in always using the same header
+         * values (which are determined by the parent Exchange which contains
+         * the Iterable or Iterator).
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer
+         * 
+         * @param batchWithIndividualHeaders the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointProducerBuilder batchWithIndividualHeaders(
+                boolean batchWithIndividualHeaders) {
+            doSetProperty("batchWithIndividualHeaders", batchWithIndividualHeaders);
+            return this;
+        }
+        /**
+         * If this feature is enabled and a single element of a batch is an
+         * Exchange or Message, the producer will generate individual kafka
+         * header values for it by using the batch Message to determine the
+         * values. Normal behaviour consists in always using the same header
+         * values (which are determined by the parent Exchange which contains
+         * the Iterable or Iterator).
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer
+         * 
+         * @param batchWithIndividualHeaders the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointProducerBuilder batchWithIndividualHeaders(
+                String batchWithIndividualHeaders) {
+            doSetProperty("batchWithIndividualHeaders", batchWithIndividualHeaders);
+            return this;
+        }
+        /**
          * The total bytes of memory the producer can use to buffer records
          * waiting to be sent to the server. If records are sent faster than
          * they can be delivered to the server the producer will either block or
@@ -2220,8 +2338,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * This parameter allows you to specify the compression codec for all
-         * data generated by this producer. Valid values are none, gzip and
-         * snappy.
+         * data generated by this producer. Valid values are none, gzip, snappy,
+         * lz4 and zstd.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -2313,16 +2431,21 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * If set to 'true' the producer will ensure that exactly one copy of
+         * When set to 'true', the producer will ensure that exactly one copy of
          * each message is written in the stream. If 'false', producer retries
-         * may write duplicates of the retried message in the stream. If set to
-         * true this option will require max.in.flight.requests.per.connection
-         * to be set to 1 and retries cannot be zero and additionally acks must
-         * be set to 'all'.
+         * due to broker failures, etc., may write duplicates of the retried
+         * message in the stream. Note that enabling idempotence requires
+         * max.in.flight.requests.per.connection to be less than or equal to 5
+         * (with message ordering preserved for any allowable value), retries to
+         * be greater than 0, and acks must be 'all'. Idempotence is enabled by
+         * default if no conflicting configurations are set. If conflicting
+         * configurations are set and idempotence is not explicitly enabled,
+         * idempotence is disabled. If idempotence is explicitly enabled and
+         * conflicting configurations are set, a ConfigException is thrown.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
-         * Default: false
+         * Default: true
          * Group: producer
          * 
          * @param enableIdempotence the value to set
@@ -2334,17 +2457,22 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * If set to 'true' the producer will ensure that exactly one copy of
+         * When set to 'true', the producer will ensure that exactly one copy of
          * each message is written in the stream. If 'false', producer retries
-         * may write duplicates of the retried message in the stream. If set to
-         * true this option will require max.in.flight.requests.per.connection
-         * to be set to 1 and retries cannot be zero and additionally acks must
-         * be set to 'all'.
+         * due to broker failures, etc., may write duplicates of the retried
+         * message in the stream. Note that enabling idempotence requires
+         * max.in.flight.requests.per.connection to be less than or equal to 5
+         * (with message ordering preserved for any allowable value), retries to
+         * be greater than 0, and acks must be 'all'. Idempotence is enabled by
+         * default if no conflicting configurations are set. If conflicting
+         * configurations are set and idempotence is not explicitly enabled,
+         * idempotence is disabled. If idempotence is explicitly enabled and
+         * conflicting configurations are set, a ConfigException is thrown.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
          * 
-         * Default: false
+         * Default: true
          * Group: producer
          * 
          * @param enableIdempotence the value to set
@@ -2422,55 +2550,6 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointProducerBuilder lazyStartProducer(
-                boolean lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
-         * Whether the producer should be started lazy (on the first message).
-         * By starting lazy you can use this to allow CamelContext and routes to
-         * startup in situations where a producer may otherwise fail during
-         * starting and cause the route to fail being started. By deferring this
-         * startup to be lazy then the startup failure can be handled during
-         * routing messages via Camel's routing error handlers. Beware that when
-         * the first message is processed then creating and starting the
-         * producer may take a little time and prolong the total processing time
-         * of the processing.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: producer
-         * 
-         * @param lazyStartProducer the value to set
-         * @return the dsl builder
-         */
-        default KafkaEndpointProducerBuilder lazyStartProducer(
-                String lazyStartProducer) {
-            doSetProperty("lazyStartProducer", lazyStartProducer);
-            return this;
-        }
-        /**
          * The producer groups together any records that arrive in between
          * request transmissions into a single batched request. Normally this
          * occurs only under load when records arrive faster than they can be
@@ -2536,13 +2615,16 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The configuration controls how long sending to kafka will block.
-         * These methods can be blocked for multiple reasons. For e.g: buffer
-         * full, metadata unavailable.This configuration imposes maximum limit
-         * on the total time spent in fetching metadata, serialization of key
-         * and value, partitioning and allocation of buffer memory when doing a
-         * send(). In case of partitionsFor(), this configuration imposes a
-         * maximum time threshold on waiting for metadata.
+         * The configuration controls how long the KafkaProducer's send(),
+         * partitionsFor(), initTransactions(), sendOffsetsToTransaction(),
+         * commitTransaction() and abortTransaction() methods will block. For
+         * send() this timeout bounds the total time waiting for both metadata
+         * fetch and buffer allocation (blocking in the user-supplied
+         * serializers or partitioner is not counted against this timeout). For
+         * partitionsFor() this timeout bounds the time spent waiting for
+         * metadata if it is unavailable. The transaction-related methods always
+         * block, but may timeout if the transaction coordinator could not be
+         * discovered or did not respond within the timeout.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
@@ -2557,13 +2639,16 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The configuration controls how long sending to kafka will block.
-         * These methods can be blocked for multiple reasons. For e.g: buffer
-         * full, metadata unavailable.This configuration imposes maximum limit
-         * on the total time spent in fetching metadata, serialization of key
-         * and value, partitioning and allocation of buffer memory when doing a
-         * send(). In case of partitionsFor(), this configuration imposes a
-         * maximum time threshold on waiting for metadata.
+         * The configuration controls how long the KafkaProducer's send(),
+         * partitionsFor(), initTransactions(), sendOffsetsToTransaction(),
+         * commitTransaction() and abortTransaction() methods will block. For
+         * send() this timeout bounds the total time waiting for both metadata
+         * fetch and buffer allocation (blocking in the user-supplied
+         * serializers or partitioner is not counted against this timeout). For
+         * partitionsFor() this timeout bounds the time spent waiting for
+         * metadata if it is unavailable. The transaction-related methods always
+         * block, but may timeout if the transaction coordinator could not be
+         * discovered or did not respond within the timeout.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
@@ -2714,7 +2799,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The number of samples maintained to compute metrics.
+         * The window of time a metrics sample is computed over.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
@@ -2730,7 +2815,7 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The number of samples maintained to compute metrics.
+         * The window of time a metrics sample is computed over.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
@@ -3036,25 +3121,29 @@ public interface KafkaEndpointBuilderFactory {
          * The number of acknowledgments the producer requires the leader to
          * have received before considering a request complete. This controls
          * the durability of records that are sent. The following settings are
-         * common: acks=0 If set to zero then the producer will not wait for any
-         * acknowledgment from the server at all. The record will be immediately
-         * added to the socket buffer and considered sent. No guarantee can be
-         * made that the server has received the record in this case, and the
-         * retries configuration will not take effect (as the client won't
-         * generally know of any failures). The offset given back for each
-         * record will always be set to -1. acks=1 This will mean the leader
-         * will write the record to its local log but will respond without
-         * awaiting full acknowledgement from all followers. In this case should
-         * the leader fail immediately after acknowledging the record but before
-         * the followers have replicated it then the record will be lost.
-         * acks=all This means the leader will wait for the full set of in-sync
-         * replicas to acknowledge the record. This guarantees that the record
-         * will not be lost as long as at least one in-sync replica remains
-         * alive. This is the strongest available guarantee.
+         * allowed: acks=0 If set to zero then the producer will not wait for
+         * any acknowledgment from the server at all. The record will be
+         * immediately added to the socket buffer and considered sent. No
+         * guarantee can be made that the server has received the record in this
+         * case, and the retries configuration will not take effect (as the
+         * client won't generally know of any failures). The offset given back
+         * for each record will always be set to -1. acks=1 This will mean the
+         * leader will write the record to its local log but will respond
+         * without awaiting full acknowledgement from all followers. In this
+         * case should the leader fail immediately after acknowledging the
+         * record but before the followers have replicated it then the record
+         * will be lost. acks=all This means the leader will wait for the full
+         * set of in-sync replicas to acknowledge the record. This guarantees
+         * that the record will not be lost as long as at least one in-sync
+         * replica remains alive. This is the strongest available guarantee.
+         * This is equivalent to the acks=-1 setting. Note that enabling
+         * idempotence requires this config value to be 'all'. If conflicting
+         * configurations are set and idempotence is not explicitly enabled,
+         * idempotence is disabled.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
-         * Default: 1
+         * Default: all
          * Group: producer
          * 
          * @param requestRequiredAcks the value to set
@@ -3106,14 +3195,22 @@ public interface KafkaEndpointBuilderFactory {
          * Setting a value greater than zero will cause the client to resend any
          * record whose send fails with a potentially transient error. Note that
          * this retry is no different than if the client resent the record upon
-         * receiving the error. Allowing retries will potentially change the
-         * ordering of records because if two records are sent to a single
-         * partition, and the first fails and is retried but the second
-         * succeeds, then the second record may appear first.
+         * receiving the error. Produce requests will be failed before the
+         * number of retries has been exhausted if the timeout configured by
+         * delivery.timeout.ms expires first before successful acknowledgement.
+         * Users should generally prefer to leave this config unset and instead
+         * use delivery.timeout.ms to control retry behavior. Enabling
+         * idempotence requires this config value to be greater than 0. If
+         * conflicting configurations are set and idempotence is not explicitly
+         * enabled, idempotence is disabled. Allowing retries while setting
+         * enable.idempotence to false and max.in.flight.requests.per.connection
+         * to 1 will potentially change the ordering of records because if two
+         * batches are sent to a single partition, and the first fails and is
+         * retried but the second succeeds, then the records in the second batch
+         * may appear first.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
-         * Default: 0
          * Group: producer
          * 
          * @param retries the value to set
@@ -3127,15 +3224,23 @@ public interface KafkaEndpointBuilderFactory {
          * Setting a value greater than zero will cause the client to resend any
          * record whose send fails with a potentially transient error. Note that
          * this retry is no different than if the client resent the record upon
-         * receiving the error. Allowing retries will potentially change the
-         * ordering of records because if two records are sent to a single
-         * partition, and the first fails and is retried but the second
-         * succeeds, then the second record may appear first.
+         * receiving the error. Produce requests will be failed before the
+         * number of retries has been exhausted if the timeout configured by
+         * delivery.timeout.ms expires first before successful acknowledgement.
+         * Users should generally prefer to leave this config unset and instead
+         * use delivery.timeout.ms to control retry behavior. Enabling
+         * idempotence requires this config value to be greater than 0. If
+         * conflicting configurations are set and idempotence is not explicitly
+         * enabled, idempotence is disabled. Allowing retries while setting
+         * enable.idempotence to false and max.in.flight.requests.per.connection
+         * to 1 will potentially change the ordering of records because if two
+         * batches are sent to a single partition, and the first fails and is
+         * retried but the second succeeds, then the records in the second batch
+         * may appear first.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
-         * Default: 0
          * Group: producer
          * 
          * @param retries the value to set
@@ -3442,8 +3547,8 @@ public interface KafkaEndpointBuilderFactory {
          * it to a short name. Any later rules in the list are ignored. By
          * default, principal names of the form {username}/{hostname}{REALM} are
          * mapped to {username}. For more details on the format please see the
-         * security authorization and acls documentation.. &lt;p/&gt; Multiple
-         * values can be separated by comma.
+         * security authorization and acls documentation (at the Apache Kafka
+         * project). Multiple values can be separated by comma.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3563,7 +3668,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * The Simple Authentication and Security Layer (SASL) Mechanism used.
-         * For the valid values see.
+         * For the valid values see
+         * http://www.iana.org/assignments/sasl-mechanisms/sasl-mechanisms.xhtml.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3578,8 +3684,8 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Protocol used to communicate with brokers. SASL_PLAINTEXT, PLAINTEXT
-         * and SSL are supported.
+         * Protocol used to communicate with brokers. SASL_PLAINTEXT, PLAINTEXT,
+         * SASL_SSL and SSL are supported.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3598,7 +3704,7 @@ public interface KafkaEndpointBuilderFactory {
          * A list of cipher suites. This is a named combination of
          * authentication, encryption, MAC and key exchange algorithm used to
          * negotiate the security settings for a network connection using TLS or
-         * SSL network protocol.By default all the available cipher suites are
+         * SSL network protocol. By default all the available cipher suites are
          * supported.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -3654,8 +3760,13 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The list of protocols enabled for SSL connections. TLSv1.2, TLSv1.1
-         * and TLSv1 are enabled by default.
+         * The list of protocols enabled for SSL connections. The default is
+         * TLSv1.2,TLSv1.3 when running with Java 11 or newer, TLSv1.2
+         * otherwise. With the default value for Java 11, clients and servers
+         * will prefer TLSv1.3 if both support it and fallback to TLSv1.2
+         * otherwise (assuming both support at least TLSv1.2). This default
+         * should be fine for most cases. Also see the config documentation for
+         * SslProtocol.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3671,7 +3782,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * The endpoint identification algorithm to validate server hostname
-         * using server certificate.
+         * using server certificate. Use none or false to disable server
+         * hostname verification.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3705,8 +3817,9 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The password of the private key in the key store file. This is
-         * optional for client.
+         * The password of the private key in the key store file or the PEM key
+         * specified in sslKeystoreKey. This is required for clients only if
+         * two-way authentication is configured.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3737,8 +3850,9 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The store password for the key store file.This is optional for client
-         * and only needed if ssl.keystore.location is configured.
+         * The store password for the key store file. This is optional for
+         * client and only needed if sslKeystoreLocation' is configured. Key
+         * store password is not supported for PEM format.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3770,11 +3884,16 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The SSL protocol used to generate the SSLContext. Default setting is
-         * TLS, which is fine for most cases. Allowed values in recent JVMs are
-         * TLS, TLSv1.1 and TLSv1.2. SSL, SSLv2 and SSLv3 may be supported in
-         * older JVMs, but their usage is discouraged due to known security
-         * vulnerabilities.
+         * The SSL protocol used to generate the SSLContext. The default is
+         * TLSv1.3 when running with Java 11 or newer, TLSv1.2 otherwise. This
+         * value should be fine for most use cases. Allowed values in recent
+         * JVMs are TLSv1.2 and TLSv1.3. TLS, TLSv1.1, SSL, SSLv2 and SSLv3 may
+         * be supported in older JVMs, but their usage is discouraged due to
+         * known security vulnerabilities. With the default value for this
+         * config and sslEnabledProtocols, clients will downgrade to TLSv1.2 if
+         * the server does not support TLSv1.3. If this config is set to
+         * TLSv1.2, clients will not use TLSv1.3 even if it is one of the values
+         * in sslEnabledProtocols and the server only supports TLSv1.3.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3836,7 +3955,10 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The password for the trust store file.
+         * The password for the trust store file. If a password is not set,
+         * trust store file configured will still be used, but integrity
+         * checking is disabled. Trust store password is not supported for PEM
+         * format.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -3876,6 +3998,55 @@ public interface KafkaEndpointBuilderFactory {
                 EndpointProducerBuilder {
         default KafkaEndpointProducerBuilder basic() {
             return (KafkaEndpointProducerBuilder) this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKafkaEndpointProducerBuilder lazyStartProducer(
+                boolean lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
+        }
+        /**
+         * Whether the producer should be started lazy (on the first message).
+         * By starting lazy you can use this to allow CamelContext and routes to
+         * startup in situations where a producer may otherwise fail during
+         * starting and cause the route to fail being started. By deferring this
+         * startup to be lazy then the startup failure can be handled during
+         * routing messages via Camel's routing error handlers. Beware that when
+         * the first message is processed then creating and starting the
+         * producer may take a little time and prolong the total processing time
+         * of the processing.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: producer (advanced)
+         * 
+         * @param lazyStartProducer the value to set
+         * @return the dsl builder
+         */
+        default AdvancedKafkaEndpointProducerBuilder lazyStartProducer(
+                String lazyStartProducer) {
+            doSetProperty("lazyStartProducer", lazyStartProducer);
+            return this;
         }
         /**
          * Factory to use for creating
@@ -3968,10 +4139,10 @@ public interface KafkaEndpointBuilderFactory {
          * configurations (e.g: new Kafka properties that are not reflected yet
          * in Camel configurations), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -3994,10 +4165,10 @@ public interface KafkaEndpointBuilderFactory {
          * configurations (e.g: new Kafka properties that are not reflected yet
          * in Camel configurations), the properties have to be prefixed with
          * additionalProperties.. E.g:
-         * additionalProperties.transactional.id=12345&amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
+         * additionalProperties.transactional.id=12345&amp;amp;additionalProperties.schema.registry.url=http://localhost:8811/avro.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * java.lang.Object&gt;&lt;/code&gt; type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * java.lang.Object&amp;gt;&lt;/code&gt; type.
          * The option is multivalued, and you can use the
          * additionalProperties(String, Object) method to add a value (call the
          * method multiple times to set more values).
@@ -4014,8 +4185,8 @@ public interface KafkaEndpointBuilderFactory {
         /**
          * URL of the Kafka brokers to use. The format is
          * host1:port1,host2:port2, and the list can be a subset of brokers or a
-         * VIP pointing to a subset of brokers. &lt;p/&gt; This option is known
-         * as &lt;tt&gt;bootstrap.servers in the Kafka documentation.
+         * VIP pointing to a subset of brokers. This option is known as
+         * bootstrap.servers in the Kafka documentation.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4247,8 +4418,8 @@ public interface KafkaEndpointBuilderFactory {
          * it to a short name. Any later rules in the list are ignored. By
          * default, principal names of the form {username}/{hostname}{REALM} are
          * mapped to {username}. For more details on the format please see the
-         * security authorization and acls documentation.. &lt;p/&gt; Multiple
-         * values can be separated by comma.
+         * security authorization and acls documentation (at the Apache Kafka
+         * project). Multiple values can be separated by comma.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4367,7 +4538,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * The Simple Authentication and Security Layer (SASL) Mechanism used.
-         * For the valid values see.
+         * For the valid values see
+         * http://www.iana.org/assignments/sasl-mechanisms/sasl-mechanisms.xhtml.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4382,8 +4554,8 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * Protocol used to communicate with brokers. SASL_PLAINTEXT, PLAINTEXT
-         * and SSL are supported.
+         * Protocol used to communicate with brokers. SASL_PLAINTEXT, PLAINTEXT,
+         * SASL_SSL and SSL are supported.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4401,7 +4573,7 @@ public interface KafkaEndpointBuilderFactory {
          * A list of cipher suites. This is a named combination of
          * authentication, encryption, MAC and key exchange algorithm used to
          * negotiate the security settings for a network connection using TLS or
-         * SSL network protocol.By default all the available cipher suites are
+         * SSL network protocol. By default all the available cipher suites are
          * supported.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
@@ -4456,8 +4628,13 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The list of protocols enabled for SSL connections. TLSv1.2, TLSv1.1
-         * and TLSv1 are enabled by default.
+         * The list of protocols enabled for SSL connections. The default is
+         * TLSv1.2,TLSv1.3 when running with Java 11 or newer, TLSv1.2
+         * otherwise. With the default value for Java 11, clients and servers
+         * will prefer TLSv1.3 if both support it and fallback to TLSv1.2
+         * otherwise (assuming both support at least TLSv1.2). This default
+         * should be fine for most cases. Also see the config documentation for
+         * SslProtocol.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4473,7 +4650,8 @@ public interface KafkaEndpointBuilderFactory {
         }
         /**
          * The endpoint identification algorithm to validate server hostname
-         * using server certificate.
+         * using server certificate. Use none or false to disable server
+         * hostname verification.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4507,6 +4685,55 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
+         * The password of the private key in the key store file or the PEM key
+         * specified in sslKeystoreKey. This is required for clients only if
+         * two-way authentication is configured.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslKeyPassword the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointBuilder sslKeyPassword(String sslKeyPassword) {
+            doSetProperty("sslKeyPassword", sslKeyPassword);
+            return this;
+        }
+        /**
+         * The location of the key store file. This is optional for client and
+         * can be used for two-way authentication for client.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslKeystoreLocation the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointBuilder sslKeystoreLocation(
+                String sslKeystoreLocation) {
+            doSetProperty("sslKeystoreLocation", sslKeystoreLocation);
+            return this;
+        }
+        /**
+         * The store password for the key store file. This is optional for
+         * client and only needed if sslKeystoreLocation' is configured. Key
+         * store password is not supported for PEM format.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslKeystorePassword the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointBuilder sslKeystorePassword(
+                String sslKeystorePassword) {
+            doSetProperty("sslKeystorePassword", sslKeystorePassword);
+            return this;
+        }
+        /**
          * The file format of the key store file. This is optional for client.
          * Default value is JKS.
          * 
@@ -4523,11 +4750,16 @@ public interface KafkaEndpointBuilderFactory {
             return this;
         }
         /**
-         * The SSL protocol used to generate the SSLContext. Default setting is
-         * TLS, which is fine for most cases. Allowed values in recent JVMs are
-         * TLS, TLSv1.1 and TLSv1.2. SSL, SSLv2 and SSLv3 may be supported in
-         * older JVMs, but their usage is discouraged due to known security
-         * vulnerabilities.
+         * The SSL protocol used to generate the SSLContext. The default is
+         * TLSv1.3 when running with Java 11 or newer, TLSv1.2 otherwise. This
+         * value should be fine for most use cases. Allowed values in recent
+         * JVMs are TLSv1.2 and TLSv1.3. TLS, TLSv1.1, SSL, SSLv2 and SSLv3 may
+         * be supported in older JVMs, but their usage is discouraged due to
+         * known security vulnerabilities. With the default value for this
+         * config and sslEnabledProtocols, clients will downgrade to TLSv1.2 if
+         * the server does not support TLSv1.3. If this config is set to
+         * TLSv1.2, clients will not use TLSv1.3 even if it is one of the values
+         * in sslEnabledProtocols and the server only supports TLSv1.3.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -4571,6 +4803,39 @@ public interface KafkaEndpointBuilderFactory {
         default KafkaEndpointBuilder sslTrustmanagerAlgorithm(
                 String sslTrustmanagerAlgorithm) {
             doSetProperty("sslTrustmanagerAlgorithm", sslTrustmanagerAlgorithm);
+            return this;
+        }
+        /**
+         * The location of the trust store file.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslTruststoreLocation the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointBuilder sslTruststoreLocation(
+                String sslTruststoreLocation) {
+            doSetProperty("sslTruststoreLocation", sslTruststoreLocation);
+            return this;
+        }
+        /**
+         * The password for the trust store file. If a password is not set,
+         * trust store file configured will still be used, but integrity
+         * checking is disabled. Trust store password is not supported for PEM
+         * format.
+         * 
+         * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
+         * 
+         * Group: security
+         * 
+         * @param sslTruststorePassword the value to set
+         * @return the dsl builder
+         */
+        default KafkaEndpointBuilder sslTruststorePassword(
+                String sslTruststorePassword) {
+            doSetProperty("sslTruststorePassword", sslTruststorePassword);
             return this;
         }
         /**
@@ -4682,6 +4947,19 @@ public interface KafkaEndpointBuilderFactory {
          * Since: 2.13
          * Maven coordinates: org.apache.camel:camel-kafka
          * 
+         * @return the dsl builder for the headers' name.
+         */
+        default KafkaHeaderNameBuilder kafka() {
+            return KafkaHeaderNameBuilder.INSTANCE;
+        }
+        /**
+         * Kafka (camel-kafka)
+         * Sent and receive messages to/from an Apache Kafka broker.
+         * 
+         * Category: messaging
+         * Since: 2.13
+         * Maven coordinates: org.apache.camel:camel-kafka
+         * 
          * Syntax: <code>kafka:topic</code>
          * 
          * Path parameter: topic (required)
@@ -4717,6 +4995,200 @@ public interface KafkaEndpointBuilderFactory {
          */
         default KafkaEndpointBuilder kafka(String componentName, String path) {
             return KafkaEndpointBuilderFactory.endpointBuilder(componentName, path);
+        }
+    }
+
+    /**
+     * The builder of headers' name for the Kafka component.
+     */
+    public static class KafkaHeaderNameBuilder {
+        /**
+         * The internal instance of the builder used to access to all the
+         * methods representing the name of headers.
+         */
+        private static final KafkaHeaderNameBuilder INSTANCE = new KafkaHeaderNameBuilder();
+
+        /**
+         * Explicitly specify the partition.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code kafka.PARTITION_KEY}.
+         */
+        public String kafkaPartitionKey() {
+            return "kafka.PARTITION_KEY";
+        }
+
+        /**
+         * The partition where the message was stored.
+         * 
+         * The option is a: {@code Integer} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code kafka.PARTITION}.
+         */
+        public String kafkaPartition() {
+            return "kafka.PARTITION";
+        }
+
+        /**
+         * Producer: The key of the message in order to ensure that all related
+         * message goes in the same partition. Consumer: The key of the message
+         * if configured.
+         * 
+         * The option is a: {@code Object} type.
+         * 
+         * Required: true
+         * Group: common
+         * 
+         * @return the name of the header {@code kafka.KEY}.
+         */
+        public String kafkaKey() {
+            return "kafka.KEY";
+        }
+
+        /**
+         * The topic from where the message originated.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code kafka.TOPIC}.
+         */
+        public String kafkaTopic() {
+            return "kafka.TOPIC";
+        }
+
+        /**
+         * The topic to which send the message (override and takes precedence),
+         * and the header is not preserved.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code kafka.OVERRIDE_TOPIC}.
+         */
+        public String kafkaOverrideTopic() {
+            return "kafka.OVERRIDE_TOPIC";
+        }
+
+        /**
+         * The offset of the message.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code kafka.OFFSET}.
+         */
+        public String kafkaOffset() {
+            return "kafka.OFFSET";
+        }
+
+        /**
+         * The record headers.
+         * 
+         * The option is a: {@code org.apache.kafka.common.header.Headers} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code kafka.HEADERS}.
+         */
+        public String kafkaHeaders() {
+            return "kafka.HEADERS";
+        }
+
+        /**
+         * Whether or not it's the last record before commit (only available if
+         * autoCommitEnable endpoint parameter is false).
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code
+         * kafka.LAST_RECORD_BEFORE_COMMIT}.
+         */
+        public String kafkaLastRecordBeforeCommit() {
+            return "kafka.LAST_RECORD_BEFORE_COMMIT";
+        }
+
+        /**
+         * Indicates the last record within the current poll request (only
+         * available if autoCommitEnable endpoint parameter is false or
+         * allowManualCommit is true).
+         * 
+         * The option is a: {@code Boolean} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code kafka.LAST_POLL_RECORD}.
+         */
+        public String kafkaLastPollRecord() {
+            return "kafka.LAST_POLL_RECORD";
+        }
+
+        /**
+         * The timestamp of the message.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code kafka.TIMESTAMP}.
+         */
+        public String kafkaTimestamp() {
+            return "kafka.TIMESTAMP";
+        }
+
+        /**
+         * The ProducerRecord also has an associated timestamp. If the user did
+         * provide a timestamp, the producer will stamp the record with the
+         * provided timestamp and the header is not preserved.
+         * 
+         * The option is a: {@code Long} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code kafka.OVERRIDE_TIMESTAMP}.
+         */
+        public String kafkaOverrideTimestamp() {
+            return "kafka.OVERRIDE_TIMESTAMP";
+        }
+
+        /**
+         * The metadata (only configured if recordMetadata endpoint parameter is
+         * true).
+         * 
+         * The option is a: {@code List<RecordMetadata>} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code
+         * org.apache.kafka.clients.producer.RecordMetadata}.
+         */
+        public String orgApacheKafkaClientsProducerRecordmetadata() {
+            return "org.apache.kafka.clients.producer.RecordMetadata";
+        }
+
+        /**
+         * Can be used for forcing manual offset commit when using Kafka
+         * consumer.
+         * 
+         * The option is a: {@code
+         * org.apache.camel.component.kafka.consumer.KafkaManualCommit} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code KafkaManualCommit}.
+         */
+        public String kafkaManualCommit() {
+            return "KafkaManualCommit";
         }
     }
     static KafkaEndpointBuilder endpointBuilder(

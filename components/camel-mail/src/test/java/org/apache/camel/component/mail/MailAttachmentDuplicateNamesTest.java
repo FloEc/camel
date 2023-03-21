@@ -18,8 +18,8 @@ package org.apache.camel.component.mail;
 
 import java.util.Map;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -91,9 +91,9 @@ public class MailAttachmentDuplicateNamesTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://james@mymailserver.com?password=secret&initialDelay=100&delay=100").to("mock:result");
             }
         };

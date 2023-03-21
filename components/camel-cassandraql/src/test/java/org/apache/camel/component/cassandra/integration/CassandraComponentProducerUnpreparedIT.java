@@ -46,24 +46,24 @@ public class CassandraComponentProducerUnpreparedIT extends BaseCassandra {
     ProducerTemplate noParameterProducerTemplate;
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             public void configure() {
 
                 from("direct:input")
-                        .to(String.format("cql://%s/%s?cql=%s&prepareStatements=false", getUrl(), KEYSPACE_NAME, CQL));
-                from("direct:inputNoParameter").to(
-                        String.format("cql://%s/%s?cql=%s&prepareStatements=false", getUrl(), KEYSPACE_NAME, NO_PARAMETER_CQL));
+                        .toF("cql://%s/%s?cql=%s&prepareStatements=false", getUrl(), KEYSPACE_NAME, CQL);
+                from("direct:inputNoParameter")
+                        .toF("cql://%s/%s?cql=%s&prepareStatements=false", getUrl(), KEYSPACE_NAME, NO_PARAMETER_CQL);
             }
         };
     }
 
     @Test
-    public void testRequestUriCql() throws Exception {
+    public void testRequestUriCql() {
         producerTemplate.requestBody(Arrays.asList("w_jiang", "Willem", "Jiang"));
 
         ResultSet resultSet = getSession()
-                .execute(String.format("select login, first_name, last_name from camel_user where login = '%s'", "w_jiang"));
+                .execute("select login, first_name, last_name from camel_user where login = ?", "w_jiang");
         Row row = resultSet.one();
         assertNotNull(row);
         assertEquals("Willem", row.getString("first_name"));
@@ -71,7 +71,7 @@ public class CassandraComponentProducerUnpreparedIT extends BaseCassandra {
     }
 
     @Test
-    public void testRequestNoParameterNull() throws Exception {
+    public void testRequestNoParameterNull() {
         Object response = noParameterProducerTemplate.requestBody(null);
 
         assertNotNull(response);
@@ -79,7 +79,7 @@ public class CassandraComponentProducerUnpreparedIT extends BaseCassandra {
     }
 
     @Test
-    public void testRequestNoParameterEmpty() throws Exception {
+    public void testRequestNoParameterEmpty() {
         Object response = noParameterProducerTemplate.requestBody(null);
 
         assertNotNull(response);
@@ -87,12 +87,12 @@ public class CassandraComponentProducerUnpreparedIT extends BaseCassandra {
     }
 
     @Test
-    public void testRequestMessageCql() throws Exception {
+    public void testRequestMessageCql() {
         producerTemplate.requestBodyAndHeader(new Object[] { "Claus 2", "Ibsen 2", "c_ibsen" }, CassandraConstants.CQL_QUERY,
                 "update camel_user set first_name=?, last_name=? where login=?");
 
         ResultSet resultSet = getSession()
-                .execute(String.format("select login, first_name, last_name from camel_user where login = '%s'", "c_ibsen"));
+                .execute("select login, first_name, last_name from camel_user where login = ?", "c_ibsen");
         Row row = resultSet.one();
         assertNotNull(row);
         assertEquals("Claus 2", row.getString("first_name"));
@@ -103,7 +103,7 @@ public class CassandraComponentProducerUnpreparedIT extends BaseCassandra {
      * Test with incoming message containing a header with RegularStatement.
      */
     @Test
-    public void testRequestMessageStatement() throws Exception {
+    public void testRequestMessageStatement() {
         Update update = QueryBuilder.update("camel_user")
                 .setColumn("first_name", literal("Claus 2"))
                 .setColumn("last_name", literal("Ibsen 2"))
@@ -111,7 +111,7 @@ public class CassandraComponentProducerUnpreparedIT extends BaseCassandra {
         producerTemplate.requestBodyAndHeader(null, CassandraConstants.CQL_QUERY, update.build());
 
         ResultSet resultSet = getSession()
-                .execute(String.format("select login, first_name, last_name from camel_user where login = '%s'", "c_ibsen"));
+                .execute("select login, first_name, last_name from camel_user where login = ?", "c_ibsen");
         Row row = resultSet.one();
         assertNotNull(row);
         assertEquals("Claus 2", row.getString("first_name"));

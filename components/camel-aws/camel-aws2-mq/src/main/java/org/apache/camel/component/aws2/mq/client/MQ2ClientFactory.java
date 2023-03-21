@@ -30,12 +30,12 @@ public final class MQ2ClientFactory {
 
     /**
      * Return the correct AWS Mq client (based on remote vs local).
-     * 
+     *
      * @param  configuration configuration
      * @return               MqClient
      */
     public static MQ2InternalClient getMqClient(MQ2Configuration configuration) {
-        return configuration.isUseDefaultCredentialsProvider()
+        return Boolean.TRUE.equals(configuration.isUseDefaultCredentialsProvider())
                 ? new MQ2ClientOptimizedImpl(configuration) : new MQ2ClientStandardImpl(configuration);
     }
 }

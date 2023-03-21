@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
@@ -97,7 +97,7 @@ public class JpaTest {
     }
 
     @Test
-    public void testProducerInsertsList() throws Exception {
+    public void testProducerInsertsList() {
         // lets produce some objects
         template.send(listEndpoint, new Processor() {
             public void process(Exchange exchange) {
@@ -122,7 +122,7 @@ public class JpaTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         camelContext.start();
         template = camelContext.createProducerTemplate();
 
@@ -136,7 +136,7 @@ public class JpaTest {
         listEndpoint = camelContext.getEndpoint(getEndpointUri() + "&entityType=java.util.List", JpaEndpoint.class);
 
         transactionTemplate = endpoint.createTransactionTemplate();
-        entityManager = endpoint.createEntityManager();
+        entityManager = endpoint.getEntityManagerFactory().createEntityManager();
 
         transactionTemplate.execute(new TransactionCallback<Object>() {
             public Object doInTransaction(TransactionStatus status) {
@@ -160,7 +160,7 @@ public class JpaTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ServiceHelper.stopService(consumer, template);
         camelContext.stop();
     }

@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component.azure.eventhubs;
 
+import com.azure.identity.DefaultAzureCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.eventhubs.EventHubConsumerAsyncClient;
 import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
 import org.apache.camel.ResolveEndpointFailedException;
@@ -25,31 +27,33 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventHubsComponentTest extends CamelTestSupport {
 
     @Test
-    public void testCreateEndpointWithNoEventHubsNameOrNameSpace() throws Exception {
+    public void testCreateEndpointWithNoEventHubsNameOrNameSpace() {
         ResolveEndpointFailedException exception = assertThrows(ResolveEndpointFailedException.class,
                 () -> context.getEndpoint("azure-eventhubs:?sharedAccessKey=string&sharedAccessName=name"));
 
         assertTrue(
-                exception.getMessage().contains("ConnectionString, AzureClients or Namespace and EventHub name must be set"));
+                exception.getMessage()
+                        .contains("ConnectionString, ProducerAsyncClient or Namespace and EventHub name must be set"));
 
         ResolveEndpointFailedException exception2 = assertThrows(ResolveEndpointFailedException.class,
                 () -> context.getEndpoint("azure-eventhubs:name?sharedAccessKey=string&sharedAccessName=name"));
 
         assertTrue(
-                exception2.getMessage().contains("ConnectionString, AzureClients or Namespace and EventHub name must be set"));
+                exception2.getMessage()
+                        .contains("ConnectionString, ProducerAsyncClient or Namespace and EventHub name must be set"));
     }
 
     @Test
-    public void testCreateEndpointWithNoSuppliedClientsOrKeysOrConnectionString() {
+    public void testCreateEndpointWithNoSuppliedClientsOrKeysOrConnectionStringOrTokenCredential() {
         final String expectedErrorMessage
-                = "Azure EventHubs SharedAccessName/SharedAccessKey, ConsumerAsyncClient/ProducerAsyncClient "
-                  + "or connectionString must be specified";
+                = "Azure EventHubs SharedAccessName/SharedAccessKey, ProducerAsyncClient, ConnectionString or TokenCredential must be specified";
 
         // first case: with no client or key or connectionstring
         assertTrue(getErrorMessage("azure-eventhubs:name/hubName?").contains(expectedErrorMessage));
@@ -102,18 +106,28 @@ class EventHubsComponentTest extends CamelTestSupport {
         context.getRegistry().bind("producerClient", producerAsyncClient);
 
         final EventHubsEndpoint endpoint
-                = (EventHubsEndpoint) context.getEndpoint("azure-eventhubs:name/hubName?producerAsyncClient=#producerClient");
+                = context.getEndpoint("azure-eventhubs:name/hubName?producerAsyncClient=#producerClient",
+                        EventHubsEndpoint.class);
 
-        assertEquals(producerAsyncClient, endpoint.getConfiguration().getProducerAsyncClient());
+        assertSame(producerAsyncClient, endpoint.getConfiguration().getProducerAsyncClient());
+
+        final DefaultAzureCredential tokenCredential = new DefaultAzureCredentialBuilder().build();
+        context.getRegistry().bind("tokenCredential", tokenCredential);
+
+        final EventHubsEndpoint endpoint2
+                = context.getEndpoint("azure-eventhubs:name/hubName?tokenCredential=#tokenCredential", EventHubsEndpoint.class);
+
+        assertSame(tokenCredential, endpoint2.getConfiguration().getTokenCredential());
     }
 
     @Test
     public void testCreateEndpointWithConfig() {
         final String uri = "azure-eventhubs:namespace/hubName?sharedAccessName=DummyAccessKeyName"
                            + "&sharedAccessKey=DummyKey"
-                           + "&consumerGroupName=testConsumer&prefetchCount=100";
+                           + "&consumerGroupName=testConsumer&prefetchCount=100"
+                           + "&checkpointBatchSize=100&checkpointBatchTimeout=1000";
 
-        final EventHubsEndpoint endpoint = (EventHubsEndpoint) context.getEndpoint(uri);
+        final EventHubsEndpoint endpoint = context.getEndpoint(uri, EventHubsEndpoint.class);
 
         assertEquals("namespace", endpoint.getConfiguration().getNamespace());
         assertEquals("hubName", endpoint.getConfiguration().getEventHubName());
@@ -121,6 +135,8 @@ class EventHubsComponentTest extends CamelTestSupport {
         assertEquals("DummyAccessKeyName", endpoint.getConfiguration().getSharedAccessName());
         assertEquals("DummyKey", endpoint.getConfiguration().getSharedAccessKey());
         assertEquals(100, endpoint.getConfiguration().getPrefetchCount());
+        assertEquals(100, endpoint.getConfiguration().getCheckpointBatchSize());
+        assertEquals(1000, endpoint.getConfiguration().getCheckpointBatchTimeout());
     }
 
     private String getErrorMessage(final String uri) {

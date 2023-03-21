@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -192,11 +192,45 @@ public interface AzureEventhubsComponentBuilderFactory {
             return this;
         }
         /**
+         * Sets the batch size between each checkpoint updates. Works jointly
+         * with checkpointBatchTimeout.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 500
+         * Group: consumer
+         * 
+         * @param checkpointBatchSize the value to set
+         * @return the dsl builder
+         */
+        default AzureEventhubsComponentBuilder checkpointBatchSize(
+                int checkpointBatchSize) {
+            doSetProperty("checkpointBatchSize", checkpointBatchSize);
+            return this;
+        }
+        /**
+         * Sets the batch timeout between each checkpoint updates. Works jointly
+         * with checkpointBatchSize.
+         * 
+         * The option is a: &lt;code&gt;int&lt;/code&gt; type.
+         * 
+         * Default: 5000
+         * Group: consumer
+         * 
+         * @param checkpointBatchTimeout the value to set
+         * @return the dsl builder
+         */
+        default AzureEventhubsComponentBuilder checkpointBatchTimeout(
+                int checkpointBatchTimeout) {
+            doSetProperty("checkpointBatchTimeout", checkpointBatchTimeout);
+            return this;
+        }
+        /**
          * Sets the CheckpointStore the EventProcessorClient will use for
-         * storing partition ownership and checkpoint information. &lt;p&gt;
-         * Users can, optionally, provide their own implementation of
-         * CheckpointStore which will store ownership and checkpoint
-         * information. By default it set to use
+         * storing partition ownership and checkpoint information. Users can,
+         * optionally, provide their own implementation of CheckpointStore which
+         * will store ownership and checkpoint information. By default it set to
+         * use
          * com.azure.messaging.eventhubs.checkpointstore.blob.BlobCheckpointStore which stores all checkpoint offsets into Azure Blob Storage.
          * 
          * The option is a:
@@ -216,8 +250,7 @@ public interface AzureEventhubsComponentBuilderFactory {
         /**
          * Sets the name of the consumer group this consumer is associated with.
          * Events are read in the context of this group. The name of the
-         * consumer group that is created by default is {link
-         * #DEFAULT_CONSUMER_GROUP_NAME $Default}.
+         * consumer group that is created by default is {code $Default}.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 
@@ -240,9 +273,8 @@ public interface AzureEventhubsComponentBuilderFactory {
          * of the partition will start from {link EventPosition#latest() latest}
          * position.
          * 
-         * The option is a: &lt;code&gt;java.util.Map&lt;java.lang.String,
-         * com.azure.messaging.eventhubs.models.EventPosition&gt;&lt;/code&gt;
-         * type.
+         * The option is a: &lt;code&gt;java.util.Map&amp;lt;java.lang.String,
+         * com.azure.messaging.eventhubs.models.EventPosition&amp;gt;&lt;/code&gt; type.
          * 
          * Group: consumer
          * 
@@ -430,6 +462,26 @@ public interface AzureEventhubsComponentBuilderFactory {
             doSetProperty("sharedAccessName", sharedAccessName);
             return this;
         }
+        /**
+         * Still another way of authentication (beside supplying namespace,
+         * sharedAccessKey, sharedAccessName or connection string) is through
+         * Azure-AD authentication using an implementation instance of
+         * TokenCredential.
+         * 
+         * The option is a:
+         * &lt;code&gt;com.azure.core.credential.TokenCredential&lt;/code&gt;
+         * type.
+         * 
+         * Group: security
+         * 
+         * @param tokenCredential the value to set
+         * @return the dsl builder
+         */
+        default AzureEventhubsComponentBuilder tokenCredential(
+                com.azure.core.credential.TokenCredential tokenCredential) {
+            doSetProperty("tokenCredential", tokenCredential);
+            return this;
+        }
     }
 
     class AzureEventhubsComponentBuilderImpl
@@ -462,6 +514,8 @@ public interface AzureEventhubsComponentBuilderFactory {
             case "blobContainerName": getOrCreateConfiguration((EventHubsComponent) component).setBlobContainerName((java.lang.String) value); return true;
             case "blobStorageSharedKeyCredential": getOrCreateConfiguration((EventHubsComponent) component).setBlobStorageSharedKeyCredential((com.azure.storage.common.StorageSharedKeyCredential) value); return true;
             case "bridgeErrorHandler": ((EventHubsComponent) component).setBridgeErrorHandler((boolean) value); return true;
+            case "checkpointBatchSize": getOrCreateConfiguration((EventHubsComponent) component).setCheckpointBatchSize((int) value); return true;
+            case "checkpointBatchTimeout": getOrCreateConfiguration((EventHubsComponent) component).setCheckpointBatchTimeout((int) value); return true;
             case "checkpointStore": getOrCreateConfiguration((EventHubsComponent) component).setCheckpointStore((com.azure.messaging.eventhubs.CheckpointStore) value); return true;
             case "consumerGroupName": getOrCreateConfiguration((EventHubsComponent) component).setConsumerGroupName((java.lang.String) value); return true;
             case "eventPosition": getOrCreateConfiguration((EventHubsComponent) component).setEventPosition((java.util.Map) value); return true;
@@ -474,6 +528,7 @@ public interface AzureEventhubsComponentBuilderFactory {
             case "connectionString": getOrCreateConfiguration((EventHubsComponent) component).setConnectionString((java.lang.String) value); return true;
             case "sharedAccessKey": getOrCreateConfiguration((EventHubsComponent) component).setSharedAccessKey((java.lang.String) value); return true;
             case "sharedAccessName": getOrCreateConfiguration((EventHubsComponent) component).setSharedAccessName((java.lang.String) value); return true;
+            case "tokenCredential": getOrCreateConfiguration((EventHubsComponent) component).setTokenCredential((com.azure.core.credential.TokenCredential) value); return true;
             default: return false;
             }
         }

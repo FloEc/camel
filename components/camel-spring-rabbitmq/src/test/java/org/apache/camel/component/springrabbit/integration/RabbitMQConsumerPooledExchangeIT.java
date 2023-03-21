@@ -19,9 +19,9 @@ package org.apache.camel.component.springrabbit.integration;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExtendedCamelContext;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.engine.PooledExchangeFactory;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +30,7 @@ public class RabbitMQConsumerPooledExchangeIT extends RabbitMQITSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext camelContext = super.createCamelContext();
-        camelContext.adapt(ExtendedCamelContext.class).setExchangeFactory(new PooledExchangeFactory());
+        camelContext.getCamelContextExtension().setExchangeFactory(new PooledExchangeFactory());
         return camelContext;
     }
 
@@ -40,7 +40,7 @@ public class RabbitMQConsumerPooledExchangeIT extends RabbitMQITSupport {
 
         template.sendBody("direct:start", "Hello World");
 
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class RabbitMQConsumerPooledExchangeIT extends RabbitMQITSupport {
         template.sendBody("direct:start", "Hello World");
         template.sendBody("direct:start", "Bye World");
 
-        assertMockEndpointsSatisfied(30, TimeUnit.SECONDS);
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
     }
 
     @Override

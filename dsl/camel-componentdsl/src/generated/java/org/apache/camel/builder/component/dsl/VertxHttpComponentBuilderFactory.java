@@ -16,7 +16,7 @@
  */
 package org.apache.camel.builder.component.dsl;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.Component;
 import org.apache.camel.builder.component.AbstractComponentBuilder;
 import org.apache.camel.builder.component.ComponentBuilder;
@@ -93,10 +93,10 @@ public interface VertxHttpComponentBuilderFactory {
         }
         /**
          * Whether to allow java serialization when a request has the
-         * Content-Type application/x-java-serialized-object &lt;p/&gt; This is
-         * disabled by default. If you enable this, be aware that Java will
-         * deserialize the incoming data from the request. This can be a
-         * potential security risk.
+         * Content-Type application/x-java-serialized-object This is disabled by
+         * default. If you enable this, be aware that Java will deserialize the
+         * incoming data from the request. This can be a potential security
+         * risk.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -177,6 +177,23 @@ public interface VertxHttpComponentBuilderFactory {
         default VertxHttpComponentBuilder vertxOptions(
                 io.vertx.core.VertxOptions vertxOptions) {
             doSetProperty("vertxOptions", vertxOptions);
+            return this;
+        }
+        /**
+         * To provide a custom set of options for configuring vertx web client.
+         * 
+         * The option is a:
+         * &lt;code&gt;io.vertx.ext.web.client.WebClientOptions&lt;/code&gt;
+         * type.
+         * 
+         * Group: advanced
+         * 
+         * @param webClientOptions the value to set
+         * @return the dsl builder
+         */
+        default VertxHttpComponentBuilder webClientOptions(
+                io.vertx.ext.web.client.WebClientOptions webClientOptions) {
+            doSetProperty("webClientOptions", webClientOptions);
             return this;
         }
         /**
@@ -372,6 +389,7 @@ public interface VertxHttpComponentBuilderFactory {
             case "vertx": ((VertxHttpComponent) component).setVertx((io.vertx.core.Vertx) value); return true;
             case "vertxHttpBinding": ((VertxHttpComponent) component).setVertxHttpBinding((org.apache.camel.component.vertx.http.VertxHttpBinding) value); return true;
             case "vertxOptions": ((VertxHttpComponent) component).setVertxOptions((io.vertx.core.VertxOptions) value); return true;
+            case "webClientOptions": ((VertxHttpComponent) component).setWebClientOptions((io.vertx.ext.web.client.WebClientOptions) value); return true;
             case "headerFilterStrategy": ((VertxHttpComponent) component).setHeaderFilterStrategy((org.apache.camel.spi.HeaderFilterStrategy) value); return true;
             case "proxyHost": ((VertxHttpComponent) component).setProxyHost((java.lang.String) value); return true;
             case "proxyPassword": ((VertxHttpComponent) component).setProxyPassword((java.lang.String) value); return true;

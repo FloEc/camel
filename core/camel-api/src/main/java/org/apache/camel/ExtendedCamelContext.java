@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.camel.catalog.RuntimeCamelCatalog;
+import org.apache.camel.console.DevConsoleResolver;
 import org.apache.camel.health.HealthCheckResolver;
 import org.apache.camel.spi.AnnotationBasedProcessorFactory;
 import org.apache.camel.spi.AsyncProcessorAwaitManager;
@@ -30,6 +31,8 @@ import org.apache.camel.spi.BeanProcessorFactory;
 import org.apache.camel.spi.BeanProxyFactory;
 import org.apache.camel.spi.BootstrapCloseable;
 import org.apache.camel.spi.CamelBeanPostProcessor;
+import org.apache.camel.spi.CamelDependencyInjectionAnnotationFactory;
+import org.apache.camel.spi.CliConnectorFactory;
 import org.apache.camel.spi.ComponentNameResolver;
 import org.apache.camel.spi.ComponentResolver;
 import org.apache.camel.spi.ConfigurerResolver;
@@ -51,10 +54,13 @@ import org.apache.camel.spi.LogListener;
 import org.apache.camel.spi.ManagementMBeanAssembler;
 import org.apache.camel.spi.ModelJAXBContextFactory;
 import org.apache.camel.spi.ModelToXMLDumper;
+import org.apache.camel.spi.ModelineFactory;
 import org.apache.camel.spi.NodeIdFactory;
 import org.apache.camel.spi.NormalizedEndpointUri;
 import org.apache.camel.spi.PackageScanClassResolver;
 import org.apache.camel.spi.PackageScanResourceResolver;
+import org.apache.camel.spi.PeriodTaskResolver;
+import org.apache.camel.spi.PeriodTaskScheduler;
 import org.apache.camel.spi.ProcessorExchangeFactory;
 import org.apache.camel.spi.ProcessorFactory;
 import org.apache.camel.spi.ReactiveExecutor;
@@ -68,13 +74,12 @@ import org.apache.camel.spi.RoutesLoader;
 import org.apache.camel.spi.StartupStepRecorder;
 import org.apache.camel.spi.UnitOfWorkFactory;
 import org.apache.camel.spi.UriFactoryResolver;
-import org.apache.camel.spi.XMLRoutesDefinitionLoader;
 
 /**
  * Extended {@link CamelContext} which contains the methods and APIs that are not primary intended for Camel end users
  * but for SPI, custom components, or more advanced used-cases with Camel.
  */
-public interface ExtendedCamelContext extends CamelContext {
+public interface ExtendedCamelContext {
 
     /**
      * Sets the name (id) of this context.
@@ -86,6 +91,19 @@ public interface ExtendedCamelContext extends CamelContext {
      */
     void setName(String name);
 
+    default String getName() {
+        return null;
+    }
+
+    /**
+     * Sets the description of this Camel application.
+     */
+    void setDescription(String description);
+
+    default String getDescription() {
+        return null;
+    }
+
     /**
      * Sets the registry Camel should use for looking up beans by name or type.
      * <p/>
@@ -95,6 +113,10 @@ public interface ExtendedCamelContext extends CamelContext {
      * @param registry the registry such as DefaultRegistry or
      */
     void setRegistry(Registry registry);
+
+    default Registry getRegistry() {
+        return null;
+    }
 
     /**
      * Method to signal to {@link CamelContext} that the process to initialize setup routes is in progress.
@@ -257,6 +279,21 @@ public interface ExtendedCamelContext extends CamelContext {
     CamelBeanPostProcessor getBeanPostProcessor();
 
     /**
+     * Sets a custom bean post processor to use.
+     */
+    void setBeanPostProcessor(CamelBeanPostProcessor beanPostProcessor);
+
+    /**
+     * Returns the annotation dependency injection factory.
+     */
+    CamelDependencyInjectionAnnotationFactory getDependencyInjectionAnnotationFactory();
+
+    /**
+     * Sets a custom annotation dependency injection factory.
+     */
+    void setDependencyInjectionAnnotationFactory(CamelDependencyInjectionAnnotationFactory factory);
+
+    /**
      * Returns the management mbean assembler
      *
      * @return the mbean assembler
@@ -348,6 +385,20 @@ public interface ExtendedCamelContext extends CamelContext {
      * @param healthCheckResolver the resolver
      */
     void setHealthCheckResolver(HealthCheckResolver healthCheckResolver);
+
+    /**
+     * Gets the current dev console resolver
+     *
+     * @return the resolver
+     */
+    DevConsoleResolver getDevConsoleResolver();
+
+    /**
+     * Sets a custom dev console resolver
+     *
+     * @param devConsoleResolver the resolver
+     */
+    void setDevConsoleResolver(DevConsoleResolver devConsoleResolver);
 
     /**
      * Returns the package scanning class resolver
@@ -654,19 +705,6 @@ public interface ExtendedCamelContext extends CamelContext {
     void setEventNotificationApplicable(boolean eventNotificationApplicable);
 
     /**
-     * Gets the {@link XMLRoutesDefinitionLoader} to be used.
-     *
-     * @deprecated use {@link #getRoutesLoader()}
-     */
-    @Deprecated
-    XMLRoutesDefinitionLoader getXMLRoutesDefinitionLoader();
-
-    /**
-     * Sets a custom {@link XMLRoutesDefinitionLoader} to be used.
-     */
-    void setXMLRoutesDefinitionLoader(XMLRoutesDefinitionLoader xmlRoutesDefinitionLoader);
-
-    /**
      * Gets the {@link RoutesLoader} to be used.
      */
     RoutesLoader getRoutesLoader();
@@ -758,6 +796,16 @@ public interface ExtendedCamelContext extends CamelContext {
     void setStartupStepRecorder(StartupStepRecorder startupStepRecorder);
 
     /**
+     * Gets the {@link CliConnectorFactory} (optional).
+     */
+    CliConnectorFactory getCliConnectorFactory();
+
+    /**
+     * Sets the {@link CliConnectorFactory} to use.
+     */
+    void setCliConnectorFactory(CliConnectorFactory cliConnectorFactory);
+
+    /**
      * Internal API for adding routes. Do not use this as end user.
      */
     void addRoute(Route route);
@@ -809,5 +857,57 @@ public interface ExtendedCamelContext extends CamelContext {
      *                                  them
      */
     String resolvePropertyPlaceholders(String text, boolean keepUnresolvedOptional);
+
+    /**
+     * Package name to use as base (offset) for classpath scanning of custom {@link CamelConfiguration},
+     * {@link Configuration}, and {@link TypeConverter}.
+     *
+     * @return the base package name (can bre null if not configured)
+     */
+    String getBasePackageScan();
+
+    /**
+     * Package name to use as base (offset) for classpath scanning of custom {@link CamelConfiguration},
+     * {@link Configuration}, and {@link TypeConverter}.
+     *
+     * @param basePackageScan the base package name
+     */
+    void setBasePackageScan(String basePackageScan);
+
+    /**
+     * Gets the {@link ModelineFactory}.
+     */
+    ModelineFactory getModelineFactory();
+
+    /**
+     * Sets a custom {@link ModelineFactory}.
+     */
+    void setModelineFactory(ModelineFactory modelineFactory);
+
+    /**
+     * The {@link CamelContext} have additional phases that are not defined in {@link ServiceStatus} and this method
+     * provides the phase ordinal value.
+     */
+    byte getStatusPhase();
+
+    /**
+     * Gets the period task scheduler
+     */
+    PeriodTaskScheduler getPeriodTaskScheduler();
+
+    /**
+     * To use a custom period task scheduler
+     */
+    void setPeriodTaskScheduler(PeriodTaskScheduler periodTaskScheduler);
+
+    /**
+     * Gets the period task resolver
+     */
+    PeriodTaskResolver getPeriodTaskResolver();
+
+    /**
+     * To use a custom period task resolver
+     */
+    void setPeriodTaskResolver(PeriodTaskResolver periodTaskResolver);
 
 }

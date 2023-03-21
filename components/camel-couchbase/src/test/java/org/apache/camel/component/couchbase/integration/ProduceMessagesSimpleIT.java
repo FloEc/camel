@@ -16,8 +16,6 @@
  */
 package org.apache.camel.component.couchbase.integration;
 
-import java.time.Duration;
-
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.couchbase.CouchbaseConstants;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -27,12 +25,11 @@ public class ProduceMessagesSimpleIT extends CouchbaseIntegrationTestBase {
 
     @Test
     public void testInsert() throws Exception {
-        cluster.bucket(bucketName).waitUntilReady(Duration.ofSeconds(30));
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(1);
 
         template.sendBody("direct:start", "couchbase persist");
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
         mock.message(0).body().equals("couchbase persist");
 
     }
@@ -41,7 +38,7 @@ public class ProduceMessagesSimpleIT extends CouchbaseIntegrationTestBase {
     protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
 
                 // need couchbase installed on localhost
                 from("direct:start").setHeader(CouchbaseConstants.HEADER_ID, constant("SimpleDocument_1"))

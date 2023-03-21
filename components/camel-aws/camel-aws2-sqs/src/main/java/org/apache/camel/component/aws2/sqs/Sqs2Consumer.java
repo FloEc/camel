@@ -31,11 +31,15 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.ExchangePropertyKey;
-import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
+import org.apache.camel.health.HealthCheckHelper;
+import org.apache.camel.health.WritableHealthCheckRepository;
 import org.apache.camel.spi.HeaderFilterStrategy;
+import org.apache.camel.spi.ScheduledPollConsumerScheduler;
 import org.apache.camel.spi.Synchronization;
+import org.apache.camel.spi.ThreadPoolProfile;
+import org.apache.camel.support.DefaultScheduledPollConsumerScheduler;
 import org.apache.camel.support.ScheduledBatchPollingConsumer;
 import org.apache.camel.util.CastUtils;
 import org.apache.camel.util.ObjectHelper;
@@ -67,6 +71,8 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
     private transient String sqsConsumerToString;
     private Collection<String> attributeNames;
     private Collection<String> messageAttributeNames;
+    private WritableHealthCheckRepository healthCheckRepository;
+    private Sqs2ConsumerHealthCheck consumerHealthCheck;
 
     public Sqs2Consumer(Sqs2Endpoint endpoint, Processor processor) {
         super(endpoint, processor);
@@ -171,7 +177,7 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
             if (this.scheduledExecutor != null && visibilityTimeout != null && (visibilityTimeout.intValue() / 2) > 0) {
                 int delay = visibilityTimeout.intValue() / 2;
                 int period = visibilityTimeout.intValue();
-                int repeatSeconds = Double.valueOf(visibilityTimeout.doubleValue() * 1.5).intValue();
+                int repeatSeconds = (int) (visibilityTimeout.doubleValue() * 1.5);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
                             "Scheduled TimeoutExtender task to start after {} delay, and run with {}/{} period/repeat (seconds), to extend exchangeId: {}",
@@ -181,7 +187,7 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
                 final ScheduledFuture<?> scheduledFuture = this.scheduledExecutor.scheduleAtFixedRate(
                         new TimeoutExtender(exchange, repeatSeconds), delay, period,
                         TimeUnit.SECONDS);
-                exchange.adapt(ExtendedExchange.class).addOnCompletion(new Synchronization() {
+                exchange.getExchangeExtension().addOnCompletion(new Synchronization() {
                     @Override
                     public void onComplete(Exchange exchange) {
                         cancelExtender(exchange);
@@ -202,11 +208,13 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
             }
 
             // add on completion to handle after work when the exchange is done
-            exchange.adapt(ExtendedExchange.class).addOnCompletion(new Synchronization() {
+            exchange.getExchangeExtension().addOnCompletion(new Synchronization() {
+                @Override
                 public void onComplete(Exchange exchange) {
                     processCommit(exchange);
                 }
 
+                @Override
                 public void onFailure(Exchange exchange) {
                     processRollback(exchange);
                 }
@@ -310,26 +318,16 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
         // Need to apply the SqsHeaderFilterStrategy this time
         HeaderFilterStrategy headerFilterStrategy = getEndpoint().getHeaderFilterStrategy();
         // add all sqs message attributes as camel message headers so that
-        // knowledge of
-        // the Sqs class MessageAttributeValue will not leak to the client
+        // knowledge of the Sqs class MessageAttributeValue will not leak to the
+        // client
         for (Map.Entry<String, MessageAttributeValue> entry : msg.messageAttributes().entrySet()) {
             String header = entry.getKey();
-            Object value = translateValue(entry.getValue());
+            Object value = Sqs2MessageHelper.fromMessageAttributeValue(entry.getValue());
             if (!headerFilterStrategy.applyFilterToExternalHeaders(header, value, exchange)) {
                 message.setHeader(header, value);
             }
         }
         return exchange;
-    }
-
-    private static Object translateValue(MessageAttributeValue mav) {
-        Object result = null;
-        if (mav.stringValue() != null) {
-            result = mav.stringValue();
-        } else if (mav.binaryValue() != null) {
-            result = mav.binaryValue();
-        }
-        return result;
     }
 
     @Override
@@ -341,14 +339,48 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
     }
 
     @Override
+    protected void afterConfigureScheduler(ScheduledPollConsumerScheduler scheduler, boolean newScheduler) {
+        if (newScheduler && scheduler instanceof DefaultScheduledPollConsumerScheduler) {
+            DefaultScheduledPollConsumerScheduler ds = (DefaultScheduledPollConsumerScheduler) scheduler;
+            ds.setConcurrentConsumers(getConfiguration().getConcurrentConsumers());
+            // if using concurrent consumers then resize pool to be at least
+            // same size
+            int ps = Math.max(ds.getPoolSize(), getConfiguration().getConcurrentConsumers());
+            ds.setPoolSize(ps);
+        }
+    }
+
+    @Override
     protected void doStart() throws Exception {
         // start scheduler first
         if (getConfiguration().isExtendMessageVisibility() && scheduledExecutor == null) {
-            this.scheduledExecutor = getEndpoint().getCamelContext().getExecutorServiceManager()
-                    .newSingleThreadScheduledExecutor(this, "SqsTimeoutExtender");
+            ThreadPoolProfile profile = new ThreadPoolProfile("SqsTimeoutExtender");
+            profile.setPoolSize(1);
+            profile.setAllowCoreThreadTimeOut(false);
+            // the max queue is set to be unbound as there is no way to register
+            // the required size. If using the Thread EIP, then the max queue
+            // size is equal to maxQueueSize of the consumer thread EIP+max
+            // thread count+consumer-thread.
+            // The consumer would block when this limit was reached. It is safe
+            // to set this queue to unbound as it will be limited by the
+            // consumer.
+            profile.setMaxQueueSize(-1);
+
+            this.scheduledExecutor = getEndpoint().getCamelContext().getExecutorServiceManager().newScheduledThreadPool(this,
+                    "SqsTimeoutExtender", profile);
         }
 
         super.doStart();
+
+        // health-check is optional so discover and resolve
+        healthCheckRepository = HealthCheckHelper.getHealthCheckRepository(getEndpoint().getCamelContext(), "components",
+                WritableHealthCheckRepository.class);
+
+        if (healthCheckRepository != null) {
+            consumerHealthCheck = new Sqs2ConsumerHealthCheck(this, getRouteId());
+            healthCheckRepository.addHealthCheck(consumerHealthCheck);
+        }
+
     }
 
     @Override
@@ -381,9 +413,7 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
                 LOG.trace("Extending visibility window by {} seconds for exchange {}", this.repeatSeconds, this.exchange);
                 getEndpoint().getClient().changeMessageVisibility(request.build());
                 LOG.debug("Extended visibility window by {} seconds for exchange {}", this.repeatSeconds, this.exchange);
-            } catch (ReceiptHandleIsInvalidException e) {
-                // Ignore.
-            } catch (MessageNotInflightException e) {
+            } catch (MessageNotInflightException | ReceiptHandleIsInvalidException e) {
                 // Ignore.
             } catch (SqsException e) {
                 if (e.getMessage().contains("Message does not exist or is not available for visibility timeout change")) {
@@ -397,9 +427,9 @@ public class Sqs2Consumer extends ScheduledBatchPollingConsumer {
         }
 
         private void logException(Exception e) {
-            LOG.warn("Extending visibility window failed for exchange " + exchange
+            LOG.warn("Extending visibility window failed for exchange {}"
                      + ". Will not attempt to extend visibility further. This exception will be ignored.",
-                    e);
+                    exchange, e);
         }
     }
 

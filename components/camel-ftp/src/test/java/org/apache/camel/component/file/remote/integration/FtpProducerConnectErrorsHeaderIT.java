@@ -33,13 +33,13 @@ public class FtpProducerConnectErrorsHeaderIT extends FtpServerTestSupport {
         mock.expectedHeaderReceived("CamelFtpReplyCode", "530");
 
         template.sendBody("direct:start", "hi");
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("direct:start").doTry().to(getFtpUrl()).doCatch(Exception.class).to("mock:result").endDoTry();
             }
         };

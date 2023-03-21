@@ -46,10 +46,10 @@ public class ComplexIT extends CamelTestSupport {
     private MockEndpoint mockProcessed;
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() {
                 final int numberOfObjects = 3;
                 //final String serviceAccountKeyFile = "somefile.json";
                 final String serviceAccountKeyFile = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
@@ -78,11 +78,11 @@ public class ComplexIT extends CamelTestSupport {
                      + "&autoCreateBucket=true"
                      + "&deleteAfterRead=true"
                      + "&includeBody=true")
-                             .log("consuming: ${header.CamelGoogleCloudStorageBucketName}/${header.CamelGoogleCloudStorageObjectName}")
-                             .to("direct:processed")
-                             .to("mock:processed");
+                        .log("consuming: ${header.CamelGoogleCloudStorageBucketName}/${header.CamelGoogleCloudStorageObjectName}")
+                        .to("direct:processed")
+                        .to("mock:processed");
 
-                //upload these files to bucket2 
+                //upload these files to bucket2
                 from("direct:processed")
                         .to("google-storage://" + bucket2 + "?serviceAccountKey=file:" + serviceAccountKeyFile)
                         .log("uploaded file object:${header.CamelGoogleCloudStorageObjectName}, body:${body}")
@@ -144,7 +144,7 @@ public class ComplexIT extends CamelTestSupport {
         mockProcessed.expectedMessageCount(3);
 
         Thread.sleep(10000);
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
 }

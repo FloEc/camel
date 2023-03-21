@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.apache.camel.builder.EndpointConsumerBuilder;
 import org.apache.camel.builder.EndpointProducerBuilder;
 import org.apache.camel.builder.endpoint.AbstractEndpointBuilder;
@@ -40,39 +40,6 @@ public interface ServletEndpointBuilderFactory {
     public interface ServletEndpointBuilder extends EndpointConsumerBuilder {
         default AdvancedServletEndpointBuilder advanced() {
             return (AdvancedServletEndpointBuilder) this;
-        }
-        /**
-         * If this option is false the Servlet will disable the HTTP streaming
-         * and set the content-length header on the response.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: true
-         * Group: consumer
-         * 
-         * @param chunked the value to set
-         * @return the dsl builder
-         */
-        default ServletEndpointBuilder chunked(boolean chunked) {
-            doSetProperty("chunked", chunked);
-            return this;
-        }
-        /**
-         * If this option is false the Servlet will disable the HTTP streaming
-         * and set the content-length header on the response.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: true
-         * Group: consumer
-         * 
-         * @param chunked the value to set
-         * @return the dsl builder
-         */
-        default ServletEndpointBuilder chunked(String chunked) {
-            doSetProperty("chunked", chunked);
-            return this;
         }
         /**
          * Determines whether or not the raw input stream from Servlet is cached
@@ -138,42 +105,6 @@ public interface ServletEndpointBuilderFactory {
             return this;
         }
         /**
-         * To use a custom HeaderFilterStrategy to filter header to and from
-         * Camel message.
-         * 
-         * The option is a:
-         * &lt;code&gt;org.apache.camel.spi.HeaderFilterStrategy&lt;/code&gt;
-         * type.
-         * 
-         * Group: common
-         * 
-         * @param headerFilterStrategy the value to set
-         * @return the dsl builder
-         */
-        default ServletEndpointBuilder headerFilterStrategy(
-                org.apache.camel.spi.HeaderFilterStrategy headerFilterStrategy) {
-            doSetProperty("headerFilterStrategy", headerFilterStrategy);
-            return this;
-        }
-        /**
-         * To use a custom HeaderFilterStrategy to filter header to and from
-         * Camel message.
-         * 
-         * The option will be converted to a
-         * &lt;code&gt;org.apache.camel.spi.HeaderFilterStrategy&lt;/code&gt;
-         * type.
-         * 
-         * Group: common
-         * 
-         * @param headerFilterStrategy the value to set
-         * @return the dsl builder
-         */
-        default ServletEndpointBuilder headerFilterStrategy(
-                String headerFilterStrategy) {
-            doSetProperty("headerFilterStrategy", headerFilterStrategy);
-            return this;
-        }
-        /**
          * Configure the consumer to work in async mode.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
@@ -205,48 +136,85 @@ public interface ServletEndpointBuilderFactory {
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
+         * If this option is false the Servlet will disable the HTTP streaming
+         * and set the content-length header on the response.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: true
+         * Group: consumer
+         * 
+         * @param chunked the value to set
+         * @return the dsl builder
+         */
+        default ServletEndpointBuilder chunked(boolean chunked) {
+            doSetProperty("chunked", chunked);
+            return this;
+        }
+        /**
+         * If this option is false the Servlet will disable the HTTP streaming
+         * and set the content-length header on the response.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: true
+         * Group: consumer
+         * 
+         * @param chunked the value to set
+         * @return the dsl builder
+         */
+        default ServletEndpointBuilder chunked(String chunked) {
+            doSetProperty("chunked", chunked);
+            return this;
+        }
+        /**
+         * If enabled and an Exchange failed processing on the consumer side,
+         * and if the caused Exception was send back serialized in the response
+         * as a application/x-java-serialized-object content type. On the
+         * producer side the exception will be deserialized and thrown as is,
+         * instead of the HttpOperationFailedException. The caused exception is
+         * required to be serialized. This is by default turned off. If you
+         * enable this then be aware that Java will deserialize the incoming
+         * data from the request to Java and that can be a potential security
+         * risk.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: common
          * 
-         * @param bridgeErrorHandler the value to set
+         * @param transferException the value to set
          * @return the dsl builder
          */
-        default ServletEndpointBuilder bridgeErrorHandler(
-                boolean bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+        default ServletEndpointBuilder transferException(
+                boolean transferException) {
+            doSetProperty("transferException", transferException);
             return this;
         }
         /**
-         * Allows for bridging the consumer to the Camel routing Error Handler,
-         * which mean any exceptions occurred while the consumer is trying to
-         * pickup incoming messages, or the likes, will now be processed as a
-         * message and handled by the routing Error Handler. By default the
-         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
-         * with exceptions, that will be logged at WARN or ERROR level and
-         * ignored.
+         * If enabled and an Exchange failed processing on the consumer side,
+         * and if the caused Exception was send back serialized in the response
+         * as a application/x-java-serialized-object content type. On the
+         * producer side the exception will be deserialized and thrown as is,
+         * instead of the HttpOperationFailedException. The caused exception is
+         * required to be serialized. This is by default turned off. If you
+         * enable this then be aware that Java will deserialize the incoming
+         * data from the request to Java and that can be a potential security
+         * risk.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
          * 
          * Default: false
-         * Group: consumer
+         * Group: common
          * 
-         * @param bridgeErrorHandler the value to set
+         * @param transferException the value to set
          * @return the dsl builder
          */
-        default ServletEndpointBuilder bridgeErrorHandler(
-                String bridgeErrorHandler) {
-            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+        default ServletEndpointBuilder transferException(
+                String transferException) {
+            doSetProperty("transferException", transferException);
             return this;
         }
         /**
@@ -333,7 +301,7 @@ public interface ServletEndpointBuilderFactory {
             return this;
         }
         /**
-         * To use a custom buffer size on the javax.servlet.ServletResponse.
+         * To use a custom buffer size on the jakarta.servlet.ServletResponse.
          * 
          * The option is a: &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
          * 
@@ -348,7 +316,7 @@ public interface ServletEndpointBuilderFactory {
             return this;
         }
         /**
-         * To use a custom buffer size on the javax.servlet.ServletResponse.
+         * To use a custom buffer size on the jakarta.servlet.ServletResponse.
          * 
          * The option will be converted to a
          * &lt;code&gt;java.lang.Integer&lt;/code&gt; type.
@@ -378,55 +346,6 @@ public interface ServletEndpointBuilderFactory {
             doSetProperty("servletName", servletName);
             return this;
         }
-        /**
-         * If enabled and an Exchange failed processing on the consumer side,
-         * and if the caused Exception was send back serialized in the response
-         * as a application/x-java-serialized-object content type. On the
-         * producer side the exception will be deserialized and thrown as is,
-         * instead of the HttpOperationFailedException. The caused exception is
-         * required to be serialized. This is by default turned off. If you
-         * enable this then be aware that Java will deserialize the incoming
-         * data from the request to Java and that can be a potential security
-         * risk.
-         * 
-         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param transferException the value to set
-         * @return the dsl builder
-         */
-        default ServletEndpointBuilder transferException(
-                boolean transferException) {
-            doSetProperty("transferException", transferException);
-            return this;
-        }
-        /**
-         * If enabled and an Exchange failed processing on the consumer side,
-         * and if the caused Exception was send back serialized in the response
-         * as a application/x-java-serialized-object content type. On the
-         * producer side the exception will be deserialized and thrown as is,
-         * instead of the HttpOperationFailedException. The caused exception is
-         * required to be serialized. This is by default turned off. If you
-         * enable this then be aware that Java will deserialize the incoming
-         * data from the request to Java and that can be a potential security
-         * risk.
-         * 
-         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
-         * type.
-         * 
-         * Default: false
-         * Group: consumer
-         * 
-         * @param transferException the value to set
-         * @return the dsl builder
-         */
-        default ServletEndpointBuilder transferException(
-                String transferException) {
-            doSetProperty("transferException", transferException);
-            return this;
-        }
     }
 
     /**
@@ -437,6 +356,42 @@ public interface ServletEndpointBuilderFactory {
                 EndpointConsumerBuilder {
         default ServletEndpointBuilder basic() {
             return (ServletEndpointBuilder) this;
+        }
+        /**
+         * To use a custom HeaderFilterStrategy to filter header to and from
+         * Camel message.
+         * 
+         * The option is a:
+         * &lt;code&gt;org.apache.camel.spi.HeaderFilterStrategy&lt;/code&gt;
+         * type.
+         * 
+         * Group: common (advanced)
+         * 
+         * @param headerFilterStrategy the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServletEndpointBuilder headerFilterStrategy(
+                org.apache.camel.spi.HeaderFilterStrategy headerFilterStrategy) {
+            doSetProperty("headerFilterStrategy", headerFilterStrategy);
+            return this;
+        }
+        /**
+         * To use a custom HeaderFilterStrategy to filter header to and from
+         * Camel message.
+         * 
+         * The option will be converted to a
+         * &lt;code&gt;org.apache.camel.spi.HeaderFilterStrategy&lt;/code&gt;
+         * type.
+         * 
+         * Group: common (advanced)
+         * 
+         * @param headerFilterStrategy the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServletEndpointBuilder headerFilterStrategy(
+                String headerFilterStrategy) {
+            doSetProperty("headerFilterStrategy", headerFilterStrategy);
+            return this;
         }
         /**
          * To use a custom HttpBinding to control the mapping between Camel
@@ -475,12 +430,11 @@ public interface ServletEndpointBuilderFactory {
         }
         /**
          * Whether to automatic bind multipart/form-data as attachments on the
-         * Camel Exchange. &lt;p/&gt; The options
-         * attachmentMultipartBinding=true and disableStreamCache=false cannot
-         * work together. Remove disableStreamCache to use
-         * AttachmentMultipartBinding. &lt;p/&gt; This is turn off by default as
-         * this may require servlet specific configuration to enable this when
-         * using Servlet's.
+         * Camel Exchange. The options attachmentMultipartBinding=true and
+         * disableStreamCache=false cannot work together. Remove
+         * disableStreamCache to use AttachmentMultipartBinding. This is turn
+         * off by default as this may require servlet specific configuration to
+         * enable this when using Servlet's.
          * 
          * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
          * 
@@ -497,12 +451,11 @@ public interface ServletEndpointBuilderFactory {
         }
         /**
          * Whether to automatic bind multipart/form-data as attachments on the
-         * Camel Exchange. &lt;p/&gt; The options
-         * attachmentMultipartBinding=true and disableStreamCache=false cannot
-         * work together. Remove disableStreamCache to use
-         * AttachmentMultipartBinding. &lt;p/&gt; This is turn off by default as
-         * this may require servlet specific configuration to enable this when
-         * using Servlet's.
+         * Camel Exchange. The options attachmentMultipartBinding=true and
+         * disableStreamCache=false cannot work together. Remove
+         * disableStreamCache to use AttachmentMultipartBinding. This is turn
+         * off by default as this may require servlet specific configuration to
+         * enable this when using Servlet's.
          * 
          * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
          * type.
@@ -516,6 +469,51 @@ public interface ServletEndpointBuilderFactory {
         default AdvancedServletEndpointBuilder attachmentMultipartBinding(
                 String attachmentMultipartBinding) {
             doSetProperty("attachmentMultipartBinding", attachmentMultipartBinding);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option is a: &lt;code&gt;boolean&lt;/code&gt; type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServletEndpointBuilder bridgeErrorHandler(
+                boolean bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
+            return this;
+        }
+        /**
+         * Allows for bridging the consumer to the Camel routing Error Handler,
+         * which mean any exceptions occurred while the consumer is trying to
+         * pickup incoming messages, or the likes, will now be processed as a
+         * message and handled by the routing Error Handler. By default the
+         * consumer will use the org.apache.camel.spi.ExceptionHandler to deal
+         * with exceptions, that will be logged at WARN or ERROR level and
+         * ignored.
+         * 
+         * The option will be converted to a &lt;code&gt;boolean&lt;/code&gt;
+         * type.
+         * 
+         * Default: false
+         * Group: consumer (advanced)
+         * 
+         * @param bridgeErrorHandler the value to set
+         * @return the dsl builder
+         */
+        default AdvancedServletEndpointBuilder bridgeErrorHandler(
+                String bridgeErrorHandler) {
+            doSetProperty("bridgeErrorHandler", bridgeErrorHandler);
             return this;
         }
         /**
@@ -627,8 +625,8 @@ public interface ServletEndpointBuilderFactory {
         }
         /**
          * Whitelist of accepted filename extensions for accepting uploaded
-         * files. &lt;p/&gt; Multiple extensions can be separated by comma, such
-         * as txt,xml.
+         * files. Multiple extensions can be separated by comma, such as
+         * txt,xml.
          * 
          * The option is a: &lt;code&gt;java.lang.String&lt;/code&gt; type.
          * 

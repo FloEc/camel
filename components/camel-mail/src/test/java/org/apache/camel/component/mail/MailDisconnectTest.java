@@ -44,13 +44,13 @@ public class MailDisconnectTest extends CamelTestSupport {
         Thread.sleep(500);
         template.sendBodyAndHeader("smtp://jones@localhost", "E Bla bla", "Subject", "Hello E");
 
-        assertMockEndpointsSatisfied();
+        MockEndpoint.assertIsSatisfied(context);
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new RouteBuilder() {
-            public void configure() throws Exception {
+            public void configure() {
                 from("pop3://jones@localhost?password=secret&disconnect=true&initialDelay=100&delay=100").to("mock:result");
             }
         };

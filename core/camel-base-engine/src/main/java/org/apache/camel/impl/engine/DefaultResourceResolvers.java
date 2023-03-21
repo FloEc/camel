@@ -32,7 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.camel.ExtendedCamelContext;
+import org.apache.camel.spi.ContentTypeAware;
 import org.apache.camel.spi.Resource;
 import org.apache.camel.spi.annotations.ResourceResolver;
 import org.apache.camel.support.CamelContextHelper;
@@ -110,47 +110,24 @@ public final class DefaultResourceResolvers {
 
         @Override
         public Resource createResource(String location, String remaining) {
-            return new ResourceSupport(SCHEME, location) {
-                @Override
-                public boolean exists() {
-                    URLConnection connection = null;
+            return new HttpResource(SCHEME, location);
+        }
+    }
 
-                    try {
-                        connection = new URL(location).openConnection();
+    /**
+     * An implementation of the {@link ResourceResolver} that resolves a {@link Resource} from https.
+     */
+    @ResourceResolver(HttpsResolver.SCHEME)
+    public static class HttpsResolver extends ResourceResolverSupport {
+        public static final String SCHEME = "https";
 
-                        if (connection instanceof HttpURLConnection) {
-                            return ((HttpURLConnection) connection).getResponseCode() == HttpURLConnection.HTTP_OK;
-                        }
+        public HttpsResolver() {
+            super(SCHEME);
+        }
 
-                        return connection.getContentLengthLong() > 0;
-                    } catch (IOException e) {
-                        throw new IllegalArgumentException(e);
-                    } finally {
-                        // close the http connection to avoid
-                        // leaking gaps in case of an exception
-                        if (connection instanceof HttpURLConnection) {
-                            ((HttpURLConnection) connection).disconnect();
-                        }
-                    }
-                }
-
-                @Override
-                public InputStream getInputStream() throws IOException {
-                    URLConnection con = new URL(location).openConnection();
-                    con.setUseCaches(false);
-
-                    try {
-                        return con.getInputStream();
-                    } catch (IOException e) {
-                        // close the http connection to avoid
-                        // leaking gaps in case of an exception
-                        if (con instanceof HttpURLConnection) {
-                            ((HttpURLConnection) con).disconnect();
-                        }
-                        throw e;
-                    }
-                }
-            };
+        @Override
+        public Resource createResource(String location, String remaining) {
+            return new HttpResource(SCHEME, location);
         }
     }
 
@@ -178,7 +155,6 @@ public final class DefaultResourceResolvers {
                 @Override
                 public URI getURI() {
                     URL url = getCamelContext()
-                            .adapt(ExtendedCamelContext.class)
                             .getClassResolver()
                             .loadResourceAsURL(path);
 
@@ -193,7 +169,6 @@ public final class DefaultResourceResolvers {
                 @Override
                 public InputStream getInputStream() throws IOException {
                     return getCamelContext()
-                            .adapt(ExtendedCamelContext.class)
                             .getClassResolver()
                             .loadResourceAsStream(path);
                 }
@@ -243,7 +218,7 @@ public final class DefaultResourceResolvers {
                 @Override
                 public InputStream getInputStream() throws IOException {
                     if (!exists()) {
-                        throw new IOException("There is no bean in the registry with name " + remaining + "and type String");
+                        throw new IOException("There is no bean in the registry with name " + remaining + " and type String");
                     }
 
                     return new ByteArrayInputStream(val.getBytes());
@@ -347,6 +322,65 @@ public final class DefaultResourceResolvers {
                     return new ByteArrayInputStream(remaining.getBytes());
                 }
             };
+        }
+    }
+
+    static final class HttpResource extends ResourceSupport implements ContentTypeAware {
+        private String contentType;
+
+        HttpResource(String scheme, String location) {
+            super(scheme, location);
+        }
+
+        @Override
+        public boolean exists() {
+            URLConnection connection = null;
+
+            try {
+                connection = new URL(getLocation()).openConnection();
+
+                if (connection instanceof HttpURLConnection) {
+                    return ((HttpURLConnection) connection).getResponseCode() == HttpURLConnection.HTTP_OK;
+                }
+
+                return connection.getContentLengthLong() > 0;
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            } finally {
+                // close the http connection to avoid
+                // leaking gaps in case of an exception
+                if (connection instanceof HttpURLConnection) {
+                    ((HttpURLConnection) connection).disconnect();
+                }
+            }
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            URLConnection con = new URL(getLocation()).openConnection();
+            con.setUseCaches(false);
+
+            try {
+                setContentType(con.getContentType());
+                return con.getInputStream();
+            } catch (IOException e) {
+                // close the http connection to avoid
+                // leaking gaps in case of an exception
+                if (con instanceof HttpURLConnection) {
+                    ((HttpURLConnection) con).disconnect();
+                }
+                throw e;
+            }
+        }
+
+        @Override
+        public String getContentType() {
+            return this.contentType;
+        }
+
+        @Override
+        public void setContentType(String contentType) {
+            this.contentType = contentType;
         }
     }
 }

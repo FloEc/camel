@@ -155,11 +155,7 @@ public abstract class AbstractJacksonDataFormat extends ServiceSupport
         this.objectMapper.writerWithView(jsonView).with(schema).writeValue(stream, graph);
 
         if (contentTypeHeader) {
-            if (exchange.hasOut()) {
-                exchange.getOut().setHeader(Exchange.CONTENT_TYPE, getDefaultContentType());
-            } else {
-                exchange.getIn().setHeader(Exchange.CONTENT_TYPE, getDefaultContentType());
-            }
+            exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, getDefaultContentType());
         }
     }
 
@@ -417,7 +413,7 @@ public abstract class AbstractJacksonDataFormat extends ServiceSupport
     }
 
     /**
-     * If set to true then Jackson will lookup for an objectMapper into the registry
+     * If set to true and useDefaultObjectMapper is true, then Jackson will look for an objectMapper in the registry.
      */
     public void setAutoDiscoverObjectMapper(boolean autoDiscoverObjectMapper) {
         this.autoDiscoverObjectMapper = autoDiscoverObjectMapper;
